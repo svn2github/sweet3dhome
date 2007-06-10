@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<project basedir="." default="deploy" name="SweetHome3D">
+  <target name="deploy">
+    <!-- Compile Sweet Home 3D -->
+    <mkdir dir="deploy/classes"/>
+    <javac srcdir="src" destdir="deploy/classes">
+       <classpath>
+         <pathelement location="lib/windows/vecmath.jar"/>
+         <pathelement location="lib/windows/j3dutils.jar"/>
+         <pathelement location="lib/windows/j3dcore.jar"/>
+         <pathelement location="libtest/AppleJavaExtensions.jar"/>
+         <pathelement location="libtest/jnlp.jar"/>
+       </classpath>
+    </javac>
+    
+    <!-- Copy resources -->
+    <copy todir="deploy/classes">
+      <fileset dir="src">
+        <exclude name="**/*.java"/>
+        <exclude name=".*"/>
+      </fileset>
+    </copy>
+    
+    <!-- Creation of SweetHome3D.jar -->
+    <jar destfile="deploy/SweetHome3D.jar" 
+    	     basedir="deploy/classes"/>
+    <delete dir="deploy/classes"/>
+  
+    <!-- Creation of java3d.jar containing Windows Java 3D DLLs -->
+    <mkdir dir="deploy/windows" />
+    <jar destfile="deploy/windows/java3d.jar">
+      <fileset dir="lib/windows">
+         <include name="**/*.dll"/>
+      </fileset>
+    </jar>
+
+    <!-- Creation of java3d.jar containing Linux Java 3D DLLs -->
+    <mkdir dir="deploy/linux/i386"/>
+    <jar destfile="deploy/linux/i386/java3d.jar">
+      <fileset dir="lib/linux/i386">
+         <include name="**/*.so"/>
+      </fileset>
+    </jar>
+ 
+    <!-- Copy other Java 3D jar files -->
+    <copy todir="deploy">
+      <fileset dir="lib">
+         <include name="**/*.jar"/>
+      </fileset>
+    </copy>
+    
+    <input message="Enter Passphrase for keystore:" 
+           addproperty="password"/> 
+    <!-- Sign jar files in deploy dir -->
+    <signjar keystore="keys.keytool" 
+           alias="SweetHome3D" storepass="${password}">
+      <fileset dir="deploy">
+         <include name="**/*.jar"/>
+      </fileset>
+    </signjar>
+      
+    <echo message="deploy dir ready for ftp"/>
+  </target>
+</project>
