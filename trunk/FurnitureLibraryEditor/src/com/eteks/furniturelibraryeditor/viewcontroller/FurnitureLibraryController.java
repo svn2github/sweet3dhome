@@ -81,7 +81,7 @@ public class FurnitureLibraryController implements Controller {
     this.furnitureLanguageController.addPropertyChangeListener(FurnitureLanguageController.Property.FURNITURE_LANGUAGE, 
         new PropertyChangeListener() {
           public void propertyChange(PropertyChangeEvent ev) {
-            if (ev.getOldValue() != null && !furnitureLibrary.getSupportedLanguages().contains(ev.getNewValue())) {
+            if (ev.getOldValue() != null) {
               translateFurnitureCategories((String)ev.getOldValue(), (String)ev.getNewValue());
             }
           }
@@ -234,37 +234,47 @@ public class FurnitureLibraryController implements Controller {
    */
   private void translateFurnitureCategories(String language,
                                             String translationLanguage) {
-    List<FurnitureCategory> categories = null;
-    List<FurnitureCategory> translatedCategories = null;
-    final List<CatalogPieceOfFurniture> selectedFurniture = new ArrayList<CatalogPieceOfFurniture>();
-    for (CatalogPieceOfFurniture piece : this.furnitureLibrary.getFurniture()) {
-      final boolean selected = this.selectedFurniture.contains(piece);
-      FurnitureController furnitureController = new FurnitureController(this.furnitureLibrary, 
-          Arrays.asList(new CatalogPieceOfFurniture [] {piece}), 
-          this.preferences, this.furnitureLanguageController, this.viewFactory);
-      if (categories == null) {
-        categories = furnitureController.getDefaultCategories(language);
-        translatedCategories = furnitureController.getDefaultCategories(translationLanguage);
-      }
-      String categoryName = (String)this.furnitureLibrary.getPieceOfFurnitureLocalizedData(piece, language, 
-          FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, piece.getCategory().getName());
-      int i = categories.indexOf(new FurnitureCategory(categoryName));
-      if (i >= 0) {
-        furnitureController.setCategory(translatedCategories.get(i));
-        // Retrieve the new modified piece that replaces the old one to add it to selection
-        this.furnitureLibrary.addListener(new CollectionListener<CatalogPieceOfFurniture>() {
-            public void collectionChanged(CollectionEvent<CatalogPieceOfFurniture> ev) {
-              if (ev.getType() == CollectionEvent.Type.ADD) {
-                if (selected) {
-                  selectedFurniture.add(ev.getItem());
+    if (translationLanguage.length() > 0) {
+      List<FurnitureCategory> categories = null;
+      List<FurnitureCategory> translatedCategories = null;
+      final List<CatalogPieceOfFurniture> selectedFurniture = new ArrayList<CatalogPieceOfFurniture>();
+      for (CatalogPieceOfFurniture piece : this.furnitureLibrary.getFurniture()) {
+        final boolean selected = this.selectedFurniture.contains(piece);
+        // If piece category wasn't translated yet
+        if (this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+                piece, translationLanguage, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY) == null) {
+          FurnitureController furnitureController = new FurnitureController(this.furnitureLibrary, 
+              Arrays.asList(new CatalogPieceOfFurniture [] {piece}), 
+              this.preferences, this.furnitureLanguageController, this.viewFactory);
+          if (categories == null) {
+            categories = furnitureController.getDefaultCategories(language);
+            translatedCategories = furnitureController.getDefaultCategories(translationLanguage);
+          }
+          String categoryName = (String)this.furnitureLibrary.getPieceOfFurnitureLocalizedData(piece, language, 
+              FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, piece.getCategory().getName());
+          int i = categories.indexOf(new FurnitureCategory(categoryName));
+          if (i >= 0) {
+            furnitureController.setCategory(translatedCategories.get(i));
+            // Retrieve the new modified piece that replaces the old one to add it to selection
+            this.furnitureLibrary.addListener(new CollectionListener<CatalogPieceOfFurniture>() {
+                public void collectionChanged(CollectionEvent<CatalogPieceOfFurniture> ev) {
+                  if (ev.getType() == CollectionEvent.Type.ADD) {
+                    if (selected) {
+                      selectedFurniture.add(ev.getItem());
+                    }
+                    furnitureLibrary.removeListener(this);
+                  }
                 }
-                furnitureLibrary.removeListener(this);
-              }
-            }
-          });
-        furnitureController.modifyFurniture();
-      }
-    }    
-    setSelectedFurniture(selectedFurniture);
+              });
+            furnitureController.modifyFurniture();
+            continue;
+          }
+        } 
+        if (selected) {
+          selectedFurniture.add(piece);
+        }
+      }    
+      setSelectedFurniture(selectedFurniture);
+    }
   }
 }

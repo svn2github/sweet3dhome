@@ -222,7 +222,10 @@ public class FurnitureLibrary {
     if (pieceLocalizedData != null) {
       Map<String, Object> pieceData = pieceLocalizedData.get(language);
       if (pieceData != null) {
-        return pieceData.get(propertyKey);
+        Object propertyValue = pieceData.get(propertyKey);
+        if (propertyValue != null) {
+          return propertyValue;
+        }
       }
     }
     return defaultValue;
