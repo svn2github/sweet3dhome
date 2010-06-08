@@ -786,8 +786,16 @@ public class FurniturePanel extends JPanel implements DialogView {
     Insets componentInsets = new Insets(0, 0, 5, 0);
     if (this.controller.isPropertyEditable(FurnitureController.Property.ICON)) {
       JPanel iconPanel = new JPanel(new GridBagLayout());
+      // Add dummy labels with a vertical weight of 1 at top and bottom of iconPanel 
+      // to keep iconComponent and rotationButtonsPanel in the middle
+      // when grid bag fill constraint is BOTH for iconPanel.
+      // If this constraint is set to HORIZONTAL only, iconPanel location may be lower
+      // and may not be the first panel treated by the focus traversal algorithm 
+      iconPanel.add(new JLabel(), new GridBagConstraints(
+          0, 0, 1, 1, 0, 1, GridBagConstraints.CENTER, 
+          GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
       iconPanel.add(this.iconComponent, new GridBagConstraints(
-          0, 0, 1, 1, 0, 0, GridBagConstraints.CENTER, 
+          0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, 
           GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
       if (this.controller.isPropertyEditable(FurnitureController.Property.MODEL_ROTATION)) {
         JPanel rotationButtonsPanel = new JPanel(new GridBagLayout()) {
@@ -809,13 +817,16 @@ public class FurniturePanel extends JPanel implements DialogView {
             1, 2, 1, 1, 0, 0, GridBagConstraints.NORTH, 
             GridBagConstraints.NONE, new Insets(0, 0, 2, 0), 0, 0));
         iconPanel.add(rotationButtonsPanel, new GridBagConstraints(
-            0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, 
+            0, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, 
             GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
       }
+      iconPanel.add(new JLabel(), new GridBagConstraints(
+          0, 3, 1, 1, 0, 1, GridBagConstraints.CENTER, 
+          GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
       add(iconPanel, new GridBagConstraints(
           0, 0, 1, 15, 0, 0, GridBagConstraints.CENTER, 
-          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 15), 0, 0));
+          GridBagConstraints.BOTH, new Insets(0, 0, 0, 15), 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.ID)) {
       add(this.idLabel, new GridBagConstraints(
