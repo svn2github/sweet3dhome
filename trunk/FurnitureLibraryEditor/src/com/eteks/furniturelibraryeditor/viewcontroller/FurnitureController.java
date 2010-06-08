@@ -878,9 +878,8 @@ public class FurnitureController implements Controller {
       
       // Apply modification
       int piecesCount = this.modifiedFurniture.size();
-      List<CatalogPieceOfFurniture> furniture = this.furnitureLibrary.getFurniture();
       for (CatalogPieceOfFurniture piece : this.modifiedFurniture) {
-        int index = furniture.indexOf(piece);
+        int index = this.furnitureLibrary.getPieceOfFurnitureIndex(piece);
         // Retrieve localized data
         Map<String, Object> localizedNames = new HashMap<String, Object>();
         Map<String, Object> localizedDescriptions = new HashMap<String, Object>();

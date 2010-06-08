@@ -142,12 +142,15 @@ public class FurnitureLibraryController implements Controller {
    * Removes <code>piece</code> from selected furniture.
    */
   private void deselectPieceOfFurniture(CatalogPieceOfFurniture piece) {
-    int pieceSelectionIndex = this.selectedFurniture.indexOf(piece);
-    if (pieceSelectionIndex != -1) {
-      List<CatalogPieceOfFurniture> selectedItems = 
-          new ArrayList<CatalogPieceOfFurniture>(getSelectedFurniture());
-      selectedItems.remove(pieceSelectionIndex);
-      setSelectedFurniture(selectedItems);
+    for (int i = 0; i < this.selectedFurniture.size(); i++) {
+      CatalogPieceOfFurniture selectedPiece = this.selectedFurniture.get(i);
+      if (piece == selectedPiece) {
+        List<CatalogPieceOfFurniture> selectedItems = 
+            new ArrayList<CatalogPieceOfFurniture>(getSelectedFurniture());
+        selectedItems.remove(i);
+        setSelectedFurniture(selectedItems);
+        break;
+      }
     }
   }
   

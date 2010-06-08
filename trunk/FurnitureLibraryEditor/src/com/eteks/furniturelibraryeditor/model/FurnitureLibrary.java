@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +83,8 @@ public class FurnitureLibrary {
   
   public FurnitureLibrary() {
     this.furniture = new ArrayList<CatalogPieceOfFurniture>();
-    this.furnitureLocalizedData = new HashMap<CatalogPieceOfFurniture, Map<String, Map<String, Object>>>();
+    // Use IdentityHashMap to ignore equality between two CatalogPieceOfFurniture instances with same name 
+    this.furnitureLocalizedData = new IdentityHashMap<CatalogPieceOfFurniture, Map<String, Map<String, Object>>>();
     this.supportedLanguages = new HashSet<String>();
     this.supportedLanguages.add(DEFAULT_LANGUAGE);
     this.furnitureChangeSupport = new CollectionChangeSupport<CatalogPieceOfFurniture>(this);
@@ -177,6 +179,19 @@ public class FurnitureLibrary {
     }
   }
 
+  /**
+   * Returns the index of the given <code>piece</code> or -1 if it was not found.
+   * This method use strong reference equality to compare pieces.
+   */
+  public int getPieceOfFurnitureIndex(CatalogPieceOfFurniture piece) {
+    for (int index = 0; index < this.furniture.size(); index++) {
+      if (this.furniture.get(index) == piece) {
+        return index;
+      }
+    }
+    return -1;
+  }
+  
   /**
    * Sets localized data of a piece of furniture and fires a <code>PropertyChangeEvent</code>.
    */
