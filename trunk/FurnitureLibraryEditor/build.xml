@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <!-- build.xml
 
-     Copyright (c) 2007-2009 Emmanuel PUYBARET / eTeks <info@eteks.com>. All Rights Reserved.
+     Copyright (c) 2010 Emmanuel PUYBARET / eTeks <info@eteks.com>. All Rights Reserved.
      
      Ant build file. Available targets :
      - furnitureLibraryEditor              : Builds FurnitureLibraryEditor.jar file in build directory
      - furnitureLibraryEditorJarExecutable : Builds FurnitureLibraryEditor-version.jar file in install directory
 -->
-<project basedir="." default="furnitureLibraryEditorJarExecutable" name="SweetHome3D">
-  <!-- The current version of Sweet Home 3D -->
-  <property name="version" value="1.0.beta5"/>
+<project basedir="." default="furnitureLibraryEditorJarExecutable" name="FurnitureLibraryEditor">
+  <!-- The current version of the Furniture Library Editor -->
+  <property name="version" value="1.0.beta"/>
 
   <target name="furnitureLibraryEditor" 
   	      description="Builds build/FurnitureLibraryEditor.jar with all its classes">
@@ -26,7 +26,7 @@
         <pathelement location="../SweetHome3D/libtest/jnlp.jar"/>
       </classpath>
     </javac>
-    <!-- Compile Sweet Home 3D Tools -->
+    <!-- Compile Furniture Library Editor -->
     <javac srcdir="src" destdir="build/classes"
            encoding="ISO-8859-1" target="1.5">
       <classpath>
@@ -108,7 +108,7 @@
 
   <target name="furnitureLibraryEditorJarExecutable" depends="furnitureLibraryEditor"
   	      description="Builds install/FurnitureLibraryEditor-version.jar executable Jar">
-    <!-- Create FurnitureLibraryEditor-version.jar containing Sweet Home 3D classes and resources,
+    <!-- Create FurnitureLibraryEditor-version.jar containing Furniture Library Editor classes and resources,
          and other DLLs and jars -->
     <jar destfile="FurnitureLibraryEditor-${version}.jar">
   	  <manifest>
@@ -144,6 +144,6 @@
     <!-- Clean build directory -->
     <delete dir="build"/>
 
-    <echo message="install/FurnitureLibraryEditor-${version}.jar ready for ftp"/>
+    <echo message="FurnitureLibraryEditor-${version}.jar ready for ftp"/>
   </target>
 </project>
