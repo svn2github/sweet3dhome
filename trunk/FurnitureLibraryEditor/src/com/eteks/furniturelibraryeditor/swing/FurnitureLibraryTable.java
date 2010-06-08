@@ -81,7 +81,6 @@ import com.eteks.sweethome3d.viewcontroller.View;
  */
 public class FurnitureLibraryTable extends JTable implements View {
   private ListSelectionListener tableSelectionListener;
-  private boolean               selectionByUser;
 
   public FurnitureLibraryTable(FurnitureLibrary furnitureLibrary,
                                FurnitureLibraryUserPreferences preferences,
@@ -138,30 +137,32 @@ public class FurnitureLibraryTable extends JTable implements View {
    * Adds selection listeners to this table.
    */
   private void addSelectionListeners(final FurnitureLibraryController controller) {   
-    final SelectionListener homeSelectionListener = new SelectionListener() {
+    final SelectionListener controllerSelectionListener = new SelectionListener() {
         public void selectionChanged(SelectionEvent ev) {
           setSelectedFurniture(controller.getSelectedFurniture());        
         }
       };
     this.tableSelectionListener = new ListSelectionListener () {
         public void valueChanged(ListSelectionEvent ev) {
-          selectionByUser = true;
-          int [] selectedRows = getSelectedRows();
-          // Build the list of selected furniture
-          List<CatalogPieceOfFurniture> selectedFurniture =
-              new ArrayList<CatalogPieceOfFurniture>(selectedRows.length);
-          TableModel tableModel = getModel();
-          for (int index : selectedRows) {
-            // Add to selectedFurniture table model value that stores piece
-            selectedFurniture.add((CatalogPieceOfFurniture)tableModel.getValueAt(index, 0));
+          if (!ev.getValueIsAdjusting()) {
+            controller.removeSelectionListener(controllerSelectionListener);
+            int [] selectedRows = getSelectedRows();
+            // Build the list of selected furniture
+            List<CatalogPieceOfFurniture> selectedFurniture =
+                new ArrayList<CatalogPieceOfFurniture>(selectedRows.length);
+            TableModel tableModel = getModel();
+            for (int index : selectedRows) {
+              // Add to selectedFurniture table model value that stores piece
+              selectedFurniture.add((CatalogPieceOfFurniture)tableModel.getValueAt(index, 0));
+            }
+            // Set the new selection in controller
+            controller.setSelectedFurniture(selectedFurniture);
+            controller.addSelectionListener(controllerSelectionListener);
           }
-          // Set the new selection in home with controller
-          controller.setSelectedFurniture(selectedFurniture);
-          selectionByUser = false;
         }
       };
     getSelectionModel().addListSelectionListener(this.tableSelectionListener);
-    controller.addSelectionListener(homeSelectionListener);
+    controller.addSelectionListener(controllerSelectionListener);
   }
 
   /**
@@ -225,7 +226,7 @@ public class FurnitureLibraryTable extends JTable implements View {
       if (piece instanceof CatalogPieceOfFurniture) {
         // Search index of piece in sorted table model
         int index = tableModel.getPieceOfFurnitureIndex((CatalogPieceOfFurniture)piece);
-        // If the piece was found (during the addition of a piece to home, the model may not be updated yet) 
+        // If the piece was found (during the addition of a piece to library, the model may not be updated yet) 
         if (index != -1) {
           addRowSelectionInterval(index, index);
           minIndex = Math.min(minIndex, index);
@@ -233,7 +234,7 @@ public class FurnitureLibraryTable extends JTable implements View {
         }
       }
     }
-    if (!this.selectionByUser && minIndex != Integer.MIN_VALUE) {
+    if (minIndex != Integer.MIN_VALUE) {
       makeRowsVisible(minIndex, maxIndex);
     }
     getSelectionModel().addListSelectionListener(this.tableSelectionListener);
@@ -447,8 +448,8 @@ public class FurnitureLibraryTable extends JTable implements View {
       int previousRowCount = this.sortedFurniture != null 
           ? this.sortedFurniture.size()
           : 0;
-      List<CatalogPieceOfFurniture> homeFurniture = this.furnitureLibrary.getFurniture();
-      this.sortedFurniture = new ArrayList<CatalogPieceOfFurniture>(homeFurniture);
+      List<CatalogPieceOfFurniture> libraryFurniture = this.furnitureLibrary.getFurniture();
+      this.sortedFurniture = new ArrayList<CatalogPieceOfFurniture>(libraryFurniture);
       // Sort it if necessary
       if (this.sortProperty != null) {
         Comparator<CatalogPieceOfFurniture> furnitureComparator = getFurnitureComparator(this.sortProperty);
