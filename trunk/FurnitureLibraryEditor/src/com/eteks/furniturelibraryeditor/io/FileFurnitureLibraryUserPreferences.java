@@ -47,9 +47,14 @@ public class FileFurnitureLibraryUserPreferences extends FurnitureLibraryUserPre
     setLanguage(preferences.get(LANGUAGE, getLanguage()));    
     setUnit(LengthUnit.valueOf(preferences.get(UNIT, getLengthUnit().name())));
     setDefaultCreator(preferences.get(DEFAULT_CREATOR, getDefaultCreator()));
-    setFurnitureLibraryOffline(preferences.getBoolean(OFFLINE_FURNITURE_LIBRARY, isFurnitureLibraryOffline()));
-    setFurnitureResourcesLocalDirectory(preferences.get(FURNITURE_RESOURCES_LOCAL_DIRECTORY, getFurnitureResourcesLocalDirectory()));
-    setFurnitureResourcesRemoteURLBase(preferences.get(FURNITURE_RESOURCES_REMOTE_URL_BASE, getFurnitureResourcesRemoteURLBase()));
+    boolean offlineFurnitureLibrary = preferences.getBoolean(OFFLINE_FURNITURE_LIBRARY, isFurnitureLibraryOffline());
+    if (isOnlineFurnitureLibrarySupported()) {
+      setFurnitureLibraryOffline(offlineFurnitureLibrary);
+      setFurnitureResourcesLocalDirectory(preferences.get(FURNITURE_RESOURCES_LOCAL_DIRECTORY, 
+          getFurnitureResourcesLocalDirectory()));
+      setFurnitureResourcesRemoteURLBase(preferences.get(FURNITURE_RESOURCES_REMOTE_URL_BASE, 
+          getFurnitureResourcesRemoteURLBase()));
+    }
   }
   
   @Override

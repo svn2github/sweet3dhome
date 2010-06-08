@@ -91,10 +91,9 @@ public class FurnitureLibraryUserPreferencesController extends UserPreferencesCo
     }
   }
 
-  public boolean isPropertyEditable(Property property) {
-    return this.preferences.isFurnitureLibraryOffline()
-        ? property == Property.DEFAULT_CREATOR
-        : true;
+  public boolean isPropertyEditable(Property property) {    
+    return this.preferences.isOnlineFurnitureLibrarySupported()
+        || property == Property.DEFAULT_CREATOR;
   }
 
   /**
@@ -187,8 +186,10 @@ public class FurnitureLibraryUserPreferencesController extends UserPreferencesCo
   public void modifyUserPreferences() {
     super.modifyUserPreferences();
     this.preferences.setDefaultCreator(getDefaultCreator());
-    this.preferences.setFurnitureLibraryOffline(isFurnitureLibraryOffline());
-    this.preferences.setFurnitureResourcesLocalDirectory(getFurnitureResourcesLocalDirectory());
-    this.preferences.setFurnitureResourcesRemoteURLBase(getFurnitureResourcesRemoteURLBase());
+    if (this.preferences.isOnlineFurnitureLibrarySupported()) {
+      this.preferences.setFurnitureLibraryOffline(isFurnitureLibraryOffline());
+      this.preferences.setFurnitureResourcesLocalDirectory(getFurnitureResourcesLocalDirectory());
+      this.preferences.setFurnitureResourcesRemoteURLBase(getFurnitureResourcesRemoteURLBase());
+    }
   }
 }

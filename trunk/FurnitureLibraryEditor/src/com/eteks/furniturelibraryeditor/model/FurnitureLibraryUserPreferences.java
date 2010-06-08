@@ -109,6 +109,14 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
   }
 
   /**
+   * Returns <code>true</code> if the user may edit online libraries,
+   * and sets furniture resources local directory and remote URL base.   
+   */
+  public boolean isOnlineFurnitureLibrarySupported() {
+    return false;
+  }
+  
+  /**
    * Returns <code>true</code> if resources needed by the furniture of a library 
    * must be included with the library to let it work without connection. 
    */
@@ -121,6 +129,9 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
    * must be included with the library to let it work without connection or not.
    */
   public void setFurnitureLibraryOffline(boolean offlineFurnitureLibrary) {
+    if (!isOnlineFurnitureLibrarySupported() && !offlineFurnitureLibrary) {
+      throw new IllegalArgumentException("Furniture library doesn't support online libraries");
+    }
     if (offlineFurnitureLibrary != this.offlineFurnitureLibrary) {
       this.offlineFurnitureLibrary = offlineFurnitureLibrary;
       this.propertyChangeSupport.firePropertyChange(Property.OFFLINE_FURNITURE_LIBRARY.toString(), 
@@ -141,6 +152,9 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
    * will be saved before being deployed on server.
    */
   public void setFurnitureResourcesLocalDirectory(String furnitureResourcesLocalDirectory) {
+    if (!isOnlineFurnitureLibrarySupported()) {
+      throw new IllegalArgumentException("Furniture library doesn't support online libraries");
+    }
     if (furnitureResourcesLocalDirectory != this.furnitureResourcesLocalDirectory
         || furnitureResourcesLocalDirectory != null && !furnitureResourcesLocalDirectory.equals(this.furnitureResourcesLocalDirectory)) {
       String oldValue = this.furnitureResourcesLocalDirectory;
@@ -164,6 +178,9 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
    * if it's a directory. 
    */
   public void setFurnitureResourcesRemoteURLBase(String furnitureResourcesRemoteUrlBase) {
+    if (!isOnlineFurnitureLibrarySupported()) {
+      throw new IllegalArgumentException("Furniture library doesn't support online libraries");
+    }
     if (furnitureResourcesRemoteUrlBase != this.furnitureResourcesRemoteUrlBase
         || furnitureResourcesRemoteUrlBase != null && !furnitureResourcesRemoteUrlBase.equals(this.furnitureResourcesRemoteUrlBase)) {
       Object oldValue = this.furnitureResourcesRemoteUrlBase;
