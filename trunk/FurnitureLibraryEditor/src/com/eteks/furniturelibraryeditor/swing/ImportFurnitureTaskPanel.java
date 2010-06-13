@@ -63,7 +63,9 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
     super(taskMessage, preferences, controller);
     this.preferences = preferences;
     this.iconPreviewComponent = new ModelPreviewComponent();
-    this.iconPreviewComponent.setPreferredSize(new Dimension(128, 128));
+    Insets insets = this.iconPreviewComponent.getInsets();
+    this.iconPreviewComponent.setPreferredSize(
+        new Dimension(128 + insets.left + insets.right, 128  + insets.top + insets.bottom));
     // Change layout
     GridBagLayout layout = new GridBagLayout();
     setLayout(layout);
