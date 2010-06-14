@@ -135,6 +135,7 @@ public class FurnitureController implements Controller {
       this.editableProperties.add(PROPERTIES_MAP.get(editedProperty));
     }
 
+    setProportional(true);
     updateProperties();
     addListeners();
   }
@@ -452,7 +453,6 @@ public class FurnitureController implements Controller {
           && getDepth() != null
           && getHeight() != null) {
         this.editableProperties.add(Property.PROPORTIONAL);
-        setProportional(false);
       }
     }
   }  

@@ -466,7 +466,7 @@ public class FurniturePanel extends JPanel implements DialogView {
       });
     
     this.keepProportionsCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
-        FurniturePanel.class, "keepProportionsCheckBox.text"));
+        FurniturePanel.class, "keepProportionsCheckBox.text"), controller.isProportional());
     this.keepProportionsCheckBox.addItemListener(new ItemListener() {
         public void itemStateChanged(ItemEvent ev) {
           controller.setProportional(keepProportionsCheckBox.isSelected());
