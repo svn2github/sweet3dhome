@@ -704,9 +704,12 @@ public class FurniturePanel extends JPanel implements DialogView {
   private void updateModelRotation(Transform3D transform) {
     Matrix3f modelRotationMatrix = new Matrix3f();
     transform.getRotationScale(modelRotationMatrix);
+    boolean proportional = this.controller.isProportional();
+    this.controller.setProportional(false);
     this.controller.setModelRotation(new float [][] {{modelRotationMatrix.m00, modelRotationMatrix.m01, modelRotationMatrix.m02},
                                                      {modelRotationMatrix.m10, modelRotationMatrix.m11, modelRotationMatrix.m12},
                                                      {modelRotationMatrix.m20, modelRotationMatrix.m21, modelRotationMatrix.m22}});
+    this.controller.setProportional(proportional);
     resetIcon(true);
   }
 
