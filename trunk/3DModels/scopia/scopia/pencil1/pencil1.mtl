@@ -1,0 +1,23 @@
+# Blender3D MTL File: pencil.blend
+# Material Count: 2
+newmtl whitepen_logo_web.tga.001
+Ns 88.235294
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.114734 0.114734 0.114734
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd logo_web.jpg
+
+
+newmtl bluetappen_logo_web.tga.001
+Ns 88.235294
+Ka 0.000000 0.000000 0.000000
+Kd 0.174225 0.263700 0.425800
+Ks 0.114734 0.114734 0.114734
+Ni 1.000000
+d 1.000000
+illum 2
+
+
