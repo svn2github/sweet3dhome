@@ -31,6 +31,7 @@ import com.eteks.sweethome3d.model.Home;
 import com.eteks.sweethome3d.model.RecorderException;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.viewcontroller.BackgroundImageWizardController;
+import com.eteks.sweethome3d.viewcontroller.CompassController;
 import com.eteks.sweethome3d.viewcontroller.ContentManager;
 import com.eteks.sweethome3d.viewcontroller.Controller;
 import com.eteks.sweethome3d.viewcontroller.DialogView;
@@ -235,6 +236,11 @@ public class ImportFurnitureController implements Controller {
 
         public DialogView createWizardView(UserPreferences preferences,
                                            WizardController wizardController) {
+          throw new UnsupportedOperationException();
+        }
+        
+        public DialogView createCompassView(UserPreferences preferences,
+                                            CompassController compassController) {
           throw new UnsupportedOperationException();
         }
       };
