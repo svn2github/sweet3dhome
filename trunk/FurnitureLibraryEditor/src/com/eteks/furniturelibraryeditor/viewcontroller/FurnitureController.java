@@ -57,7 +57,7 @@ public class FurnitureController implements Controller {
    * The properties that may be edited by the view associated to this controller. 
    */
   public enum Property {ID, NAME, DESCRIPTION, CATEGORY, MODEL, ICON, 
-      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DOOR_OR_WINDOW, MODEL_ROTATION, CREATOR, 
+      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, DOOR_OR_WINDOW, MODEL_ROTATION, CREATOR, 
       PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
   
   private static final Map<String, Property> PROPERTIES_MAP = new HashMap<String, Property>();
@@ -74,6 +74,7 @@ public class FurnitureController implements Controller {
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_HEIGHT_PROPERTY, Property.HEIGHT);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_ELEVATION_PROPERTY, Property.ELEVATION);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_MOVABLE_PROPERTY, Property.MOVABLE);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DEFORMABLE_PROPERTY, Property.DEFORMABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY, Property.RESIZABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY, Property.DOOR_OR_WINDOW);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY, Property.MODEL_ROTATION);
@@ -104,6 +105,7 @@ public class FurnitureController implements Controller {
   private Boolean           doorOrWindow;
   private Boolean           backFaceShown;
   private Boolean           resizable;
+  private Boolean           deformable;
   private float [][]        modelRotation;
   private String            creator;
   private BigDecimal        price;
@@ -264,6 +266,7 @@ public class FurnitureController implements Controller {
       setDoorOrWindow(null);
       setBackFaceShown(null);
       setResizable(null);
+      setDeformable(null);
       setModelRotation(null);
       setCreator(null);
       setPrice(null);
@@ -392,6 +395,15 @@ public class FurnitureController implements Controller {
         }
       }
       setResizable(resizable);
+
+      Boolean deformable = firstPiece.isDeformable();
+      for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+        if (deformable.booleanValue() != this.modifiedFurniture.get(i).isDeformable()) {
+          deformable = null;
+          break;
+        }
+      }
+      setDeformable(deformable);
 
       Boolean doorOrWindow = firstPiece.isDoorOrWindow();
       for (int i = 1; i < this.modifiedFurniture.size(); i++) {
@@ -781,6 +793,24 @@ public class FurnitureController implements Controller {
   }
   
   /**
+   * Sets whether furniture model can be deformed or not.
+   */
+  public void setDeformable(Boolean deformable) {
+    if (deformable != this.deformable) {
+      Boolean oldDeformable = this.deformable;
+      this.deformable = deformable;
+      this.propertyChangeSupport.firePropertyChange(Property.DEFORMABLE.name(), oldDeformable, deformable);
+    }
+  }
+  
+  /**
+   * Returns whether furniture model can be deformed or not.
+   */
+  public Boolean getDeformable() {
+    return this.deformable;
+  }
+  
+  /**
    * Sets the edited model rotation.
    */
   public void setModelRotation(float [][] modelRotation) {
@@ -869,6 +899,7 @@ public class FurnitureController implements Controller {
       Float elevation = getElevation();
       Boolean movable = getMovable();
       Boolean resizable = getResizable();
+      Boolean deformable = getDeformable();
       Boolean doorOrWindow = getDoorOrWindow();
       float [][] modelRotation = getModelRotation();
       String creator = getCreator();
@@ -917,6 +948,7 @@ public class FurnitureController implements Controller {
         float [][] pieceModelRotation = modelRotation != null ? modelRotation : piece.getModelRotation();
         String pieceCreator = creator != null || piecesCount == 1 ? creator : piece.getCreator();
         boolean pieceResizable = resizable != null ? resizable : piece.isResizable();
+        boolean pieceDeformable = deformable != null ? deformable : piece.isDeformable();
         BigDecimal piecePrice = price != null ? price : piece.getPrice();
         BigDecimal pieceValueAddedTaxPercentage = valueAddedTaxPercentage != null 
             ? valueAddedTaxPercentage : piece.getValueAddedTaxPercentage();
@@ -927,14 +959,14 @@ public class FurnitureController implements Controller {
               pieceIcon, opening.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
-              pieceModelRotation, pieceCreator, pieceResizable, 
+              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
               piecePrice, pieceValueAddedTaxPercentage);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceIcon, light.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), 
-              pieceModelRotation, pieceCreator, pieceResizable, 
+              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
               piecePrice, pieceValueAddedTaxPercentage);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
@@ -942,13 +974,13 @@ public class FurnitureController implements Controller {
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable,
                 1, 0, new Sash [0], 
-                pieceModelRotation, pieceCreator, pieceResizable, 
+                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
                 piecePrice, pieceValueAddedTaxPercentage);
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-                pieceModelRotation, pieceCreator, pieceResizable, 
+                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, 
                 piecePrice, pieceValueAddedTaxPercentage);
           }
         }

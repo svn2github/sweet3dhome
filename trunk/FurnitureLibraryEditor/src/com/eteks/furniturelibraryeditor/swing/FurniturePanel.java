@@ -116,6 +116,7 @@ public class FurniturePanel extends JPanel implements DialogView {
   private NullableCheckBox          doorOrWindowCheckBox;
   private NullableCheckBox          backFaceShownCheckBox;
   private NullableCheckBox          resizableCheckBox;
+  private NullableCheckBox          deformableCheckBox;
   private JLabel                    creatorLabel;
   private JTextField                creatorTextField;
   private JLabel                    priceLabel;
@@ -587,6 +588,26 @@ public class FurniturePanel extends JPanel implements DialogView {
         }
       });
     
+    // Create deformable check box bound to DEFORMABLE controller property
+    this.deformableCheckBox = new NullableCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+        FurniturePanel.class, "deformableCheckBox.text"));
+    this.deformableCheckBox.setNullable(controller.getDeformable() == null);
+    this.deformableCheckBox.setValue(controller.getDeformable());
+    final PropertyChangeListener deformableChangeListener = new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent ev) {
+        deformableCheckBox.setNullable(ev.getNewValue() == null);
+        deformableCheckBox.setValue((Boolean)ev.getNewValue());
+      }
+    };
+    controller.addPropertyChangeListener(FurnitureController.Property.DEFORMABLE, deformableChangeListener);
+    this.deformableCheckBox.addChangeListener(new ChangeListener() {
+        public void stateChanged(ChangeEvent ev) {
+          controller.removePropertyChangeListener(FurnitureController.Property.DEFORMABLE, deformableChangeListener);
+          controller.setDeformable(deformableCheckBox.getValue());
+          controller.addPropertyChangeListener(FurnitureController.Property.DEFORMABLE, deformableChangeListener);
+        }
+      });
+    
     // Create creator label and its text field bound to CREATOR controller property
     this.creatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "creatorLabel.text"));
     this.creatorTextField = new JTextField(controller.getCreator(), 10);
@@ -772,6 +793,8 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "backFaceShownCheckBox.mnemonic")).getKeyCode());
       this.resizableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "resizableCheckBox.mnemonic")).getKeyCode());
+      this.deformableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+          FurniturePanel.class, "deformableCheckBox.mnemonic")).getKeyCode());
       this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
       this.creatorLabel.setLabelFor(this.creatorTextField);
@@ -931,9 +954,9 @@ public class FurniturePanel extends JPanel implements DialogView {
           4, 7, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.MOVABLE)) {
-      add(this.movableCheckBox, new GridBagConstraints(
-          2, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+    if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
+      add(this.backFaceShownCheckBox, new GridBagConstraints(
+          2, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
@@ -941,9 +964,14 @@ public class FurniturePanel extends JPanel implements DialogView {
           4, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
-      add(this.backFaceShownCheckBox, new GridBagConstraints(
-          2, 9, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+    if (this.controller.isPropertyEditable(FurnitureController.Property.MOVABLE)) {
+      add(this.movableCheckBox, new GridBagConstraints(
+          2, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.DEFORMABLE)) {
+      add(this.deformableCheckBox, new GridBagConstraints(
+          3, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.RESIZABLE)) {
