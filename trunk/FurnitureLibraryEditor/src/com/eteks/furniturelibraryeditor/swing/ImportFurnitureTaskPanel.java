@@ -28,12 +28,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.media.j3d.BranchGroup;
 import javax.vecmath.Vector3f;
 
+import com.eteks.furniturelibraryeditor.model.FurnitureLibrary;
 import com.eteks.furniturelibraryeditor.model.FurnitureLibraryUserPreferences;
 import com.eteks.furniturelibraryeditor.viewcontroller.ImportFurnitureTaskView;
 import com.eteks.sweethome3d.j3d.ModelManager;
@@ -176,11 +178,16 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       return null;
     }    
     
-    String key = this.preferences.getDefaultCreator();
-    if (key == null) {
-      key = System.getProperty("user.name");
+    String key;
+    if (Arrays.asList(preferences.getEditedProperties()).contains(FurnitureLibrary.FURNITURE_ID_PROPERTY)) {
+      key = this.preferences.getDefaultCreator();
+      if (key == null) {
+        key = System.getProperty("user.name");
+      }
+      key += "#" + modelName;
+    } else {
+      key = null;
     }
-    key += "#" + modelName;
     modelName = Character.toUpperCase(modelName.charAt(0)) + modelName.substring(1); 
     CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
         modelName, null, iconContent, null, modelContent, 
