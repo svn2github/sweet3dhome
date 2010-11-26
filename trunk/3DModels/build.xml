@@ -7,8 +7,8 @@
      - 3DModels : Builds *.sh3f files and include each of them in a .zip file for distribution
 -->
 <project basedir="." default="3DModels" name="SweetHome3D models">
-  <!-- The current version of Sweet Home 3D -->
-  <property name="version" value="1.1"/>
+  <!-- The current version of a SH3F file -->
+  <property name="version" value="1.1.1"/>
 	
   <target name="3DModels">
   	<mkdir dir="install"/>
