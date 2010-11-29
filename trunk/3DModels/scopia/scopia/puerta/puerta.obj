@@ -1,6 +1,6 @@
 # Blender3D v249 OBJ File: puerta_yafaray.blend
 # www.blender3d.org
-mtllib wooden_door.mtl
+mtllib puerta.mtl
 o marc_Cube
 v 43.693928 210.898010 -29.826231
 v 43.693916 -0.000004 -29.826221
