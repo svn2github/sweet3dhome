@@ -959,14 +959,14 @@ public class FurnitureController implements Controller {
               pieceIcon, opening.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
+              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
               piecePrice, pieceValueAddedTaxPercentage);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceIcon, light.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), 
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
+              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
               piecePrice, pieceValueAddedTaxPercentage);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
@@ -974,13 +974,13 @@ public class FurnitureController implements Controller {
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable,
                 1, 0, new Sash [0], 
-                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable,
+                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
                 piecePrice, pieceValueAddedTaxPercentage);
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, 
+                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(), 
                 piecePrice, pieceValueAddedTaxPercentage);
           }
         }
