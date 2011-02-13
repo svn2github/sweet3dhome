@@ -38,28 +38,28 @@ public class FurnitureLibraryEditorBootstrap {
   public static void main(String [] args) throws MalformedURLException, IllegalAccessException, 
       InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
     Class<?> furnitureLibraryEditorBootstrapClass = FurnitureLibraryEditorBootstrap.class;
-    List<String> java3DFiles = new ArrayList<String>(Arrays.asList(new String [] {
+    List<String> extensionJarsAndDlls = new ArrayList<String>(Arrays.asList(new String [] {
         "Loader3DS1_2u.jar", // Jars included in editor executable jar file
         "jnlp.jar",
         "j3dcore.jar", // Main Java 3D jars
         "vecmath.jar",
         "j3dutils.jar",
-        "windows/j3dcore-d3d.dll", // Windows DLLs
-        "windows/j3dcore-ogl.dll",
-        "windows/j3dcore-ogl-cg.dll",
-        "windows/j3dcore-ogl-chk.dll",
         "macosx/gluegen-rt.jar", // Mac OS X jars and DLLs
         "macosx/jogl.jar",
         "macosx/libgluegen-rt.jnilib",
         "macosx/libjogl.jnilib",
         "macosx/libjogl_awt.jnilib",
         "macosx/libjogl_cg.jnilib"}));
-    if (System.getProperty("os.name").startsWith("Linux")
-        && "64".equals(System.getProperty("sun.arch.data.model"))) {
-      java3DFiles.add("linux/x64/libj3dcore-ogl.so"); // Linux DLLs
+    if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+      extensionJarsAndDlls.add("linux/x64/libj3dcore-ogl.so"); // Linux 64 bits DLLs
+      extensionJarsAndDlls.add("windows/x64/j3dcore-ogl.dll"); // Windows 64 bits DLLs
     } else {
-      java3DFiles.add("linux/i386/libj3dcore-ogl.so"); 
-      java3DFiles.add("linux/i386/libj3dcore-ogl-cg.so");
+      extensionJarsAndDlls.add("linux/i386/libj3dcore-ogl.so"); // Linux 32 bits DLLs
+      extensionJarsAndDlls.add("linux/i386/libj3dcore-ogl-cg.so"); // Windows 32 bits DLLs
+      extensionJarsAndDlls.add("windows/i386/j3dcore-d3d.dll");
+      extensionJarsAndDlls.add("windows/i386/j3dcore-ogl.dll");
+      extensionJarsAndDlls.add("windows/i386/j3dcore-ogl-cg.dll");
+      extensionJarsAndDlls.add("windows/i386/j3dcore-ogl-chk.dll");
     }
     
     String [] applicationPackages = {
@@ -75,7 +75,7 @@ public class FurnitureLibraryEditorBootstrap {
     ClassLoader java3DClassLoader = new ExtensionsClassLoader(
         furnitureLibraryEditorBootstrapClass.getClassLoader(), 
         furnitureLibraryEditorBootstrapClass.getProtectionDomain(),
-        java3DFiles.toArray(new String [java3DFiles.size()]), applicationPackages);  
+        extensionJarsAndDlls.toArray(new String [extensionJarsAndDlls.size()]), applicationPackages);  
     
     String applicationClassName = "com.eteks.furniturelibraryeditor.FurnitureLibraryEditor";
     Class<?> applicationClass = java3DClassLoader.loadClass(applicationClassName);
