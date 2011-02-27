@@ -8,7 +8,7 @@
 -->
 <project basedir="." default="3DModels" name="SweetHome3D models">
   <!-- The current version of a SH3F file -->
-  <property name="version" value="1.1.1"/>
+  <property name="version" value="1.2"/>
 	
   <target name="3DModels">
   	<mkdir dir="install"/>
@@ -36,6 +36,12 @@
     <zip destfile="install/3DModels-KatorLegaz-${version}.zip" update="true" basedir="." includes="README.TXT"/>
     <zip destfile="install/3DModels-KatorLegaz-${version}.zip" update="true" basedir="katorlegaz" includes="LICENSE.TXT"/>
     <delete file="install/KatorLegaz.sh3f"/>
+
+    <zip destfile="install/Reallusion.sh3f" basedir="reallusion"/>
+    <zip destfile="install/3DModels-Reallusion-${version}.zip" basedir="install" includes="Reallusion.sh3f"/>
+    <zip destfile="install/3DModels-Reallusion-${version}.zip" update="true" basedir="." includes="README.TXT"/>
+    <zip destfile="install/3DModels-Reallusion-${version}.zip" update="true" basedir="reallusion" includes="LICENSE.TXT"/>
+    <delete file="install/Reallusion.sh3f"/>
 
     <echo message="SH3F files generated in install folder"/>
   </target>
