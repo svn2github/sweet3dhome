@@ -1,0 +1,18 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl Shelving_1
+illum 2
+Ka 0 0 0
+Kd 0.329 0.478 0.588
+Ks 0.5 0.5 0.5
+Ns 8
+
+newmtl Shelving_3
+illum 2
+Ka 0 0 0
+Kd 0.026448 0.008816 0.001959
+Ks 0.768628 0.760784 0.717647
+Ns 8
