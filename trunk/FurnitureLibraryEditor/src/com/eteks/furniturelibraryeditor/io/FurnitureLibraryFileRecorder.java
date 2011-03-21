@@ -421,22 +421,33 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
           String lightSourceY = "";
           String lightSourceZ = "";
           String lightSourceColor = "";
+          String lightSourceDiameter = null;
           for (int lightIndex = 0; lightIndex < lightSources.length; lightIndex++) {
             if (lightIndex > 0) {
               lightSourceX += " ";
               lightSourceY += " ";
               lightSourceZ += " ";
               lightSourceColor += " ";
+              if (lightSourceDiameter != null) {
+                lightSourceDiameter += " ";
+              }
             }
             lightSourceX += lightSources [lightIndex].getX() * light.getWidth();
             lightSourceY += lightSources [lightIndex].getY() * light.getDepth();
             lightSourceZ += lightSources [lightIndex].getZ() * light.getHeight();
             lightSourceColor += "#" + Integer.toHexString(lightSources [lightIndex].getColor());
+            if (lightSources [lightIndex].getDiameter() != null) {
+              if (lightSourceDiameter == null) {
+                lightSourceDiameter = "";
+              }
+              lightSourceDiameter += lightSources [lightIndex].getDiameter() * light.getWidth();
+            }
           }          
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_X, i, lightSourceX);
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_Y, i, lightSourceY);
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_Z, i, lightSourceZ);
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_COLOR, i, lightSourceColor);
+          writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_DIAMETER, i, lightSourceDiameter);
         }
       }
       if (piece.getElevation() > 0) {
@@ -455,6 +466,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       }
       if (!piece.isDeformable()) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DEFORMABLE, i, piece.isDeformable());
+      }
+      if (!piece.isTexturable()) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.TEXTURABLE, i, piece.isTexturable());
       }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PRICE, i, piece.getPrice());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.VALUE_ADDED_TAX_PERCENTAGE, i, piece.getValueAddedTaxPercentage());
