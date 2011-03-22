@@ -188,4 +188,12 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
           oldValue, furnitureResourcesRemoteUrlBase);
     }
   }
+
+  /**
+   * Returns <code>true</code> if the furniture content saved with the library should be named 
+   * from the furniture name in the default language.
+   */
+  public boolean isContentMatchingFurnitureName() {
+    return true;
+  }
 }
