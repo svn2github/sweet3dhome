@@ -476,9 +476,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       }
       float [][] modelRotation = piece.getModelRotation();
       String modelRotationString = 
-          Math.round(modelRotation[0][0]) + " " + Math.round(modelRotation[0][1]) + " " + Math.round(modelRotation[0][2]) + " "
-        + Math.round(modelRotation[1][0]) + " " + Math.round(modelRotation[1][1]) + " " + Math.round(modelRotation[1][2]) + " "
-        + Math.round(modelRotation[2][0]) + " " + Math.round(modelRotation[2][1]) + " " + Math.round(modelRotation[2][2]);
+          floatToString(modelRotation[0][0]) + " " + floatToString(modelRotation[0][1]) + " " + floatToString(modelRotation[0][2]) + " "
+        + floatToString(modelRotation[1][0]) + " " + floatToString(modelRotation[1][1]) + " " + floatToString(modelRotation[1][2]) + " "
+        + floatToString(modelRotation[2][0]) + " " + floatToString(modelRotation[2][1]) + " " + floatToString(modelRotation[2][2]);
       if (!"1 0 0 0 1 0 0 0 1".equals(modelRotationString)) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MODEL_ROTATION, i, modelRotationString);
       }
@@ -497,6 +497,21 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       i++;
     }
     writer.flush();
+  }
+  
+  /**
+   * Returns the string value of the given float, except for -1.0, 1.0 or 0.0 where -1, 1 and 0 is returned.
+   */
+  private String floatToString(float f) {
+    if (Math.abs(f) < 1E-6) {
+      return "0";
+    } else if (Math.abs(f - 1f) < 1E-6) {
+      return "1";
+    } else if (Math.abs(f + 1f) < 1E-6) {
+      return "-1";
+    } else {
+      return String.valueOf(f);
+    }
   }
     
   /**
