@@ -98,8 +98,11 @@ public class FurnitureController implements Controller {
   private Content           model;
   private Content           icon;
   private Float             width;
+  private Float             proportionalWidth;
   private Float             depth;
+  private Float             proportionalDepth;
   private Float             height;
+  private Float             proportionalHeight;
   private Float             elevation;
   private Boolean           movable;
   private Boolean           doorOrWindow;
@@ -137,7 +140,7 @@ public class FurnitureController implements Controller {
       this.editableProperties.add(PROPERTIES_MAP.get(editedProperty));
     }
 
-    setProportional(true);
+    setProportional(modifiedFurniture.size() == 1);
     updateProperties();
     addListeners();
   }
@@ -186,8 +189,8 @@ public class FurnitureController implements Controller {
             
             // If proportions should be kept, update depth and height
             float ratio = (Float)ev.getNewValue() / (Float)ev.getOldValue();
-            setDepth(getDepth() * ratio); 
-            setHeight(getHeight() * ratio);
+            setDepth(proportionalDepth * ratio, true); 
+            setHeight(proportionalHeight * ratio, true);
             
             addPropertyChangeListener(Property.DEPTH, depthChangeListener);
             addPropertyChangeListener(Property.HEIGHT, heightChangeListener);
@@ -202,8 +205,8 @@ public class FurnitureController implements Controller {
             
             // If proportions should be kept, update width and height
             float ratio = (Float)ev.getNewValue() / (Float)ev.getOldValue();
-            setWidth(getWidth() * ratio); 
-            setHeight(getHeight() * ratio);
+            setWidth(proportionalWidth * ratio, true); 
+            setHeight(proportionalHeight * ratio, true);
             
             addPropertyChangeListener(Property.WIDTH, widthChangeListener);
             addPropertyChangeListener(Property.HEIGHT, heightChangeListener);
@@ -218,8 +221,8 @@ public class FurnitureController implements Controller {
             
             // If proportions should be kept, update width and depth
             float ratio = (Float)ev.getNewValue() / (Float)ev.getOldValue();
-            setWidth(getWidth() * ratio); 
-            setDepth(getDepth() * ratio);
+            setWidth(proportionalWidth * ratio, true); 
+            setDepth(proportionalDepth * ratio, true);
             
             addPropertyChangeListener(Property.WIDTH, widthChangeListener);
             addPropertyChangeListener(Property.DEPTH, depthChangeListener);
@@ -622,10 +625,23 @@ public class FurnitureController implements Controller {
    * Sets the edited width.
    */
   public void setWidth(Float width) {
-    if (width != this.width) {
+    setWidth(width, false);
+  }
+
+  private void setWidth(Float width, boolean keepProportionalWidthUnchanged) {
+    Float adjustedWidth = width != null 
+        ? Math.max(width, 0.001f)
+        : null;
+    if (adjustedWidth == width 
+        || adjustedWidth != null && adjustedWidth.equals(width)
+        || !keepProportionalWidthUnchanged) {
+      this.proportionalWidth = width;
+    }
+    if (adjustedWidth == null && this.width != null
+        || adjustedWidth != null && !adjustedWidth.equals(this.width)) {
       Float oldWidth = this.width;
-      this.width = width;
-      this.propertyChangeSupport.firePropertyChange(Property.WIDTH.name(), oldWidth, width);
+      this.width = adjustedWidth;
+      this.propertyChangeSupport.firePropertyChange(Property.WIDTH.name(), oldWidth, adjustedWidth);
     }
   }
 
@@ -640,10 +656,24 @@ public class FurnitureController implements Controller {
    * Sets the edited depth.
    */
   public void setDepth(Float depth) {
-    if (depth != this.depth) {
+    setDepth(depth, false);
+  }
+
+  private void setDepth(Float depth, boolean keepProportionalDepthUnchanged) {
+    Float adjustedDepth = depth != null 
+        ? Math.max(depth, 0.001f)
+        : null;
+
+    if (adjustedDepth == depth 
+        || adjustedDepth != null && adjustedDepth.equals(depth)
+        || !keepProportionalDepthUnchanged) {
+      this.proportionalDepth = depth;
+    }
+    if (adjustedDepth == null && this.depth != null
+        || adjustedDepth != null && !adjustedDepth.equals(this.depth)) {
       Float oldDepth = this.depth;
-      this.depth = depth;
-      this.propertyChangeSupport.firePropertyChange(Property.DEPTH.name(), oldDepth, depth);
+      this.depth = adjustedDepth;
+      this.propertyChangeSupport.firePropertyChange(Property.DEPTH.name(), oldDepth, adjustedDepth);
     }
   }
 
@@ -658,10 +688,23 @@ public class FurnitureController implements Controller {
    * Sets the edited height.
    */
   public void setHeight(Float height) {
-    if (height != this.height) {
+    setHeight(height, false);
+  }
+
+  private void setHeight(Float height, boolean keepProportionalHeightUnchanged) {
+    Float adjustedHeight = height != null 
+        ? Math.max(height, 0.001f)
+        : null;
+    if (adjustedHeight == height 
+        || adjustedHeight != null && adjustedHeight.equals(height)
+        || !keepProportionalHeightUnchanged) {
+      this.proportionalHeight = height;
+    }
+    if (adjustedHeight == null && this.height != null
+        || adjustedHeight != null && !adjustedHeight.equals(this.height)) {
       Float oldHeight = this.height;
-      this.height = height;
-      this.propertyChangeSupport.firePropertyChange(Property.HEIGHT.name(), oldHeight, height);
+      this.height = adjustedHeight;
+      this.propertyChangeSupport.firePropertyChange(Property.HEIGHT.name(), oldHeight, adjustedHeight);
     }
   }
 
