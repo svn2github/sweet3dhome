@@ -21,8 +21,8 @@ package com.eteks.furniturelibraryeditor.viewcontroller;
 
 import java.util.concurrent.Callable;
 
-import com.eteks.furniturelibraryeditor.model.FurnitureLibraryUserPreferences;
 import com.eteks.furniturelibraryeditor.model.FurnitureLibrary;
+import com.eteks.furniturelibraryeditor.model.FurnitureLibraryUserPreferences;
 import com.eteks.sweethome3d.model.BackgroundImage;
 import com.eteks.sweethome3d.model.CatalogPieceOfFurniture;
 import com.eteks.sweethome3d.model.CatalogTexture;
@@ -48,6 +48,7 @@ import com.eteks.sweethome3d.viewcontroller.ImportedFurnitureWizardController;
 import com.eteks.sweethome3d.viewcontroller.ImportedFurnitureWizardStepsView;
 import com.eteks.sweethome3d.viewcontroller.ImportedTextureWizardController;
 import com.eteks.sweethome3d.viewcontroller.LabelController;
+import com.eteks.sweethome3d.viewcontroller.LevelController;
 import com.eteks.sweethome3d.viewcontroller.PageSetupController;
 import com.eteks.sweethome3d.viewcontroller.PhotoController;
 import com.eteks.sweethome3d.viewcontroller.PlanController;
@@ -143,6 +144,11 @@ public class ImportFurnitureController implements Controller {
 
         public DialogView createHome3DAttributesView(UserPreferences preferences,
                                                      Home3DAttributesController home3dAttributesController) {
+          throw new UnsupportedOperationException();
+        }
+
+        public DialogView createLevelView(UserPreferences preferences,
+                                          LevelController levelController) {
           throw new UnsupportedOperationException();
         }
 
