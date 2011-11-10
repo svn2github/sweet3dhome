@@ -1,0 +1,17 @@
+# 3D model sgabello.obj
+
+newmtl Line59_1
+illum 2
+Ka 0.7569 0.7569 0.7569
+Kd 0.7569 0.7569 0.7569
+Ks 0.603 0.603 0.603
+Ns 20.0
+Ni 1.5
+
+newmtl Line60_4
+illum 2
+Ka 0.4 0.0 0.0
+Kd 0.4 0.0 0.0
+Ks 0.423 0.423 0.423
+Ns 10.0
+Ni 1.5
