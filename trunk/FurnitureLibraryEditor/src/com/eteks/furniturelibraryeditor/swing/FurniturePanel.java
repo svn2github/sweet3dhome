@@ -1083,7 +1083,7 @@ public class FurniturePanel extends JPanel implements DialogView {
               controller.getWidth(), controller.getDepth(), controller.getHeight());
         }
         
-        getCanvas3D().addMouseListener(new MouseAdapter() {
+        addMouseListener(new MouseAdapter() {
           private boolean mousePressedInIcon;
 
           @Override
