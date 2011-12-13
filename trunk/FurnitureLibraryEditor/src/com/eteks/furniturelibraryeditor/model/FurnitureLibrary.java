@@ -63,7 +63,7 @@ public class FurnitureLibrary {
   public static final String FURNITURE_HEIGHT_PROPERTY                     = "HEIGHT";
   public static final String FURNITURE_MOVABLE_PROPERTY                    = "MOVABLE";
   public static final String FURNITURE_DOOR_OR_WINDOW_PROPERTY             = "DOOR_OR_WINDOW";
-  public static final String FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY    = "STAIRCASE";
+  public static final String FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY    = "STAIRCASE_CUT_OUT_SHAPE";
   public static final String FURNITURE_ELEVATION_PROPERTY                  = "ELEVATION";
   public static final String FURNITURE_MODEL_ROTATION_PROPERTY             = "MODEL_ROTATION";
   public static final String FURNITURE_RESIZABLE_PROPERTY                  = "RESIZABLE";
