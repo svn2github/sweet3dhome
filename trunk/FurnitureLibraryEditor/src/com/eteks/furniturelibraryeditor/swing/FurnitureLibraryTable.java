@@ -60,8 +60,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
-import com.eteks.furniturelibraryeditor.model.FurnitureLibraryUserPreferences;
 import com.eteks.furniturelibraryeditor.model.FurnitureLibrary;
+import com.eteks.furniturelibraryeditor.model.FurnitureLibraryUserPreferences;
 import com.eteks.furniturelibraryeditor.viewcontroller.FurnitureLanguageController;
 import com.eteks.furniturelibraryeditor.viewcontroller.FurnitureLibraryController;
 import com.eteks.sweethome3d.model.CatalogPieceOfFurniture;
@@ -591,6 +591,18 @@ public class FurnitureLibraryTable extends JTable implements View {
                       ? -1 : 1);
             }
           };
+      } else if (FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY.equals(propertyKey)) {
+        furnitureComparator = new Comparator<CatalogPieceOfFurniture>() {
+            public int compare(CatalogPieceOfFurniture piece1, CatalogPieceOfFurniture piece2) {
+              if (piece1.getStaircaseCutOutShape() == null) {
+                return -1;
+              } else if (piece2.getStaircaseCutOutShape() == null) {
+                return 1; 
+              } else {
+                return piece1.getStaircaseCutOutShape().compareTo(piece2.getStaircaseCutOutShape());
+              }
+            }
+          };
       } else if (FurnitureLibrary.FURNITURE_ELEVATION_PROPERTY.equals(propertyKey)) {
         furnitureComparator = new Comparator<CatalogPieceOfFurniture>() {
             public int compare(CatalogPieceOfFurniture piece1, CatalogPieceOfFurniture piece2) {
@@ -773,6 +785,8 @@ public class FurnitureLibraryTable extends JTable implements View {
         return preferences.getLocalizedString(FurnitureLibraryTable.class, "movableColumn");
       } else if (FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY.equals(propertyKey)) {
         return preferences.getLocalizedString(FurnitureLibraryTable.class, "doorOrWindowColumn");
+      } else if (FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY.equals(propertyKey)) {
+        return preferences.getLocalizedString(FurnitureLibraryTable.class, "staircaseColumn");
       } else if (FurnitureLibrary.FURNITURE_ELEVATION_PROPERTY.equals(propertyKey)) {
         return preferences.getLocalizedString(FurnitureLibraryTable.class, "elevationColumn");
       } else if (FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY.equals(propertyKey)) {
@@ -816,6 +830,7 @@ public class FurnitureLibraryTable extends JTable implements View {
         return 45;
       } else if (FurnitureLibrary.FURNITURE_MOVABLE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY.equals(propertyKey)
+          || FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_DEFORMABLE_PROPERTY.equals(propertyKey)) {
         return 20;
@@ -855,6 +870,7 @@ public class FurnitureLibraryTable extends JTable implements View {
         return getSizeRenderer(propertyKey, preferences);
       } else if (FurnitureLibrary.FURNITURE_MOVABLE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY.equals(propertyKey)
+          || FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY.equals(propertyKey)
           || FurnitureLibrary.FURNITURE_DEFORMABLE_PROPERTY.equals(propertyKey)) {
         return getBooleanRenderer(propertyKey);
@@ -1127,6 +1143,15 @@ public class FurnitureLibraryTable extends JTable implements View {
                 Object value, boolean isSelected, boolean hasFocus, int row, int column) {
               return super.getTableCellRendererComponent(table, 
                   ((CatalogPieceOfFurniture)value).isDoorOrWindow(), isSelected, hasFocus, row, column);
+            }
+          };
+      } else if (FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY.equals(propertyKey)) {
+        return new BooleanRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, 
+                Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+              return super.getTableCellRendererComponent(table, 
+                  ((CatalogPieceOfFurniture)value).getStaircaseCutOutShape() != null, isSelected, hasFocus, row, column);
             }
           };
       } else if (FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY.equals(propertyKey)) {

@@ -57,7 +57,7 @@ public class FurnitureController implements Controller {
    * The properties that may be edited by the view associated to this controller. 
    */
   public enum Property {ID, NAME, DESCRIPTION, CATEGORY, MODEL, ICON, 
-      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, DOOR_OR_WINDOW, MODEL_ROTATION, CREATOR, 
+      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, DOOR_OR_WINDOW, STAIRCASE_CUT_OUT_SHAPE, MODEL_ROTATION, CREATOR, 
       PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
   
   private static final Map<String, Property> PROPERTIES_MAP = new HashMap<String, Property>();
@@ -77,6 +77,7 @@ public class FurnitureController implements Controller {
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DEFORMABLE_PROPERTY, Property.DEFORMABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY, Property.RESIZABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY, Property.DOOR_OR_WINDOW);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY, Property.STAIRCASE_CUT_OUT_SHAPE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY, Property.MODEL_ROTATION);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_PRICE_PROPERTY, Property.PRICE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_VALUE_ADDED_TAX_PERCENTAGE_PROPERTY, Property.VALUE_ADDED_TAX_PERCENTAGE);
@@ -106,6 +107,7 @@ public class FurnitureController implements Controller {
   private Float             elevation;
   private Boolean           movable;
   private Boolean           doorOrWindow;
+  private String            staircaseCutOutShape;
   private Boolean           backFaceShown;
   private Boolean           resizable;
   private Boolean           deformable;
@@ -267,6 +269,7 @@ public class FurnitureController implements Controller {
       setElevation(null);
       setMovable(null);
       setDoorOrWindow(null);
+      setStaircaseCutOutShape(null);
       setBackFaceShown(null);
       setResizable(null);
       setDeformable(null);
@@ -416,6 +419,17 @@ public class FurnitureController implements Controller {
         }
       }
       setDoorOrWindow(doorOrWindow);           
+
+      String staircaseCutOutShape = firstPiece.getStaircaseCutOutShape();
+      for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+        CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+        if (staircaseCutOutShape == null && piece.getStaircaseCutOutShape() != null
+            || staircaseCutOutShape != null && !staircaseCutOutShape.equals(piece.getStaircaseCutOutShape())) {
+          staircaseCutOutShape = null;
+          break;
+        }
+      }
+      setStaircaseCutOutShape(staircaseCutOutShape);           
 
       float [][] modelRotation = firstPiece.getModelRotation();
       if (modelRotation != null) {
@@ -800,6 +814,25 @@ public class FurnitureController implements Controller {
   }
    
   /**
+   * Sets the shape used to cut out upper levels at its intersection with a staircase.
+   */
+  public void setStaircaseCutOutShape(String staircaseCutOutShape) {
+    if (staircaseCutOutShape != this.staircaseCutOutShape
+        || (staircaseCutOutShape != null && !staircaseCutOutShape.equals(this.staircaseCutOutShape))) {
+      String oldStaircaseCutOutShape = this.staircaseCutOutShape;
+      this.staircaseCutOutShape = staircaseCutOutShape;
+      this.propertyChangeSupport.firePropertyChange(Property.STAIRCASE_CUT_OUT_SHAPE.name(), oldStaircaseCutOutShape, staircaseCutOutShape);
+    }
+  }
+  
+  /**
+   * Returns the shape used to cut out upper levels at its intersection with a staircase.
+   */
+  public String getStaircaseCutOutShape() {
+    return this.staircaseCutOutShape;
+  }
+
+  /**
    * Sets whether the back face of the furniture model should be shown or not.
    */
   public void setBackFaceShown(Boolean backFaceShown) {
@@ -944,6 +977,7 @@ public class FurnitureController implements Controller {
       Boolean resizable = getResizable();
       Boolean deformable = getDeformable();
       Boolean doorOrWindow = getDoorOrWindow();
+      String staircaseCutOutShape = getStaircaseCutOutShape();
       float [][] modelRotation = getModelRotation();
       String creator = getCreator();
       BigDecimal price = getPrice();
@@ -989,6 +1023,7 @@ public class FurnitureController implements Controller {
         float pieceElevation = elevation != null ? elevation : piece.getElevation();
         boolean pieceMovable = movable != null ? movable : piece.isMovable();
         float [][] pieceModelRotation = modelRotation != null ? modelRotation : piece.getModelRotation();
+        String pieceStaircaseCutOutShape = staircaseCutOutShape != null || piecesCount == 1 ? staircaseCutOutShape : piece.getStaircaseCutOutShape();
         String pieceCreator = creator != null || piecesCount == 1 ? creator : piece.getCreator();
         boolean pieceResizable = resizable != null ? resizable : piece.isResizable();
         boolean pieceDeformable = deformable != null ? deformable : piece.isDeformable();
@@ -1008,7 +1043,7 @@ public class FurnitureController implements Controller {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceIcon, light.getPlanIcon(), pieceModel,
-              pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), 
+              pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
               piecePrice, pieceValueAddedTaxPercentage);
         } else {
@@ -1022,8 +1057,8 @@ public class FurnitureController implements Controller {
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
-                pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(), 
+                pieceWidth, pieceDepth, pieceHeight, pieceElevation, 
+                pieceMovable, pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(), 
                 piecePrice, pieceValueAddedTaxPercentage);
           }
         }

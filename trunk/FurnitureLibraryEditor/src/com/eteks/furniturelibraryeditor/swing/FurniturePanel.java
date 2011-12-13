@@ -114,6 +114,7 @@ public class FurniturePanel extends JPanel implements DialogView {
   private JSpinner                  elevationSpinner;
   private NullableCheckBox          movableCheckBox;
   private NullableCheckBox          doorOrWindowCheckBox;
+  private JCheckBox                 staircaseCheckBox;
   private NullableCheckBox          backFaceShownCheckBox;
   private NullableCheckBox          resizableCheckBox;
   private NullableCheckBox          deformableCheckBox;
@@ -602,6 +603,26 @@ public class FurniturePanel extends JPanel implements DialogView {
         });
     }
     
+    if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
+      // Create staircase check box bound to STAIRCASE_CUT_OUT_SHAPE controller property
+      this.staircaseCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+          FurniturePanel.class, "staircaseCheckBox.text"));
+      this.staircaseCheckBox.setSelected(controller.getStaircaseCutOutShape() != null);
+      final PropertyChangeListener staircaseChangeListener = new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent ev) {
+          staircaseCheckBox.setSelected(ev.getNewValue() != null);
+        }
+      };
+      controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
+      this.staircaseCheckBox.addChangeListener(new ChangeListener() {
+          public void stateChanged(ChangeEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
+            controller.setStaircaseCutOutShape(staircaseCheckBox.isSelected()  ? "M0,0 v1 h1 v-1 z"  : null);
+            controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
+          }
+        });
+    }
+    
     if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
       // Create back face shown check box bound to BACK_FACE_SHOWN controller property
       this.backFaceShownCheckBox = new NullableCheckBox(SwingTools.getLocalizedLabelText(preferences, 
@@ -837,6 +858,8 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "movableCheckBox.mnemonic")).getKeyCode());
       this.doorOrWindowCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "doorOrWindowCheckBox.mnemonic")).getKeyCode());
+      this.staircaseCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+          FurniturePanel.class, "staircaseCheckBox.mnemonic")).getKeyCode());
       this.backFaceShownCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "backFaceShownCheckBox.mnemonic")).getKeyCode());
       this.resizableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
@@ -1004,11 +1027,16 @@ public class FurniturePanel extends JPanel implements DialogView {
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
       add(this.backFaceShownCheckBox, new GridBagConstraints(
-          2, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
       add(this.doorOrWindowCheckBox, new GridBagConstraints(
+          3, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
+      add(this.staircaseCheckBox, new GridBagConstraints(
           4, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }

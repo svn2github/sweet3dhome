@@ -56,6 +56,7 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
         FurnitureLibrary.FURNITURE_ELEVATION_PROPERTY,
         FurnitureLibrary.FURNITURE_MOVABLE_PROPERTY,
         FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY,
+        FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY,
         FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY};
     setUnit(LengthUnit.CENTIMETER);
     this.offlineFurnitureLibrary = true;
