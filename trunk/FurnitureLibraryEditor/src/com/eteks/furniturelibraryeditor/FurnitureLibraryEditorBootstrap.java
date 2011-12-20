@@ -40,6 +40,7 @@ public class FurnitureLibraryEditorBootstrap {
     Class<?> furnitureLibraryEditorBootstrapClass = FurnitureLibraryEditorBootstrap.class;
     List<String> extensionJarsAndDlls = new ArrayList<String>(Arrays.asList(new String [] {
         "Loader3DS1_2u.jar", // Jars included in editor executable jar file
+        "batik-svgpathparser-1.7.jar", 
         "jnlp.jar",
         "j3dcore.jar", // Main Java 3D jars
         "vecmath.jar",

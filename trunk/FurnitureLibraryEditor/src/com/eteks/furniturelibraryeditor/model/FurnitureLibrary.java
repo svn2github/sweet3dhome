@@ -68,7 +68,7 @@ public class FurnitureLibrary {
   public static final String FURNITURE_MODEL_ROTATION_PROPERTY             = "MODEL_ROTATION";
   public static final String FURNITURE_RESIZABLE_PROPERTY                  = "RESIZABLE";
   public static final String FURNITURE_DEFORMABLE_PROPERTY                 = "DEFORMABLE";
-
+  public static final String FURNITURE_TEXTURABLE_PROPERTY                 = "TEXTURABLE";
   
   private final PropertyChangeSupport                                    propertyChangeSupport;
   private List<CatalogPieceOfFurniture>                                  furniture;

@@ -19,6 +19,7 @@
  */
 package com.eteks.furniturelibraryeditor.swing;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
@@ -64,6 +65,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.vecmath.Matrix3f;
+
+import org.apache.batik.parser.AWTPathProducer;
+import org.apache.batik.parser.ParseException;
+import org.apache.batik.parser.PathParser;
 
 import com.eteks.furniturelibraryeditor.viewcontroller.FurnitureController;
 import com.eteks.sweethome3d.j3d.ModelManager;
@@ -114,10 +119,13 @@ public class FurniturePanel extends JPanel implements DialogView {
   private JSpinner                  elevationSpinner;
   private NullableCheckBox          movableCheckBox;
   private NullableCheckBox          doorOrWindowCheckBox;
-  private JCheckBox                 staircaseCheckBox;
+  private NullableCheckBox          staircaseCheckBox;
+  private JLabel                    staircaseCutOutShapeLabel;
+  private JTextField                staircaseCutOutShapeTextField;
   private NullableCheckBox          backFaceShownCheckBox;
   private NullableCheckBox          resizableCheckBox;
   private NullableCheckBox          deformableCheckBox;
+  private NullableCheckBox          texturableCheckBox;
   private JLabel                    creatorLabel;
   private JTextField                creatorTextField;
   private JLabel                    priceLabel;
@@ -605,21 +613,68 @@ public class FurniturePanel extends JPanel implements DialogView {
     }
     
     if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
-      // Create staircase check box bound to STAIRCASE_CUT_OUT_SHAPE controller property
-      this.staircaseCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+      // Create staircase check box and text field bound to STAIRCASE_CUT_OUT_SHAPE controller property
+      this.staircaseCheckBox = new NullableCheckBox(SwingTools.getLocalizedLabelText(preferences, 
           FurniturePanel.class, "staircaseCheckBox.text"));
-      this.staircaseCheckBox.setSelected(controller.getStaircaseCutOutShape() != null);
+      this.staircaseCheckBox.setNullable(controller.getStaircase() == null);
+      this.staircaseCheckBox.setValue(controller.getStaircase());
       final PropertyChangeListener staircaseChangeListener = new PropertyChangeListener() {
         public void propertyChange(PropertyChangeEvent ev) {
-          staircaseCheckBox.setSelected(ev.getNewValue() != null);
+          staircaseCheckBox.setNullable(ev.getNewValue() == null);
+          staircaseCheckBox.setValue((Boolean)ev.getNewValue());
         }
       };
-      controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
+      controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE, staircaseChangeListener);
       this.staircaseCheckBox.addChangeListener(new ChangeListener() {
           public void stateChanged(ChangeEvent ev) {
-            controller.removePropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
-            controller.setStaircaseCutOutShape(staircaseCheckBox.isSelected()  ? "M0,0 v1 h1 v-1 z"  : null);
-            controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseChangeListener);
+            controller.removePropertyChangeListener(FurnitureController.Property.STAIRCASE, staircaseChangeListener);
+            Boolean value = staircaseCheckBox.getValue();
+            staircaseCutOutShapeLabel.setEnabled(!Boolean.FALSE.equals(value));
+            staircaseCutOutShapeTextField.setEnabled(!Boolean.FALSE.equals(value));
+            controller.setStaircase(value);
+            controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE, staircaseChangeListener);
+          }
+        });
+
+      this.staircaseCutOutShapeLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "staircaseCutOutShapeLabel.text"));
+      staircaseCutOutShapeLabel.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
+      this.staircaseCutOutShapeTextField = new JTextField(controller.getStaircaseCutOutShape(), 20);
+      staircaseCutOutShapeTextField.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
+      final PropertyChangeListener staircaseCutOutShapeChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            staircaseCutOutShapeTextField.setText(controller.getStaircaseCutOutShape());
+          }
+        };
+      controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseCutOutShapeChangeListener);
+      final Color defaultTextFieldColor = this.staircaseCutOutShapeTextField.getForeground();
+      this.staircaseCutOutShapeTextField.getDocument().addDocumentListener(new DocumentListener() {
+          public void changedUpdate(DocumentEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseCutOutShapeChangeListener);
+            String staircaseCutOutShape = staircaseCutOutShapeTextField.getText(); 
+            if (staircaseCutOutShape == null || staircaseCutOutShape.trim().length() == 0) {
+              controller.setStaircaseCutOutShape(null);
+            } else {
+              controller.setStaircaseCutOutShape(staircaseCutOutShape);
+              try {
+                PathParser pathParser = new PathParser();
+                pathParser.setPathHandler(new AWTPathProducer());
+                pathParser.parse(staircaseCutOutShape);
+                staircaseCutOutShapeTextField.setForeground(defaultTextFieldColor);
+              } catch (ParseException ex) {
+                staircaseCutOutShapeTextField.setForeground(Color.RED);
+              } catch (NullPointerException ex) {
+                staircaseCutOutShapeTextField.setForeground(Color.RED);
+              }
+            }
+            controller.addPropertyChangeListener(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE, staircaseCutOutShapeChangeListener);
+          }
+    
+          public void insertUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+    
+          public void removeUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
           }
         });
     }
@@ -687,6 +742,28 @@ public class FurniturePanel extends JPanel implements DialogView {
             controller.removePropertyChangeListener(FurnitureController.Property.DEFORMABLE, deformableChangeListener);
             controller.setDeformable(deformableCheckBox.getValue());
             controller.addPropertyChangeListener(FurnitureController.Property.DEFORMABLE, deformableChangeListener);
+          }
+        });
+    }
+    
+    if (this.controller.isPropertyEditable(FurnitureController.Property.TEXTURABLE)) {
+      // Create texturable check box bound to TEXTURABLE controller property
+      this.texturableCheckBox = new NullableCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+          FurniturePanel.class, "texturableCheckBox.text"));
+      this.texturableCheckBox.setNullable(controller.getTexturable() == null);
+      this.texturableCheckBox.setValue(controller.getTexturable());
+      final PropertyChangeListener texturableChangeListener = new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent ev) {
+          texturableCheckBox.setNullable(ev.getNewValue() == null);
+          texturableCheckBox.setValue((Boolean)ev.getNewValue());
+        }
+      };
+      controller.addPropertyChangeListener(FurnitureController.Property.TEXTURABLE, texturableChangeListener);
+      this.texturableCheckBox.addChangeListener(new ChangeListener() {
+          public void stateChanged(ChangeEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.TEXTURABLE, texturableChangeListener);
+            controller.setTexturable(texturableCheckBox.getValue());
+            controller.addPropertyChangeListener(FurnitureController.Property.TEXTURABLE, texturableChangeListener);
           }
         });
     }
@@ -861,12 +938,17 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "doorOrWindowCheckBox.mnemonic")).getKeyCode());
       this.staircaseCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "staircaseCheckBox.mnemonic")).getKeyCode());
+      this.staircaseCutOutShapeLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+          FurniturePanel.class, "staircaseCutOutShapeLabel.mnemonic")).getKeyCode());
+      this.staircaseCutOutShapeLabel.setLabelFor(this.staircaseCutOutShapeTextField);
       this.backFaceShownCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "backFaceShownCheckBox.mnemonic")).getKeyCode());
       this.resizableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "resizableCheckBox.mnemonic")).getKeyCode());
       this.deformableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "deformableCheckBox.mnemonic")).getKeyCode());
+      this.texturableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+          FurniturePanel.class, "texturableCheckBox.mnemonic")).getKeyCode());
       this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
           FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
       this.creatorLabel.setLabelFor(this.creatorTextField);
@@ -1026,34 +1108,45 @@ public class FurniturePanel extends JPanel implements DialogView {
           4, 7, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
-      add(this.backFaceShownCheckBox, new GridBagConstraints(
-          1, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.NONE, componentInsets, 0, 0));
-    }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
       add(this.doorOrWindowCheckBox, new GridBagConstraints(
-          3, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
+      add(this.backFaceShownCheckBox, new GridBagConstraints(
+          2, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
       add(this.staircaseCheckBox, new GridBagConstraints(
-          4, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
+      add(this.staircaseCutOutShapeLabel, new GridBagConstraints(
+          2, 9, 1, 1, 0, 0, labelAlignment, 
+          GridBagConstraints.NONE, labelInsets, 0, 0));
+      add(this.staircaseCutOutShapeTextField, new GridBagConstraints(
+          3, 9, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.MOVABLE)) {
       add(this.movableCheckBox, new GridBagConstraints(
-          2, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.NONE, componentInsets, 0, 0));
-    }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.DEFORMABLE)) {
-      add(this.deformableCheckBox, new GridBagConstraints(
-          3, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.RESIZABLE)) {
       add(this.resizableCheckBox, new GridBagConstraints(
-          4, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.DEFORMABLE)) {
+      add(this.deformableCheckBox, new GridBagConstraints(
+          3, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.TEXTURABLE)) {
+      add(this.texturableCheckBox, new GridBagConstraints(
+          4, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
   }

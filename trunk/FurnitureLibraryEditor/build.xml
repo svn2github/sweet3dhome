@@ -10,7 +10,7 @@
 -->
 <project basedir="." default="furnitureLibraryEditorJarExecutable" name="FurnitureLibraryEditor">
   <!-- The current version of the Furniture Library Editor -->
-  <property name="version" value="1.5"/>
+  <property name="version" value="1.6"/>
 
   <target name="furnitureLibraryEditor" 
           description="Builds build/FurnitureLibraryEditor.jar with all its classes">
@@ -32,6 +32,7 @@
            encoding="ISO-8859-1" target="1.5">
       <classpath>
         <pathelement location="build/classes"/>
+        <pathelement location="../SweetHome3D/lib/batik-svgpathparser-1.7.jar"/>
       </classpath>
     </javac>
     
