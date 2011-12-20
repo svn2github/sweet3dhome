@@ -1045,7 +1045,7 @@ public class FurnitureController implements Controller {
               pieceIcon, light.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
-              piecePrice, pieceValueAddedTaxPercentage);
+              piecePrice, pieceValueAddedTaxPercentage, null);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
@@ -1053,13 +1053,13 @@ public class FurnitureController implements Controller {
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable,
                 1, 0, new Sash [0], 
                 pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(),
-                piecePrice, pieceValueAddedTaxPercentage);
+                piecePrice, pieceValueAddedTaxPercentage, null);
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, 
                 pieceMovable, pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, piece.isTexturable(), 
-                piecePrice, pieceValueAddedTaxPercentage);
+                piecePrice, pieceValueAddedTaxPercentage, null);
           }
         }
         new FurnitureCatalog() { }.add(pieceCategory, piece);
