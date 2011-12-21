@@ -900,58 +900,98 @@ public class FurniturePanel extends JPanel implements DialogView {
    */
   private void setMnemonics(UserPreferences preferences) {
     if (!OperatingSystem.isMacOSX()) {
-      this.idLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "idLabel.mnemonic")).getKeyCode());
-      this.idLabel.setLabelFor(this.idTextField);
-      this.nameLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "nameLabel.mnemonic")).getKeyCode());
-      this.nameLabel.setLabelFor(this.nameTextField);
-      this.descriptionLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "descriptionLabel.mnemonic")).getKeyCode());
-      this.descriptionLabel.setLabelFor(this.descriptionTextField);
-      this.categoryLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "categoryLabel.mnemonic")).getKeyCode());
-      this.categoryLabel.setLabelFor(this.categoryComboBox);
-      this.priceLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "priceLabel.mnemonic")).getKeyCode());
-      this.priceLabel.setLabelFor(this.priceSpinner);
-      this.valueAddedTaxPercentageLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "valueAddedTaxPercentageLabel.mnemonic")).getKeyCode());
-      this.valueAddedTaxPercentageLabel.setLabelFor(this.valueAddedTaxPercentageSpinner);
-      this.widthLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "widthLabel.mnemonic")).getKeyCode());
-      this.widthLabel.setLabelFor(this.widthSpinner);
-      this.depthLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "depthLabel.mnemonic")).getKeyCode());
-      this.depthLabel.setLabelFor(this.depthSpinner);
-      this.heightLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "heightLabel.mnemonic")).getKeyCode());
-      this.heightLabel.setLabelFor(this.heightSpinner);
-      this.keepProportionsCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "keepProportionsCheckBox.mnemonic")).getKeyCode());
-      this.elevationLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "elevationLabel.mnemonic")).getKeyCode());
-      this.elevationLabel.setLabelFor(this.elevationSpinner);
-      this.movableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "movableCheckBox.mnemonic")).getKeyCode());
-      this.doorOrWindowCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "doorOrWindowCheckBox.mnemonic")).getKeyCode());
-      this.staircaseCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "staircaseCheckBox.mnemonic")).getKeyCode());
-      this.staircaseCutOutShapeLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "staircaseCutOutShapeLabel.mnemonic")).getKeyCode());
-      this.staircaseCutOutShapeLabel.setLabelFor(this.staircaseCutOutShapeTextField);
-      this.backFaceShownCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "backFaceShownCheckBox.mnemonic")).getKeyCode());
-      this.resizableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "resizableCheckBox.mnemonic")).getKeyCode());
-      this.deformableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "deformableCheckBox.mnemonic")).getKeyCode());
-      this.texturableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "texturableCheckBox.mnemonic")).getKeyCode());
-      this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-          FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
-      this.creatorLabel.setLabelFor(this.creatorTextField);
+      if (this.idLabel != null) {
+        this.idLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "idLabel.mnemonic")).getKeyCode());
+        this.idLabel.setLabelFor(this.idTextField);
+      }
+      if (this.nameLabel != null) {
+        this.nameLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "nameLabel.mnemonic")).getKeyCode());
+        this.nameLabel.setLabelFor(this.nameTextField);
+      }
+      if (this.descriptionLabel != null) {
+        this.descriptionLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "descriptionLabel.mnemonic")).getKeyCode());
+        this.descriptionLabel.setLabelFor(this.descriptionTextField);
+      }
+      if (this.categoryLabel != null) {
+        this.categoryLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "categoryLabel.mnemonic")).getKeyCode());
+        this.categoryLabel.setLabelFor(this.categoryComboBox);
+      }
+      if (this.priceLabel != null) {
+        this.priceLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "priceLabel.mnemonic")).getKeyCode());
+        this.priceLabel.setLabelFor(this.priceSpinner);
+      }
+      if (this.priceLabel != null) {
+        this.valueAddedTaxPercentageLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "valueAddedTaxPercentageLabel.mnemonic")).getKeyCode());
+        this.valueAddedTaxPercentageLabel.setLabelFor(this.valueAddedTaxPercentageSpinner);
+      }
+      if (this.widthLabel != null) {
+        this.widthLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "widthLabel.mnemonic")).getKeyCode());
+        this.widthLabel.setLabelFor(this.widthSpinner);
+      }
+      if (this.depthLabel != null) {
+        this.depthLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "depthLabel.mnemonic")).getKeyCode());
+        this.depthLabel.setLabelFor(this.depthSpinner);
+      }
+      if (this.heightLabel != null) {
+        this.heightLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "heightLabel.mnemonic")).getKeyCode());
+        this.heightLabel.setLabelFor(this.heightSpinner);
+      }
+      if (this.keepProportionsCheckBox != null) {
+        this.keepProportionsCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "keepProportionsCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.elevationLabel != null) {
+        this.elevationLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "elevationLabel.mnemonic")).getKeyCode());
+        this.elevationLabel.setLabelFor(this.elevationSpinner);
+      }
+      if (this.movableCheckBox != null) {
+        this.movableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "movableCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.doorOrWindowCheckBox != null) {
+        this.doorOrWindowCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "doorOrWindowCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.staircaseCheckBox != null) {
+        this.staircaseCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "staircaseCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.staircaseCutOutShapeLabel != null) {
+        this.staircaseCutOutShapeLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "staircaseCutOutShapeLabel.mnemonic")).getKeyCode());
+        this.staircaseCutOutShapeLabel.setLabelFor(this.staircaseCutOutShapeTextField);
+      }
+      if (this.backFaceShownCheckBox != null) {
+        this.backFaceShownCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "backFaceShownCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.resizableCheckBox != null) {
+        this.resizableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "resizableCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.deformableCheckBox != null) {
+        this.deformableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "deformableCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.texturableCheckBox != null) {
+        this.texturableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "texturableCheckBox.mnemonic")).getKeyCode());
+      }
+      if (this.creatorLabel != null) {
+        this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
+        this.creatorLabel.setLabelFor(this.creatorTextField);
+      }
     }
   }
   
