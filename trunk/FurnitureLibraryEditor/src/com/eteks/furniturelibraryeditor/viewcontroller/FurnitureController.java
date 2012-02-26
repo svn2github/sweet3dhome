@@ -1121,14 +1121,14 @@ public class FurnitureController implements Controller {
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-              piecePrice, pieceValueAddedTaxPercentage, null);
+              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceIcon, light.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-              piecePrice, pieceValueAddedTaxPercentage, null);
+              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
@@ -1136,13 +1136,13 @@ public class FurnitureController implements Controller {
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable,
                 1, 0, new Sash [0], 
                 pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-                piecePrice, pieceValueAddedTaxPercentage, null);
+                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, 
                 pieceMovable, pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-                piecePrice, pieceValueAddedTaxPercentage, null);
+                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
           }
         }
         new FurnitureCatalog() { }.add(pieceCategory, piece);
