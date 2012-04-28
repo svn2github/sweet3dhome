@@ -10,7 +10,7 @@
 -->
 <project basedir="." default="furnitureLibraryEditorJarExecutable" name="FurnitureLibraryEditor">
   <!-- The current version of the Furniture Library Editor -->
-  <property name="version" value="1.6"/>
+  <property name="version" value="1.7"/>
 
   <target name="furnitureLibraryEditor" 
           description="Builds build/FurnitureLibraryEditor.jar with all its classes">
