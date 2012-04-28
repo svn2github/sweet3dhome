@@ -49,6 +49,7 @@ import com.eteks.sweethome3d.viewcontroller.ImportedFurnitureWizardStepsView;
 import com.eteks.sweethome3d.viewcontroller.ImportedTextureWizardController;
 import com.eteks.sweethome3d.viewcontroller.LabelController;
 import com.eteks.sweethome3d.viewcontroller.LevelController;
+import com.eteks.sweethome3d.viewcontroller.ObserverCameraController;
 import com.eteks.sweethome3d.viewcontroller.PageSetupController;
 import com.eteks.sweethome3d.viewcontroller.PhotoController;
 import com.eteks.sweethome3d.viewcontroller.PlanController;
@@ -247,6 +248,11 @@ public class ImportFurnitureController implements Controller {
         
         public DialogView createCompassView(UserPreferences preferences,
                                             CompassController compassController) {
+          throw new UnsupportedOperationException();
+        }
+
+        public DialogView createObserverCameraView(UserPreferences preferences,
+                                                   ObserverCameraController home3dAttributesController) {
           throw new UnsupportedOperationException();
         }
       };
