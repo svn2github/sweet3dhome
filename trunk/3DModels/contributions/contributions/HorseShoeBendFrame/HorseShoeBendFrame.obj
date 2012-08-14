@@ -4,7 +4,7 @@
 # Modelled by Emmanuel Puybaret / eTeks under Blender 3d modeller for SweetHome3D
 # This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
 #
-mtllib HorseShoeColoradoFrame.mtl
+mtllib HorseShoeBendFrame.mtl
 o MetalFrame_Cylinder
 v -45.219906 21.928392 -1.593184
 v -45.221500 21.930037 -0.192094
@@ -659,7 +659,7 @@ vt 1.000000 1.000000 0.0
 vt 0.000000 1.000000 0.0
 vt 0.000000 0.000000 0.0
 vt 1.000000 0.000000 0.0
-g Photo_Cube_Material_HorseShoeColorado
-usemtl Material_HorseShoeColorado
+g Photo_Cube_Material_HorseShoeBend
+usemtl Material_HorseShoeBend
 s off
 f 123/413 126/414 125/415 124/416
