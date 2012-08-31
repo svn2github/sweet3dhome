@@ -194,7 +194,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
         size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
     FurnitureCategory defaultCategory = new FurnitureCategory(
         this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
-    new FurnitureCatalog() { }.add(defaultCategory , piece);
+    new FurnitureCatalog().add(defaultCategory , piece);
     return piece;
   }
   

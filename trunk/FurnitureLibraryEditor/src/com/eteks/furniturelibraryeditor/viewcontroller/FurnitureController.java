@@ -1145,7 +1145,7 @@ public class FurnitureController implements Controller {
                 piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
           }
         }
-        new FurnitureCatalog() { }.add(pieceCategory, piece);
+        new FurnitureCatalog().add(pieceCategory, piece);
         this.furnitureLibrary.addPieceOfFurniture(piece, index);
         Set<String> supportedLanguages = new HashSet<String>(this.furnitureLibrary.getSupportedLanguages());
         supportedLanguages.add(this.furnitureLanguageController.getFurnitureLangauge());

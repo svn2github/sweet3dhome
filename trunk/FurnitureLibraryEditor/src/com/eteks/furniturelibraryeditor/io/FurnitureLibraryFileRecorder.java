@@ -113,7 +113,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
             if (piece != null) {
               // Set furniture category through dummy catalog
               FurnitureCategory category = super.readFurnitureCategory(resource, index);
-              new FurnitureCatalog() { }.add(category, piece);
+              new FurnitureCatalog().add(category, piece);
               furniture.add(piece);
             }
             return piece;
