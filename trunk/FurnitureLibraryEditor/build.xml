@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- build.xml
 
-     Furniture Library Editor, Copyright (c) 2010 Emmanuel PUYBARET / eTeks <info@eteks.com>
+     Furniture Library Editor, Copyright (c) 2012 Emmanuel PUYBARET / eTeks <info@eteks.com>
      
      Ant build file. Available targets :
      - furnitureLibraryEditor              : Builds FurnitureLibraryEditor.jar file in build directory
@@ -10,7 +10,7 @@
 -->
 <project basedir="." default="furnitureLibraryEditorJarExecutable" name="FurnitureLibraryEditor">
   <!-- The current version of the Furniture Library Editor -->
-  <property name="version" value="1.7"/>
+  <property name="version" value="1.8"/>
 
   <target name="furnitureLibraryEditor" 
           description="Builds build/FurnitureLibraryEditor.jar with all its classes">

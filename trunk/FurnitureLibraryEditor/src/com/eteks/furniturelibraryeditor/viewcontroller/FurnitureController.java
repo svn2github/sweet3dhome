@@ -1117,32 +1117,36 @@ public class FurnitureController implements Controller {
         if (piece instanceof CatalogDoorOrWindow) {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
           piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
+              piece.getTags(), piece.getCreationDate(), 
               pieceIcon, opening.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+              pieceModelRotation, pieceCreator, piece.getURL(), pieceResizable, pieceDeformable, pieceTexturable,
+              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency(), piece.getGrade());
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
+              piece.getTags(), piece.getCreationDate(), 
               pieceIcon, light.getPlanIcon(), pieceModel,
               pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, light.getLightSources(), pieceStaircaseCutOutShape, 
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+              pieceModelRotation, pieceCreator, piece.getURL(), pieceResizable, pieceDeformable, pieceTexturable,
+              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency(), piece.getGrade());
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
+                piece.getTags(), piece.getCreationDate(), 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable,
                 1, 0, new Sash [0], 
-                pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable,
-                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+                pieceModelRotation, pieceCreator, piece.getURL(), pieceResizable, pieceDeformable, pieceTexturable,
+                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency(), piece.getGrade());
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
+                piece.getTags(), piece.getCreationDate(), 
                 pieceIcon, piece.getPlanIcon(), pieceModel,
                 pieceWidth, pieceDepth, pieceHeight, pieceElevation, 
-                pieceMovable, pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+                pieceMovable, pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, piece.getURL(), pieceResizable, pieceDeformable, pieceTexturable, 
+                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency(), piece.getGrade());
           }
         }
         new FurnitureCatalog().add(pieceCategory, piece);

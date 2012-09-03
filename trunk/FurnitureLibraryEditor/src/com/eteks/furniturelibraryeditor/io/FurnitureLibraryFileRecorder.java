@@ -33,7 +33,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -310,6 +313,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
     boolean keepURLContentUnchanged = !offlineFurnitureLibrary
         && furnitureResourcesRemoteAbsoluteUrlBase == null 
         && furnitureResourcesRemoteRelativeUrlBase == null;
+    DateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     Set<String> existingEntryNames = new HashSet<String>();
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "ISO-8859-1"));
     final String CATALOG_FILE_HEADER = "#\n# " 
@@ -328,6 +332,16 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ID, i, piece.getId());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.NAME, i, piece.getName());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DESCRIPTION, i, piece.getDescription());
+      String tags = Arrays.toString(piece.getTags());
+      if (tags.length() > 2) {
+        // Write comma separated tags without [ and ] characters
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.TAGS, i, tags.substring(1, tags.length() - 1));
+      }
+      Long creationDate = piece.getCreationDate();
+      if (creationDate != null) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CREATION_DATE, i, 
+            creationDateFormat.format(new Date(piece.getCreationDate())));
+      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CATEGORY, i, piece.getCategory().getName());
       Content pieceModel = piece.getModel();
       String contentBaseName;
@@ -497,7 +511,11 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PRICE, i, piece.getPrice());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.VALUE_ADDED_TAX_PERCENTAGE, i, piece.getValueAddedTaxPercentage());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CURRENCY, i, piece.getCurrency());
+      if (piece.getGrade() != null) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.GRADE, i, piece.getGrade());
+      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CREATOR, i, piece.getCreator());
+      writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.URL, i, piece.getURL());
       i++;
     }
     writer.flush();
