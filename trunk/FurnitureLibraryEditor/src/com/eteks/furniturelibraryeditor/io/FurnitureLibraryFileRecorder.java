@@ -332,6 +332,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ID, i, piece.getId());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.NAME, i, piece.getName());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DESCRIPTION, i, piece.getDescription());
+      writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.INFORMATION, i, piece.getInformation());
       String tags = Arrays.toString(piece.getTags());
       if (tags.length() > 2) {
         // Write comma separated tags without [ and ] characters
@@ -341,6 +342,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (creationDate != null) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CREATION_DATE, i, 
             creationDateFormat.format(new Date(piece.getCreationDate())));
+      }
+      if (piece.getGrade() != null) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.GRADE, i, piece.getGrade());
       }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CATEGORY, i, piece.getCategory().getName());
       Content pieceModel = piece.getModel();
@@ -511,11 +515,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PRICE, i, piece.getPrice());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.VALUE_ADDED_TAX_PERCENTAGE, i, piece.getValueAddedTaxPercentage());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CURRENCY, i, piece.getCurrency());
-      if (piece.getGrade() != null) {
-        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.GRADE, i, piece.getGrade());
-      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CREATOR, i, piece.getCreator());
-      writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.URL, i, piece.getURL());
       i++;
     }
     writer.flush();
