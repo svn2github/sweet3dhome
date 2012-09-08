@@ -1,0 +1,137 @@
+# Blender MTL File
+#
+# Modelled by Fabrice Delobe 
+# Textures edited by Emmanuel Puybaret / eTeks
+# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+#
+# Material Count: 12
+newmtl Armature_auv_armature.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.165 0.278 0.262
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl Casier_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl couvercle1_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl couvercle2_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl cube19_extract20_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl default
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.630588 0.649412 0.552157
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+
+
+newmtl planche_1_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl planche_2_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl planche_bisautee_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl planche_dossier__bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl planche_encrier__bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
+newmtl separation_auv_bureau.jpg
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd wood3.jpg
+
+
