@@ -27,6 +27,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.Action;
@@ -234,8 +236,17 @@ public class FurnitureLibraryEditor {
           }
         }
       };
-    furnitureFrame.setIconImage(new ImageIcon(
-        FurnitureLibraryEditor.class.getResource("resources/frameIcon.png")).getImage());
+    // Update frame image and title 
+    Image [] frameImages = {new ImageIcon(FurnitureLibraryEditor.class.getResource("resources/frameIcon.png")).getImage(),
+                            new ImageIcon(FurnitureLibraryEditor.class.getResource("resources/frameIcon32x32.png")).getImage()};
+    try {
+      // Call Java 1.6 setIconImages by reflection
+      furnitureFrame.getClass().getMethod("setIconImages", List.class)
+          .invoke(furnitureFrame, Arrays.asList(frameImages));
+    } catch (Exception ex) {
+      // Call setIconImage available in previous versions
+      furnitureFrame.setIconImage(frameImages [0]);
+    }
     furnitureFrame.setLocationByPlatform(true);
     furnitureFrame.pack();
     furnitureFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
