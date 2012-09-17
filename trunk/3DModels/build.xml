@@ -8,7 +8,7 @@
 -->
 <project basedir="." default="3DModels" name="SweetHome3D models">
   <!-- The current version of a SH3F file -->
-  <property name="version" value="1.2"/>
+  <property name="version" value="1.2.1"/>
 	
   <target name="3DModels">
   	<mkdir dir="install"/>
