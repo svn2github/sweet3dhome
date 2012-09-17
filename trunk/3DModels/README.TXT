@@ -10,7 +10,7 @@ localized in the following languages:
 + English
 + French
 + German
-- Greek
++ Greek
 - Hungarian
 - Italian
 - Japanese
