@@ -8,6 +8,7 @@ localized in the following languages:
 + Chinese (Traditional)
 - Czech
 + English
++ Finnish
 + French
 + German
 + Greek
