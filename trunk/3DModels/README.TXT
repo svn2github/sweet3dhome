@@ -18,7 +18,7 @@ localized in the following languages:
 + Polish
 - Portuguese (Brazilian)
 - Russian
-- Spanish
++ Spanish
 + Swedish
 + Turkish
 - Vietnamese
