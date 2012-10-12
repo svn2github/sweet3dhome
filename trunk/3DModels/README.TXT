@@ -13,7 +13,7 @@ localized in the following languages:
 + German
 + Greek
 - Hungarian
-- Italian
++ Italian
 - Japanese
 + Polish
 - Portuguese (Brazilian)
