@@ -217,6 +217,10 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       }
       // Decode file name (replace %.. values)
       objFile = URLDecoder.decode(objFile.replace("+", "%2B"), "UTF-8");
+      // Ensure the file contains only letters, figures, underscores, dots, hyphens or spaces
+      if (objFile.matches(".*[^a-zA-Z0-9_\\.\\-\\ ].*")) {
+        objFile = "model.obj";
+      }
     } else {
       objFile = "model.obj";
     }
