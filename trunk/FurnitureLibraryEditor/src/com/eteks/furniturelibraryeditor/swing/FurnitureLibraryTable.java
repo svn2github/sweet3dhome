@@ -702,8 +702,8 @@ public class FurnitureLibraryTable extends JTable implements View {
         // Create the list of custom columns
       TableCellRenderer headerRenderer = getHeaderRenderer();
       for (String columnProperty : preferences.getEditedProperties()) {
-        if (columnProperty != "MODEL_ROTATION"
-            && columnProperty != "MODEL") {
+        if (!FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY.equals(columnProperty) 
+            && !FurnitureLibrary.FURNITURE_MODEL_PROPERTY.equals(columnProperty)) {
           TableColumn tableColumn = new TableColumn();
           tableColumn.setIdentifier(columnProperty);
           tableColumn.setHeaderValue(getColumnName(columnProperty, preferences));
