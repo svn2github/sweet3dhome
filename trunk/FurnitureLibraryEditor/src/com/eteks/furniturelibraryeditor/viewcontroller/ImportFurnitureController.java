@@ -49,6 +49,7 @@ import com.eteks.sweethome3d.viewcontroller.ImportedFurnitureWizardStepsView;
 import com.eteks.sweethome3d.viewcontroller.ImportedTextureWizardController;
 import com.eteks.sweethome3d.viewcontroller.LabelController;
 import com.eteks.sweethome3d.viewcontroller.LevelController;
+import com.eteks.sweethome3d.viewcontroller.ModelMaterialsController;
 import com.eteks.sweethome3d.viewcontroller.ObserverCameraController;
 import com.eteks.sweethome3d.viewcontroller.PageSetupController;
 import com.eteks.sweethome3d.viewcontroller.PhotoController;
@@ -216,6 +217,11 @@ public class ImportFurnitureController implements Controller {
 
         public TextureChoiceView createTextureChoiceView(UserPreferences preferences,
                                                          TextureChoiceController textureChoiceController) {
+          throw new UnsupportedOperationException();
+        }
+
+        public View createModelMaterialsView(UserPreferences preferences,
+                                             ModelMaterialsController modelMaterialsController) {
           throw new UnsupportedOperationException();
         }
 
