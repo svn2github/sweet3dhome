@@ -128,8 +128,8 @@
       <fileset dir="../SweetHome3D/lib">
         <include name="windows/**/*.dll"/>
         <include name="linux/**/*.so"/>
-        <include name="macosx/*.jnilib"/>
-        <include name="macosx/*.jar"/>
+        <include name="macosx/**/*.jnilib"/>
+        <include name="macosx/**/*.jar"/>
       </fileset>
       <fileset dir="../SweetHome3D/lib">
         <include name="*.jar"/>
