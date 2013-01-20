@@ -108,13 +108,13 @@ public class EditorController implements Controller {
             furnitureLibrary.deletePieceOfFurniture(piece);
           }
           getFurnitureLanguageController().setFurnitureLanguage(FurnitureLibrary.DEFAULT_LANGUAGE);
-          furnitureLibrary.setName(null);
+          furnitureLibrary.setLocation(null);
           furnitureLibrary.setModified(false);
         }
       };
       
     if (this.furnitureLibrary.isModified()) {
-      switch (getView().confirmSave(this.furnitureLibrary.getName())) {
+      switch (getView().confirmSave(this.furnitureLibrary.getLocation())) {
         case SAVE   : save(newLibraryTask); // Falls through
         case CANCEL : return;
       }  
@@ -130,16 +130,16 @@ public class EditorController implements Controller {
     Runnable openTask = new Runnable() {
         public void run() {
           String openTitle = preferences.getLocalizedString(EditorController.class, "openTitle");
-          String furnitureLibraryName = contentManager.showOpenDialog(null, openTitle, 
+          String furnitureLibraryLocation = contentManager.showOpenDialog(null, openTitle, 
               ContentManager.ContentType.FURNITURE_LIBRARY);
-          if (furnitureLibraryName != null) {
-            open(furnitureLibraryName);
+          if (furnitureLibraryLocation != null) {
+            open(furnitureLibraryLocation);
           }
         }
       };
       
     if (this.furnitureLibrary.isModified()) {
-      switch (getView().confirmSave(this.furnitureLibrary.getName())) {
+      switch (getView().confirmSave(this.furnitureLibrary.getLocation())) {
         case SAVE   : save(openTask); // Falls through
         case CANCEL : return;
       }  
@@ -148,14 +148,14 @@ public class EditorController implements Controller {
   }
 
   /**
-   * Opens the furniture library in the given file.
+   * Opens the furniture library at the given location.
    */
-  public void open(final String furnitureLibraryName) {
+  public void open(final String furnitureLibraryLocation) {
     Callable<Void> saveTask = new Callable<Void>() {
         public Void call() throws RecorderException {
-          recorder.readFurnitureLibrary(furnitureLibrary, furnitureLibraryName, preferences);
+          recorder.readFurnitureLibrary(furnitureLibrary, furnitureLibraryLocation, preferences);
           getFurnitureLanguageController().setFurnitureLanguage(FurnitureLibrary.DEFAULT_LANGUAGE);
-          furnitureLibrary.setName(furnitureLibraryName);
+          furnitureLibrary.setLocation(furnitureLibraryLocation);
           furnitureLibrary.setModified(false);
           return null;
         }
@@ -189,10 +189,10 @@ public class EditorController implements Controller {
    * if it's not <code>null</code>.
    */
   private void save(Runnable postSaveTask) {
-    if (this.furnitureLibrary.getName() == null) {
+    if (this.furnitureLibrary.getLocation() == null) {
       saveAs(postSaveTask);
     } else {
-      save(this.furnitureLibrary.getName(), postSaveTask);
+      save(this.furnitureLibrary.getLocation(), postSaveTask);
     }
   }
   
@@ -209,10 +209,10 @@ public class EditorController implements Controller {
    */
   private void saveAs(Runnable postSaveTask) {
     String saveTitle = this.preferences.getLocalizedString(EditorController.class, "saveTitle");
-    String furnitureLibraryName = this.contentManager.showSaveDialog(null, saveTitle, 
-        ContentManager.ContentType.FURNITURE_LIBRARY, this.furnitureLibrary.getName());
-    if (furnitureLibraryName != null) {
-      save(furnitureLibraryName, postSaveTask);
+    String furnitureLibraryLocation = this.contentManager.showSaveDialog(null, saveTitle, 
+        ContentManager.ContentType.FURNITURE_LIBRARY, this.furnitureLibrary.getLocation());
+    if (furnitureLibraryLocation != null) {
+      save(furnitureLibraryLocation, postSaveTask);
     }
   }
   
@@ -220,14 +220,14 @@ public class EditorController implements Controller {
    * Actually saves the library managed by this controller and executes <code>postSaveTask</code> 
    * if it's not <code>null</code>.
    */
-  private void save(final String name, 
+  private void save(final String location, 
                     final Runnable postSaveTask) {
     Callable<Void> saveTask = new Callable<Void>() {
         public Void call() throws RecorderException {
-          recorder.writeFurnitureLibrary(furnitureLibrary, name, preferences);
+          recorder.writeFurnitureLibrary(furnitureLibrary, location, preferences);
           getView().invokeLater(new Runnable() {
               public void run() {
-                furnitureLibrary.setName(name);
+                furnitureLibrary.setLocation(location);
                 furnitureLibrary.setModified(false);
                 if (postSaveTask != null) {
                   postSaveTask.run();
@@ -266,7 +266,7 @@ public class EditorController implements Controller {
       };
       
     if (this.furnitureLibrary.isModified()) {
-      switch (getView().confirmSave(this.furnitureLibrary.getName())) {
+      switch (getView().confirmSave(this.furnitureLibrary.getLocation())) {
         case SAVE   : save(exitTask); // Falls through
         case CANCEL : return;
       }  

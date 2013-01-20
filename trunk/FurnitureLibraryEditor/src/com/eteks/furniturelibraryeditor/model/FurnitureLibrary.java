@@ -34,17 +34,19 @@ import com.eteks.sweethome3d.model.CatalogPieceOfFurniture;
 import com.eteks.sweethome3d.model.CollectionChangeSupport;
 import com.eteks.sweethome3d.model.CollectionEvent;
 import com.eteks.sweethome3d.model.CollectionListener;
+import com.eteks.sweethome3d.model.Library;
+import com.eteks.sweethome3d.model.UserPreferences;
 
 /**
- * A collection of furniture catalog pieces.
+ * A library of furniture catalog pieces.
  * @author Emmanuel Puybaret
  */
-public class FurnitureLibrary {
+public class FurnitureLibrary implements Library {
   /**
    * The properties of this library that may change. <code>PropertyChangeListener</code>s added 
    * to a library will be notified under a property name equal to the name value of one these properties.
    */
-  public enum Property {NAME, MODIFIED, DESCRIPTION, VERSION, LICENSE, PROVIDER, LOCALIZED_DATA};
+  public enum Property {LOCATION, ID, NAME, MODIFIED, DESCRIPTION, VERSION, LICENSE, PROVIDER, LOCALIZED_DATA};
   
   public static final String DEFAULT_LANGUAGE = "";
 
@@ -76,7 +78,9 @@ public class FurnitureLibrary {
   private Set<String>                                                    supportedLanguages;
   private CollectionChangeSupport<CatalogPieceOfFurniture>               furnitureChangeSupport;
   private boolean   noRequestSinceLastChange = true;
+  private String    location;
   private boolean   modified;
+  private String    id;
   private String    name;
   private String    description;
   private String    version;
@@ -257,6 +261,25 @@ public class FurnitureLibrary {
   }
 
   /**
+   * Returns the location where this library is stored.
+   */
+  public String getLocation() {
+    return this.location;
+  }
+
+  /**
+   * Sets the location where this library is stored and fires a <code>PropertyChangeEvent</code>.
+   */
+  public void setLocation(String location) {
+    if (location != this.location
+        || (location != null && !location.equals(this.location))) {
+      String oldLocation = this.location;
+      this.location = location;
+      this.propertyChangeSupport.firePropertyChange(Property.LOCATION.name(), oldLocation, location);
+    }
+  }
+
+  /**
    * Returns <code>true</code> if the library handled by this controller is modified.
    */
   public boolean isModified() {
@@ -273,6 +296,32 @@ public class FurnitureLibrary {
     }
   }
   
+  /**
+   * Returns the id of this library.
+   */
+  public String getId() {
+    return this.id;
+  }
+
+  /**
+   * Sets the id of this library and fires a <code>PropertyChangeEvent</code>.
+   */
+  public void setId(String id) {
+    if (id != this.id
+        || (id != null && !id.equals(this.id))) {
+      String oldId = this.id;
+      this.id = id;
+      this.propertyChangeSupport.firePropertyChange(Property.ID.name(), oldId, id);
+    }
+  }
+
+  /**
+   * Returns {@link UserPreferences#FURNITURE_LIBRARY_TYPE}.
+   */
+  public String getType() {
+    return UserPreferences.FURNITURE_LIBRARY_TYPE;
+  }
+
   /**
    * Returns the name of this library.
    */

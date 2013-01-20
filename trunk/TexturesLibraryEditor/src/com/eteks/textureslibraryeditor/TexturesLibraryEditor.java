@@ -270,7 +270,7 @@ public class TexturesLibraryEditor {
     }
     updateFrameTitle(texturesFrame, texturesLibrary, getUserPreferences(), getContentManager());
     // Update title when the name or the modified state of library changes
-    texturesLibrary.addPropertyChangeListener(TexturesLibrary.Property.NAME, new PropertyChangeListener () {
+    texturesLibrary.addPropertyChangeListener(TexturesLibrary.Property.LOCATION, new PropertyChangeListener () {
         public void propertyChange(PropertyChangeEvent ev) {
           updateFrameTitle(texturesFrame, texturesLibrary, getUserPreferences(), getContentManager());
         }
@@ -304,13 +304,13 @@ public class TexturesLibraryEditor {
                                 TexturesLibrary texturesLibrary,
                                 UserPreferences  preferences,
                                 ContentManager   contentManager) {
-    String texturesLibraryName = texturesLibrary.getName();
+    String texturesLibraryLocation = texturesLibrary.getLocation();
     String texturesLibraryDisplayedName;
-    if (texturesLibraryName == null) {
+    if (texturesLibraryLocation == null) {
       texturesLibraryDisplayedName = preferences.getLocalizedString(TexturesLibraryEditor.class, "untitled"); 
     } else {
       texturesLibraryDisplayedName = contentManager.getPresentationName(
-          texturesLibraryName, ContentManager.ContentType.TEXTURES_LIBRARY);
+          texturesLibraryLocation, ContentManager.ContentType.TEXTURES_LIBRARY);
     }
     
     String title = texturesLibraryDisplayedName;
@@ -323,8 +323,8 @@ public class TexturesLibraryEditor {
       if (OperatingSystem.isMacOSXLeopardOrSuperior()) {
         frame.getRootPane().putClientProperty("Window.documentModified", texturesLibraryModified);
         
-        if (texturesLibraryName != null) {        
-          File texturesLibraryFile = new File(texturesLibraryName);
+        if (texturesLibraryLocation != null) {        
+          File texturesLibraryFile = new File(texturesLibraryLocation);
           if (texturesLibraryFile.exists()) {
             // Update the icon in window title bar for library files
             frame.getRootPane().putClientProperty("Window.documentFile", texturesLibraryFile);

@@ -20,10 +20,12 @@
 package com.eteks.textureslibraryeditor.io;
 
 import java.io.File;
+import java.util.List;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 import com.eteks.sweethome3d.model.LengthUnit;
+import com.eteks.sweethome3d.model.Library;
 import com.eteks.sweethome3d.model.RecorderException;
 import com.eteks.textureslibraryeditor.model.TexturesLibraryUserPreferences;
 
@@ -121,6 +123,16 @@ public class FileTexturesLibraryUserPreferences extends TexturesLibraryUserPrefe
 
   @Override
   public boolean texturesLibraryExists(String texturesLibraryName) throws RecorderException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<Library> getLibraries() throws RecorderException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void deleteLibrary(Library library) throws RecorderException {
     throw new UnsupportedOperationException();
   }
 }

@@ -270,7 +270,7 @@ public class FurnitureLibraryEditor {
     }
     updateFrameTitle(furnitureFrame, furnitureLibrary, getUserPreferences(), getContentManager());
     // Update title when the name or the modified state of library changes
-    furnitureLibrary.addPropertyChangeListener(FurnitureLibrary.Property.NAME, new PropertyChangeListener () {
+    furnitureLibrary.addPropertyChangeListener(FurnitureLibrary.Property.LOCATION, new PropertyChangeListener () {
         public void propertyChange(PropertyChangeEvent ev) {
           updateFrameTitle(furnitureFrame, furnitureLibrary, getUserPreferences(), getContentManager());
         }
@@ -304,13 +304,13 @@ public class FurnitureLibraryEditor {
                                 FurnitureLibrary furnitureLibrary,
                                 UserPreferences  preferences,
                                 ContentManager   contentManager) {
-    String furnitureLibraryName = furnitureLibrary.getName();
+    String furnitureLibraryLocation = furnitureLibrary.getLocation();
     String furnitureLibraryDisplayedName;
-    if (furnitureLibraryName == null) {
+    if (furnitureLibraryLocation == null) {
       furnitureLibraryDisplayedName = preferences.getLocalizedString(FurnitureLibraryEditor.class, "untitled"); 
     } else {
       furnitureLibraryDisplayedName = contentManager.getPresentationName(
-          furnitureLibraryName, ContentManager.ContentType.FURNITURE_LIBRARY);
+          furnitureLibraryLocation, ContentManager.ContentType.FURNITURE_LIBRARY);
     }
     
     String title = furnitureLibraryDisplayedName;
@@ -323,8 +323,8 @@ public class FurnitureLibraryEditor {
       if (OperatingSystem.isMacOSXLeopardOrSuperior()) {
         frame.getRootPane().putClientProperty("Window.documentModified", furnitureLibraryModified);
         
-        if (furnitureLibraryName != null) {        
-          File furnitureLibraryFile = new File(furnitureLibraryName);
+        if (furnitureLibraryLocation != null) {        
+          File furnitureLibraryFile = new File(furnitureLibraryLocation);
           if (furnitureLibraryFile.exists()) {
             // Update the icon in window title bar for library files
             frame.getRootPane().putClientProperty("Window.documentFile", furnitureLibraryFile);
