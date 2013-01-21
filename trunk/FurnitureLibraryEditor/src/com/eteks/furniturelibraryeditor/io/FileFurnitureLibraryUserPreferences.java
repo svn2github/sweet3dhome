@@ -135,4 +135,9 @@ public class FileFurnitureLibraryUserPreferences extends FurnitureLibraryUserPre
   public void deleteLibrary(Library library) throws RecorderException {
     throw new UnsupportedOperationException();
   }
+  
+  @Override
+  public boolean isLibraryDeletable(Library library) throws RecorderException {
+    throw new UnsupportedOperationException();
+  }
 }
