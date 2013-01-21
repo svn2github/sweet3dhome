@@ -132,7 +132,7 @@ public class FileTexturesLibraryUserPreferences extends TexturesLibraryUserPrefe
   }
 
   @Override
-  public void deleteLibrary(Library library) throws RecorderException {
+  public void deleteLibraries(List<Library> libraries) throws RecorderException {
     throw new UnsupportedOperationException();
   }
   
