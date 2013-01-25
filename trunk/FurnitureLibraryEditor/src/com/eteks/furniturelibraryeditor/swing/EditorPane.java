@@ -53,7 +53,6 @@ import com.eteks.sweethome3d.swing.ControllerAction;
 import com.eteks.sweethome3d.swing.ResourceAction;
 import com.eteks.sweethome3d.swing.UnfocusableToolBar;
 import com.eteks.sweethome3d.tools.OperatingSystem;
-import com.eteks.sweethome3d.viewcontroller.HomeView.ActionType;
 import com.eteks.sweethome3d.viewcontroller.HomeView.SaveAnswer;
 
 /**
