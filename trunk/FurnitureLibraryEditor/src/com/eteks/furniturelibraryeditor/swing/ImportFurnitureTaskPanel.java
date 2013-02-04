@@ -20,15 +20,20 @@
 package com.eteks.furniturelibraryeditor.swing;
 
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -80,43 +85,59 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
   }
 
   /**
-   * Returns the catalog piece of furniture matching <code>modelContent</code> 3D model 
+   * Returns the catalog piece of furniture matching <code>model</code> 3D model 
    * or <code>null</code> if the content doesn't contain a 3D model at a supported format.
    */
-  public CatalogPieceOfFurniture readPieceOfFurniture(Content modelContent) throws InterruptedException {
-    BranchGroup model = null;
-    String modelName = "model";
+  public CatalogPieceOfFurniture readPieceOfFurniture(final Content model) throws InterruptedException {
     try {
-      model = ModelManager.getInstance().loadModel(modelContent);
-      // Copy model to a temporary OBJ content with materials and textures
-      if (modelContent instanceof URLContent) {
-        modelName = URLDecoder.decode(((URLContent)modelContent).getURL().getFile().replace("+", "%2B"), "UTF-8");;
-        if (modelName.lastIndexOf('/') != -1) {
-          modelName = modelName.substring(modelName.lastIndexOf('/') + 1);
-        }
-      } 
-      modelContent = copyToTemporaryOBJContent(model, modelContent);
-      int dotIndex = modelName.lastIndexOf('.');
-      if (dotIndex != -1) {
-        modelName = modelName.substring(0, dotIndex);
-      } 
-    } catch (IOException ex) {
-      try {
-        // Copy model content to a temporary content
-        modelContent = TemporaryURLContent.copyToTemporaryURLContent(modelContent);
-      } catch (IOException ex2) {
-        return null;
-      }
+      final AtomicReference<BranchGroup> modelNode = new AtomicReference<BranchGroup>();
+      String modelName = "model";
+      final CountDownLatch latch = new CountDownLatch(1);
+      EventQueue.invokeAndWait(new Runnable() {
+          public void run() {
+            // Load content using cache to make it accessible by preview components
+            ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {
+                public void modelUpdated(BranchGroup modelRoot) {
+                  modelNode.set(modelRoot);
+                  latch.countDown();
+                }
+                
+                public void modelError(Exception ex) {
+                  latch.countDown();
+                }
+              });
+          }
+        });
       
-      // If content couldn't be loaded, try to load model as a zipped file 
-      ZipInputStream zipIn = null;
-      try {
-        URLContent urlContent = (URLContent)modelContent;
-        // Open zipped stream
-        zipIn = new ZipInputStream(urlContent.openStream());
-        // Parse entries to see if a obj file is readable
-        for (ZipEntry entry; (entry = zipIn.getNextEntry()) != null; ) {
-          try {
+      latch.await();
+      
+      Content pieceModel = null;
+      Content previewModel = null;
+      if (modelNode.get() != null) {
+        // Copy model to a temporary OBJ content with materials and textures
+        if (model instanceof URLContent) {
+          modelName = URLDecoder.decode(((URLContent)model).getURL().getFile().replace("+", "%2B"), "UTF-8");;
+          if (modelName.lastIndexOf('/') != -1) {
+            modelName = modelName.substring(modelName.lastIndexOf('/') + 1);
+          }
+        } 
+
+        previewModel = model;
+        pieceModel = copyToTemporaryOBJContent(modelNode.get(), model);
+        int dotIndex = modelName.lastIndexOf('.');
+        if (dotIndex != -1) {
+          modelName = modelName.substring(0, dotIndex);
+        } 
+      } else {
+        ZipInputStream zipIn = null;
+        try {
+          // If content couldn't be loaded, copy model content to a temporary content 
+          // and try to load model as a zipped file 
+          URLContent urlContent = TemporaryURLContent.copyToTemporaryURLContent(model);
+          // Open zipped stream
+          zipIn = new ZipInputStream(urlContent.openStream());
+          // Parse entries to see if a obj file is readable
+          for (ZipEntry entry; (entry = zipIn.getNextEntry()) != null; ) {
             String entryName = entry.getName();
             // Ignore directory entries and entries starting by a dot
             if (!entryName.endsWith("/")) {
@@ -131,77 +152,106 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
                 }
                 URL entryUrl = new URL("jar:" + urlContent.getURL() + "!/" 
                     + URLEncoder.encode(entryName, "UTF-8").replace("+", "%20").replace("%2F", "/"));
-                modelContent = new TemporaryURLContent(entryUrl);
-                model = ModelManager.getInstance().loadModel(modelContent);
-                if (!entryFileName.toLowerCase().endsWith(".obj")
-                    && (this.preferences.isModelContentAlwaysConvertedToOBJFormat()
-                        || slashIndex > 0)) {
-                  // Convert models in subdirectories at format different from OBJ
-                  modelContent = copyToTemporaryOBJContent(model, modelContent);
+                final Content entryContent = new TemporaryURLContent(entryUrl);
+                final CountDownLatch entryLatch = new CountDownLatch(1);
+                EventQueue.invokeAndWait(new Runnable() {
+                    public void run() {
+                      // Load content using cache to make it accessible by preview components
+                      ModelManager.getInstance().loadModel(entryContent, new ModelManager.ModelObserver() {
+                          public void modelUpdated(BranchGroup modelRoot) {
+                            modelNode.set(modelRoot);
+                            entryLatch.countDown();
+                          }
+                          
+                          public void modelError(Exception ex) {
+                            entryLatch.countDown();
+                          }
+                        });
+                    }
+                  });
+                
+                entryLatch.await();
+                if (modelNode.get() != null) {
+                  previewModel =
+                  pieceModel = new TemporaryURLContent(entryUrl);
+                  if (!entryFileName.toLowerCase().endsWith(".obj")
+                      && (this.preferences.isModelContentAlwaysConvertedToOBJFormat()
+                          || slashIndex > 0)) {
+                    // Convert models in subdirectories at format different from OBJ
+                    pieceModel = copyToTemporaryOBJContent(modelNode.get(), model);
+                  }
+                  break;
                 }
-                break;
               }
             }
-          } catch (IOException ex2) {
-            // Ignore exception and try next entry
           }
-        }
-        if (model == null) {
+        } catch (IOException ex) {
           return null;
-        }
-      } catch (IOException ex2) {
-        return null;
-      } finally {
-        try {
-          if (zipIn != null) {
-            zipIn.close();
+        } finally {
+          try {
+            if (zipIn != null) {
+              zipIn.close();
+            }
+          } catch (IOException ex2) {
+            // Ignore close exception
           }
-        } catch (IOException ex2) {
-          // Ignore close exception
         }
       }
-    }
-    
-    if (Thread.interrupted()) {
-      throw new InterruptedException();
-    }
 
-    Vector3f size = ModelManager.getInstance().getSize(model);
-    Content iconContent;
-    try {
-      // Generate icon image
-      this.iconPreviewComponent.setModel(model);
-      Thread.sleep(this.firstRendering ? 1000 : 100);
-      this.firstRendering = false;
-      iconContent = this.iconPreviewComponent.getIcon(0);
-    } catch (IOException ex) {
-      return null;
-    }    
-    
-    String key;
-    if (Arrays.asList(preferences.getEditedProperties()).contains(FurnitureLibrary.FURNITURE_ID_PROPERTY)) {
-      key = this.preferences.getDefaultCreator();
-      if (key == null) {
-        key = System.getProperty("user.name");
+      if (Thread.interrupted()) {
+        throw new InterruptedException();
       }
-      key += "#" + modelName;
-    } else {
-      key = null;
+
+      if (modelNode.get() == null) {
+        return null;
+      }
+      
+      Vector3f size = ModelManager.getInstance().getSize(modelNode.get());
+      Content iconContent;
+      try {
+        // Generate icon image
+        this.iconPreviewComponent.setModel(previewModel);
+        Thread.sleep(this.firstRendering ? 1000 : 100);
+        this.firstRendering = false;
+        iconContent = this.iconPreviewComponent.getIcon(0);
+      } catch (IOException ex) {
+        return null;
+      }    
+      
+      String key;
+      if (Arrays.asList(preferences.getEditedProperties()).contains(FurnitureLibrary.FURNITURE_ID_PROPERTY)) {
+        key = this.preferences.getDefaultCreator();
+        if (key == null) {
+          key = System.getProperty("user.name");
+        }
+        key += "#" + modelName;
+      } else {
+        key = null;
+      }
+      modelName = Character.toUpperCase(modelName.charAt(0)) + modelName.substring(1); 
+      CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
+          modelName, null, iconContent, null, pieceModel, 
+          size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
+      FurnitureCategory defaultCategory = new FurnitureCategory(
+          this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
+      new FurnitureCatalog().add(defaultCategory , piece);
+      return piece;
+    } catch (IllegalArgumentException ex) {
+      // Thrown by getSize if model node is empty
+      return null;
+    } catch (IOException ex) {
+      // If copying failed
+      return null;
+    } catch (InvocationTargetException ex) {
+      ex.printStackTrace();
+      return null;
     }
-    modelName = Character.toUpperCase(modelName.charAt(0)) + modelName.substring(1); 
-    CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
-        modelName, null, iconContent, null, modelContent, 
-        size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
-    FurnitureCategory defaultCategory = new FurnitureCategory(
-        this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
-    new FurnitureCatalog().add(defaultCategory , piece);
-    return piece;
   }
   
   /**
    * Returns a copy of a given <code>model</code> as a zip content at OBJ format.
    */
-  static Content copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
+  private static Content copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
     String objFile;
     if (modelContent instanceof URLContent) {
       objFile = ((URLContent)modelContent).getURL().getFile();
@@ -226,6 +276,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
     }
 
     File tempZipFile = File.createTempFile("urlContent", "tmp");
+    tempZipFile.deleteOnExit();
     OBJWriter.writeNodeInZIPFile(model, tempZipFile, 0, objFile, "3D model " + objFile);
     return new TemporaryURLContent(new URL("jar:" + tempZipFile.toURI().toURL() + "!/" 
         + URLEncoder.encode(objFile, "UTF-8").replace("+", "%20")));

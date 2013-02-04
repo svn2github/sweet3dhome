@@ -1204,8 +1204,7 @@ public class FurniturePanel extends JPanel implements DialogView {
         Cursor defaultCursor = rootPane.getCursor();
         try {
           rootPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          this.controller.setModel(ImportFurnitureTaskPanel.copyToTemporaryOBJContent(
-              this.iconComponent.getModel(), this.controller.getModel()));
+          this.controller.setModel(this.iconComponent.getModel());
         } catch (IOException e) {
           JOptionPane.showMessageDialog(rootPane, 
               preferences.getLocalizedString(FurniturePanel.class, "backFaceShownError"),
@@ -1375,13 +1374,13 @@ public class FurniturePanel extends JPanel implements DialogView {
     /**
      * Sets the 3D model viewed by this model  
      */
-    public void setModel(Content model, final UserPreferences preferences) {
+    public void setModel(final Content model, final UserPreferences preferences) {
       if (model == null) {
-        setModel(new BranchGroup());            
+        setModel(null);            
       } else {
         ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {          
             public void modelUpdated(BranchGroup modelRoot) {
-              setModel(modelRoot);            
+              setModel(model);            
             }
             
             public void modelError(Exception ex) {
