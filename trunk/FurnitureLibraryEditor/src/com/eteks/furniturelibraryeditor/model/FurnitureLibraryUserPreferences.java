@@ -197,4 +197,12 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
   public boolean isContentMatchingFurnitureName() {
     return true;
   }
+  
+  /**
+   * Returns <code>false</code>.
+   */
+  @Override
+  public boolean isCheckUpdatesEnabled() {
+    return false;
+  }
 }
