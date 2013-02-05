@@ -71,9 +71,12 @@ import org.apache.batik.parser.ParseException;
 import org.apache.batik.parser.PathParser;
 
 import com.eteks.furniturelibraryeditor.viewcontroller.FurnitureController;
+import com.eteks.sweethome3d.j3d.HomePieceOfFurniture3D;
 import com.eteks.sweethome3d.j3d.ModelManager;
+import com.eteks.sweethome3d.model.CatalogPieceOfFurniture;
 import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.FurnitureCategory;
+import com.eteks.sweethome3d.model.HomePieceOfFurniture;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.swing.AutoCommitSpinner;
 import com.eteks.sweethome3d.swing.ModelPreviewComponent;
@@ -1204,7 +1207,12 @@ public class FurniturePanel extends JPanel implements DialogView {
         Cursor defaultCursor = rootPane.getCursor();
         try {
           rootPane.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-          this.controller.setModel(this.iconComponent.getModel());
+          // Generate a modified model with back face (modifying the model is required because this information isn't stored in a SH3F file)
+          HomePieceOfFurniture3D piece3D = new HomePieceOfFurniture3D(new HomePieceOfFurniture(
+              new CatalogPieceOfFurniture(this.controller.getName(), null, 
+                  this.controller.getModel(), this.controller.getWidth(), this.controller.getDepth(), this.controller.getHeight(),
+                  0, false, null, null, this.controller.getBackFaceShown(), 0, false)), null, true, true); 
+          this.controller.setModel(ImportFurnitureTaskPanel.copyToTemporaryOBJContent(piece3D, this.controller.getModel()));
         } catch (IOException e) {
           JOptionPane.showMessageDialog(rootPane, 
               preferences.getLocalizedString(FurniturePanel.class, "backFaceShownError"),

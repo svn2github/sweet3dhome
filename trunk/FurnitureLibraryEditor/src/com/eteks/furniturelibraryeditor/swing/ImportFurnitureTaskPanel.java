@@ -32,7 +32,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -251,7 +250,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
   /**
    * Returns a copy of a given <code>model</code> as a zip content at OBJ format.
    */
-  private static Content copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
+  static Content copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
     String objFile;
     if (modelContent instanceof URLContent) {
       objFile = ((URLContent)modelContent).getURL().getFile();
