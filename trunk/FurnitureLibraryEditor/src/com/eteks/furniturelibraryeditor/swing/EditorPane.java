@@ -167,7 +167,7 @@ public class EditorPane extends JRootPane implements EditorView {
   private void addActionToToolBar(ActionType actionType,
                                   JToolBar toolBar) {
     Action action = new ResourceAction.ToolBarAction(getActionMap().get(actionType));
-    if (OperatingSystem.isMacOSXLeopardOrSuperior() && OperatingSystem.isJavaVersionAtLeast("1.7")) {
+    if (OperatingSystem.isMacOSXLeopardOrSuperior() && OperatingSystem.isJavaVersionGreaterOrEqual("1.7")) {
       // Add a button with higher insets to ensure the top and bottom of segmented buttons are correctly drawn 
       toolBar.add(new JButton(new ResourceAction.ToolBarAction(action)) {
           @Override
