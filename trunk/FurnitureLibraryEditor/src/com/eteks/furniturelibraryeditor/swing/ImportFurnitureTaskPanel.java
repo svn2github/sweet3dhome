@@ -206,16 +206,25 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       }
       
       Vector3f size = ModelManager.getInstance().getSize(modelNode.get());
-      Content iconContent;
-      try {
-        // Generate icon image
-        this.iconPreviewComponent.setModel(previewModel);
-        Thread.sleep(this.firstRendering ? 1000 : 100);
-        this.firstRendering = false;
-        iconContent = this.iconPreviewComponent.getIcon(0);
-      } catch (IOException ex) {
-        return null;
-      }    
+      // Generate icon image        
+      final Content finalPreviewModel = previewModel;
+      EventQueue.invokeLater(new Runnable() {
+          public void run() {
+            iconPreviewComponent.setModel(finalPreviewModel);
+          }
+        });
+      Thread.sleep(this.firstRendering ? 1000 : 100);
+      this.firstRendering = false;
+      final AtomicReference<Content> iconContent = new AtomicReference<Content>();
+      EventQueue.invokeAndWait(new Runnable() {
+          public void run() {
+            try {
+              iconContent.set(iconPreviewComponent.getIcon(0));
+            } catch (IOException ex) {
+              throw new RuntimeException("Couldn't retrieve icon", ex);
+            }    
+          }
+        });
       
       String key;
       if (Arrays.asList(preferences.getEditedProperties()).contains(FurnitureLibrary.FURNITURE_ID_PROPERTY)) {
@@ -229,7 +238,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       }
       modelName = Character.toUpperCase(modelName.charAt(0)) + modelName.substring(1); 
       CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
-          modelName, null, iconContent, null, pieceModel, 
+          modelName, null, iconContent.get(), null, pieceModel, 
           size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
       FurnitureCategory defaultCategory = new FurnitureCategory(
           this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
