@@ -208,7 +208,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       Vector3f size = ModelManager.getInstance().getSize(modelNode.get());
       // Generate icon image        
       final Content finalPreviewModel = previewModel;
-      EventQueue.invokeLater(new Runnable() {
+      EventQueue.invokeAndWait(new Runnable() {
           public void run() {
             iconPreviewComponent.setModel(finalPreviewModel);
           }
