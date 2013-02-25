@@ -56,7 +56,7 @@ public class FurnitureController implements Controller {
   /**
    * The properties that may be edited by the view associated to this controller. 
    */
-  public enum Property {ID, NAME, DESCRIPTION, CATEGORY, MODEL, ICON, 
+  public enum Property {ID, NAME, DESCRIPTION, INFORMATION, TAGS, GRADE, CREATION_DATE, CATEGORY, MODEL, ICON, 
       WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, TEXTURABLE, DOOR_OR_WINDOW, STAIRCASE, STAIRCASE_CUT_OUT_SHAPE, 
       MODEL_ROTATION, CREATOR, PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
   
@@ -66,6 +66,10 @@ public class FurnitureController implements Controller {
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_ID_PROPERTY, Property.ID);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_NAME_PROPERTY, Property.NAME);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY, Property.DESCRIPTION);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, Property.INFORMATION);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_TAGS_PROPERTY, Property.TAGS);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_GRADE_PROPERTY, Property.GRADE);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CREATION_DATE_PROPERTY, Property.CREATION_DATE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, Property.CATEGORY);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CREATOR_PROPERTY, Property.CREATOR);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_ICON_PROPERTY, Property.ICON);
@@ -98,6 +102,10 @@ public class FurnitureController implements Controller {
   private String            id;
   private String            name;
   private String            description;
+  private String            information;
+  private String []         tags;
+  private Long              creationDate;
+  private Float             grade;
   private FurnitureCategory category;
   private Content           model;
   private Content           icon;
@@ -339,7 +347,57 @@ public class FurnitureController implements Controller {
         }
       }
       setDescription(description);
-      
+
+      String information = (String)this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+          firstPiece, furnitureLanguage, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, firstPiece.getInformation());
+      if (information != null) {
+        for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+          CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+          if (!information.equals(this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+              piece, furnitureLanguage, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, piece.getInformation()))) {
+            information = null;
+            break;
+          }
+        }
+      }
+      setInformation(information);
+
+      String [] tags = (String [])this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+          firstPiece, furnitureLanguage, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, firstPiece.getTags());
+      if (tags != null) {
+        for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+          CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+          if (!Arrays.equals(tags, (String [])this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+              piece, furnitureLanguage, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, piece.getTags()))) {
+            tags = null;
+            break;
+          }
+        }
+      }
+      setTags(tags);
+
+      Long creationDate = firstPiece.getCreationDate();
+      for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+        CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+        if (creationDate == null && piece.getCreationDate() != null
+            || creationDate != null && !creationDate.equals(piece.getCreationDate())) {
+          creationDate = null;
+          break;
+        }
+      }
+      setCreationDate(creationDate);
+
+      Float grade = firstPiece.getGrade();
+      for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+        CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+        if (grade == null && piece.getGrade() != null
+            || grade != null && !grade.equals(piece.getGrade())) {
+          grade = null;
+          break;
+        }
+      }
+      setGrade(grade);
+
       FurnitureCategory category = firstPiece.getCategory();
       String categoryName = (String)this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
           firstPiece, furnitureLanguage, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, category.getName());
@@ -569,6 +627,78 @@ public class FurnitureController implements Controller {
    */
   public String getDescription() {
     return this.description;
+  }
+  
+  /**
+   * Sets the edited information.
+   */
+  public void setInformation(String information) {
+    if (information != this.information) {
+      String oldInformation = this.information;
+      this.information = information;
+      this.propertyChangeSupport.firePropertyChange(Property.INFORMATION.name(), oldInformation, information);
+    }
+  }
+
+  /**
+   * Returns the edited information.
+   */
+  public String getInformation() {
+    return this.information;
+  }
+  
+  /**
+   * Sets the edited tags.
+   */
+  public void setTags(String [] tags) {
+    if (tags != this.tags) {
+      String [] oldTags = this.tags;
+      this.tags = tags;
+      this.propertyChangeSupport.firePropertyChange(Property.TAGS.name(), oldTags, tags);
+    }
+  }
+
+  /**
+   * Returns the edited tags.
+   */
+  public String [] getTags() {
+    return this.tags;
+  }
+  
+  /**
+   * Sets the edited creation date.
+   */
+  public void setCreationDate(Long creationDate) {
+    if (creationDate != this.creationDate) {
+      Long oldCreationDate = this.creationDate;
+      this.creationDate = creationDate;
+      this.propertyChangeSupport.firePropertyChange(Property.INFORMATION.name(), oldCreationDate, creationDate);
+    }
+  }
+
+  /**
+   * Returns the edited creation date.
+   */
+  public Long getCreationDate() {
+    return this.creationDate;
+  }
+  
+  /**
+   * Sets the edited grade.
+   */
+  public void setGrade(Float grade) {
+    if (grade != this.grade) {
+      Float oldGrade = this.grade;
+      this.grade = grade;
+      this.propertyChangeSupport.firePropertyChange(Property.GRADE.name(), oldGrade, grade);
+    }
+  }
+
+  /**
+   * Returns the edited grade.
+   */
+  public Float getGrade() {
+    return this.grade;
   }
   
   /**
@@ -1033,6 +1163,10 @@ public class FurnitureController implements Controller {
       String id = getId(); 
       String name = getName();
       String description = getDescription();
+      String information = getInformation();
+      String [] tags = getTags();
+      Long creationDate = getCreationDate();
+      Float grade = getGrade();
       FurnitureCategory category = getCategory();
       Content model = getModel();
       Content icon = getIcon();
@@ -1060,6 +1194,8 @@ public class FurnitureController implements Controller {
         // Retrieve localized data
         Map<String, Object> localizedNames = new HashMap<String, Object>();
         Map<String, Object> localizedDescriptions = new HashMap<String, Object>();
+        Map<String, Object> localizedInformation = new HashMap<String, Object>();
+        Map<String, Object> localizedTags = new HashMap<String, Object>();
         Map<String, Object> localizedCategories = new HashMap<String, Object>();
         for (String language : this.furnitureLibrary.getSupportedLanguages()) {
           Object pieceName = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
@@ -1072,6 +1208,16 @@ public class FurnitureController implements Controller {
           if (pieceDescription != null) {
             localizedDescriptions.put(language, pieceDescription);
           }
+          Object pieceInformation = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+              piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY);
+          if (pieceInformation != null) {
+            localizedInformation.put(language, pieceInformation);
+          }
+          Object pieceTags = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
+              piece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY);
+          if (pieceTags != null) {
+            localizedTags.put(language, pieceTags);
+          }
           Object categoryName = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
               piece, language, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY);
           if (categoryName != null) {
@@ -1083,6 +1229,10 @@ public class FurnitureController implements Controller {
         String pieceId = id != null || piecesCount == 1 ? id : piece.getId();
         String pieceName = name != null && defaultFurnitureLanguage ? name : piece.getName();
         String pieceDescription = description != null && defaultFurnitureLanguage ? description : piece.getDescription();
+        String pieceInformation = information != null && defaultFurnitureLanguage ? information : piece.getInformation();
+        String [] pieceTags = tags != null && defaultFurnitureLanguage ? tags : piece.getTags();
+        Long pieceCreationDate = creationDate != null ? creationDate : piece.getCreationDate();
+        Float pieceGrade = grade != null ? grade : piece.getGrade();
         FurnitureCategory pieceCategory = category != null && defaultFurnitureLanguage ? category : piece.getCategory();
         Content pieceModel = model != null ? model : piece.getModel();
         Content pieceIcon = icon != null ? icon : piece.getIcon();
@@ -1117,7 +1267,7 @@ public class FurnitureController implements Controller {
         if (piece instanceof CatalogDoorOrWindow) {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
           piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
-              piece.getInformation(), piece.getTags(), piece.getCreationDate(), piece.getGrade(), 
+              pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, opening.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
@@ -1125,7 +1275,7 @@ public class FurnitureController implements Controller {
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
-              piece.getInformation(), piece.getTags(), piece.getCreationDate(), piece.getGrade(), 
+              pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, light.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
@@ -1133,14 +1283,14 @@ public class FurnitureController implements Controller {
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
-                piece.getInformation(), piece.getTags(), piece.getCreationDate(), piece.getGrade(), 
+                pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piece.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
-                piece.getInformation(), piece.getTags(), piece.getCreationDate(), piece.getGrade(), 
+                pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
                 pieceIcon, piece.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
@@ -1165,6 +1315,18 @@ public class FurnitureController implements Controller {
             if (localizedPieceDescription != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY, localizedPieceDescription);
+            }          
+            Object localizedPieceInformation = information != null && editedFurnitureLanguage 
+                ? information : localizedInformation.get(language);
+            if (localizedPieceInformation != null) {
+              this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
+                  piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, localizedPieceInformation);
+            }          
+            Object localizedPieceTags = description != null && editedFurnitureLanguage 
+                ? tags : localizedDescriptions.get(language);
+            if (localizedPieceTags != null) {
+              this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
+                  piece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, localizedPieceTags);
             }          
             Object localizedPieceCategory = category != null && editedFurnitureLanguage 
                 ? category.getName() : localizedCategories.get(language);

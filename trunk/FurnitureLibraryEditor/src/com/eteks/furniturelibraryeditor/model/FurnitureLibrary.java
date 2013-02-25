@@ -53,6 +53,10 @@ public class FurnitureLibrary implements Library {
   public static final String FURNITURE_ID_PROPERTY                         = "ID";
   public static final String FURNITURE_NAME_PROPERTY                       = "NAME";
   public static final String FURNITURE_DESCRIPTION_PROPERTY                = "DESCRIPTION";
+  public static final String FURNITURE_INFORMATION_PROPERTY                = "INFORMATION";
+  public static final String FURNITURE_TAGS_PROPERTY                       = "TAGS";
+  public static final String FURNITURE_CREATION_DATE_PROPERTY              = "CREATION_DATE";
+  public static final String FURNITURE_GRADE_PROPERTY                      = "GRADE";
   public static final String FURNITURE_CATEGORY_PROPERTY                   = "CATEGORY";
   public static final String FURNITURE_CREATOR_PROPERTY                    = "CREATOR";
   public static final String FURNITURE_PRICE_PROPERTY                      = "PRICE";

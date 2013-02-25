@@ -38,9 +38,16 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Transform3D;
@@ -58,6 +65,7 @@ import javax.swing.JRootPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
@@ -73,6 +81,7 @@ import org.apache.batik.parser.PathParser;
 import com.eteks.furniturelibraryeditor.viewcontroller.FurnitureController;
 import com.eteks.sweethome3d.j3d.HomePieceOfFurniture3D;
 import com.eteks.sweethome3d.j3d.ModelManager;
+import com.eteks.sweethome3d.model.Camera;
 import com.eteks.sweethome3d.model.CatalogPieceOfFurniture;
 import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.FurnitureCategory;
@@ -101,8 +110,18 @@ public class FurniturePanel extends JPanel implements DialogView {
   private JTextField                nameTextField;
   private JLabel                    descriptionLabel;
   private JTextField                descriptionTextField;
+  private JLabel                    informationLabel;
+  private JTextField                informationTextField;
+  private JLabel                    tagsLabel;
+  private JTextField                tagsTextField;
+  private JLabel                    creatorLabel;
+  private JTextField                creatorTextField;
   private JLabel                    categoryLabel;
   private JComboBox                 categoryComboBox;
+  private JLabel                    creationDateLabel;
+  private JSpinner                  creationDateSpinner;
+  private JLabel                    gradeLabel;
+  private JSpinner                  gradeSpinner;
   private IconPreviewComponent      iconComponent;
   private JButton                   turnLeftButton;
   private JButton                   turnRightButton;
@@ -129,8 +148,6 @@ public class FurniturePanel extends JPanel implements DialogView {
   private NullableCheckBox          resizableCheckBox;
   private NullableCheckBox          deformableCheckBox;
   private NullableCheckBox          texturableCheckBox;
-  private JLabel                    creatorLabel;
-  private JTextField                creatorTextField;
   private JLabel                    priceLabel;
   private JSpinner                  priceSpinner;
   private JLabel                    valueAddedTaxPercentageLabel;
@@ -266,6 +283,121 @@ public class FurniturePanel extends JPanel implements DialogView {
         });
     }
 
+    if (this.controller.isPropertyEditable(FurnitureController.Property.INFORMATION)) {
+      // Create description label and its text field bound to INFORMATION controller property
+      this.informationLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "informationLabel.text"));
+      this.informationTextField = new JTextField(controller.getInformation(), 10);
+      if (!OperatingSystem.isMacOSX()) {
+        SwingTools.addAutoSelectionOnFocusGain(this.informationTextField);
+      }
+      final PropertyChangeListener informationChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            informationTextField.setText(controller.getInformation());
+          }
+        };
+      controller.addPropertyChangeListener(FurnitureController.Property.INFORMATION, informationChangeListener);
+      this.informationTextField.getDocument().addDocumentListener(new DocumentListener() {
+          public void changedUpdate(DocumentEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.INFORMATION, informationChangeListener);
+            String information = informationTextField.getText(); 
+            if (information == null || information.trim().length() == 0) {
+              controller.setInformation(null);
+            } else {
+              controller.setInformation(information);
+            }
+            controller.addPropertyChangeListener(FurnitureController.Property.INFORMATION, informationChangeListener);
+          }
+    
+          public void insertUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+    
+          public void removeUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+        });
+    }
+
+    if (this.controller.isPropertyEditable(FurnitureController.Property.TAGS)) {
+      // Create tags label and its text field bound to TAGS controller property
+      this.tagsLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "tagsLabel.text"));
+      String tags = null;
+      if (controller.getTags() != null) {
+        tags = Arrays.toString(controller.getTags());
+        tags = tags.substring(1, tags.length() - 1);
+      }
+      this.tagsTextField = new JTextField(tags, 10);
+      if (!OperatingSystem.isMacOSX()) {
+        SwingTools.addAutoSelectionOnFocusGain(this.tagsTextField);
+      }
+      final PropertyChangeListener tagsChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            String tags = null;
+            if (controller.getTags() != null) {
+              tags = Arrays.toString(controller.getTags());
+              tags = tags.substring(1, tags.length() - 1);
+            }
+            tagsTextField.setText(tags);
+          }
+        };
+      controller.addPropertyChangeListener(FurnitureController.Property.TAGS, tagsChangeListener);
+      this.tagsTextField.getDocument().addDocumentListener(new DocumentListener() {
+          public void changedUpdate(DocumentEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.TAGS, tagsChangeListener);
+            String tags = tagsTextField.getText(); 
+            if (tags == null || tags.trim().length() == 0) {
+              controller.setTags(null);
+            } else {
+              controller.setTags(tags.split("\\s*,\\s*"));
+            }
+            controller.addPropertyChangeListener(FurnitureController.Property.TAGS, tagsChangeListener);
+          }
+    
+          public void insertUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+    
+          public void removeUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+        });
+    }
+
+    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATOR)) {
+      // Create creator label and its text field bound to CREATOR controller property
+      this.creatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "creatorLabel.text"));
+      this.creatorTextField = new JTextField(controller.getCreator(), 10);
+      if (!OperatingSystem.isMacOSX()) {
+        SwingTools.addAutoSelectionOnFocusGain(this.creatorTextField);
+      }
+      final PropertyChangeListener creatorChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            creatorTextField.setText(controller.getCreator());
+          }
+        };
+      controller.addPropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
+      this.creatorTextField.getDocument().addDocumentListener(new DocumentListener() {
+          public void changedUpdate(DocumentEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
+            String creator = creatorTextField.getText(); 
+            if (creator == null || creator.trim().length() == 0) {
+              controller.setCreator(null);
+            } else {
+              controller.setCreator(creator);
+            }
+            controller.addPropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
+          }
+    
+          public void insertUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+    
+          public void removeUpdate(DocumentEvent ev) {
+            changedUpdate(ev);
+          }
+        });
+    }
+  
     if (this.controller.isPropertyEditable(FurnitureController.Property.CATEGORY)) {
       this.categoryLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, 
           FurniturePanel.class, "categoryLabel.text")); 
@@ -350,6 +482,88 @@ public class FurniturePanel extends JPanel implements DialogView {
         this.categoryComboBox.setSelectedItem(controller.getCategory());
       }
       this.categoryComboBox.setMaximumRowCount(15);
+    }
+    
+    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATION_DATE)) {
+      // Create creation date label and spinner bound to CREATION_DATE controller property
+      this.creationDateLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "creationDateLabel.text"));
+      final NullableSpinner.NullableSpinnerDateModel creationDateSpinnerModel = new NullableSpinner.NullableSpinnerDateModel();
+      if (controller.getCreationDate() != null) {
+        Date time = new Date(Camera.convertTimeToTimeZone(controller.getCreationDate(), TimeZone.getDefault().getID()));
+        creationDateSpinnerModel.setValue(time);
+      } else {
+        creationDateSpinnerModel.setNullable(true);
+        creationDateSpinnerModel.setValue(null);
+      }
+      this.creationDateSpinner = new AutoCommitSpinner(creationDateSpinnerModel);
+      String datePattern = ((SimpleDateFormat)DateFormat.getDateInstance(DateFormat.SHORT)).toPattern();
+      if (datePattern.indexOf("yyyy") == -1) {
+        datePattern = datePattern.replace("yy", "yyyy");
+      }
+      JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(this.creationDateSpinner, datePattern);
+      this.creationDateSpinner.setEditor(dateEditor);
+      SwingTools.addAutoSelectionOnFocusGain(dateEditor.getTextField());
+      
+      final PropertyChangeListener dateChangeListener = new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent ev) {
+          if (controller.getCreationDate() != null) {
+            Date date = new Date(Camera.convertTimeToTimeZone(controller.getCreationDate(), TimeZone.getDefault().getID()));
+            creationDateSpinnerModel.setNullable(false);
+            creationDateSpinnerModel.setValue(date);
+          } else {
+            creationDateSpinnerModel.setNullable(true);
+            creationDateSpinnerModel.setValue(null);
+          }
+        }
+      };
+      controller.addPropertyChangeListener(FurnitureController.Property.CREATION_DATE, dateChangeListener);
+      final ChangeListener dateTimeChangeListener = new ChangeListener() {
+          public void stateChanged(ChangeEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.CREATION_DATE, dateChangeListener);
+            // Merge date and time
+            GregorianCalendar dateCalendar = new GregorianCalendar();
+            if (creationDateSpinnerModel.getValue() != null) {
+              dateCalendar.setTime((Date)creationDateSpinnerModel.getValue());
+              Calendar utcCalendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+              utcCalendar.set(GregorianCalendar.YEAR, dateCalendar.get(GregorianCalendar.YEAR));
+              utcCalendar.set(GregorianCalendar.MONTH, dateCalendar.get(GregorianCalendar.MONTH));
+              utcCalendar.set(GregorianCalendar.DAY_OF_MONTH, dateCalendar.get(GregorianCalendar.DAY_OF_MONTH));
+              controller.setCreationDate(utcCalendar.getTimeInMillis());
+            } else {
+              controller.setCreationDate(null);
+            }
+            controller.addPropertyChangeListener(FurnitureController.Property.CREATION_DATE, dateChangeListener);
+          }
+        };
+      creationDateSpinnerModel.addChangeListener(dateTimeChangeListener);
+    }
+  
+    if (this.controller.isPropertyEditable(FurnitureController.Property.GRADE)) {
+      // Create grade label and spinner bound to GRADE controller property
+      this.gradeLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, 
+          FurniturePanel.class, "gradeLabel.text", unitName));
+      final NullableSpinner.NullableSpinnerNumberModel gradeSpinnerModel = 
+          new NullableSpinner.NullableSpinnerNumberModel(0, 0f, 1f, 0.1f);
+      this.gradeSpinner = new AutoCommitSpinner(gradeSpinnerModel);
+      final PropertyChangeListener gradeChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            Float grade = controller.getGrade();
+            gradeSpinnerModel.setNullable(grade == null);
+            gradeSpinnerModel.setValue(grade);
+            if (grade != null) {
+              gradeSpinnerModel.setMinimum(Math.min(grade, 0));
+            }
+          }
+        };
+      gradeChangeListener.propertyChange(null);
+      controller.addPropertyChangeListener(FurnitureController.Property.GRADE, gradeChangeListener);
+      gradeSpinnerModel.addChangeListener(new ChangeListener() {
+          public void stateChanged(ChangeEvent ev) {
+            controller.removePropertyChangeListener(FurnitureController.Property.GRADE, gradeChangeListener);
+            controller.setGrade(((Number)gradeSpinnerModel.getValue()).floatValue());
+            controller.addPropertyChangeListener(FurnitureController.Property.GRADE, gradeChangeListener);
+          }
+        });
     }
     
     if (this.controller.isPropertyEditable(FurnitureController.Property.PRICE)) {
@@ -771,41 +985,6 @@ public class FurniturePanel extends JPanel implements DialogView {
         });
     }
     
-    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATOR)) {
-      // Create creator label and its text field bound to CREATOR controller property
-      this.creatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "creatorLabel.text"));
-      this.creatorTextField = new JTextField(controller.getCreator(), 10);
-      if (!OperatingSystem.isMacOSX()) {
-        SwingTools.addAutoSelectionOnFocusGain(this.creatorTextField);
-      }
-      final PropertyChangeListener creatorChangeListener = new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent ev) {
-            creatorTextField.setText(controller.getCreator());
-          }
-        };
-      controller.addPropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
-      this.creatorTextField.getDocument().addDocumentListener(new DocumentListener() {
-          public void changedUpdate(DocumentEvent ev) {
-            controller.removePropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
-            String creator = creatorTextField.getText(); 
-            if (creator == null || creator.trim().length() == 0) {
-              controller.setCreator(null);
-            } else {
-              controller.setCreator(creator);
-            }
-            controller.addPropertyChangeListener(FurnitureController.Property.CREATOR, creatorChangeListener);
-          }
-    
-          public void insertUpdate(DocumentEvent ev) {
-            changedUpdate(ev);
-          }
-    
-          public void removeUpdate(DocumentEvent ev) {
-            changedUpdate(ev);
-          }
-        });
-    }
-  
     if (this.controller.isPropertyEditable(FurnitureController.Property.ICON)) {
       this.iconComponent = new IconPreviewComponent(controller, preferences);
       
@@ -918,10 +1097,30 @@ public class FurniturePanel extends JPanel implements DialogView {
             FurniturePanel.class, "descriptionLabel.mnemonic")).getKeyCode());
         this.descriptionLabel.setLabelFor(this.descriptionTextField);
       }
+      if (this.informationLabel != null) {
+        this.informationLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "informationLabel.mnemonic")).getKeyCode());
+        this.informationLabel.setLabelFor(this.informationTextField);
+      }
+      if (this.tagsLabel != null) {
+        this.tagsLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "tagsLabel.mnemonic")).getKeyCode());
+        this.tagsLabel.setLabelFor(this.tagsTextField);
+      }
+      if (this.creatorLabel != null) {
+        this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
+        this.creatorLabel.setLabelFor(this.creatorTextField);
+      }
       if (this.categoryLabel != null) {
         this.categoryLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
             FurniturePanel.class, "categoryLabel.mnemonic")).getKeyCode());
         this.categoryLabel.setLabelFor(this.categoryComboBox);
+      }
+      if (this.creationDateLabel != null) {
+        this.creationDateLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "creationDateLabel.mnemonic")).getKeyCode());
+        this.creationDateLabel.setLabelFor(this.creationDateSpinner);
       }
       if (this.priceLabel != null) {
         this.priceLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
@@ -989,11 +1188,6 @@ public class FurniturePanel extends JPanel implements DialogView {
       if (this.texturableCheckBox != null) {
         this.texturableCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
             FurniturePanel.class, "texturableCheckBox.mnemonic")).getKeyCode());
-      }
-      if (this.creatorLabel != null) {
-        this.creatorLabel.setDisplayedMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
-            FurniturePanel.class, "creatorLabel.mnemonic")).getKeyCode());
-        this.creatorLabel.setLabelFor(this.creatorTextField);
       }
     }
   }
@@ -1075,68 +1269,100 @@ public class FurniturePanel extends JPanel implements DialogView {
           2, 2, 3, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATOR)) {
-      add(this.creatorLabel, new GridBagConstraints(
+    if (this.controller.isPropertyEditable(FurnitureController.Property.INFORMATION)) {
+      add(this.informationLabel, new GridBagConstraints(
           1, 3, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
+      add(this.informationTextField, new GridBagConstraints(
+          2, 3, 3, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.TAGS)) {
+      add(this.tagsLabel, new GridBagConstraints(
+          1, 4, 1, 1, 0, 0, labelAlignment, 
+          GridBagConstraints.NONE, labelInsets, 0, 0));
+      add(this.tagsTextField, new GridBagConstraints(
+          2, 4, 3, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATOR)) {
+      add(this.creatorLabel, new GridBagConstraints(
+          1, 5, 1, 1, 0, 0, labelAlignment, 
+          GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.creatorTextField, new GridBagConstraints(
-          2, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.CATEGORY)) {
       add(this.categoryLabel, new GridBagConstraints(
-          3, 3, 1, 1, 0, 0, labelAlignment, 
+          3, 5, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.categoryComboBox, new GridBagConstraints(
-          4, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.CREATION_DATE)) {
+      add(this.creationDateLabel, new GridBagConstraints(
+          1, 6, 1, 1, 0, 0, labelAlignment, 
+          GridBagConstraints.NONE, labelInsets, 0, 0));
+      add(this.creationDateSpinner, new GridBagConstraints(
+          2, 6, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.GRADE)) {
+      add(this.gradeLabel, new GridBagConstraints(
+          3, 6, 1, 1, 0, 0, labelAlignment, 
+          GridBagConstraints.NONE, labelInsets, 0, 0));
+      add(this.gradeSpinner, new GridBagConstraints(
+          4, 6, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.PRICE)) {
       add(this.priceLabel, new GridBagConstraints(
-          1, 4, 1, 1, 0, 0, labelAlignment, 
+          1, 7, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.priceSpinner, new GridBagConstraints(
-          2, 4, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 7, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), -10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.VALUE_ADDED_TAX_PERCENTAGE)) {
       add(this.valueAddedTaxPercentageLabel, new GridBagConstraints(
-          3, 4, 1, 1, 0, 0, labelAlignment, 
+          3, 7, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.valueAddedTaxPercentageSpinner, new GridBagConstraints(
-          4, 4, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 7, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.WIDTH)) {
       add(this.widthLabel, new GridBagConstraints(
-          1, 5, 1, 1, 0, 0, labelAlignment, 
+          1, 8, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.widthSpinner, new GridBagConstraints(
-          2, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), -10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DEPTH)) {
       add(this.depthLabel, new GridBagConstraints(
-          3, 5, 1, 1, 0, 0, labelAlignment, 
+          3, 8, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.depthSpinner, new GridBagConstraints(
-          4, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, -10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.HEIGHT)) {
       add(this.heightLabel, new GridBagConstraints(
-          1, 6, 1, 1, 0, 0, labelAlignment, 
+          1, 9, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.heightSpinner, new GridBagConstraints(
-          2, 6, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), -10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.ELEVATION)) {
       add(this.elevationLabel, new GridBagConstraints(
-          3, 6, 1, 1, 0, 0, labelAlignment, 
+          3, 9, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.elevationSpinner, new GridBagConstraints(
-          4, 6, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, -10, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.PROPORTIONAL)) {
@@ -1145,51 +1371,51 @@ public class FurniturePanel extends JPanel implements DialogView {
       multiplySizePanel.add(this.reduceTenTimesButton);
       multiplySizePanel.add(this.enlargeInchTimesButton);
       add(multiplySizePanel, new GridBagConstraints(
-          1, 7, 3, 1, 0, 0, GridBagConstraints.CENTER, 
+          1, 10, 3, 1, 0, 0, GridBagConstraints.CENTER, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
       add(this.keepProportionsCheckBox, new GridBagConstraints(
-          4, 7, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
       add(this.doorOrWindowCheckBox, new GridBagConstraints(
-          1, 8, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 11, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
       add(this.backFaceShownCheckBox, new GridBagConstraints(
-          2, 8, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 11, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
       add(this.staircaseCheckBox, new GridBagConstraints(
-          1, 9, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 12, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
       add(this.staircaseCutOutShapeLabel, new GridBagConstraints(
-          2, 9, 1, 1, 0, 0, labelAlignment, 
+          2, 12, 1, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.staircaseCutOutShapeTextField, new GridBagConstraints(
-          3, 9, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          3, 12, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.MOVABLE)) {
       add(this.movableCheckBox, new GridBagConstraints(
-          1, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.RESIZABLE)) {
       add(this.resizableCheckBox, new GridBagConstraints(
-          2, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DEFORMABLE)) {
       add(this.deformableCheckBox, new GridBagConstraints(
-          3, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          3, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.TEXTURABLE)) {
       add(this.texturableCheckBox, new GridBagConstraints(
-          4, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
   }
