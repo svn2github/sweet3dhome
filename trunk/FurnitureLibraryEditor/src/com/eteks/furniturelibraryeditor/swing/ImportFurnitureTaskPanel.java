@@ -97,8 +97,8 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
             // Load content using cache to make it accessible by preview components
             ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {
                 public void modelUpdated(BranchGroup modelRoot) {
-                  modelNode.set(modelRoot);
                   latch.countDown();
+                  modelNode.set(modelRoot);
                 }
                 
                 public void modelError(Exception ex) {
@@ -219,7 +219,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       EventQueue.invokeAndWait(new Runnable() {
           public void run() {
             try {
-              iconContent.set(iconPreviewComponent.getIcon(0));
+              iconContent.set(iconPreviewComponent.getIcon(100));
             } catch (IOException ex) {
               throw new RuntimeException("Couldn't retrieve icon", ex);
             }    
