@@ -1,0 +1,18 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl _2BNX13D07_1_1
+illum 2
+Ka 1.0 1.0 1.0
+Kd 0.996078 0.980392 0.870588
+Ks 0.5 0.5 0.5
+Ns 4.59479
+
+newmtl _2BNL13D03_4_4
+illum 2
+Ka 0.0627451 0.180392 0.054902
+Kd 0.2 0.552941 0.176471
+Ks 0.5 0.5 0.5
+Ns 11.3137

@@ -1,0 +1,9 @@
+# 3D model pensileBlu.obj
+
+newmtl Box43_1
+illum 2
+Ka 0.1922 0.1804 0.4353
+Kd 0.1137 0.3294 0.7765
+Ks 0.405 0.405 0.405
+Ns 10.0
+Ni 1.5

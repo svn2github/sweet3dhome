@@ -1,0 +1,18 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl caster11_1_1
+illum 2
+Ka 0.0156863 0.0156863 0.0156863
+Kd 0.0156863 0.0156863 0.0156863
+Ks 1.0 1.0 1.0
+Ns 128.0
+
+newmtl chair_cus3_42_42
+illum 2
+Ka 0.0980392 0.0980392 0.0980392
+Kd 0.214 0.131279 0.098226
+Ks 0.898039 0.898039 0.898039
+Ns 3.241
