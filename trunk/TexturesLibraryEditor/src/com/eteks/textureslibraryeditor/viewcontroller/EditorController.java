@@ -108,6 +108,12 @@ public class EditorController implements Controller {
             texturesLibrary.deleteTexture(texture);
           }
           getTexturesLanguageController().setTexturesLanguage(TexturesLibrary.DEFAULT_LANGUAGE);
+          texturesLibrary.setId(null);
+          texturesLibrary.setName(null);
+          texturesLibrary.setDescription(null);
+          texturesLibrary.setProvider(null);
+          texturesLibrary.setLicense(null);
+          texturesLibrary.setVersion(null);
           texturesLibrary.setLocation(null);
           texturesLibrary.setModified(false);
         }

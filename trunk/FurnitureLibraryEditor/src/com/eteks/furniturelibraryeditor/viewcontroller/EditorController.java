@@ -108,6 +108,12 @@ public class EditorController implements Controller {
             furnitureLibrary.deletePieceOfFurniture(piece);
           }
           getFurnitureLanguageController().setFurnitureLanguage(FurnitureLibrary.DEFAULT_LANGUAGE);
+          furnitureLibrary.setId(null);
+          furnitureLibrary.setName(null);
+          furnitureLibrary.setProvider(null);
+          furnitureLibrary.setLicense(null);
+          furnitureLibrary.setVersion(null);
+          furnitureLibrary.setDescription(null);
           furnitureLibrary.setLocation(null);
           furnitureLibrary.setModified(false);
         }
