@@ -1322,7 +1322,7 @@ public class FurnitureController implements Controller {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, localizedPieceInformation);
             }          
-            Object localizedPieceTags = description != null && editedFurnitureLanguage 
+            Object localizedPieceTags = tags != null && editedFurnitureLanguage 
                 ? tags : localizedDescriptions.get(language);
             if (localizedPieceTags != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
