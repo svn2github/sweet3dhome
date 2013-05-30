@@ -19,6 +19,7 @@
  */
 package com.eteks.furniturelibraryeditor;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -97,12 +98,20 @@ public class FurnitureLibraryEditorBootstrap {
         "javax.media.nativewindow",
         "javax.media.opengl",
         "com.microcrowd.loader.java3d"};
-    ClassLoader java3DClassLoader = new ExtensionsClassLoader(
-        furnitureLibraryEditorBootstrapClass.getClassLoader(), 
-        furnitureLibraryEditorBootstrapClass.getProtectionDomain(),
-        extensionJarsAndDlls.toArray(new String [extensionJarsAndDlls.size()]), applicationPackages);  
-    
     String applicationClassName = "com.eteks.furniturelibraryeditor.FurnitureLibraryEditor";
+    ClassLoader java3DClassLoader = System.getProperty("os.name").startsWith("Windows")
+        ? new ExtensionsClassLoader(
+            furnitureLibraryEditorBootstrapClass.getClassLoader(), 
+            furnitureLibraryEditorBootstrapClass.getProtectionDomain(),
+            extensionJarsAndDlls.toArray(new String [extensionJarsAndDlls.size()]), null, applicationPackages,
+            // Use cache under Windows because temporary files tagged as deleteOnExit can't 
+            // be deleted if they are still opened when program exits 
+            new File(System.getProperty("java.io.tmpdir")), applicationClassName + "-cache-")  
+        : new ExtensionsClassLoader(
+            furnitureLibraryEditorBootstrapClass.getClassLoader(), 
+            furnitureLibraryEditorBootstrapClass.getProtectionDomain(),
+            extensionJarsAndDlls.toArray(new String [extensionJarsAndDlls.size()]), applicationPackages);  
+    
     Class<?> applicationClass = java3DClassLoader.loadClass(applicationClassName);
     Method applicationClassMain = 
         applicationClass.getMethod("main", Array.newInstance(String.class, 0).getClass());
