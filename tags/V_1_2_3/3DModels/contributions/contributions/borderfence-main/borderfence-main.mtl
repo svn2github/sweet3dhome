@@ -1,0 +1,11 @@
+#Produced by Art of Illusion 2.7.1, Fri Oct 09 12:27:24 EDT 2009
+newmtl redwoodstain
+Kd 0.72 0.36 0.33
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl whitepaint
+Kd 1 1 1
+Ks 0 0 0
+Ka 0 0 0
+illum 1
