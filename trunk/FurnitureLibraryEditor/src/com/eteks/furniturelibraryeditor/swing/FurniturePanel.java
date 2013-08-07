@@ -1458,6 +1458,8 @@ public class FurniturePanel extends JPanel implements DialogView {
    * Preview component for model icon. 
    */
   private static class IconPreviewComponent extends ModelPreviewComponent {
+    private static final int PREFERRED_SIZE = 128;
+    
     private float defaultViewYaw;
     private float defaultViewPitch;
     private float defaultViewScale;
@@ -1629,7 +1631,7 @@ public class FurniturePanel extends JPanel implements DialogView {
     @Override
     public Dimension getPreferredSize() {
       Insets insets = getInsets();
-      return new Dimension(128 + insets.left + insets.right, 128  + insets.top + insets.bottom);
+      return new Dimension(PREFERRED_SIZE + insets.left + insets.right, PREFERRED_SIZE  + insets.top + insets.bottom);
     }
     
     /**
