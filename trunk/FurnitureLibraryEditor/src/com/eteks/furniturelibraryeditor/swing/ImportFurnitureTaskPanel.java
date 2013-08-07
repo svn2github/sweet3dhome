@@ -59,6 +59,8 @@ import com.eteks.sweethome3d.viewcontroller.ThreadedTaskController;
  * @author Emmanuel Puybaret
  */
 public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements ImportFurnitureTaskView {
+  private static final int PREVIEW_PREFERRED_SIZE = 128;
+  
   private final FurnitureLibraryUserPreferences preferences;
   private ModelPreviewComponent       iconPreviewComponent;
   private boolean                     firstRendering = true;
@@ -71,7 +73,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
     this.iconPreviewComponent = new ModelPreviewComponent();
     Insets insets = this.iconPreviewComponent.getInsets();
     this.iconPreviewComponent.setPreferredSize(
-        new Dimension(128 + insets.left + insets.right, 128  + insets.top + insets.bottom));
+        new Dimension(PREVIEW_PREFERRED_SIZE + insets.left + insets.right, PREVIEW_PREFERRED_SIZE  + insets.top + insets.bottom));
     // Change layout
     GridBagLayout layout = new GridBagLayout();
     setLayout(layout);
@@ -236,9 +238,24 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       } else {
         key = null;
       }
-      modelName = Character.toUpperCase(modelName.charAt(0)) + modelName.substring(1); 
+      // Compute a more human readable name with spaces instead of hyphens and without camel case and trailing digit 
+      String pieceName = "" + Character.toUpperCase(modelName.charAt(0));
+      for (int i = 1; i < modelName.length(); i++) {
+        char c = modelName.charAt(i);
+        if (c == '-' || c == '_') {
+          pieceName += ' ';
+        } else if (!Character.isDigit(c) || i < modelName.length() - 1) {
+          // Remove camel case
+          if ((Character.isUpperCase(c) || Character.isDigit(c)) 
+              && Character.isLowerCase(modelName.charAt(i - 1))) {
+            pieceName += ' ';
+            c = Character.toLowerCase(c);
+          }
+          pieceName += c;
+        }
+      }
       CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
-          modelName, null, iconContent.get(), null, pieceModel, 
+          pieceName, null, iconContent.get(), null, pieceModel, 
           size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
       FurnitureCategory defaultCategory = new FurnitureCategory(
           this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
