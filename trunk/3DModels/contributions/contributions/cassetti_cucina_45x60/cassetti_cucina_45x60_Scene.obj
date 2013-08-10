@@ -1,7 +1,7 @@
 # Blender v2.67 (sub 0) OBJ File: ''
 # www.blender.org
 mtllib cassetti_cucina_45x60_Scene.mtl
-o Cube_Cube.003_Material.002
+g Cube_Cube.003_Material.002
 v -4.885402 0.016558 -1.232997
 v -4.885402 -0.191051 -1.232997
 v -6.818528 -0.191051 -1.232997
@@ -18,7 +18,7 @@ f 1 5 8 2
 f 2 8 7 3
 f 3 7 6 4
 f 5 1 4 6
-o Cube.002_Cube.002_Aluminum.001
+g Cube.002_Cube.002_Aluminum.001
 v -5.574051 -0.609551 1.356340
 v -5.643560 -0.609551 1.356340
 v -5.643560 -0.512037 1.356340
@@ -159,7 +159,7 @@ f 73 79 77 76
 f 72 80 79 73
 f 70 78 80 72
 f 78 77 79 80
-o Cube.002_Cube.002_WoodCherry
+g Cube.002_Cube.002_WoodCherry
 v -4.935043 -2.997159 1.070845
 v -4.935043 -2.997159 1.170844
 v -6.776372 -2.997159 1.170844

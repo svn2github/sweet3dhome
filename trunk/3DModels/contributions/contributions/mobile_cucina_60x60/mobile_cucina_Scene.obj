@@ -1,7 +1,7 @@
 # Blender v2.67 (sub 0) OBJ File: ''
 # www.blender.org
 mtllib mobile_cucina_Scene.mtl
-o Cube_Cube_Material
+g Cube_Cube_Material
 v -2.245748 -0.192595 1.132914
 v -2.245748 -0.192595 -1.229853
 v -2.245748 0.015276 -1.229853
@@ -23,7 +23,7 @@ f 7 6 9 10
 f 4 7 10 11
 f 1 4 11 12
 f 9 12 11 10
-o Cube_Cube_Wood_Cherry
+g Cube_Cube_Wood_Cherry
 v -4.865897 -3.003158 1.128544
 v -4.865897 -0.202431 1.128543
 v -4.865897 -0.202430 -1.229852
@@ -58,7 +58,7 @@ f 23 22 26 28
 f 25 21 24 27
 f 17 15 29 30
 f 14 18 31 32
-o Cube_Cube_Aluminum
+g Cube_Cube_Aluminum
 v -4.622991 -0.280494 1.364952
 v -4.622991 -0.347306 1.364952
 v -4.714733 -0.347306 1.364952
