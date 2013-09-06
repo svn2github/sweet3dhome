@@ -1,5 +1,5 @@
-# 3D model tableBasse.obj
-mtllib tableBasse.mtl
+# 3D model tableBasse2.obj
+mtllib tableBasse2.mtl
 g Cube_1_1
 usemtl BoisBlanc
 v -1.00869 -19.13111 26.05
