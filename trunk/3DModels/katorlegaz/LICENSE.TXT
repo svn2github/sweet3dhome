@@ -2,16 +2,16 @@ LICENSE
 	
 (C) Copyright Andrew Kator & Jennifer Legaz
 	
-These files are under the Creative Commons 3.0 Attribution 3.0 United States license
+These files are under the Creative Commons Attribution 3.0 United States license
 available at:
 	
 http://creativecommons.org/licenses/by/3.0/us/
 	
 You are free:
 
-	to Share Ñ to copy, distribute, display, and perform the work
+	to Share: to copy, distribute, display, and perform the work
 
-	to Remix Ñ to make derivative works
+	to Remix: to make derivative works
 
 Under the following conditions:
 
