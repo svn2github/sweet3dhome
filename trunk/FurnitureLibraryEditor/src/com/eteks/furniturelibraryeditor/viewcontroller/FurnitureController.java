@@ -1191,110 +1191,188 @@ public class FurnitureController implements Controller {
       int piecesCount = this.modifiedFurniture.size();
       for (CatalogPieceOfFurniture piece : this.modifiedFurniture) {
         int index = this.furnitureLibrary.getPieceOfFurnitureIndex(piece);
+        // Retrieve piece data
+        String pieceId = piece.getId();
+        String pieceName = piece.getName();
+        String pieceDescription = piece.getDescription();
+        String pieceInformation = piece.getInformation();
+        String [] pieceTags = piece.getTags();
+        Long pieceCreationDate = piece.getCreationDate();
+        Float pieceGrade = piece.getGrade();
+        FurnitureCategory pieceCategory = piece.getCategory();
+        Content pieceModel = piece.getModel();
+        Content pieceIcon = piece.getIcon();
+        Content piecePlanIcon = piece.getPlanIcon();
+        float pieceWidth = piece.getWidth();
+        float pieceDepth = piece.getDepth();
+        float pieceHeight = piece.getHeight();
+        float pieceElevation = piece.getElevation();
+        boolean pieceMovable = piece.isMovable();
+        float [][] pieceModelRotation = piece.getModelRotation();
+        String pieceStaircaseCutOutShape = piece.getStaircaseCutOutShape();
+        String pieceCreator = piece.getCreator();
+        boolean pieceResizable = piece.isResizable();
+        boolean pieceDeformable = piece.isDeformable();
+        boolean pieceTexturable = piece.isTexturable();
+        BigDecimal piecePrice = piece.getPrice();
+        BigDecimal pieceValueAddedTaxPercentage = piece.getValueAddedTaxPercentage();
+        String pieceCurrency = piece.getCurrency();
         // Retrieve localized data
         Map<String, Object> localizedNames = new HashMap<String, Object>();
+        retrieveLocalizedData(piece, localizedNames, FurnitureLibrary.FURNITURE_NAME_PROPERTY);
         Map<String, Object> localizedDescriptions = new HashMap<String, Object>();
+        retrieveLocalizedData(piece, localizedDescriptions, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY);
         Map<String, Object> localizedInformation = new HashMap<String, Object>();
+        retrieveLocalizedData(piece, localizedInformation, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY);
         Map<String, Object> localizedTags = new HashMap<String, Object>();
+        retrieveLocalizedData(piece, localizedTags, FurnitureLibrary.FURNITURE_TAGS_PROPERTY);
         Map<String, Object> localizedCategories = new HashMap<String, Object>();
-        for (String language : this.furnitureLibrary.getSupportedLanguages()) {
-          Object pieceName = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
-              piece, language, FurnitureLibrary.FURNITURE_NAME_PROPERTY);
-          if (pieceName != null) {
-            localizedNames.put(language, pieceName);
-          }
-          Object pieceDescription = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
-              piece, language, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY);
-          if (pieceDescription != null) {
-            localizedDescriptions.put(language, pieceDescription);
-          }
-          Object pieceInformation = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
-              piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY);
-          if (pieceInformation != null) {
-            localizedInformation.put(language, pieceInformation);
-          }
-          Object pieceTags = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
-              piece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY);
-          if (pieceTags != null) {
-            localizedTags.put(language, pieceTags);
-          }
-          Object categoryName = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(
-              piece, language, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY);
-          if (categoryName != null) {
-            localizedCategories.put(language, categoryName);
-          }
-        }
+        retrieveLocalizedData(piece, localizedCategories, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY);
+        // Remove piece from library
         this.furnitureLibrary.deletePieceOfFurniture(piece);
-        
-        String pieceId = id != null || piecesCount == 1 ? id : piece.getId();
-        String pieceName = name != null && defaultFurnitureLanguage ? name : piece.getName();
-        String pieceDescription = description != null && defaultFurnitureLanguage ? description : piece.getDescription();
-        String pieceInformation = information != null && defaultFurnitureLanguage ? information : piece.getInformation();
-        String [] pieceTags = tags != null && defaultFurnitureLanguage ? tags : piece.getTags();
-        Long pieceCreationDate = creationDate != null ? creationDate : piece.getCreationDate();
-        Float pieceGrade = grade != null ? grade : piece.getGrade();
-        FurnitureCategory pieceCategory = category != null && defaultFurnitureLanguage ? category : piece.getCategory();
-        Content pieceModel = model != null ? model : piece.getModel();
-        Content pieceIcon = icon != null ? icon : piece.getIcon();
-        float pieceWidth = width != null ? width : piece.getWidth();
-        float pieceDepth = depth != null ? depth : piece.getDepth();
-        float pieceHeight = height != null ? height : piece.getHeight();
-        float pieceElevation = elevation != null ? elevation : piece.getElevation();
-        boolean pieceMovable = movable != null ? movable : piece.isMovable();
-        float [][] pieceModelRotation = modelRotation != null ? modelRotation : piece.getModelRotation();
-        String pieceStaircaseCutOutShape;
-        if (staircase == null) {
-          if (staircaseCutOutShape != null && piece.getStaircaseCutOutShape() != null) {
-            pieceStaircaseCutOutShape = staircaseCutOutShape;
-          } else {
-            pieceStaircaseCutOutShape = piece.getStaircaseCutOutShape();
-          }
-        } else if (!staircase) {
-          pieceStaircaseCutOutShape = null;
-        } else if (staircaseCutOutShape != null) {
-          pieceStaircaseCutOutShape = staircaseCutOutShape;
-        } else {
-          pieceStaircaseCutOutShape = DEFAULT_CUT_OUT_SHAPE;
+
+        // Update mandatory not localizable data
+        if (model != null) {
+          pieceModel = model;
         }
-        String pieceCreator = creator != null || piecesCount == 1 ? creator : piece.getCreator();
-        boolean pieceResizable = resizable != null ? resizable : piece.isResizable();
-        boolean pieceDeformable = deformable != null ? deformable : piece.isDeformable();
-        boolean pieceTexturable = texturable != null ? texturable : piece.isTexturable();
-        BigDecimal piecePrice = price != null ? price : piece.getPrice();
-        BigDecimal pieceValueAddedTaxPercentage = valueAddedTaxPercentage != null 
-            ? valueAddedTaxPercentage : piece.getValueAddedTaxPercentage();
-        
+        if (icon != null) {
+          pieceIcon = icon;
+        }
+        if (width != null) {
+          pieceWidth = width;
+        }
+        if (depth != null) {
+          pieceDepth = depth;
+        }
+        if (height != null) {
+          pieceHeight = height;
+        }
+        if (movable != null) {
+          pieceMovable = movable;
+        }
+        // Update not mandatory and not localizable data
+        // When only one piece is updated, data can be reset to empty 
+        if (id != null || piecesCount == 1) {
+          pieceId = id;
+        }
+        if (creationDate != null || piecesCount == 1) {
+          pieceCreationDate = creationDate;
+        }
+        if (grade != null || piecesCount == 1) {
+          pieceGrade = grade;
+        }
+        if (elevation != null || piecesCount == 1) {
+          pieceElevation = elevation;
+        }
+        if (modelRotation != null || piecesCount == 1) {
+          pieceModelRotation = modelRotation;
+        }
+        if (staircase != null) { // Always Boolean.TRUE or Boolean.FALSE (not null) if piecesCount == 1
+          if (staircase) {
+            if (staircaseCutOutShape != null) {
+              pieceStaircaseCutOutShape = staircaseCutOutShape;
+            } else {
+              pieceStaircaseCutOutShape = DEFAULT_CUT_OUT_SHAPE;
+            }
+          } else {
+            pieceStaircaseCutOutShape = null;
+          }
+        } else if (staircaseCutOutShape != null && pieceStaircaseCutOutShape != null) {
+          pieceStaircaseCutOutShape = staircaseCutOutShape;
+        }
+        if (creator != null || piecesCount == 1) {
+          pieceCreator = creator;
+        }
+        if (resizable != null || piecesCount == 1) {
+          pieceResizable = resizable;
+        }
+        if (deformable != null || piecesCount == 1) {
+          pieceDeformable = deformable;
+        }
+        if (texturable != null || piecesCount == 1) {
+          pieceTexturable = texturable;
+        }
+        if (price != null || piecesCount == 1) {
+          piecePrice = price;
+        }
+        if (valueAddedTaxPercentage != null || piecesCount == 1) {
+          pieceValueAddedTaxPercentage = valueAddedTaxPercentage;
+        }
+        // Update mandatory localizable data
+        if (name != null) {
+          if (defaultFurnitureLanguage) {
+            pieceName = name;
+          } else {
+            localizedNames.put(this.furnitureLanguageController.getFurnitureLangauge(), name);
+          }
+        }
+        if (category != null) {
+          if (defaultFurnitureLanguage) {
+            pieceCategory = category;
+          } else {
+            localizedCategories.put(this.furnitureLanguageController.getFurnitureLangauge(), category.getName());
+          }
+        }
+        // Update not mandatory localizable data
+        // When only one piece is updated, data can be reset to empty 
+        if (description != null || piecesCount == 1) {
+          if (defaultFurnitureLanguage) {
+            pieceDescription = description;
+          } else {
+            localizedDescriptions.put(this.furnitureLanguageController.getFurnitureLangauge(), description);
+          }
+        }
+        if (information != null || piecesCount == 1) {
+          if (defaultFurnitureLanguage) {
+            pieceInformation = information;
+          } else {
+            localizedInformation.put(this.furnitureLanguageController.getFurnitureLangauge(), information);
+          }
+        }
+        if (tags != null || piecesCount == 1) {
+          if (defaultFurnitureLanguage) {
+            if (tags == null) {
+              pieceTags = new String [0];
+            } else {
+              pieceTags = tags;
+            }
+          } else {
+            localizedTags.put(this.furnitureLanguageController.getFurnitureLangauge(), tags);
+          }
+        }
+       
+        // Create update piece
         if (piece instanceof CatalogDoorOrWindow) {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
           piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-              pieceIcon, opening.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-              pieceIcon, light.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-              piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
-                pieceIcon, piece.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
-                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
             piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-                pieceIcon, piece.getPlanIcon(), pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
-                piecePrice, pieceValueAddedTaxPercentage, piece.getCurrency());
+                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           }
         }
         new FurnitureCatalog().add(pieceCategory, piece);
@@ -1303,39 +1381,44 @@ public class FurnitureController implements Controller {
         supportedLanguages.add(this.furnitureLanguageController.getFurnitureLangauge());
         for (String language : supportedLanguages) {
           if (!FurnitureLibrary.DEFAULT_LANGUAGE.equals(language)) {
-            boolean editedFurnitureLanguage = this.furnitureLanguageController.getFurnitureLangauge().equals(language);
-            Object localizedPieceName = name != null && editedFurnitureLanguage 
-                ? name : localizedNames.get(language);
+            Object localizedPieceName = localizedNames.get(language);
             if (localizedPieceName != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_NAME_PROPERTY, localizedPieceName);
             }
-            Object localizedPieceDescription = description != null && editedFurnitureLanguage 
-                ? description : localizedDescriptions.get(language);
+            Object localizedPieceDescription = localizedDescriptions.get(language);
             if (localizedPieceDescription != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY, localizedPieceDescription);
             }          
-            Object localizedPieceInformation = information != null && editedFurnitureLanguage 
-                ? information : localizedInformation.get(language);
+            Object localizedPieceInformation = localizedInformation.get(language);
             if (localizedPieceInformation != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, localizedPieceInformation);
             }          
-            Object localizedPieceTags = tags != null && editedFurnitureLanguage 
-                ? tags : localizedDescriptions.get(language);
+            Object localizedPieceTags = localizedTags.get(language);
             if (localizedPieceTags != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, localizedPieceTags);
             }          
-            Object localizedPieceCategory = category != null && editedFurnitureLanguage 
-                ? category.getName() : localizedCategories.get(language);
+            Object localizedPieceCategory = localizedCategories.get(language);
             if (localizedPieceCategory != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
                   piece, language, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, localizedPieceCategory);
             }
           }
         }
+      }
+    }
+  }
+
+  private void retrieveLocalizedData(CatalogPieceOfFurniture piece,
+                                     Map<String, Object> localizedNames,
+                                     String propertyKey) {
+    for (String language : this.furnitureLibrary.getSupportedLanguages()) {
+      Object pieceData = this.furnitureLibrary.getPieceOfFurnitureLocalizedData(piece, language, propertyKey);
+      if (pieceData != null) {
+        localizedNames.put(language, pieceData);
       }
     }
   }
