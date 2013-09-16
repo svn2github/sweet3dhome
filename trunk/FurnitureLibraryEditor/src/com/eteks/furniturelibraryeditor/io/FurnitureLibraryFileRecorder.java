@@ -34,6 +34,9 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,6 +79,7 @@ import com.eteks.sweethome3d.tools.URLContent;
 public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
   private static final String [] IGNORED_EXTENSIONS = {".max", ".lwo", ".dxf"};
   private static final Locale DEFAULT_LOCALE = new Locale("");
+  private static final NumberFormat DECIMAL_FORMAT = new DecimalFormat("0.#####", DecimalFormatSymbols.getInstance(Locale.ENGLISH));
   
   private static final String ID          = "id"; 
   private static final String NAME        = "name"; 
@@ -449,9 +453,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
               sashStartAngle += " ";
               sashEndAngle += " ";
             }
-            sashXAxis += sashes [sashIndex].getXAxis() * doorOrWindow.getWidth();
-            sashYAxis += sashes [sashIndex].getYAxis() * doorOrWindow.getDepth();
-            sashWidth += sashes [sashIndex].getWidth() * doorOrWindow.getWidth();
+            sashXAxis += DECIMAL_FORMAT.format(sashes [sashIndex].getXAxis() * doorOrWindow.getWidth());
+            sashYAxis += DECIMAL_FORMAT.format(sashes [sashIndex].getYAxis() * doorOrWindow.getDepth());
+            sashWidth += DECIMAL_FORMAT.format(sashes [sashIndex].getWidth() * doorOrWindow.getWidth());
             sashStartAngle += Math.round(Math.toDegrees(sashes [sashIndex].getStartAngle()) * 100) / 100;
             sashEndAngle += Math.round(Math.toDegrees(sashes [sashIndex].getEndAngle()) * 100) / 100;
           }          
@@ -482,15 +486,15 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
                 lightSourceDiameter += " ";
               }
             }
-            lightSourceX += lightSources [lightIndex].getX() * light.getWidth();
-            lightSourceY += lightSources [lightIndex].getY() * light.getDepth();
-            lightSourceZ += lightSources [lightIndex].getZ() * light.getHeight();
+            lightSourceX += DECIMAL_FORMAT.format(lightSources [lightIndex].getX() * light.getWidth());
+            lightSourceY += DECIMAL_FORMAT.format(lightSources [lightIndex].getY() * light.getDepth());
+            lightSourceZ += DECIMAL_FORMAT.format(lightSources [lightIndex].getZ() * light.getHeight());
             lightSourceColor += "#" + Integer.toHexString(lightSources [lightIndex].getColor());
             if (lightSources [lightIndex].getDiameter() != null) {
               if (lightSourceDiameter == null) {
                 lightSourceDiameter = "";
               }
-              lightSourceDiameter += lightSources [lightIndex].getDiameter() * light.getWidth();
+              lightSourceDiameter += DECIMAL_FORMAT.format(lightSources [lightIndex].getDiameter() * light.getWidth());
             }
           }          
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.LIGHT_SOURCE_X, i, lightSourceX);
@@ -715,6 +719,8 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (value.getClass().isArray()) {
         s = Arrays.toString((Object [])value);
         s = s.substring(1, s.length() - 1); // Remove brackets
+      } else if (value instanceof Float) {
+        s = DECIMAL_FORMAT.format(value);
       } else {
         s = value.toString();
       }
