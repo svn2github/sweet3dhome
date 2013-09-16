@@ -95,7 +95,7 @@ public class FurnitureLibraryTable extends JTable implements View {
     if (furnitureLibraryController != null) {
       addSelectionListeners(furnitureLibraryController);
       addMouseListener(furnitureLibraryController);
-      addFurnitureLanguageListener(furnitureLanguageController);
+      addFurnitureLanguageListener(furnitureLibrary, furnitureLanguageController);
       setTransferHandler(new TableTransferHandler(furnitureLibraryController));
     }
     addUserPreferencesListener(preferences);
@@ -225,7 +225,7 @@ public class FurnitureLibraryTable extends JTable implements View {
     int maxIndex = Integer.MIN_VALUE;
     for (CatalogPieceOfFurniture piece : selectedFurniture) {
       if (piece instanceof CatalogPieceOfFurniture) {
-        // Search index of piece in sorted table model
+        // Search index of piece in sorting table model
         int index = tableModel.getPieceOfFurnitureIndex((CatalogPieceOfFurniture)piece);
         // If the piece was found (during the addition of a piece to library, the model may not be updated yet) 
         if (index != -1) {
@@ -264,21 +264,34 @@ public class FurnitureLibraryTable extends JTable implements View {
   }
 
   /**
-   * Adds a listener on furniture language change to resort furniture.
+   * Adds listeners on furniture language change to resort furniture.
    */
-  private void addFurnitureLanguageListener(FurnitureLanguageController controller) {
-    controller.addPropertyChangeListener(FurnitureLanguageController.Property.FURNITURE_LANGUAGE, 
-        new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent ev) {
-            FurnitureLibraryTableModel tableModel = (FurnitureLibraryTableModel)getModel();
-            List<CatalogPieceOfFurniture> selectedFurniture = new ArrayList<CatalogPieceOfFurniture>();
-            for (int index : getSelectedRows()) {
-              selectedFurniture.add((CatalogPieceOfFurniture)tableModel.getValueAt(index, 0));
-            }
-            tableModel.sortFurniture();
-            setSelectedFurniture(selectedFurniture);
+  private void addFurnitureLanguageListener(FurnitureLibrary furnitureLibrary,
+                                            final FurnitureLanguageController controller) {
+    PropertyChangeListener listener = new PropertyChangeListener() {
+        private boolean sorting = false;
+        
+        public void propertyChange(PropertyChangeEvent ev) {
+          if (!sorting) {
+            // Postpone update in case of multiple localized data is set
+            sorting = true;
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                  FurnitureLibraryTableModel tableModel = (FurnitureLibraryTableModel)getModel();
+                  List<CatalogPieceOfFurniture> selectedFurniture = new ArrayList<CatalogPieceOfFurniture>();
+                  for (int index : getSelectedRows()) {
+                    selectedFurniture.add((CatalogPieceOfFurniture)tableModel.getValueAt(index, 0));
+                  }
+                  tableModel.sortFurniture();
+                  setSelectedFurniture(selectedFurniture);
+                  sorting = false;
+                }
+              });
           }
-        });
+        }
+      };
+    controller.addPropertyChangeListener(FurnitureLanguageController.Property.FURNITURE_LANGUAGE, listener);
+    furnitureLibrary.addPropertyChangeListener(FurnitureLibrary.Property.LOCALIZED_DATA, listener);
   }
 
   /**
@@ -353,60 +366,60 @@ public class FurnitureLibraryTable extends JTable implements View {
     private void addFurnitureLibraryListener(final FurnitureLibrary furnitureLibrary) {
       furnitureLibrary.addListener(new CollectionListener<CatalogPieceOfFurniture>() {
         public void collectionChanged(CollectionEvent<CatalogPieceOfFurniture> ev) {
-          CatalogPieceOfFurniture piece = ev.getItem();
-          int pieceIndex = ev.getIndex();
-          switch (ev.getType()) {
-            case ADD :
-              int insertionIndex = getPieceOfFurnitureInsertionIndex(piece, furnitureLibrary, pieceIndex);
-              if (insertionIndex != -1) {
-                sortedFurniture.add(insertionIndex, piece);
-                fireTableRowsInserted(insertionIndex, insertionIndex);
-              }
-              break;
-            case DELETE :
-              int deletionIndex = getPieceOfFurnitureDeletionIndex(piece, furnitureLibrary, pieceIndex);
-              if (deletionIndex != -1) {
-                sortedFurniture.remove(deletionIndex);
-                fireTableRowsDeleted(deletionIndex, deletionIndex);
-              }
-              break;
+            CatalogPieceOfFurniture piece = ev.getItem();
+            int pieceIndex = ev.getIndex();
+            switch (ev.getType()) {
+              case ADD :
+                int insertionIndex = getPieceOfFurnitureInsertionIndex(piece, furnitureLibrary, pieceIndex);
+                if (insertionIndex != -1) {
+                  sortedFurniture.add(insertionIndex, piece);
+                  fireTableRowsInserted(insertionIndex, insertionIndex);
+                }
+                break;
+              case DELETE :
+                int deletionIndex = getPieceOfFurnitureDeletionIndex(piece, furnitureLibrary, pieceIndex);
+                if (deletionIndex != -1) {
+                  sortedFurniture.remove(deletionIndex);
+                  fireTableRowsDeleted(deletionIndex, deletionIndex);
+                }
+                break;
+            }
           }
-        }
-
-        /**
-         * Returns the index of an added <code>piece</code> in furniture table, with a default index
-         * of <code>pieceIndex</code> if furniture library isn't sorted.
-         * If <code>piece</code> isn't added to furniture table, the returned value is
-         * equals to the insertion index where piece should be added.
-         */
-        private int getPieceOfFurnitureInsertionIndex(CatalogPieceOfFurniture piece, 
-                                                      FurnitureLibrary furnitureLibrary, 
-                                                      int pieceIndex) {
-          if (sortProperty == null) {
-            return pieceIndex;
-          } 
-          // Default case when piece is included and furniture is  sorted 
-          int sortedIndex = Collections.binarySearch(sortedFurniture, piece, getFurnitureComparator(sortProperty));
-          if (sortedIndex >= 0) {
-            return sortedIndex;
-          } else {
-            return -(sortedIndex + 1);
-          }              
-        }
-
-        /**
-         * Returns the index of an existing <code>piece</code> in furniture table, with a default index
-         * of <code>pieceIndex</code> if furniture isn't sorted.
-         */
-        private int getPieceOfFurnitureDeletionIndex(CatalogPieceOfFurniture piece, 
-                                                     FurnitureLibrary furnitureLibrary, 
-                                                     int pieceIndex) {
-          if (sortProperty == null) {
-            return pieceIndex;
-          } 
-          return getPieceOfFurnitureIndex(piece);              
-        }
-      });
+  
+          /**
+           * Returns the index of an added <code>piece</code> in furniture table, with a default index
+           * of <code>pieceIndex</code> if furniture library isn't sorting.
+           * If <code>piece</code> isn't added to furniture table, the returned value is
+           * equals to the insertion index where piece should be added.
+           */
+          private int getPieceOfFurnitureInsertionIndex(CatalogPieceOfFurniture piece, 
+                                                        FurnitureLibrary furnitureLibrary, 
+                                                        int pieceIndex) {
+            if (sortProperty == null) {
+              return pieceIndex;
+            } 
+            // Default case when piece is included and furniture is  sorting 
+            int sortedIndex = Collections.binarySearch(sortedFurniture, piece, getFurnitureComparator(sortProperty));
+            if (sortedIndex >= 0) {
+              return sortedIndex;
+            } else {
+              return -(sortedIndex + 1);
+            }              
+          }
+  
+          /**
+           * Returns the index of an existing <code>piece</code> in furniture table, with a default index
+           * of <code>pieceIndex</code> if furniture isn't sorting.
+           */
+          private int getPieceOfFurnitureDeletionIndex(CatalogPieceOfFurniture piece, 
+                                                       FurnitureLibrary furnitureLibrary, 
+                                                       int pieceIndex) {
+            if (sortProperty == null) {
+              return pieceIndex;
+            } 
+            return getPieceOfFurnitureIndex(piece);              
+          }
+        });
     }
 
     @Override
@@ -1348,7 +1361,7 @@ public class FurnitureLibraryTable extends JTable implements View {
 
     /**
      * Returns column header renderer that displays an ascending or a descending icon 
-     * when column is sorted, beside column name.
+     * when column is sorting, beside column name.
      */
     private TableCellRenderer getHeaderRenderer() {
       // Return a table renderer that displays the icon matching current sort
