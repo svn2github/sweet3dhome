@@ -411,7 +411,7 @@ public class FurnitureController implements Controller {
           }
         }
       }
-      setCategory(new FurnitureCategory(categoryName));
+      setCategory(category == null ? null : new FurnitureCategory(categoryName));
 
       Float width = firstPiece.getWidth();
       for (int i = 1; i < this.modifiedFurniture.size(); i++) {
