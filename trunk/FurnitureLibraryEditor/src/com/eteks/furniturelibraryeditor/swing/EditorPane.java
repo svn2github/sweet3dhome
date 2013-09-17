@@ -101,6 +101,9 @@ public class EditorPane extends JRootPane implements EditorView {
       actionMap.put(ActionType.OPEN, new ControllerAction(
           preferences, EditorPane.class, ActionType.OPEN.name(), true, 
           controller, "open"));
+      actionMap.put(ActionType.MERGE, new ControllerAction(
+          preferences, EditorPane.class, ActionType.MERGE.name(), true, 
+          controller, "merge"));
       actionMap.put(ActionType.SAVE, new ControllerAction(
           preferences, EditorPane.class, ActionType.SAVE.name(), true, 
           controller, "save"));
@@ -144,6 +147,7 @@ public class EditorPane extends JRootPane implements EditorView {
     toolBar.setFloatable(false);
     addActionToToolBar(EditorView.ActionType.NEW_LIBRARY, toolBar);
     addActionToToolBar(EditorView.ActionType.OPEN, toolBar);
+    addActionToToolBar(EditorView.ActionType.MERGE, toolBar);
     addActionToToolBar(EditorView.ActionType.SAVE, toolBar);
     addActionToToolBar(EditorView.ActionType.SAVE_AS, toolBar);
     toolBar.add(Box.createRigidArea(new Dimension(2, 2)));

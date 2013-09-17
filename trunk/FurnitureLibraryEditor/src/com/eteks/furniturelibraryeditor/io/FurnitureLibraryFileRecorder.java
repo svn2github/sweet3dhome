@@ -86,21 +86,40 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
   private static final String DESCRIPTION = "description"; 
   private static final String VERSION     = "version"; 
   private static final String LICENSE     = "license"; 
-  private static final String PROVIDER    = "provider"; 
+  private static final String PROVIDER    = "provider";
   
   /**
-   * Reads furniture library from the given file.
+   * Reads a furniture library from the given file, after clearing the given library.
    */
   public void readFurnitureLibrary(final FurnitureLibrary furnitureLibrary, 
-                                   String furnitureLibraryName,
+                                   String furnitureLibraryLocation,
                                    FurnitureLibraryUserPreferences preferences) throws RecorderException {
+    readFurnitureLibrary(furnitureLibrary, furnitureLibraryLocation, preferences, false);
+  }
+  
+  /**
+   * Merges a furniture library with one in the given file.
+   */
+  public void mergeFurnitureLibrary(FurnitureLibrary furnitureLibrary,
+                                    String furnitureLibraryLocation,
+                                    FurnitureLibraryUserPreferences preferences) throws RecorderException {
+    readFurnitureLibrary(furnitureLibrary, furnitureLibraryLocation, preferences, true);
+  }
+
+  /**
+   * Reads a furniture library from the given file.
+   */
+  private void readFurnitureLibrary(final FurnitureLibrary furnitureLibrary, 
+                                    String furnitureLibraryLocation, 
+                                    FurnitureLibraryUserPreferences preferences, 
+                                    final boolean mergeLibrary) throws RecorderException {
     try {
       // Retrieve furniture library with default reader and locale 
       Locale defaultLocale = Locale.getDefault();
       Locale.setDefault(DEFAULT_LOCALE);
       File furnitureLibraryFile = File.createTempFile("furniture", ".sh3f");
       furnitureLibraryFile.deleteOnExit();
-      copyFile(new File(furnitureLibraryName), furnitureLibraryFile);      
+      copyFile(new File(furnitureLibraryLocation), furnitureLibraryFile);
       URL furnitureLibraryUrl = furnitureLibraryFile.toURI().toURL();
       String furnitureResourcesLocalDirectory = preferences.getFurnitureResourcesLocalDirectory();
       URL furnitureResourcesUrlBase = furnitureResourcesLocalDirectory != null
@@ -113,7 +132,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
                                                                  int index,
                                                                  URL furnitureCatalogUrl,
                                                                  URL furnitureResourcesUrlBase) {
-            if (index == 1) {
+            if (index == 1 && !mergeLibrary) {
               furnitureLibrary.setId(getOptionalString(resource, ID));
               furnitureLibrary.setName(getOptionalString(resource, NAME));
               furnitureLibrary.setDescription(getOptionalString(resource, DESCRIPTION));
@@ -152,8 +171,10 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       }
 
       // Replace furniture by the one read
-      for (CatalogPieceOfFurniture piece : furnitureLibrary.getFurniture()) {
-        furnitureLibrary.deletePieceOfFurniture(piece);
+      if (!mergeLibrary) {
+        for (CatalogPieceOfFurniture piece : furnitureLibrary.getFurniture()) {
+          furnitureLibrary.deletePieceOfFurniture(piece);
+        }
       }
       for (CatalogPieceOfFurniture piece : furniture) {
         furnitureLibrary.addPieceOfFurniture(piece);
@@ -193,9 +214,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       
       Locale.setDefault(defaultLocale);
     } catch (IOException ex) {
-      throw new RecorderException("Invalid furniture library file " + furnitureLibraryName, ex);
+      throw new RecorderException("Invalid furniture library file " + furnitureLibraryLocation, ex);
     } catch (MissingResourceException ex) {
-      throw new RecorderException("Invalid furniture library file " + furnitureLibraryName, ex);
+      throw new RecorderException("Invalid furniture library file " + furnitureLibraryLocation, ex);
     }
   }
 
