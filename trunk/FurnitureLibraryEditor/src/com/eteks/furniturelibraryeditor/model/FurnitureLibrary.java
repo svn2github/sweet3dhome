@@ -78,6 +78,7 @@ public class FurnitureLibrary implements Library {
   
   private final PropertyChangeSupport                                    propertyChangeSupport;
   private List<CatalogPieceOfFurniture>                                  furniture;
+  private Map<String, CatalogPieceOfFurniture>                           furnitureByIds;
   private Map<CatalogPieceOfFurniture, Map<String, Map<String, Object>>> furnitureLocalizedData;
   private Set<String>                                                    supportedLanguages;
   private CollectionChangeSupport<CatalogPieceOfFurniture>               furnitureChangeSupport;
@@ -93,6 +94,7 @@ public class FurnitureLibrary implements Library {
   
   public FurnitureLibrary() {
     this.furniture = new ArrayList<CatalogPieceOfFurniture>();
+    this.furnitureByIds = new HashMap<String, CatalogPieceOfFurniture>();
     // Use IdentityHashMap to ignore equality between two CatalogPieceOfFurniture instances with same name 
     this.furnitureLocalizedData = new IdentityHashMap<CatalogPieceOfFurniture, Map<String, Map<String, Object>>>();
     this.supportedLanguages = new HashSet<String>();
@@ -160,6 +162,10 @@ public class FurnitureLibrary implements Library {
       this.noRequestSinceLastChange = true;
     }
     this.furniture.add(index, piece);
+    String pieceId = piece.getId();
+    if (pieceId != null) {
+      this.furnitureByIds.put(pieceId, piece);
+    }
     this.furnitureChangeSupport.fireCollectionChanged(piece, index, CollectionEvent.Type.ADD);
   }
 
@@ -178,6 +184,10 @@ public class FurnitureLibrary implements Library {
           this.noRequestSinceLastChange = true;
         }
         this.furniture.remove(index);
+        String pieceId = piece.getId();
+        if (pieceId != null) {
+          this.furnitureByIds.remove(pieceId);
+        }
         this.furnitureLocalizedData.remove(piece);
         if (this.furnitureLocalizedData.isEmpty()) {
           this.supportedLanguages.clear();
@@ -200,6 +210,13 @@ public class FurnitureLibrary implements Library {
       }
     }
     return -1;
+  }
+  
+  /**
+   * Returns the first piece of furniture with the given ID or <code>null</code>.
+   */
+  public CatalogPieceOfFurniture getPieceOfFurniture(String pieceId) {
+    return this.furnitureByIds.get(pieceId);
   }
   
   /**
