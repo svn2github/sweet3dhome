@@ -48,6 +48,7 @@ public abstract class FurnitureLibraryUserPreferences extends UserPreferences {
     this.editedProperties = new String [] {
         FurnitureLibrary.FURNITURE_ICON_PROPERTY,
         FurnitureLibrary.FURNITURE_NAME_PROPERTY,
+        FurnitureLibrary.FURNITURE_TAGS_PROPERTY,
         FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY,
         FurnitureLibrary.FURNITURE_CREATOR_PROPERTY,
         FurnitureLibrary.FURNITURE_WIDTH_PROPERTY,
