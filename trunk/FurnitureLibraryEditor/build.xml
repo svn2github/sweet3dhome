@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- build.xml
 
-     Furniture Library Editor, Copyright (c) 2012 Emmanuel PUYBARET / eTeks <info@eteks.com>
+     Furniture Library Editor, Copyright (c) 2010-2013 Emmanuel PUYBARET / eTeks <info@eteks.com>
      
      Ant build file. Available targets :
      - furnitureLibraryEditor              : Builds FurnitureLibraryEditor.jar file in build directory
