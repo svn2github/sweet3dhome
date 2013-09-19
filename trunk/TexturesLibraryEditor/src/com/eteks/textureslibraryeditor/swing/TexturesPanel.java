@@ -21,6 +21,7 @@ package com.eteks.textureslibraryeditor.swing;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -197,24 +198,31 @@ public class TexturesPanel extends JPanel implements DialogView {
           public Object getItem() {
             String name = (String)defaultEditor.getItem();
             name = name.trim();
-            // If category is empty, replace it by the last selected item
+            // If category is empty, replace it by the last selected item when the combo box isn't nullable
             if (name.length() == 0) {
-              setItem(nullableComboBox ? null : categoryComboBox.getSelectedItem());
-            } 
-            TexturesCategory category = new TexturesCategory(name);
-            // Search an existing category
-            int categoryIndex = Collections.binarySearch(categories, category);
-            if (categoryIndex >= 0) {
-              return categories.get(categoryIndex);
+              if (nullableComboBox) {
+                controller.setCategory(null);
+                return null;
+              } else {
+                Object selectedItem = categoryComboBox.getSelectedItem();
+                setItem(selectedItem);
+                return selectedItem;
+              }
+            } else {
+              TexturesCategory category = new TexturesCategory(name);
+              // Search an existing category
+              int categoryIndex = Collections.binarySearch(categories, category);
+              if (categoryIndex >= 0) {
+                return categories.get(categoryIndex);
+              }
+              // If no existing category was found, return a new one          
+              return category;
             }
-            // If no existing category was found, return a new one          
-            return category;
           }
         
           public void setItem(Object value) {
             if (value != null) {
-              TexturesCategory category = (TexturesCategory)value;
-              defaultEditor.setItem(category.getName());
+              defaultEditor.setItem(((TexturesCategory)value).getName());
             }
           }
   

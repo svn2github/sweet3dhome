@@ -409,23 +409,31 @@ public class FurniturePanel extends JPanel implements DialogView {
       this.categoryComboBox = new JComboBox(categoriesList.toArray());
       this.categoryComboBox.setEditable(true); 
       final ComboBoxEditor defaultEditor = this.categoryComboBox.getEditor();
-      // Change editor to edit category name
+      // Change editor to edit category name when the combo box isn't nullable
       this.categoryComboBox.setEditor(new ComboBoxEditor() {
           public Object getItem() {
             String name = (String)defaultEditor.getItem();
             name = name.trim();
             // If category is empty, replace it by the last selected item
             if (name.length() == 0) {
-              return nullableComboBox ? null : categoryComboBox.getSelectedItem();
-            } 
-            FurnitureCategory category = new FurnitureCategory(name);
-            // Search an existing category
-            int categoryIndex = Collections.binarySearch(categories, category);
-            if (categoryIndex >= 0) {
-              return categories.get(categoryIndex);
+              if (nullableComboBox) {
+                controller.setCategory(null);
+                return null;
+              } else {
+                Object selectedItem = categoryComboBox.getSelectedItem();
+                setItem(selectedItem);
+                return selectedItem;
+              }
+            } else {
+              FurnitureCategory category = new FurnitureCategory(name);
+              // Search an existing category
+              int categoryIndex = Collections.binarySearch(categories, category);
+              if (categoryIndex >= 0) {
+                return categories.get(categoryIndex);
+              }
+              // If no existing category was found, return a new one          
+              return category;
             }
-            // If no existing category was found, return a new one          
-            return category;
           }
         
           public void setItem(Object value) {
