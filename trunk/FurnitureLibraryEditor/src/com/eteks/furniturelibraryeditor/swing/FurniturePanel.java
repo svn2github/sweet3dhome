@@ -416,7 +416,7 @@ public class FurniturePanel extends JPanel implements DialogView {
             name = name.trim();
             // If category is empty, replace it by the last selected item
             if (name.length() == 0) {
-              setItem(nullableComboBox ? null : categoryComboBox.getSelectedItem());
+              return nullableComboBox ? null : categoryComboBox.getSelectedItem();
             } 
             FurnitureCategory category = new FurnitureCategory(name);
             // Search an existing category
@@ -430,8 +430,7 @@ public class FurniturePanel extends JPanel implements DialogView {
         
           public void setItem(Object value) {
             if (value != null) {
-              FurnitureCategory category = (FurnitureCategory)value;
-              defaultEditor.setItem(category.getName());
+              defaultEditor.setItem(((FurnitureCategory)value).getName());
             }
           }
   
