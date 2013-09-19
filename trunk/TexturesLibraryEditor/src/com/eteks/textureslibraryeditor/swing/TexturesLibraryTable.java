@@ -92,7 +92,7 @@ public class TexturesLibraryTable extends JTable implements View {
     if (texturesLibraryController != null) {
       addSelectionListeners(texturesLibraryController);
       addMouseListener(texturesLibraryController);
-      addTexturesLanguageListener(texturesLanguageController);
+      addTexturesLanguageListener(texturesLibrary, texturesLanguageController);
       setTransferHandler(new TableTransferHandler(texturesLibraryController));
     }
     addUserPreferencesListener(preferences);
@@ -263,19 +263,32 @@ public class TexturesLibraryTable extends JTable implements View {
   /**
    * Adds a listener on textures language change to resort textures.
    */
-  private void addTexturesLanguageListener(TexturesLanguageController controller) {
-    controller.addPropertyChangeListener(TexturesLanguageController.Property.TEXTURES_LANGUAGE, 
-        new PropertyChangeListener() {
-          public void propertyChange(PropertyChangeEvent ev) {
-            TexturesLibraryTableModel tableModel = (TexturesLibraryTableModel)getModel();
-            List<CatalogTexture> selectedTextures = new ArrayList<CatalogTexture>();
-            for (int index : getSelectedRows()) {
-              selectedTextures.add((CatalogTexture)tableModel.getValueAt(index, 0));
-            }
-            tableModel.sortTextures();
-            setSelectedTextures(selectedTextures);
+  private void addTexturesLanguageListener(TexturesLibrary texturesLibrary, 
+                                           TexturesLanguageController controller) {
+    PropertyChangeListener listener = new PropertyChangeListener() {
+        private boolean sorting = false;
+        
+        public void propertyChange(PropertyChangeEvent ev) {
+          if (!sorting) {
+            // Postpone update in case of multiple localized data is set
+            sorting = true;
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                  TexturesLibraryTableModel tableModel = (TexturesLibraryTableModel)getModel();
+                  List<CatalogTexture> selectedTextures = new ArrayList<CatalogTexture>();
+                  for (int index : getSelectedRows()) {
+                    selectedTextures.add((CatalogTexture)tableModel.getValueAt(index, 0));
+                  }
+                  tableModel.sortTextures();
+                  setSelectedTextures(selectedTextures);
+                  sorting = false;
+                }
+              });
           }
-        });
+        }
+      };
+    controller.addPropertyChangeListener(TexturesLanguageController.Property.TEXTURES_LANGUAGE, listener);
+    texturesLibrary.addPropertyChangeListener(TexturesLibrary.Property.LOCALIZED_DATA, listener);
   }
 
   /**
