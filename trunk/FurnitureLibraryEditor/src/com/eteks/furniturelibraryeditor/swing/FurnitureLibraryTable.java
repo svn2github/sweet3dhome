@@ -1361,7 +1361,7 @@ public class FurnitureLibraryTable extends JTable implements View {
 
     /**
      * Returns column header renderer that displays an ascending or a descending icon 
-     * when column is sorting, beside column name.
+     * when column is sorted, beside column name.
      */
     private TableCellRenderer getHeaderRenderer() {
       // Return a table renderer that displays the icon matching current sort
