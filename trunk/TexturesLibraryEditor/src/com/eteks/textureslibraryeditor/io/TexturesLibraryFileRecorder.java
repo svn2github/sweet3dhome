@@ -76,18 +76,37 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
   private static final String PROVIDER    = "provider"; 
   
   /**
-   * Reads textures library from the given file.
+   * Reads a textures library from the given file, after clearing the given library.
    */
   public void readTexturesLibrary(final TexturesLibrary texturesLibrary, 
-                                   String texturesLibraryName,
+                                  String texturesLibraryLocation,
+                                  TexturesLibraryUserPreferences preferences) throws RecorderException {
+    readTexturesLibrary(texturesLibrary, texturesLibraryLocation, preferences, false);
+  }
+  
+  /**
+   * Merges a textures library with one in the given file.
+   */
+  public void mergeTexturesLibrary(TexturesLibrary texturesLibrary,
+                                   String texturesLibraryLocation,
                                    TexturesLibraryUserPreferences preferences) throws RecorderException {
+    readTexturesLibrary(texturesLibrary, texturesLibraryLocation, preferences, true);
+  }
+
+  /**
+   * Reads a Textures library from the given file.
+   */
+  private void readTexturesLibrary(final TexturesLibrary texturesLibrary, 
+                                   String texturesLibraryLocation, 
+                                   TexturesLibraryUserPreferences preferences, 
+                                   final boolean mergeLibrary) throws RecorderException {
     try {
       // Retrieve textures library with default reader and locale 
       Locale defaultLocale = Locale.getDefault();
       Locale.setDefault(DEFAULT_LOCALE);
       File texturesLibraryFile = File.createTempFile("textures", ".sh3t");
       texturesLibraryFile.deleteOnExit();
-      copyFile(new File(texturesLibraryName), texturesLibraryFile);      
+      copyFile(new File(texturesLibraryLocation), texturesLibraryFile);      
       URL texturesLibraryUrl = texturesLibraryFile.toURI().toURL();
       String texturesResourcesLocalDirectory = preferences.getTexturesResourcesLocalDirectory();
       URL texturesResourcesUrlBase = texturesResourcesLocalDirectory != null
@@ -100,7 +119,7 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
                                                int index,
                                                URL texturesCatalogUrl,
                                                URL texturesResourcesUrlBase) {
-            if (index == 1) {
+            if (index == 1 && !mergeLibrary) {
               texturesLibrary.setId(getOptionalString(resource, ID));
               texturesLibrary.setName(getOptionalString(resource, NAME));
               texturesLibrary.setDescription(getOptionalString(resource, DESCRIPTION));
@@ -139,8 +158,10 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
       }
 
       // Replace textures by the one read
-      for (CatalogTexture texture : texturesLibrary.getTextures()) {
-        texturesLibrary.deleteTexture(texture);
+      if (!mergeLibrary) {
+        for (CatalogTexture texture : texturesLibrary.getTextures()) {
+          texturesLibrary.deleteTexture(texture);
+        }
       }
       for (CatalogTexture texture : textures) {
         texturesLibrary.addTexture(texture);
@@ -174,9 +195,9 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
       
       Locale.setDefault(defaultLocale);
     } catch (IOException ex) {
-      throw new RecorderException("Invalid textures library file " + texturesLibraryName, ex);
+      throw new RecorderException("Invalid textures library file " + texturesLibraryLocation, ex);
     } catch (MissingResourceException ex) {
-      throw new RecorderException("Invalid textures library file " + texturesLibraryName, ex);
+      throw new RecorderException("Invalid textures library file " + texturesLibraryLocation, ex);
     }
   }
 

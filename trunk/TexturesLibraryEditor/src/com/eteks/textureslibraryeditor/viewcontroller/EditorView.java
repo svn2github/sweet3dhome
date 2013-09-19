@@ -30,7 +30,7 @@ public interface EditorView extends View {
   /**
    * The actions proposed by this view.
    */
-  public enum ActionType {NEW_LIBRARY, OPEN, SAVE, SAVE_AS, PREFERENCES, EXIT, 
+  public enum ActionType {NEW_LIBRARY, OPEN, MERGE, SAVE, SAVE_AS, PREFERENCES, EXIT, 
                           IMPORT_TEXTURES, MODIFY_TEXTURES, DELETE, SELECT_ALL, ABOUT}
 
   /**

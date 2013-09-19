@@ -101,7 +101,7 @@ public class EditorController implements Controller {
    * Empties the textures library after saving and deleting the current one.
    */
   public void newLibrary() {
-    // Create a task that deletes home and run postCloseTask
+    // Create a task that resets textures library
     Runnable newLibraryTask = new Runnable() {
         public void run() {
           for (CatalogTexture texture : texturesLibrary.getTextures()) {
@@ -132,7 +132,7 @@ public class EditorController implements Controller {
    * Opens a textures library chosen by user after saving and deleting the current one.
    */
   public void open() {
-    // Create a task that deletes home and run postCloseTask
+    // Create a task that opens textures library
     Runnable openTask = new Runnable() {
         public void run() {
           String openTitle = preferences.getLocalizedString(EditorController.class, "openTitle");
@@ -151,6 +151,39 @@ public class EditorController implements Controller {
       }  
     }
     openTask.run();
+  }
+
+  /**
+   * Merges the current library with a textures library chosen by user.
+   */
+  public void merge() {
+    String mergeTitle = preferences.getLocalizedString(EditorController.class, "mergeTitle");
+    final String texturesLibraryLocation = contentManager.showOpenDialog(null, mergeTitle, 
+        ContentManager.ContentType.TEXTURES_LIBRARY);
+    if (texturesLibraryLocation != null) {
+      Callable<Void> saveTask = new Callable<Void>() {
+          public Void call() throws RecorderException {
+            recorder.mergeTexturesLibrary(texturesLibrary, texturesLibraryLocation, preferences);
+            texturesLibrary.setModified(true);
+            return null;
+          }
+        };
+      ThreadedTaskController.ExceptionHandler exceptionHandler = 
+          new ThreadedTaskController.ExceptionHandler() {
+            public void handleException(Exception ex) {
+              if (!(ex instanceof InterruptedRecorderException)) {
+                ex.printStackTrace();
+                if (ex instanceof RecorderException) {
+                  getView().showError(preferences.getLocalizedString(EditorController.class, "errorTitle"), 
+                      preferences.getLocalizedString(EditorController.class, "invalidFile"));
+                }
+              }
+            }
+          };
+      new ThreadedTaskController(saveTask, 
+          this.preferences.getLocalizedString(EditorController.class, "mergeMessage"), exceptionHandler, 
+          this.preferences, this.viewFactory).executeTask(getView());
+    }
   }
 
   /**

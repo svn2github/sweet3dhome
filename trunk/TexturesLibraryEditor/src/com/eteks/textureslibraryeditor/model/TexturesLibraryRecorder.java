@@ -27,16 +27,22 @@ import com.eteks.sweethome3d.model.RecorderException;
  */
 public interface TexturesLibraryRecorder {
   /**
-   * Reads textures library from the given file.
+   * Merges a textures library with the one at the given location.
+   */
+  public abstract void mergeTexturesLibrary(TexturesLibrary texturesLibrary,
+                                             String texturesLibraryLocation,
+                                             TexturesLibraryUserPreferences preferences) throws RecorderException;
+  /**
+   * Reads a textures library from the given location.
    */
   public abstract void readTexturesLibrary(TexturesLibrary texturesLibrary,
-                                           String texturesLibraryName,
+                                           String texturesLibraryLocation,
                                            TexturesLibraryUserPreferences preferences) throws RecorderException;
 
   /**
-   * Writes textures library in the <code>texturesLibraryName</code> file.  
+   * Writes textures library at the given location.  
    */
   public abstract void writeTexturesLibrary(TexturesLibrary texturesLibrary,
-                                            String texturesLibraryName,
+                                            String texturesLibraryLocation,
                                             TexturesLibraryUserPreferences preferences) throws RecorderException;
 }
