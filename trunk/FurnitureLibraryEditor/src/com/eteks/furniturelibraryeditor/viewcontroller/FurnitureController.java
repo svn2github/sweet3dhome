@@ -1271,7 +1271,7 @@ public class FurnitureController implements Controller {
           if (staircase) {
             if (staircaseCutOutShape != null) {
               pieceStaircaseCutOutShape = staircaseCutOutShape;
-            } else {
+            } else if (piecesCount == 1) {
               pieceStaircaseCutOutShape = DEFAULT_CUT_OUT_SHAPE;
             }
           } else {
