@@ -451,6 +451,10 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (piece.isDoorOrWindow()) {
         // Write properties specific to doors and windows
         DoorOrWindow doorOrWindow = (DoorOrWindow)piece;
+        if (doorOrWindow.getCutOutShape() != null) {
+          writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW_CUT_OUT_SHAPE, i, 
+              doorOrWindow.getCutOutShape());
+        }
         if (doorOrWindow.getWallThickness() != 1) {
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW_WALL_THICKNESS, i, 
               doorOrWindow.getWallThickness() * doorOrWindow.getDepth());

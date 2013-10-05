@@ -1347,7 +1347,7 @@ public class FurnitureController implements Controller {
           piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-              opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(), 
+              opening.getCutOutShape(), opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
@@ -1363,7 +1363,7 @@ public class FurnitureController implements Controller {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-                1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
+                null, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
