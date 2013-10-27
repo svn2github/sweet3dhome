@@ -12,7 +12,7 @@ localized in the following languages:
 + Finnish
 + French
 + German
-- Greek
++ Greek
 + Hungarian
 + Italian
 - Japanese
