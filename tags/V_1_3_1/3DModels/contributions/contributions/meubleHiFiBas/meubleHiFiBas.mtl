@@ -1,0 +1,16 @@
+# 3D model meubleHiFiBas.obj
+
+newmtl Bois
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 76.0
+map_Kd meubleHiFiBas_Bois.png
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0

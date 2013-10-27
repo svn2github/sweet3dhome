@@ -1,0 +1,12 @@
+#Produced by Art of Illusion 2.6, Thu Jan 08 20:20:29 EST 2009
+newmtl white
+Kd 0.85 0.85 0.85
+Ks 0.31 0.31 0.31
+Ka 0 0 0
+illum 2
+Ns 75
+newmtl Glass
+Kd 0.0468 0.0468 0.0468
+Ks 0 0 0
+Ka 0 0 0
+illum 1

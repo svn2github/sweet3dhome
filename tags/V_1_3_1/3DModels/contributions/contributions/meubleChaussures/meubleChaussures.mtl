@@ -1,0 +1,32 @@
+# 3D model meubleChaussures.obj
+
+newmtl hetre2
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd meubleChaussures_hetre2.jpg
+
+newmtl hetre3
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd meubleChaussures_hetre2.jpg
+
+newmtl GrisMat
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 65.0
+map_Kd meubleChaussures_GrisMat.png
+
+newmtl GrisPlast
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.65 0.65 0.65
+Ks 0.0 0.0 0.0
+Ns 1.0

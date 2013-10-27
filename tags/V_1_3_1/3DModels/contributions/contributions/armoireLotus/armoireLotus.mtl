@@ -1,0 +1,24 @@
+# 3D model armoireLotus.obj
+
+newmtl hetrenoir
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.13 0.13 0.13
+Ns 103.0
+map_Kd armoireLotus_hetrenoir.png
+
+newmtl verre
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 128.0
+map_Kd armoireLotus_verre.png
+
+newmtl Gris
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.89 0.89 0.89
+Ks 0.1 0.1 0.1
+Ns 62.0

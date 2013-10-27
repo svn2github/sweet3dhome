@@ -1,0 +1,13 @@
+#Produced by Art of Illusion 2.7.1, Mon Mar 29 12:01:04 EDT 2010
+newmtl bluey
+Kd 1 1 1
+map_Kd latticeChair2.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Metalish
+Kd 1 1 1
+map_Kd latticeChair1.jpg
+Ks 0 0 0
+Ka 0.22 0.22 0.22
+illum 1

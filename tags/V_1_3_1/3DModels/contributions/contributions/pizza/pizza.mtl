@@ -1,0 +1,13 @@
+# pizza.mtl produced by Art of Illusion 2.8.1, Fri Jun 21 11:40:43 CEST 2013
+#
+# Modeled by Thomas PUYBARET / eTeks under Art of Illusion for SweetHome3D
+# Copyright (c) 2013 Emmanuel PUYBARET / eTeks <info@eteks.com>
+#
+# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+#
+newmtl pizza
+Kd 1 1 1
+map_Kd pizza.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
