@@ -57,7 +57,8 @@ public class FurnitureController implements Controller {
    * The properties that may be edited by the view associated to this controller. 
    */
   public enum Property {ID, NAME, DESCRIPTION, INFORMATION, TAGS, GRADE, CREATION_DATE, CATEGORY, MODEL, ICON, 
-      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, TEXTURABLE, DOOR_OR_WINDOW, STAIRCASE, STAIRCASE_CUT_OUT_SHAPE, 
+      WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, TEXTURABLE, 
+      DOOR_OR_WINDOW, DOOR_OR_WINDOW_CUT_OUT_SHAPE, STAIRCASE, STAIRCASE_CUT_OUT_SHAPE, 
       MODEL_ROTATION, CREATOR, PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
   
   private static final Map<String, Property> PROPERTIES_MAP = new HashMap<String, Property>();
@@ -82,6 +83,7 @@ public class FurnitureController implements Controller {
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_RESIZABLE_PROPERTY, Property.RESIZABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_TEXTURABLE_PROPERTY, Property.TEXTURABLE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_PROPERTY, Property.DOOR_OR_WINDOW);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_CUT_OUT_SHAPE_PROPERTY, Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_STAIRCASE_CUT_OUT_SHAPE_PROPERTY, Property.STAIRCASE_CUT_OUT_SHAPE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY, Property.MODEL_ROTATION);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_PRICE_PROPERTY, Property.PRICE);
@@ -118,6 +120,7 @@ public class FurnitureController implements Controller {
   private Float             elevation;
   private Boolean           movable;
   private Boolean           doorOrWindow;
+  private String            doorOrWindowCutOutShape;
   private Boolean           staircase;
   private String            staircaseCutOutShape;
   private Boolean           backFaceShown;
@@ -261,7 +264,8 @@ public class FurnitureController implements Controller {
     } else {
       return this.editableProperties.contains(property)
           && property != Property.ID
-          && property != Property.ICON;
+          && property != Property.ICON
+          && property != Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE;
     }
   }
   
@@ -282,6 +286,7 @@ public class FurnitureController implements Controller {
       setElevation(null);
       setMovable(null);
       setDoorOrWindow(null);
+      setDoorOrWindowCutOutShape(null);
       setStaircase(null);
       setStaircaseCutOutShape(null);
       setBackFaceShown(null);
@@ -493,6 +498,21 @@ public class FurnitureController implements Controller {
         }
       }
       setDoorOrWindow(doorOrWindow);           
+
+      String doorOrWindowCutOutShape = firstPiece instanceof CatalogDoorOrWindow
+         ? ((CatalogDoorOrWindow)firstPiece).getCutOutShape()
+         : null;
+      if (doorOrWindowCutOutShape != null) {
+        for (int i = 1; i < this.modifiedFurniture.size(); i++) {
+          CatalogPieceOfFurniture piece = this.modifiedFurniture.get(i);
+          if (!(piece instanceof CatalogDoorOrWindow)
+              || !doorOrWindowCutOutShape.equals(((CatalogDoorOrWindow)piece).getCutOutShape())) {
+            doorOrWindowCutOutShape = null;
+            break;
+          }
+        }
+      }
+      setDoorOrWindowCutOutShape(doorOrWindowCutOutShape);
 
       Boolean staircase = firstPiece.getStaircaseCutOutShape() != null;
       for (int i = 1; i < this.modifiedFurniture.size(); i++) {
@@ -975,6 +995,25 @@ public class FurnitureController implements Controller {
   }
    
   /**
+   * Sets the shape used to cut out walls at its intersection with a door or a window.
+   */
+  public void setDoorOrWindowCutOutShape(String doorOrWindowCutOutShape) {
+    if (doorOrWindowCutOutShape != this.doorOrWindowCutOutShape
+        || (doorOrWindowCutOutShape != null && !doorOrWindowCutOutShape.equals(this.doorOrWindowCutOutShape))) {
+      String oldDoorOrWindowCutOutShape = this.doorOrWindowCutOutShape;
+      this.doorOrWindowCutOutShape = doorOrWindowCutOutShape;
+      this.propertyChangeSupport.firePropertyChange(Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE.name(), oldDoorOrWindowCutOutShape, doorOrWindowCutOutShape);
+    }
+  }
+  
+  /**
+   * Returns the shape used to cut out walls at its intersection with a door or a window.
+   */
+  public String getDoorOrWindowCutOutShape() {
+    return this.doorOrWindowCutOutShape;
+  }
+
+  /**
    * Sets whether furniture model is a staircase.
    */
   public void setStaircase(Boolean staircase) {
@@ -1179,6 +1218,7 @@ public class FurnitureController implements Controller {
       Boolean deformable = getDeformable();
       Boolean texturable = getTexturable();
       Boolean doorOrWindow = getDoorOrWindow();
+      String doorOrWindowCutOutShape = getDoorOrWindowCutOutShape();
       Boolean staircase = getStaircase();
       String staircaseCutOutShape = getStaircaseCutOutShape();
       float [][] modelRotation = getModelRotation();
@@ -1209,6 +1249,9 @@ public class FurnitureController implements Controller {
         float pieceElevation = piece.getElevation();
         boolean pieceMovable = piece.isMovable();
         float [][] pieceModelRotation = piece.getModelRotation();
+        String pieceDoorOrWindowCutOutShape = piece instanceof CatalogDoorOrWindow
+            ? ((CatalogDoorOrWindow)piece).getCutOutShape()
+            : null;
         String pieceStaircaseCutOutShape = piece.getStaircaseCutOutShape();
         String pieceCreator = piece.getCreator();
         boolean pieceResizable = piece.isResizable();
@@ -1266,6 +1309,9 @@ public class FurnitureController implements Controller {
         }
         if (modelRotation != null || piecesCount == 1) {
           pieceModelRotation = modelRotation;
+        }
+        if (pieceDoorOrWindowCutOutShape != null || piecesCount == 1) {
+          pieceDoorOrWindowCutOutShape = doorOrWindowCutOutShape;
         }
         if (staircase != null) { // Always Boolean.TRUE or Boolean.FALSE (not null) if piecesCount == 1
           if (staircase) {
@@ -1342,12 +1388,13 @@ public class FurnitureController implements Controller {
         }
        
         // Create update piece
-        if (piece instanceof CatalogDoorOrWindow) {
+        if (piece instanceof CatalogDoorOrWindow
+            && (doorOrWindow == null || doorOrWindow)) {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
           piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-              opening.getCutOutShape(), opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
+              pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
@@ -1363,7 +1410,7 @@ public class FurnitureController implements Controller {
             piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
-                null, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
+                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {

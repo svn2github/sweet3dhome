@@ -140,6 +140,8 @@ public class FurniturePanel extends JPanel implements DialogView {
   private JSpinner                  elevationSpinner;
   private NullableCheckBox          movableCheckBox;
   private NullableCheckBox          doorOrWindowCheckBox;
+  private JCheckBox                 doorOrWindowCustomizedCutOutShapeCheckBox;
+  private JTextField                doorOrWindowCustomizedCutOutShapeTextField;
   private NullableCheckBox          staircaseCheckBox;
   private JLabel                    staircaseCutOutShapeLabel;
   private JTextField                staircaseCutOutShapeTextField;
@@ -823,6 +825,11 @@ public class FurniturePanel extends JPanel implements DialogView {
         public void propertyChange(PropertyChangeEvent ev) {
           doorOrWindowCheckBox.setNullable(ev.getNewValue() == null);
           doorOrWindowCheckBox.setValue((Boolean)ev.getNewValue());
+          if (doorOrWindowCustomizedCutOutShapeCheckBox != null) {
+            doorOrWindowCustomizedCutOutShapeCheckBox.setEnabled(Boolean.TRUE.equals(ev.getNewValue()));
+            doorOrWindowCustomizedCutOutShapeTextField.setEnabled(Boolean.TRUE.equals(ev.getNewValue())
+                && controller.getDoorOrWindowCutOutShape() != null);
+          }
         }
       };
       controller.addPropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW, doorOrWindowChangeListener);
@@ -830,9 +837,79 @@ public class FurniturePanel extends JPanel implements DialogView {
           public void stateChanged(ChangeEvent ev) {
             controller.removePropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW, doorOrWindowChangeListener);
             controller.setDoorOrWindow(doorOrWindowCheckBox.getValue());
+            if (doorOrWindowCustomizedCutOutShapeCheckBox != null) {
+              doorOrWindowCustomizedCutOutShapeCheckBox.setEnabled(Boolean.TRUE.equals(doorOrWindowCheckBox.getValue()));
+              doorOrWindowCustomizedCutOutShapeTextField.setEnabled(Boolean.TRUE.equals(doorOrWindowCheckBox.getValue())
+                  && controller.getDoorOrWindowCutOutShape() != null);
+            }
             controller.addPropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW, doorOrWindowChangeListener);
           }
         });
+
+      if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE)) {
+        // Create cut out shape label and text field bound to DOOR_OR_WINDOW_CUT_OUT_SHAPE controller property
+        this.doorOrWindowCustomizedCutOutShapeCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+            FurniturePanel.class, "doorOrWindowCustomizedCutOutShapeCheckBox.text"));
+        this.doorOrWindowCustomizedCutOutShapeCheckBox.setEnabled(Boolean.TRUE.equals(controller.getDoorOrWindow()));
+        this.doorOrWindowCustomizedCutOutShapeCheckBox.setSelected(controller.getDoorOrWindowCutOutShape() != null);
+        final PropertyChangeListener customizedCutOutShapeChangeListener = new PropertyChangeListener() {
+          public void propertyChange(PropertyChangeEvent ev) {
+            doorOrWindowCustomizedCutOutShapeCheckBox.setSelected(controller.getDoorOrWindowCutOutShape() != null);
+            doorOrWindowCustomizedCutOutShapeTextField.setText(controller.getDoorOrWindowCutOutShape());
+            doorOrWindowCustomizedCutOutShapeTextField.setEnabled(controller.getDoorOrWindowCutOutShape() != null);
+          }
+        };
+        controller.addPropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE, customizedCutOutShapeChangeListener);
+        this.doorOrWindowCustomizedCutOutShapeCheckBox.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent ev) {
+              controller.removePropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE, customizedCutOutShapeChangeListener);
+              doorOrWindowCustomizedCutOutShapeTextField.setEnabled(doorOrWindowCustomizedCutOutShapeCheckBox.isSelected());
+              if (doorOrWindowCustomizedCutOutShapeCheckBox.isSelected()) {
+                String customizedCutOutShape = doorOrWindowCustomizedCutOutShapeTextField.getText();
+                controller.setDoorOrWindowCutOutShape(customizedCutOutShape != null && customizedCutOutShape.trim().length() > 0
+                    ? customizedCutOutShape
+                    : null);
+              } else {
+                controller.setDoorOrWindowCutOutShape(null);
+              }
+              controller.addPropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE, customizedCutOutShapeChangeListener);
+            }
+          });
+
+        this.doorOrWindowCustomizedCutOutShapeTextField = new JTextField(controller.getDoorOrWindowCutOutShape(), 15);
+        this.doorOrWindowCustomizedCutOutShapeTextField.setEnabled(controller.getDoorOrWindowCutOutShape() != null);
+        final Color defaultTextFieldColor = this.doorOrWindowCustomizedCutOutShapeTextField.getForeground();
+        this.doorOrWindowCustomizedCutOutShapeTextField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent ev) {
+              controller.removePropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE, customizedCutOutShapeChangeListener);
+              String customizedCutOutShape = doorOrWindowCustomizedCutOutShapeTextField.getText(); 
+              if (customizedCutOutShape == null || customizedCutOutShape.trim().length() == 0) {
+                controller.setDoorOrWindowCutOutShape(null);
+              } else {
+                controller.setDoorOrWindowCutOutShape(customizedCutOutShape);
+                try {
+                  PathParser pathParser = new PathParser();
+                  pathParser.setPathHandler(new AWTPathProducer());
+                  pathParser.parse(customizedCutOutShape);
+                  doorOrWindowCustomizedCutOutShapeTextField.setForeground(defaultTextFieldColor);
+                } catch (ParseException ex) {
+                  doorOrWindowCustomizedCutOutShapeTextField.setForeground(Color.RED);
+                } catch (NullPointerException ex) {
+                  doorOrWindowCustomizedCutOutShapeTextField.setForeground(Color.RED);
+                }
+              }
+              controller.addPropertyChangeListener(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE, customizedCutOutShapeChangeListener);
+            }
+      
+            public void insertUpdate(DocumentEvent ev) {
+              changedUpdate(ev);
+            }
+      
+            public void removeUpdate(DocumentEvent ev) {
+              changedUpdate(ev);
+            }
+          });
+      }
     }
     
     if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
@@ -860,9 +937,9 @@ public class FurniturePanel extends JPanel implements DialogView {
         });
 
       this.staircaseCutOutShapeLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurniturePanel.class, "staircaseCutOutShapeLabel.text"));
-      staircaseCutOutShapeLabel.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
-      this.staircaseCutOutShapeTextField = new JTextField(controller.getStaircaseCutOutShape(), 20);
-      staircaseCutOutShapeTextField.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
+      this.staircaseCutOutShapeLabel.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
+      this.staircaseCutOutShapeTextField = new JTextField(controller.getStaircaseCutOutShape(), 15);
+      this.staircaseCutOutShapeTextField.setEnabled(!Boolean.FALSE.equals(controller.getStaircase()));
       final PropertyChangeListener staircaseCutOutShapeChangeListener = new PropertyChangeListener() {
           public void propertyChange(PropertyChangeEvent ev) {
             staircaseCutOutShapeTextField.setText(controller.getStaircaseCutOutShape());
@@ -1170,6 +1247,10 @@ public class FurniturePanel extends JPanel implements DialogView {
         this.doorOrWindowCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
             FurniturePanel.class, "doorOrWindowCheckBox.mnemonic")).getKeyCode());
       }
+      if (this.doorOrWindowCustomizedCutOutShapeCheckBox != null) {
+        this.doorOrWindowCustomizedCutOutShapeCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
+            FurniturePanel.class, "doorOrWindowCustomizedCutOutShapeCheckBox.mnemonic")).getKeyCode());
+      }
       if (this.staircaseCheckBox != null) {
         this.staircaseCheckBox.setMnemonic(KeyStroke.getKeyStroke(preferences.getLocalizedString(
             FurniturePanel.class, "staircaseCheckBox.mnemonic")).getKeyCode());
@@ -1248,7 +1329,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
       add(iconPanel, new GridBagConstraints(
-          0, 0, 1, 15, 0, 0, GridBagConstraints.CENTER, 
+          0, 0, 1, 16, 0, 0, GridBagConstraints.CENTER, 
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 15), 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.ID)) {
@@ -1383,45 +1464,53 @@ public class FurniturePanel extends JPanel implements DialogView {
           4, 10, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
-    if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
-      add(this.doorOrWindowCheckBox, new GridBagConstraints(
-          1, 11, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.NONE, componentInsets, 0, 0));
-    }
     if (this.controller.isPropertyEditable(FurnitureController.Property.BACK_FACE_SHOWN)) {
       add(this.backFaceShownCheckBox, new GridBagConstraints(
-          2, 11, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 11, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
+    }
+    if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW)) {
+      add(this.doorOrWindowCheckBox, new GridBagConstraints(
+          1, 12, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          GridBagConstraints.NONE, componentInsets, 0, 0));
+      if (this.controller.isPropertyEditable(FurnitureController.Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE)) {
+        add(this.doorOrWindowCustomizedCutOutShapeCheckBox, new GridBagConstraints(
+            2, 12, 2, 1, 0, 0, labelAlignment, 
+            GridBagConstraints.NONE, OperatingSystem.isMacOSX() ? new Insets(0, 0, 5, 0) : labelInsets, 0, 0));
+        add(this.doorOrWindowCustomizedCutOutShapeTextField, new GridBagConstraints(
+            4, 12, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+            GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
+      }
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.STAIRCASE_CUT_OUT_SHAPE)) {
       add(this.staircaseCheckBox, new GridBagConstraints(
-          1, 12, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
       add(this.staircaseCutOutShapeLabel, new GridBagConstraints(
-          2, 12, 1, 1, 0, 0, labelAlignment, 
+          2, 13, 2, 1, 0, 0, labelAlignment, 
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.staircaseCutOutShapeTextField, new GridBagConstraints(
-          3, 12, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.MOVABLE)) {
       add(this.movableCheckBox, new GridBagConstraints(
-          1, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 14, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.RESIZABLE)) {
       add(this.resizableCheckBox, new GridBagConstraints(
-          2, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 14, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.DEFORMABLE)) {
       add(this.deformableCheckBox, new GridBagConstraints(
-          3, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          3, 14, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(FurnitureController.Property.TEXTURABLE)) {
       add(this.texturableCheckBox, new GridBagConstraints(
-          4, 13, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 14, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
   }

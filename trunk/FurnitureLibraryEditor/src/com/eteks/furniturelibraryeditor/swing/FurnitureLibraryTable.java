@@ -773,11 +773,12 @@ public class FurnitureLibraryTable extends JTable implements View {
     private void createColumns(FurnitureLibrary furnitureLibrary, 
                                FurnitureLibraryUserPreferences preferences, 
                                FurnitureLanguageController controller) {
-        // Create the list of custom columns
+      // Create the list of custom columns
       TableCellRenderer headerRenderer = getHeaderRenderer();
       for (String columnProperty : preferences.getEditedProperties()) {
         if (!FurnitureLibrary.FURNITURE_MODEL_ROTATION_PROPERTY.equals(columnProperty) 
-            && !FurnitureLibrary.FURNITURE_MODEL_PROPERTY.equals(columnProperty)) {
+            && !FurnitureLibrary.FURNITURE_MODEL_PROPERTY.equals(columnProperty) 
+            && !FurnitureLibrary.FURNITURE_DOOR_OR_WINDOW_CUT_OUT_SHAPE_PROPERTY.equals(columnProperty)) {
           TableColumn tableColumn = new TableColumn();
           tableColumn.setIdentifier(columnProperty);
           tableColumn.setHeaderValue(getColumnName(columnProperty, preferences));
