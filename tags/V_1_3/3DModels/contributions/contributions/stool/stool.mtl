@@ -1,0 +1,24 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+newmtl Stool_Object01_1
+illum 2
+Ka 0.65098 0.768628 0.811765
+Kd 0.65098 0.768628 0.811765
+Ks 0.8 0.8 0.8
+Ns 128
+
+newmtl Stool_Object01870_2
+illum 2
+Ka 0.098039 0.098039 0.098039
+Kd 0.098039 0.098039 0.098039
+Ks 0.8 0.8 0.8
+Ns 2.43318
+
+newmtl Stool_Object011048_3
+illum 2
+Ka 0 0 0
+Kd 0.08496 0.08496 0.08496
+Ks 0.5 0.5 0.5
+Ns 8
