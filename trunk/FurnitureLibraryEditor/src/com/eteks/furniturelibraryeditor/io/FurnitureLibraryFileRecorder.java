@@ -399,6 +399,8 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
         }
         contentBaseName = file;
       }
+      // Replace # and & symbols in file names to avoid wrongly encoded URLs
+      contentBaseName = contentBaseName.replace('%', '_').replace('#', '_');
       String iconContentEntryName = getContentEntry(piece.getIcon(), contentBaseName + ".png", 
           keepURLContentUnchanged, existingEntryNames);
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ICON, i, 
