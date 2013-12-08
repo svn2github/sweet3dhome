@@ -1,4 +1,4 @@
-LIBRARY OF 3D MODELS FOR SWEET HOME 3D v 1.3.1
+LIBRARY OF 3D MODELS FOR SWEET HOME 3D v 1.3.2
 ----------------------------------------------
 
 This archive contains a SH3F file that describes a set of additional 3D models for Sweet Home 3D, 
@@ -7,7 +7,7 @@ localized in the following languages:
 - Chinese (Simplified)
 + Chinese (Traditional)
 - Czech
-- Dutch
++ Dutch
 + English
 + Finnish
 + French
