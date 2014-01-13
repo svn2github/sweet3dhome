@@ -1,0 +1,30 @@
+# 3D model tabouretBar.obj
+
+newmtl Gris
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.82 0.82 0.82
+Ks 0.14 0.14 0.14
+Ns 103.0
+
+newmtl BoisClair
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd tabouretBar_BoisClair.jpg
+
+newmtl Noir
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.14 0.14 0.14
+Ks 0.0 0.0 0.0
+Ns 1.0
+
+newmtl GrisFonce
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.65 0.65 0.65
+Ks 0.0 0.0 0.0
+Ns 1.0
