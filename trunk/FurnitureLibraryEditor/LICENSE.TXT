@@ -1,4 +1,4 @@
-Furniture Library Editor, Copyright (c) 2010-2012 Emmanuel PUYBARET / eTeks
+Furniture Library Editor, Copyright (c) 2010-2014 Emmanuel PUYBARET / eTeks
 
 This software is licensed by eTeks under GNU General Public License.
 Please, read COPYING.TXT file for more details about GNU General Public License.
