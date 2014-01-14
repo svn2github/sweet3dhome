@@ -116,7 +116,20 @@
     <delete dir="build/classes"/>
   </target>
 
-  <target name="furnitureLibraryEditorJarExecutable" depends="furnitureLibraryEditor"
+  <target name="jogl-java3d"
+          description="Builds jogl-java3d.jar that contains only packages required for Java 3D">
+    <mkdir dir="build"/>
+    <zip destfile="build/macosx/java3d-1.6/jogl-java3d.jar">
+      <zipfileset src="../SweetHome3D/lib/macosx/java3d-1.6/jogl-all.jar"  
+        excludes="com/jogamp/graph/**, com/jogamp/newt/**, com/jogamp/opengl/swt/**, com/jogamp/opengl/util/**,
+                  javax/media/opengl/Debug*, javax/media/opengl/Trace*,
+                  jogamp/graph/**, jogamp/newt/**, jogl/util/data/av/**"/>
+      <zipfileset src="../SweetHome3D/lib/macosx/java3d-1.6/jogl-all.jar"  
+        includes="com/jogamp/opengl/util/GLBuffers.class"/>
+    </zip>
+  </target>
+
+  <target name="furnitureLibraryEditorJarExecutable" depends="furnitureLibraryEditor,jogl-java3d"
           description="Builds FurnitureLibraryEditor-version.jar executable Jar">
     <!-- Create FurnitureLibraryEditor-version.jar containing Furniture Library Editor classes and resources,
          and other DLLs and jars -->
@@ -130,6 +143,10 @@
         <include name="linux/**/*.so"/>
         <include name="macosx/**/*.jnilib"/>
         <include name="macosx/**/*.jar"/>
+        <exclude name="macosx/*/jogl-all.jar"/>
+      </fileset>
+      <fileset dir="build">
+        <include name="macosx/java3d-1.6/jogl-java3d.jar"/>
       </fileset>
       <fileset dir="../SweetHome3D/lib">
         <include name="*.jar"/>

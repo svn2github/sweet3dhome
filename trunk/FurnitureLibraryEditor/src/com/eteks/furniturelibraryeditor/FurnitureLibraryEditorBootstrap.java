@@ -62,7 +62,7 @@ public class FurnitureLibraryEditorBootstrap {
           "macosx/java3d-1.6/vecmath.jar",
           "macosx/java3d-1.6/j3dutils.jar",
           "macosx/java3d-1.6/gluegen.jar", 
-          "macosx/java3d-1.6/jogl-all.jar",
+          "macosx/java3d-1.6/jogl-java3d.jar",
           "macosx/java3d-1.6/libgluegen-rt.jnilib",
           "macosx/java3d-1.6/libjogl_desktop.jnilib",
           "macosx/java3d-1.6/libnativewindow_awt.jnilib",
