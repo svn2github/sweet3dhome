@@ -1271,8 +1271,6 @@ public class FurnitureController implements Controller {
         retrieveLocalizedData(piece, localizedTags, FurnitureLibrary.FURNITURE_TAGS_PROPERTY);
         Map<String, Object> localizedCategories = new HashMap<String, Object>();
         retrieveLocalizedData(piece, localizedCategories, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY);
-        // Remove piece from library
-        this.furnitureLibrary.deletePieceOfFurniture(piece);
 
         // Update mandatory not localizable data
         if (model != null) {
@@ -1387,11 +1385,12 @@ public class FurnitureController implements Controller {
           }
         }
        
-        // Create update piece
+        // Create updated piece
+        CatalogPieceOfFurniture updatedPiece;
         if (piece instanceof CatalogDoorOrWindow
             && (doorOrWindow == null || doorOrWindow)) {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
-          piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
+          updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
@@ -1399,7 +1398,7 @@ public class FurnitureController implements Controller {
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
-          piece = new CatalogLight(pieceId, pieceName, pieceDescription, 
+          updatedPiece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
@@ -1407,14 +1406,14 @@ public class FurnitureController implements Controller {
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
-            piece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
+            updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
-            piece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
+            updatedPiece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
@@ -1422,8 +1421,8 @@ public class FurnitureController implements Controller {
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           }
         }
-        new FurnitureCatalog().add(pieceCategory, piece);
-        this.furnitureLibrary.addPieceOfFurniture(piece, index);
+        new FurnitureCatalog().add(pieceCategory, updatedPiece);
+        this.furnitureLibrary.addPieceOfFurniture(updatedPiece, index);
         Set<String> supportedLanguages = new HashSet<String>(this.furnitureLibrary.getSupportedLanguages());
         supportedLanguages.add(this.furnitureLanguageController.getFurnitureLangauge());
         for (String language : supportedLanguages) {
@@ -1431,30 +1430,33 @@ public class FurnitureController implements Controller {
             Object localizedPieceName = localizedNames.get(language);
             if (localizedPieceName != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
-                  piece, language, FurnitureLibrary.FURNITURE_NAME_PROPERTY, localizedPieceName);
+                  updatedPiece, language, FurnitureLibrary.FURNITURE_NAME_PROPERTY, localizedPieceName);
             }
             Object localizedPieceDescription = localizedDescriptions.get(language);
             if (localizedPieceDescription != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
-                  piece, language, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY, localizedPieceDescription);
+                  updatedPiece, language, FurnitureLibrary.FURNITURE_DESCRIPTION_PROPERTY, localizedPieceDescription);
             }          
             Object localizedPieceInformation = localizedInformation.get(language);
             if (localizedPieceInformation != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
-                  piece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, localizedPieceInformation);
+                  updatedPiece, language, FurnitureLibrary.FURNITURE_INFORMATION_PROPERTY, localizedPieceInformation);
             }          
             Object localizedPieceTags = localizedTags.get(language);
             if (localizedPieceTags != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
-                  piece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, localizedPieceTags);
+                  updatedPiece, language, FurnitureLibrary.FURNITURE_TAGS_PROPERTY, localizedPieceTags);
             }          
             Object localizedPieceCategory = localizedCategories.get(language);
             if (localizedPieceCategory != null) {
               this.furnitureLibrary.setPieceOfFurnitureLocalizedData(
-                  piece, language, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, localizedPieceCategory);
+                  updatedPiece, language, FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, localizedPieceCategory);
             }
           }
         }
+        
+        // Remove old piece from library
+        this.furnitureLibrary.deletePieceOfFurniture(piece);
       }
     }
   }
