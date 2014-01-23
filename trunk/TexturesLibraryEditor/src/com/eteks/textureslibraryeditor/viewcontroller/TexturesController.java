@@ -515,8 +515,6 @@ public class TexturesController implements Controller {
         retrieveLocalizedData(texture, localizedNames, TexturesLibrary.TEXTURES_NAME_PROPERTY);
         Map<String, Object> localizedCategories = new HashMap<String, Object>();
         retrieveLocalizedData(texture, localizedCategories, TexturesLibrary.TEXTURES_CATEGORY_PROPERTY);
-        // Remove texture from library
-        this.texturesLibrary.deleteTexture(texture);
         
         // Update mandatory not localizable data
         if (image != null) {
@@ -557,10 +555,10 @@ public class TexturesController implements Controller {
         }
        
         // Create update texture
-        texture = new CatalogTexture(textureId, textureName, textureImage, textureWidth, textureHeight, textureCreator);
+        CatalogTexture updatedTexture = new CatalogTexture(textureId, textureName, textureImage, textureWidth, textureHeight, textureCreator);
         
-        new TexturesCatalog().add(textureCategory, texture);
-        this.texturesLibrary.addTexture(texture, index);
+        new TexturesCatalog().add(textureCategory, updatedTexture);
+        this.texturesLibrary.addTexture(updatedTexture, index);
         Set<String> supportedLanguages = new HashSet<String>(this.texturesLibrary.getSupportedLanguages());
         supportedLanguages.add(this.texturesLanguageController.getTexturesLangauge());
         for (String language : supportedLanguages) {
@@ -568,15 +566,18 @@ public class TexturesController implements Controller {
             Object localizedTextureName = localizedNames.get(language);
             if (localizedTextureName != null) {
               this.texturesLibrary.setTextureLocalizedData(
-                  texture, language, TexturesLibrary.TEXTURES_NAME_PROPERTY, localizedTextureName);
+                  updatedTexture, language, TexturesLibrary.TEXTURES_NAME_PROPERTY, localizedTextureName);
             }
             Object localizedTextureCategory = localizedCategories.get(language);
             if (localizedTextureCategory != null) {
               this.texturesLibrary.setTextureLocalizedData(
-                  texture, language, TexturesLibrary.TEXTURES_CATEGORY_PROPERTY, localizedTextureCategory);
+                  updatedTexture, language, TexturesLibrary.TEXTURES_CATEGORY_PROPERTY, localizedTextureCategory);
             }
           }
         }
+        
+        // Remove old texture from library
+        this.texturesLibrary.deleteTexture(texture);
       }
     }
   }
