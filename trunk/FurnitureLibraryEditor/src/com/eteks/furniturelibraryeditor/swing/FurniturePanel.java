@@ -93,7 +93,6 @@ import com.eteks.sweethome3d.model.FurnitureCategory;
 import com.eteks.sweethome3d.model.HomePieceOfFurniture;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.swing.AutoCommitSpinner;
-import com.eteks.sweethome3d.swing.ImportedFurnitureWizardStepsPanel;
 import com.eteks.sweethome3d.swing.ModelPreviewComponent;
 import com.eteks.sweethome3d.swing.NullableCheckBox;
 import com.eteks.sweethome3d.swing.NullableSpinner;
@@ -1163,7 +1162,9 @@ public class FurniturePanel extends JPanel implements DialogView {
                   EventQueue.invokeLater(new Runnable() {
                       public void run() {
                         JOptionPane.showMessageDialog(SwingUtilities.getRootPane(FurniturePanel.this), 
-                            preferences.getLocalizedString(ImportedFurnitureWizardStepsPanel.class, "modelChoiceErrorLabel.text"));
+                            preferences.getLocalizedString(FurniturePanel.class, "modelError"),
+                            preferences.getLocalizedString(FurniturePanel.class, "errorTitle"),
+                            JOptionPane.ERROR_MESSAGE);
                       }
                     });
                 }
@@ -1177,7 +1178,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           @Override
           public void actionPerformed(ActionEvent ev) {
             String modelName = controller.getContentManager().showOpenDialog(FurniturePanel.this, 
-                preferences.getLocalizedString(ImportedFurnitureWizardStepsPanel.class, "modelChoiceDialog.title"), 
+                preferences.getLocalizedString(FurniturePanel.class, "modelChoiceDialog.title"), 
                 ContentManager.ContentType.MODEL);
             if (modelName != null) {
               controller.setModel(modelName);
