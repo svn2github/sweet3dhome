@@ -44,6 +44,7 @@ import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.FurnitureCatalog;
 import com.eteks.sweethome3d.model.FurnitureCategory;
 import com.eteks.sweethome3d.model.Sash;
+import com.eteks.sweethome3d.viewcontroller.ContentManager;
 import com.eteks.sweethome3d.viewcontroller.Controller;
 import com.eteks.sweethome3d.viewcontroller.DialogView;
 import com.eteks.sweethome3d.viewcontroller.View;
@@ -73,6 +74,7 @@ public class FurnitureController implements Controller {
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CREATION_DATE_PROPERTY, Property.CREATION_DATE);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CATEGORY_PROPERTY, Property.CATEGORY);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_CREATOR_PROPERTY, Property.CREATOR);
+    PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_MODEL_PROPERTY, Property.MODEL);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_ICON_PROPERTY, Property.ICON);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_WIDTH_PROPERTY, Property.WIDTH);
     PROPERTIES_MAP.put(FurnitureLibrary.FURNITURE_DEPTH_PROPERTY, Property.DEPTH);
@@ -98,6 +100,7 @@ public class FurnitureController implements Controller {
   private final FurnitureLibraryUserPreferences preferences;
   private final FurnitureLanguageController     furnitureLanguageController;
   private final EditorViewFactory               viewFactory;
+  private final ContentManager                  contentManager;
   private final PropertyChangeSupport           propertyChangeSupport;
   private DialogView                            homeFurnitureView;
 
@@ -145,12 +148,14 @@ public class FurnitureController implements Controller {
                              List<CatalogPieceOfFurniture> modifiedFurniture,
                              FurnitureLibraryUserPreferences preferences, 
                              FurnitureLanguageController furnitureLanguageController,
-                             EditorViewFactory viewFactory) {
+                             EditorViewFactory viewFactory,
+                             ContentManager    contentManager) {
     this.furnitureLibrary = furnitureLibrary;
     this.modifiedFurniture = modifiedFurniture;
     this.preferences = preferences;
     this.furnitureLanguageController = furnitureLanguageController;
     this.viewFactory = viewFactory;
+    this.contentManager = contentManager;
     this.propertyChangeSupport = new PropertyChangeSupport(this);
     
     this.editableProperties = new HashSet<Property>();
@@ -254,6 +259,13 @@ public class FurnitureController implements Controller {
   }
 
   /**
+   * Returns the content manager of this controller.
+   */
+  public ContentManager getContentManager() {
+    return this.contentManager;
+  }
+  
+  /**
    * Returns <code>true</code> if the given <code>property</code> is editable.
    * Depending on whether a property is editable or not, the view associated to this controller
    * may render it differently.
@@ -264,6 +276,7 @@ public class FurnitureController implements Controller {
     } else {
       return this.editableProperties.contains(property)
           && property != Property.ID
+          && property != Property.MODEL
           && property != Property.ICON
           && property != Property.DOOR_OR_WINDOW_CUT_OUT_SHAPE;
     }
@@ -278,7 +291,7 @@ public class FurnitureController implements Controller {
       setName(null);
       setDescription(null);
       setCategory(null);
-      setModel(null);
+      setModel((Content)null);
       setIcon(null);
       setWidth(null);
       setDepth(null);
@@ -308,7 +321,7 @@ public class FurnitureController implements Controller {
         this.editableProperties.add(Property.BACK_FACE_SHOWN);
       } else {
         setIcon(null);
-        setModel(null);
+        setModel((Content)null);
         this.editableProperties.remove(Property.BACK_FACE_SHOWN);
       }
       
@@ -814,6 +827,32 @@ public class FurnitureController implements Controller {
    */
   public Content getModel() {
     return this.model;
+  }
+
+  /**
+   * Reads the 3D model from the given parameter and updates the model if it's valid.
+   */
+  public void setModel(String modelName) {
+    final FurnitureLibrary furnitureLibrary = new FurnitureLibrary();
+    Runnable postImportTask = new Runnable() {
+        public void run() {
+          List<CatalogPieceOfFurniture> furniture = furnitureLibrary.getFurniture();
+          if (!furniture.isEmpty()) {
+            CatalogPieceOfFurniture piece = furniture.get(0);
+            setModel(piece.getModel());
+            setModelRotation(piece.getModelRotation());
+            // Reset object size 
+            boolean proportional = isProportional();
+            setProportional(false);
+            setWidth(piece.getWidth());
+            setDepth(piece.getDepth());
+            setHeight(piece.getHeight());
+            setProportional(proportional);
+          }
+        }
+      };
+    new ImportFurnitureController(furnitureLibrary, new String [] {modelName}, postImportTask, 
+        this.preferences, this.viewFactory, this.contentManager).executeTask(getView());
   }
 
   /**

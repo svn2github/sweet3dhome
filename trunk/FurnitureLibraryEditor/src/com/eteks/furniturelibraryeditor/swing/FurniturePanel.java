@@ -24,10 +24,14 @@ import java.awt.Component;
 import java.awt.ComponentOrientation;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -36,6 +40,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -66,6 +71,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -87,12 +93,14 @@ import com.eteks.sweethome3d.model.FurnitureCategory;
 import com.eteks.sweethome3d.model.HomePieceOfFurniture;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.swing.AutoCommitSpinner;
+import com.eteks.sweethome3d.swing.ImportedFurnitureWizardStepsPanel;
 import com.eteks.sweethome3d.swing.ModelPreviewComponent;
 import com.eteks.sweethome3d.swing.NullableCheckBox;
 import com.eteks.sweethome3d.swing.NullableSpinner;
 import com.eteks.sweethome3d.swing.ResourceAction;
 import com.eteks.sweethome3d.swing.SwingTools;
 import com.eteks.sweethome3d.tools.OperatingSystem;
+import com.eteks.sweethome3d.viewcontroller.ContentManager;
 import com.eteks.sweethome3d.viewcontroller.DialogView;
 import com.eteks.sweethome3d.viewcontroller.View;
 
@@ -122,6 +130,7 @@ public class FurniturePanel extends JPanel implements DialogView {
   private JLabel                    gradeLabel;
   private JSpinner                  gradeSpinner;
   private IconPreviewComponent      iconComponent;
+  private JButton                   changeModelButton;
   private JButton                   turnLeftButton;
   private JButton                   turnRightButton;
   private JButton                   turnUpButton;
@@ -174,7 +183,7 @@ public class FurniturePanel extends JPanel implements DialogView {
   /**
    * Creates and initializes components and spinners model.
    */
-  private void createComponents(UserPreferences preferences, 
+  private void createComponents(final UserPreferences preferences, 
                                 final FurnitureController controller) {
     // Get unit name matching current unit 
     String unitName = preferences.getLengthUnit().getName();
@@ -1070,7 +1079,6 @@ public class FurniturePanel extends JPanel implements DialogView {
     
     if (this.controller.isPropertyEditable(FurnitureController.Property.ICON)) {
       this.iconComponent = new IconPreviewComponent(controller, preferences);
-      
       this.turnLeftButton = new JButton(new ResourceAction(preferences, FurniturePanel.class, "TURN_LEFT", true) {
           @Override
           public void actionPerformed(ActionEvent ev) {
@@ -1109,6 +1117,71 @@ public class FurniturePanel extends JPanel implements DialogView {
             downRotation.rotX(Math.PI / 2);
             downRotation.mul(oldTransform);
             updateModelRotation(downRotation);
+          }
+        });
+    }
+
+    if (this.controller.isPropertyEditable(FurnitureController.Property.MODEL)) {
+      if (this.iconComponent != null) {
+        controller.addPropertyChangeListener(FurnitureController.Property.MODEL, 
+            new PropertyChangeListener() {
+              public void propertyChange(PropertyChangeEvent ev) {
+                resetIcon(true);
+              }
+            });
+        // Add a transfer handler to model preview component to let user drag and drop a file in component
+        this.iconComponent.setTransferHandler(new TransferHandler() {
+              @Override
+              public boolean canImport(JComponent comp, DataFlavor [] flavors) {
+                return Arrays.asList(flavors).contains(DataFlavor.javaFileListFlavor);
+              }
+              
+              @Override
+              public boolean importData(JComponent comp, Transferable transferedFiles) {
+                boolean success = false;
+                try {
+                  List<File> files = (List<File>)transferedFiles.getTransferData(DataFlavor.javaFileListFlavor);
+                  for (File file : files) {
+                    final String modelName = file.getAbsolutePath();
+                    // Try to import the first file that would be accepted by content manager
+                    if (controller.getContentManager().isAcceptable(modelName, ContentManager.ContentType.MODEL)) {
+                      EventQueue.invokeLater(new Runnable() {
+                          public void run() {
+                            controller.setModel(modelName);
+                          }
+                        });
+                      success = true;
+                      break;
+                    }
+                  }
+                } catch (UnsupportedFlavorException ex) {
+                  // No success
+                } catch (IOException ex) {
+                  // No success
+                }
+                if (!success) {
+                  EventQueue.invokeLater(new Runnable() {
+                      public void run() {
+                        JOptionPane.showMessageDialog(SwingUtilities.getRootPane(FurniturePanel.this), 
+                            preferences.getLocalizedString(ImportedFurnitureWizardStepsPanel.class, "modelChoiceErrorLabel.text"));
+                      }
+                    });
+                }
+                return success;
+              }
+            });
+        this.iconComponent.setBorder(SwingTools.getDropableComponentBorder());
+      }
+      
+      this.changeModelButton = new JButton(new ResourceAction(preferences, FurniturePanel.class, "CHANGE_MODEL", true) {
+          @Override
+          public void actionPerformed(ActionEvent ev) {
+            String modelName = controller.getContentManager().showOpenDialog(FurniturePanel.this, 
+                preferences.getLocalizedString(ImportedFurnitureWizardStepsPanel.class, "modelChoiceDialog.title"), 
+                ContentManager.ContentType.MODEL);
+            if (modelName != null) {
+              controller.setModel(modelName);
+            }
           }
         });
     }
@@ -1298,8 +1371,13 @@ public class FurniturePanel extends JPanel implements DialogView {
       iconPanel.add(new JLabel(), new GridBagConstraints(
           0, 0, 1, 1, 0, 1, GridBagConstraints.CENTER, 
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+      if (this.controller.isPropertyEditable(FurnitureController.Property.MODEL)) {
+        iconPanel.add(this.changeModelButton, new GridBagConstraints(
+            0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, 
+            GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+      }
       iconPanel.add(this.iconComponent, new GridBagConstraints(
-          0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, 
+          0, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, 
           GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
       if (this.controller.isPropertyEditable(FurnitureController.Property.MODEL_ROTATION)) {
         JPanel rotationButtonsPanel = new JPanel(new GridBagLayout()) {
@@ -1321,11 +1399,11 @@ public class FurniturePanel extends JPanel implements DialogView {
             1, 2, 1, 1, 0, 0, GridBagConstraints.NORTH, 
             GridBagConstraints.NONE, new Insets(0, 0, 2, 0), 0, 0));
         iconPanel.add(rotationButtonsPanel, new GridBagConstraints(
-            0, 2, 1, 1, 0, 0, GridBagConstraints.CENTER, 
+            0, 3, 1, 1, 0, 0, GridBagConstraints.CENTER, 
             GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
       }
       iconPanel.add(new JLabel(), new GridBagConstraints(
-          0, 3, 1, 1, 0, 1, GridBagConstraints.CENTER, 
+          0, 4, 1, 1, 0, 1, GridBagConstraints.CENTER, 
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
       add(iconPanel, new GridBagConstraints(
