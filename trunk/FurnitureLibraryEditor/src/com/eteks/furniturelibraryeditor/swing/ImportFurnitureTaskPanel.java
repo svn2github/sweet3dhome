@@ -66,8 +66,8 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
   private boolean                     firstRendering = true;
 
   public ImportFurnitureTaskPanel(String taskMessage,
-                              FurnitureLibraryUserPreferences preferences,
-                              ThreadedTaskController controller) {
+                                  FurnitureLibraryUserPreferences preferences,
+                                  ThreadedTaskController controller) {
     super(taskMessage, preferences, controller);
     this.preferences = preferences;
     this.iconPreviewComponent = new ModelPreviewComponent();
