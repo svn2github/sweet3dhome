@@ -126,9 +126,24 @@ public class ImportTexturesTaskPanel extends ThreadedTaskPanel implements Import
       } else {
         key = null;
       }
-      textureName = Character.toUpperCase(textureName.charAt(0)) + textureName.substring(1); 
+      // Compute a more human readable name with spaces instead of hyphens and without camel case and trailing digit 
+      String displayedName = "" + Character.toUpperCase(textureName.charAt(0));
+      for (int i = 1; i < textureName.length(); i++) {
+        char c = textureName.charAt(i);
+        if (c == '-' || c == '_') {
+          displayedName += ' ';
+        } else if (!Character.isDigit(c) || i < textureName.length() - 1) {
+          // Remove camel case
+          if ((Character.isUpperCase(c) || Character.isDigit(c)) 
+              && Character.isLowerCase(textureName.charAt(i - 1))) {
+            displayedName += ' ';
+            c = Character.toLowerCase(c);
+          }
+          displayedName += c;
+        }
+      }
       CatalogTexture texture = new CatalogTexture(key, 
-          textureName, imageContent, image.getWidth() / 10f, image.getHeight() / 10f, this.preferences.getDefaultCreator());
+          displayedName, imageContent, image.getWidth() / 10f, image.getHeight() / 10f, this.preferences.getDefaultCreator());
       TexturesCategory defaultCategory = new TexturesCategory(
           this.preferences.getLocalizedString(ImportTexturesTaskPanel.class, "defaultCategory"));
       new TexturesCatalog().add(defaultCategory , texture);
