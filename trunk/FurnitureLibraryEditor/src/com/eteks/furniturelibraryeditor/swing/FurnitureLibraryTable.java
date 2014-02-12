@@ -50,6 +50,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.JToolTip;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -72,8 +73,8 @@ import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.SelectionEvent;
 import com.eteks.sweethome3d.model.SelectionListener;
 import com.eteks.sweethome3d.model.UserPreferences;
+import com.eteks.sweethome3d.swing.FurnitureToolTip;
 import com.eteks.sweethome3d.swing.IconManager;
-import com.eteks.sweethome3d.tools.URLContent;
 import com.eteks.sweethome3d.viewcontroller.View;
 
 /**
@@ -82,6 +83,7 @@ import com.eteks.sweethome3d.viewcontroller.View;
  */
 public class FurnitureLibraryTable extends JTable implements View {
   private ListSelectionListener tableSelectionListener;
+  private FurnitureToolTip      toolTip;
 
   public FurnitureLibraryTable(FurnitureLibrary furnitureLibrary,
                                FurnitureLibraryUserPreferences preferences,
@@ -89,6 +91,7 @@ public class FurnitureLibraryTable extends JTable implements View {
                                FurnitureLanguageController furnitureLanguageController) {
     super(new FurnitureLibraryTableModel(furnitureLibrary, furnitureLanguageController),
         new FurnitureLibraryTableColumnModel(furnitureLibrary, preferences, furnitureLanguageController));
+    this.toolTip = new FurnitureToolTip(FurnitureToolTip.DisplayedInformation.ICON, preferences);
     addTableHeaderListener();
     setAutoResizeMode(AUTO_RESIZE_OFF);
     updateTableColumnsWidth();
@@ -319,7 +322,21 @@ public class FurnitureLibraryTable extends JTable implements View {
   }
 
   /**
-   * Returns a tooltip for furniture pieces described in this table.
+   * Returns the tool tip displayed by this tree.
+   */
+  @Override
+  public JToolTip createToolTip() {    
+    if (this.toolTip.isTipTextComplete()) {
+      // Use toolTip object only for its text returned in getToolTipText
+      return super.createToolTip();
+    } else {
+      this.toolTip.setComponent(this);
+      return this.toolTip;
+    }
+  }
+
+  /**
+   * Returns a tooltip for furniture pieces described in this tree.
    */
   @Override
   public String getToolTipText(MouseEvent ev) {
@@ -328,17 +345,13 @@ public class FurnitureLibraryTable extends JTable implements View {
         && FurnitureLibrary.FURNITURE_ICON_PROPERTY.equals(getColumnModel().getColumn(column).getIdentifier())) {
       int row = rowAtPoint(ev.getPoint());
       if (row != -1) {
-        CatalogPieceOfFurniture piece = (CatalogPieceOfFurniture)getModel().getValueAt(row, 0);
-        if (piece.getIcon() instanceof URLContent) {
-          String tooltip = "<html><center><img width='128' height='128' src='" 
-              + ((URLContent)piece.getIcon()).getURL() + "'>"; 
-          return tooltip;
-        }
+        this.toolTip.setPieceOfFurniture((CatalogPieceOfFurniture)getModel().getValueAt(row, 0));
+        return this.toolTip.getTipText();
       }
     }
     return null;
   }
-
+  
   @Override
   public Dimension getPreferredScrollableViewportSize() {
     return new Dimension(getPreferredSize().width, 400);
