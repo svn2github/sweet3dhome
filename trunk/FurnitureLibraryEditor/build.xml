@@ -111,6 +111,7 @@
       </fileset>
       <fileset dir="build/classes">
         <include name="com/eteks/sweethome3d/swing/resources/icons/tango/image-*.png"/>
+        <include name="com/eteks/sweethome3d/swing/FurnitureToolTip*"/>
       </fileset>
     </zip>
     <delete dir="build/classes"/>
