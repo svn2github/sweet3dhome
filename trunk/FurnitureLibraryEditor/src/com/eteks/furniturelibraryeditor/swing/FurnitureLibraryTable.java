@@ -73,7 +73,7 @@ import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.SelectionEvent;
 import com.eteks.sweethome3d.model.SelectionListener;
 import com.eteks.sweethome3d.model.UserPreferences;
-import com.eteks.sweethome3d.swing.FurnitureToolTip;
+import com.eteks.sweethome3d.swing.CatalogItemToolTip;
 import com.eteks.sweethome3d.swing.IconManager;
 import com.eteks.sweethome3d.viewcontroller.View;
 
@@ -83,7 +83,7 @@ import com.eteks.sweethome3d.viewcontroller.View;
  */
 public class FurnitureLibraryTable extends JTable implements View {
   private ListSelectionListener tableSelectionListener;
-  private FurnitureToolTip      toolTip;
+  private CatalogItemToolTip      toolTip;
 
   public FurnitureLibraryTable(FurnitureLibrary furnitureLibrary,
                                FurnitureLibraryUserPreferences preferences,
@@ -91,7 +91,7 @@ public class FurnitureLibraryTable extends JTable implements View {
                                FurnitureLanguageController furnitureLanguageController) {
     super(new FurnitureLibraryTableModel(furnitureLibrary, furnitureLanguageController),
         new FurnitureLibraryTableColumnModel(furnitureLibrary, preferences, furnitureLanguageController));
-    this.toolTip = new FurnitureToolTip(FurnitureToolTip.DisplayedInformation.ICON, preferences);
+    this.toolTip = new CatalogItemToolTip(CatalogItemToolTip.DisplayedInformation.ICON, preferences);
     addTableHeaderListener();
     setAutoResizeMode(AUTO_RESIZE_OFF);
     updateTableColumnsWidth();
@@ -345,7 +345,7 @@ public class FurnitureLibraryTable extends JTable implements View {
         && FurnitureLibrary.FURNITURE_ICON_PROPERTY.equals(getColumnModel().getColumn(column).getIdentifier())) {
       int row = rowAtPoint(ev.getPoint());
       if (row != -1) {
-        this.toolTip.setPieceOfFurniture((CatalogPieceOfFurniture)getModel().getValueAt(row, 0));
+        this.toolTip.setCatalogItem((CatalogPieceOfFurniture)getModel().getValueAt(row, 0));
         return this.toolTip.getTipText();
       }
     }
