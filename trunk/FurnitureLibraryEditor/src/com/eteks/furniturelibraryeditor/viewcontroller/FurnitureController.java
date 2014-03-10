@@ -1285,6 +1285,7 @@ public class FurnitureController implements Controller {
         float pieceWidth = piece.getWidth();
         float pieceDepth = piece.getDepth();
         float pieceHeight = piece.getHeight();
+        float pieceDropOnTopElevation = piece.getDropOnTopElevation();
         float pieceElevation = piece.getElevation();
         boolean pieceMovable = piece.isMovable();
         float [][] pieceModelRotation = piece.getModelRotation();
@@ -1431,7 +1432,8 @@ public class FurnitureController implements Controller {
           CatalogDoorOrWindow opening = (CatalogDoorOrWindow)piece;
           updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
+              pieceDropOnTopElevation, pieceElevation, pieceMovable, 
               pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1439,7 +1441,8 @@ public class FurnitureController implements Controller {
           CatalogLight light = (CatalogLight)piece;
           updatedPiece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+              pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
+              pieceDropOnTopElevation, pieceElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1447,14 +1450,16 @@ public class FurnitureController implements Controller {
           if (doorOrWindow != null && doorOrWindow) {
             updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
-                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
+                pieceDropOnTopElevation, pieceElevation, pieceMovable, 
                 pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
             updatedPiece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
-                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, pieceElevation, pieceMovable, 
+                pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
+                pieceDropOnTopElevation, pieceElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);

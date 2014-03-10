@@ -448,6 +448,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.WIDTH, i, piece.getWidth());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DEPTH, i, piece.getDepth());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.HEIGHT, i, piece.getHeight());
+      if (piece.getDropOnTopElevation() != 1f) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DROP_ON_TOP_ELEVATION, i, piece.getDropOnTopElevation());
+      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MOVABLE, i, piece.isMovable());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW, i, piece.isDoorOrWindow());
       if (piece.isDoorOrWindow()) {
