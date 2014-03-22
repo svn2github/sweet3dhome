@@ -1433,7 +1433,7 @@ public class FurnitureController implements Controller {
           updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
-              pieceDropOnTopElevation, pieceElevation, pieceMovable, 
+              pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1442,7 +1442,7 @@ public class FurnitureController implements Controller {
           updatedPiece = new CatalogLight(pieceId, pieceName, pieceDescription, 
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
-              pieceDropOnTopElevation, pieceElevation, pieceMovable, 
+              pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1451,7 +1451,7 @@ public class FurnitureController implements Controller {
             updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
-                pieceDropOnTopElevation, pieceElevation, pieceMovable, 
+                pieceElevation, pieceDropOnTopElevation, pieceMovable, 
                 pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1459,7 +1459,7 @@ public class FurnitureController implements Controller {
             updatedPiece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
-                pieceDropOnTopElevation, pieceElevation, pieceMovable, 
+                pieceElevation, pieceDropOnTopElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
