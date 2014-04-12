@@ -388,7 +388,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (contentMatchingFurnitureName
           || !(pieceModel instanceof URLContent)
           || ((URLContent)pieceModel).getURL().getFile().toString().endsWith("model.obj")) {
-        contentBaseName = piece.getName();
+        contentBaseName = piece.getName().replace('/', '-');
       } else {
         String file = ((URLContent)pieceModel).getURL().getFile();
         if (file.lastIndexOf('/') != -1) {
