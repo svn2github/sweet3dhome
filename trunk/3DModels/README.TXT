@@ -3,26 +3,26 @@ LIBRARY OF 3D MODELS FOR SWEET HOME 3D v 1.4
 
 This archive contains a SH3F file that describes a set of additional 3D models for Sweet Home 3D, 
 localized in the following languages:
-+ Bulgarian
+- Bulgarian
 - Chinese (Simplified)
 + Chinese (Traditional)
 - Czech
-+ Dutch
+- Dutch
 + English
-+ Finnish
+- Finnish
 + French
-+ German
-+ Greek
-+ Hungarian
-+ Italian
+- German
+- Greek
+- Hungarian
+- Italian
 - Japanese
-+ Polish
+- Polish
 - Portuguese (Brazilian)
 + Portuguese (Portugal)
-+ Russian
-+ Spanish
-+ Swedish
-+ Turkish
+- Russian
+- Spanish
+- Swedish
+- Turkish
 - Vietnamese
 
 (the minus sign preceding a language indicates that the SH3F file might be incomplete or in the process of being translated) 
@@ -50,6 +50,9 @@ The location of this folder depends on your system:
     "data/furniture" found in the folder where the portable archive was deployed. 
 
 To uninstall a SH3F file, simply remove it from furniture plug-in folder and restart Sweet Home 3D.
+The furniture plug-in folder can be also shown when you click on a SH3F file listed in the "Furniture 
+libraries" section of the "Libraries in use" pane. The latter pane is displayed by clicking on the 
+"Libraries..." button shown at the bottom of Sweet Home 3D About dialog box.
 
 For your information, a SH3F file is a ZIP file containing some 3D models files and their description.
 
