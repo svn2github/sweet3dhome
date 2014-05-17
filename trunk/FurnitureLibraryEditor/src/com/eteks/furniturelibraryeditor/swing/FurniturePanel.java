@@ -588,7 +588,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "priceLabel.text"));
       final NullableSpinner.NullableSpinnerNumberModel priceSpinnerModel = 
           new NullableSpinner.NullableSpinnerNumberModel(1, 0.00999f, 1000000f, 1f);
-      this.priceSpinner = new AutoCommitSpinner(priceSpinnerModel);
+      this.priceSpinner = new NullableSpinner(priceSpinnerModel);
       priceSpinnerModel.setNullable(controller.getPrice() == null);
       priceSpinnerModel.setValue(controller.getPrice());
       final PropertyChangeListener priceChangeListener = new PropertyChangeListener() {
@@ -616,7 +616,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "valueAddedTaxPercentageLabel.text"));
       final NullableSpinner.NullableSpinnerNumberModel valueAddedTaxPercentageSpinnerModel = 
           new NullableSpinner.NullableSpinnerNumberModel(0, 0, 100f, 0.1f);
-      this.valueAddedTaxPercentageSpinner = new AutoCommitSpinner(valueAddedTaxPercentageSpinnerModel);
+      this.valueAddedTaxPercentageSpinner = new NullableSpinner(valueAddedTaxPercentageSpinnerModel);
       valueAddedTaxPercentageSpinnerModel.setNullable(controller.getValueAddedTaxPercentage() == null);
       valueAddedTaxPercentageSpinnerModel.setValue(controller.getValueAddedTaxPercentage() == null
           ? null
@@ -650,7 +650,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           FurniturePanel.class, "widthLabel.text", unitName));
       final NullableSpinner.NullableSpinnerLengthModel widthSpinnerModel = 
           new NullableSpinner.NullableSpinnerLengthModel(preferences, minimumLength, maximumLength);
-      this.widthSpinner = new AutoCommitSpinner(widthSpinnerModel);
+      this.widthSpinner = new NullableSpinner(widthSpinnerModel);
       final PropertyChangeListener widthChangeListener = new PropertyChangeListener() {
           public void propertyChange(PropertyChangeEvent ev) {
             Float width = controller.getWidth();

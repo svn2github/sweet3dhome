@@ -21,7 +21,6 @@ package com.eteks.textureslibraryeditor.swing;
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -58,7 +57,6 @@ import javax.swing.event.DocumentListener;
 import com.eteks.sweethome3d.model.Content;
 import com.eteks.sweethome3d.model.TexturesCategory;
 import com.eteks.sweethome3d.model.UserPreferences;
-import com.eteks.sweethome3d.swing.AutoCommitSpinner;
 import com.eteks.sweethome3d.swing.NullableSpinner;
 import com.eteks.sweethome3d.swing.ScaledImageComponent;
 import com.eteks.sweethome3d.swing.SwingTools;
@@ -282,7 +280,7 @@ public class TexturesPanel extends JPanel implements DialogView {
           TexturesPanel.class, "widthLabel.text", unitName));
       final NullableSpinner.NullableSpinnerLengthModel widthSpinnerModel = 
           new NullableSpinner.NullableSpinnerLengthModel(preferences, minimumLength, maximumLength);
-      this.widthSpinner = new AutoCommitSpinner(widthSpinnerModel);
+      this.widthSpinner = new NullableSpinner(widthSpinnerModel);
       final PropertyChangeListener widthChangeListener = new PropertyChangeListener() {
           public void propertyChange(PropertyChangeEvent ev) {
             Float width = controller.getWidth();
