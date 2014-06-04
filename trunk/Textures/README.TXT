@@ -15,7 +15,7 @@ localized in the following languages:
 + Greek
 + Hungarian
 + Italian
-- Japanese
++ Japanese
 + Polish
 + Portuguese (Brazilian)
 + Portuguese (Portugal)
