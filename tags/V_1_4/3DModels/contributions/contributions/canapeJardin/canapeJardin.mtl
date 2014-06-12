@@ -1,0 +1,8 @@
+# 3D model canapeJardin.obj
+
+newmtl default
+illum 2
+Ka 0.4 0.4 0.4
+Kd 0.7102 0.702 0.6531
+Ks 0.3 0.3 0.3
+Ns 30

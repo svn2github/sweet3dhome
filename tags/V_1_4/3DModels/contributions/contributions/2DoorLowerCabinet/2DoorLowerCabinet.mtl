@@ -1,0 +1,25 @@
+#Produced by Art of Illusion 2.7.1, Wed Jun 02 14:36:15 EDT 2010
+newmtl marble2
+Kd 1 1 1
+map_Kd 2DoorLowerCabinet1.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl wood
+Kd 1 1 1
+map_Kd 2DoorLowerCabinet2.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl brass
+Kd 0.756 0.66286 0.42336
+Ks 0.5 0.466 0.4
+Ka 0 0 0
+illum 2
+Ns 103
+newmtl Woodenhandle
+Kd 1 1 1
+map_Kd 2DoorLowerCabinet3.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1

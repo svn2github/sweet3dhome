@@ -1,0 +1,12 @@
+#Produced by Art of Illusion 2.7.1, Wed Mar 31 11:41:14 EDT 2010
+newmtl Glasswindow
+Kd 0.0954 0.1239 0.12048
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Wood
+Kd 1 1 1
+map_Kd garageDoor2.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1

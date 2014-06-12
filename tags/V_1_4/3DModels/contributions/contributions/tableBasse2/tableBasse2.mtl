@@ -1,0 +1,31 @@
+# 3D model tableBasse2.obj
+
+newmtl BoisBlanc
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.04 0.04 0.04
+Ns 103.0
+map_Kd tableBasse_BoisBlanc.jpg
+
+newmtl VerreBlanc
+illum 2
+Ka 0.92 0.9904 1.0
+Kd 0.6693 0.6693 0.6693
+Ks 0.51336 0.552 0.53577
+Ns 122.0
+
+newmtl GrisMat
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 65.0
+map_Kd tableBasse_GrisMat.png
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0

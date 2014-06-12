@@ -1,0 +1,18 @@
+# 3D model pensileVetro.obj
+
+newmtl Box20_1
+illum 2
+Ka 0.251 0.251 0.251
+Kd 0.251 0.251 0.251
+Ks 0.0 0.0 0.0
+Ns 10.0
+Ni 1.5
+
+newmtl Box09_6
+illum 2
+Ka 0.588 0.588 0.588
+Kd 0.588 0.588 0.588
+Ks 0.639 0.639 0.639
+Ns 10.0
+Ni 1.5
+d 0.19999999
