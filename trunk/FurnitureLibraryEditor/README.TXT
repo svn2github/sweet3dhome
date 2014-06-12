@@ -9,7 +9,7 @@ cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3
 
 
 As this project depends on Sweet Home 3D, download and install also Sweet Home 3D source code from 
-http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.2-src.zip 
+http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.4-src.zip 
 or with the following CVS command: 
 
 cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_4 SweetHome3D
