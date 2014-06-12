@@ -1,18 +1,18 @@
-TEXTURES LIBRARY EDITOR v 1.3
+TEXTURES LIBRARY EDITOR v 1.4
 -----------------------------
 
 This archive contains source code of the Textures Library Editor for Sweet Home 3D.
 
 You may also download this source code with the following CVS command:
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_3 TexturesLibraryEditor
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_4 TexturesLibraryEditor
 
 
 As this project depends on Sweet Home 3D, download and install also Sweet Home 3D source code from 
-http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.2-src.zip 
+http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.4-src.zip 
 or with the following CVS command: 
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_2 SweetHome3D
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_4 SweetHome3D
 
 
 HOW TO USE THIS SOURCE CODE
@@ -48,4 +48,4 @@ Read LICENSE.TXT file for more details about licenses applicable to this softwar
 and included materials developed by third parties.
     
     
-Copyright (c) 2012-2013 Emmanuel Puybaret / eTeks. Distributed under GNU General Public License    
+Copyright (c) 2012-2014 Emmanuel Puybaret / eTeks. Distributed under GNU General Public License    
