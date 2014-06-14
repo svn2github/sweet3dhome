@@ -520,7 +520,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
             lightSourceX += DECIMAL_FORMAT.format(lightSources [lightIndex].getX() * light.getWidth());
             lightSourceY += DECIMAL_FORMAT.format(lightSources [lightIndex].getY() * light.getDepth());
             lightSourceZ += DECIMAL_FORMAT.format(lightSources [lightIndex].getZ() * light.getHeight());
-            lightSourceColor += "#" + String.format("%06X ", lightSources [lightIndex].getColor());
+            lightSourceColor += "#" + String.format("%06X", lightSources [lightIndex].getColor());
             if (lightSources [lightIndex].getDiameter() != null) {
               if (lightSourceDiameter == null) {
                 lightSourceDiameter = "";
