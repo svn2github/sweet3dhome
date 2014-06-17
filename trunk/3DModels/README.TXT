@@ -7,7 +7,7 @@ localized in the following languages:
 - Chinese (Simplified)
 + Chinese (Traditional)
 - Czech
-- Dutch
++ Dutch
 + English
 + Finnish
 + French
