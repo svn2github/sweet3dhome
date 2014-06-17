@@ -1,0 +1,24 @@
+# 3D model kit.obj
+
+newmtl wenge
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd lit_wenge.png
+
+newmtl Gris
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.7566 0.7566 0.7566
+Ks 0.09 0.09 0.09
+Ns 81.0
+
+newmtl tissu
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd lit_tissu.png

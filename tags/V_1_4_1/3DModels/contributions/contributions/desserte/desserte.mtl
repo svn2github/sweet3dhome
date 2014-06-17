@@ -1,0 +1,38 @@
+# 3D model desserte.obj
+
+newmtl Pin
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd desserte_Pin.png
+
+newmtl GrisMetal
+illum 2
+Ka 0.24 0.23846 0.2376
+Kd 0.6552 0.6552 0.6552
+Ks 0.65 0.65 0.65
+Ns 70.0
+
+newmtl Noir
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.22 0.22 0.22
+Ks 0.0 0.0 0.0
+Ns 1.0
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+
+newmtl Tiles
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.16 0.16 0.16
+Ns 103.0
+map_Kd desserte_Tiles.png
