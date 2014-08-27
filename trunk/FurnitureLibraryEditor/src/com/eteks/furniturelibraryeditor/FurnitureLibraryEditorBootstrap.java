@@ -40,8 +40,7 @@ public class FurnitureLibraryEditorBootstrap {
       InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
     Class<?> furnitureLibraryEditorBootstrapClass = FurnitureLibraryEditorBootstrap.class;
     List<String> extensionJarsAndDlls = new ArrayList<String>(Arrays.asList(new String [] {
-        "Loader3DS1_2u.jar", // Jars included in editor executable jar file
-        "batik-svgpathparser-1.7.jar", 
+        "batik-svgpathparser-1.7.jar", // Jars included in editor executable jar file 
         "jnlp.jar"}));
     if (!System.getProperty("os.name").startsWith("Mac OS X")
         || System.getProperty("java.version").startsWith("1.5")
