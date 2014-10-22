@@ -1,0 +1,11 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl LR_chair_1_1
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.270588 0.266667 0.266667
+Ks 0.752941 0.752941 0.752941
+Ns 9.18959

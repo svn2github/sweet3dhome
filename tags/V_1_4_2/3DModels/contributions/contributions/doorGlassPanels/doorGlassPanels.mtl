@@ -1,0 +1,43 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl Door_GlassPanels_1
+illum 2
+Ka 0 0 0
+Kd 1 1 1
+Ks 0.5 0.5 0.5
+Ns 8
+map_Kd BackDoorLock.png
+
+newmtl Door_GlassPanels_4
+illum 2
+Ka 0 0 0
+Kd 0.624 0.607529 0.378768
+Ks 0.5 0.5 0.5
+Ns 8
+
+newmtl Door_GlassPanels_5
+illum 2
+Ka 0 0 0
+Kd 0.75752 0.75752 0.75752
+Ks 0.5 0.5 0.5
+Ns 8
+
+newmtl Door_GlassPanels_6
+illum 2
+Ka 0 0 0
+Kd 0.8 0.8 0.8
+Ks 0.5 0.5 0.5
+Ns 8
+d 0.19834
+
+newmtl Door_GlassPanels_14
+illum 2
+Ka 0 0 0
+Kd 1 1 1
+Ks 0 0 0
+Ns 8
+map_Kd wood44.jpg
+

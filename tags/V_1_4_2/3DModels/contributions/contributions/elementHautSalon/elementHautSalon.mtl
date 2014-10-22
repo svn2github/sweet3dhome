@@ -1,0 +1,24 @@
+# 3D model elementHautSalon.obj
+
+newmtl BoisBlanc
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.04 0.04 0.04
+Ns 103.0
+map_Kd elementHautSalon_BoisBlanc.jpg
+
+newmtl GrisMat
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 1.0 1.0 1.0
+Ns 65.0
+map_Kd elementHautSalon_GrisMat.png
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
