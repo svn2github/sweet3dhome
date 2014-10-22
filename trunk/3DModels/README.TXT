@@ -17,7 +17,7 @@ localized in the following languages:
 + Italian
 + Japanese
 + Polish
-- Portuguese (Brazilian)
++ Portuguese (Brazilian)
 + Portuguese (Portugal)
 + Russian
 + Spanish
