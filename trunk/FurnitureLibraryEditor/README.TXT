@@ -1,29 +1,29 @@
-FURNITURE LIBRARY EDITOR v 1.14a
---------------------------------
+FURNITURE LIBRARY EDITOR v 1.15
+-------------------------------
 
 This archive contains source code of the Furniture Library Editor for Sweet Home 3D.
 
 You may also download this source code with the following CVS command:
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_14_A FurnitureLibraryEditor
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_15 FurnitureLibraryEditor
 
 
 As this project depends on Sweet Home 3D, download and install also Sweet Home 3D source code from 
 http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.4-src.zip 
 or with the following CVS command: 
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_4 SweetHome3D
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_5 SweetHome3D
 
 
 HOW TO USE THIS SOURCE CODE
 ---------------------------
 
-Source code classes are compatible with Java SE 5, and the directory where
+Source code classes are compatible with Java SE 5v, and the directory where
 you find this file may be compiled as an Eclipse project or with Ant.
 
 If you want to compile and test the Java files of this release 
 with Eclipse, please follow the next steps:
-1. install last JDK 5 or 6 available at http://java.sun.com
+1. install last JDK 5 or greater available at http://java.sun.com
 2. install Eclipse available at http://www.eclipse.org
 3. in Eclipse, select File > Import... menu
 4. in "Select an import source" list of Import dialog box, 
@@ -44,7 +44,7 @@ text field the option -Djava.ext.dirs=../SweetHome3D/lib;../SweetHome3D/lib/wind
 -Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/linux/x64 depending on  
 your system and its architecture.
 
-If you want to build Furniture Library Editor with Ant, please install last JDK 5 or 6 and 
+If you want to build Furniture Library Editor with Ant, please install last JDK or greater and 
 Ant available at http://ant.apache.org/, and run ant command in the directory where
 you uncompressed this archive.
 The default target provided by build.xml Ant file builds a JAR executable version.
