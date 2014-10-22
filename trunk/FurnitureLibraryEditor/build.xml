@@ -75,7 +75,10 @@
         <exclude name="com/eteks/sweethome3d/applet/**"/>
         <exclude name="com/eteks/sweethome3d/io/AutoRecovery**"/>
         <exclude name="com/eteks/sweethome3d/plugin/**"/>
-        <exclude name="com/eteks/sweethome3d/swing/Furniture*"/>
+        <exclude name="com/eteks/sweethome3d/swing/FurnitureCatalogListPanel*"/>
+        <exclude name="com/eteks/sweethome3d/swing/FurnitureCatalogTransferHandler*"/>
+        <exclude name="com/eteks/sweethome3d/swing/FurnitureTable*"/>
+        <exclude name="com/eteks/sweethome3d/swing/FurnitureTransferHandler*"/>
         <exclude name="com/eteks/sweethome3d/swing/Home*"/>
         <exclude name="com/eteks/sweethome3d/swing/Import*"/>
         <exclude name="com/eteks/sweethome3d/swing/BackgroundImageWizard*"/>
