@@ -1,5 +1,5 @@
-LIBRARY OF TEXTURES FOR SWEET HOME 3D v 1.0.1
----------------------------------------------
+LIBRARY OF TEXTURES FOR SWEET HOME 3D v 1.1
+-------------------------------------------
 
 This archive contains a SH3T file that describes a set of additional Textures for Sweet Home 3D, 
 localized in the following languages:
@@ -7,9 +7,9 @@ localized in the following languages:
 - Chinese (Simplified)
 + Chinese (Traditional)
 - Czech
-+ Dutch
+- Dutch
 + English
-+ Finnish
+- Finnish
 + French
 + German
 + Greek
