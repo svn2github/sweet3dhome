@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.Action;
@@ -150,6 +151,13 @@ public class FurnitureLibraryEditor {
   }
   
   /**
+   * Returns the name of this application read from resources.
+   */
+  private String getName() {
+    return getUserPreferences().getLocalizedString(FurnitureLibraryEditor.class, "applicationName");
+  }
+
+  /**
    * Returns a new instance of an editor controller after <code>furnitureLibrary</code> was created.
    */
   protected EditorController createEditorController(FurnitureLibrary furnitureLibrary) {
@@ -185,11 +193,19 @@ public class FurnitureLibraryEditor {
   private void initSystemProperties() {
     if (OperatingSystem.isMacOSX()) {
       // Change Mac OS X application menu name
-      System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Furniture Library Editor");
+      String classPackage = FurnitureLibraryEditor.class.getName();
+      classPackage = classPackage.substring(0, classPackage.lastIndexOf("."));
+      ResourceBundle resource = ResourceBundle.getBundle(classPackage + "." + "package");
+      String applicationName = resource.getString("FurnitureLibraryEditor.applicationName");
+      System.setProperty("com.apple.mrj.application.apple.menu.about.name", applicationName);
       // Use Mac OS X screen menu bar for frames menu bar
       System.setProperty("apple.laf.useScreenMenuBar", "true");
       // Force the use of Quartz under Mac OS X for better Java 2D rendering performance
       System.setProperty("apple.awt.graphics.UseQuartz", "true");
+    }
+    // Force 3D antialiasing before toolkit is launched
+    if (System.getProperty("j3d.implicitAntialiasing") == null) {
+      System.setProperty("j3d.implicitAntialiasing", "true");
     }
   }
 
@@ -332,7 +348,7 @@ public class FurnitureLibraryEditor {
         }
       }
     } else {
-      title += " - " + preferences.getLocalizedString(FurnitureLibraryEditor.class, "title"); 
+      title += " - " + getName(); 
       if (furnitureLibrary.isModified()) {
         title = "* " + title;
       }
