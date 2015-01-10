@@ -8,5 +8,5 @@ http://creativecommons.org/choose/zero/
 This means that you can use it for any purpose you see fit, even commercially,
 with no requirements.
 
-Read also BLENDSWAP_LICENSE.txt files for more information about the author of each model 
+Read license files included in the folder of each model to get more information about the author of a model 
 (note that the Creative Commons Zero license doesn't oblige you to give them credit). 
