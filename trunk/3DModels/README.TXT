@@ -21,7 +21,7 @@ localized in the following languages:
 + Portuguese (Portugal)
 + Russian
 + Spanish
-- Swedish
++ Swedish
 + Turkish
 - Vietnamese
 
