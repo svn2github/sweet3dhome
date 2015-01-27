@@ -1,0 +1,25 @@
+#Produced by Art of Illusion 2.8.1, Tue Sep 21 16:12:39 EDT 2010
+newmtl Glass
+Kd 0.5 0.5 0.5
+Ks 0.042 0.042 0.042
+Ka 0 0 0
+illum 2
+Ns 116
+d 0.5
+newmtl cold_steel
+Kd 0.2475 0.2475 0.2838
+Ks 0.8 0.8 0.8
+Ka 0 0 0
+illum 2
+Ns 116
+newmtl mywood
+Kd 1 1 1
+map_Kd patioDoor1.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Default_Texture
+Kd 1 1 1
+Ks 0 0 0
+Ka 0 0 0
+illum 1

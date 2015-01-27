@@ -1,0 +1,23 @@
+# 3D model barCusisine.obj
+
+newmtl GrisClair
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.83 0.83 0.83
+Ks 0.41 0.41 0.41
+Ns 103.0
+
+newmtl BoisClair
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd barCusisine_BoisClair.png
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0

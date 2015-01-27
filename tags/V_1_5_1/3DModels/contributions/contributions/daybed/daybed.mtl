@@ -1,0 +1,12 @@
+#Produced by Art of Illusion 2.7.1, Wed Nov 04 13:43:21 EST 2009
+newmtl whitewood
+Kd 1 1 1
+Ks 0.72 0.72 0.72
+Ka 0 0 0
+illum 2
+Ns 104
+newmtl mattressblue
+Kd 0.75 0.85 1
+Ks 0 0 0
+Ka 0 0 0
+illum 1

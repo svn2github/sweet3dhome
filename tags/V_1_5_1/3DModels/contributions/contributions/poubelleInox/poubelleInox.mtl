@@ -1,0 +1,22 @@
+# 3D model poubelleInox.obj
+
+newmtl Grey
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.6004 0.6004 0.6004
+Ks 0.55 0.55 0.55
+Ns 118.0
+
+newmtl Noir
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.18 0.18 0.18
+Ks 0.0 0.0 0.0
+Ns 1.0
+
+newmtl Default_Texture
+illum 1
+Ka 0.0 0.0 0.0
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0

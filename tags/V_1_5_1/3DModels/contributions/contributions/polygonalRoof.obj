@@ -1,0 +1,15 @@
+# Blender3D v245 OBJ File: 
+# www.blender3d.org
+g PolyMesh_1_None_None
+v -55 100 -100
+v -167 0 -100
+v -167 0 0
+v 167 0 0
+v 55 100 -100
+v 167 0 -100
+s off
+f 1 2 3
+f 1 3 4 5
+f 4 6 5
+f 2 1 5 6
+f 4 3 2 6

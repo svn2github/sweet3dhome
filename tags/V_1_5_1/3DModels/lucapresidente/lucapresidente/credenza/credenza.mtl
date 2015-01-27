@@ -1,0 +1,17 @@
+# 3D model credenza.obj
+
+newmtl Box04_1
+illum 2
+Ka 0.7569 0.7569 0.7569
+Kd 0.7569 0.7569 0.7569
+Ks 0.603 0.603 0.603
+Ns 20.0
+Ni 1.5
+
+newmtl Box07_5
+illum 2
+Ka 0.251 0.251 0.251
+Kd 0.251 0.251 0.251
+Ks 0.0 0.0 0.0
+Ns 10.0
+Ni 1.5
