@@ -1,24 +1,24 @@
-FURNITURE LIBRARY EDITOR v 1.16
+FURNITURE LIBRARY EDITOR v 1.17
 -------------------------------
 
 This archive contains source code of the Furniture Library Editor for Sweet Home 3D.
 
 You may also download this source code with the following CVS command:
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_16 FurnitureLibraryEditor
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_17 FurnitureLibraryEditor
 
 
 As this project depends on Sweet Home 3D, download and install also Sweet Home 3D source code from 
-http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-4.6-src.zip 
+http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-5.0-src.zip 
 or with the following CVS command: 
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_4_6 SweetHome3D
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_5_0 SweetHome3D
 
 
 HOW TO USE THIS SOURCE CODE
 ---------------------------
 
-Source code classes are compatible with Java SE 5v, and the directory where
+Source code classes are compatible with Java SE 5, and the directory where
 you find this file may be compiled as an Eclipse project or with Ant.
 
 If you want to compile and test the Java files of this release 
