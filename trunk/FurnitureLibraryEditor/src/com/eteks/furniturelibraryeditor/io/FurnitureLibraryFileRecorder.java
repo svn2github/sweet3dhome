@@ -402,47 +402,60 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       }
       // Replace # and & symbols in file names to avoid wrongly encoded URLs
       contentBaseName = contentBaseName.replace('%', '_').replace('#', '_');
-      String iconContentEntryName = getContentEntry(piece.getIcon(), contentBaseName + ".png", 
-          keepURLContentUnchanged, existingEntryNamesLowerCase);
-      writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ICON, i, 
-          getContentProperty(piece.getIcon(), iconContentEntryName, offlineFurnitureLibrary, 
-              furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
-      if (iconContentEntryName != null) {
-        contentEntries.put(piece.getIcon(), iconContentEntryName);
-      }
-      if (piece.getPlanIcon() != null) {
-        String planIconContentEntryName = getContentEntry(piece.getPlanIcon(), contentBaseName + "PlanIcon.png", 
+      Content pieceIcon = piece.getIcon();
+      String iconContentEntryName = contentEntries.get(pieceIcon);
+      // If piece icon content not referenced yet among saved content 
+      if (iconContentEntryName == null) {
+        iconContentEntryName = getContentEntry(pieceIcon, contentBaseName + ".png", 
             keepURLContentUnchanged, existingEntryNamesLowerCase);
-        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PLAN_ICON, i, 
-            getContentProperty(piece.getPlanIcon(), planIconContentEntryName, offlineFurnitureLibrary,
-                furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
-        if (planIconContentEntryName != null) {
-          contentEntries.put(piece.getPlanIcon(), planIconContentEntryName);
+        if (iconContentEntryName != null) {
+          contentEntries.put(pieceIcon, iconContentEntryName);
         }
+      }
+      writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ICON, i, 
+          getContentProperty(pieceIcon, iconContentEntryName, offlineFurnitureLibrary, 
+              furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
+      Content piecePlanIcon = piece.getPlanIcon();
+      if (piecePlanIcon != null) {
+        String planIconContentEntryName = contentEntries.get(piecePlanIcon);
+        // If plan icon content not referenced yet among saved content
+        if (planIconContentEntryName == null) {
+          planIconContentEntryName = getContentEntry(piecePlanIcon, contentBaseName + "PlanIcon.png", 
+              keepURLContentUnchanged, existingEntryNamesLowerCase);
+          if (planIconContentEntryName != null) {
+            contentEntries.put(piecePlanIcon, planIconContentEntryName);
+          }
+        }
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PLAN_ICON, i, 
+            getContentProperty(piecePlanIcon, planIconContentEntryName, offlineFurnitureLibrary,
+                furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
       }
       boolean multipart = pieceModel instanceof ResourceURLContent
               && ((ResourceURLContent)pieceModel).isMultiPartResource()
           || !(pieceModel instanceof ResourceURLContent)
               && pieceModel instanceof URLContent
               && ((URLContent)pieceModel).isJAREntry();
-      String modelContentEntryName;
-      if (multipart) {
-        String jarEntryName = ((URLContent)pieceModel).getJAREntryName();
-        modelContentEntryName = getContentEntry(pieceModel,
-            pieceModel instanceof TemporaryURLContent
-                ? contentBaseName + "/" + jarEntryName 
-                : contentBaseName + "/" + jarEntryName.substring(jarEntryName.lastIndexOf('/') + 1),  
-            keepURLContentUnchanged, existingEntryNamesLowerCase);
-      } else {
-        modelContentEntryName = getContentEntry(pieceModel, 
-            contentBaseName + ".obj", keepURLContentUnchanged, existingEntryNamesLowerCase);
+      String modelContentEntryName = contentEntries.get(pieceModel);
+      // If piece model content not referenced yet among saved content
+      if (modelContentEntryName == null) {
+        if (multipart) {
+          String jarEntryName = ((URLContent)pieceModel).getJAREntryName();
+          modelContentEntryName = getContentEntry(pieceModel,
+              pieceModel instanceof TemporaryURLContent
+                  ? contentBaseName + "/" + jarEntryName 
+                  : contentBaseName + "/" + jarEntryName.substring(jarEntryName.lastIndexOf('/') + 1),  
+              keepURLContentUnchanged, existingEntryNamesLowerCase);
+        } else {
+          modelContentEntryName = getContentEntry(pieceModel, 
+              contentBaseName + ".obj", keepURLContentUnchanged, existingEntryNamesLowerCase);
+        }
+        if (modelContentEntryName != null) {
+          contentEntries.put(pieceModel, modelContentEntryName);
+        }
       }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MODEL, i, 
           getContentProperty(pieceModel, modelContentEntryName, offlineFurnitureLibrary, 
               furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
-      if (modelContentEntryName != null) {
-        contentEntries.put(pieceModel, modelContentEntryName);
-      }
       if (multipart) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MULTI_PART_MODEL, i, "true");
       }
