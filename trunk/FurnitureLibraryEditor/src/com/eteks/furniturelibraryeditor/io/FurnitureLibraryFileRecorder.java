@@ -40,7 +40,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,7 +50,6 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -350,12 +348,8 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
         && furnitureResourcesRemoteAbsoluteUrlBase == null 
         && furnitureResourcesRemoteRelativeUrlBase == null;
     DateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    // Store existing entries in a tree set to be able to compare their names ignoring case
-    Set<String> existingEntryNames = new TreeSet<String>(new Comparator<String>() {
-          public int compare(String s1, String s2) {
-            return s1.compareToIgnoreCase(s2);
-          }
-        });
+    // Store existing entries in lower case to be able to compare their names ignoring case
+    Set<String> existingEntryNamesLowerCase = new HashSet<String>();
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "ISO-8859-1"));
     final String CATALOG_FILE_HEADER = "#\n# " 
         + DefaultFurnitureCatalog.PLUGIN_FURNITURE_CATALOG_FAMILY + ".properties %tc\n" 
@@ -409,7 +403,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       // Replace # and & symbols in file names to avoid wrongly encoded URLs
       contentBaseName = contentBaseName.replace('%', '_').replace('#', '_');
       String iconContentEntryName = getContentEntry(piece.getIcon(), contentBaseName + ".png", 
-          keepURLContentUnchanged, existingEntryNames);
+          keepURLContentUnchanged, existingEntryNamesLowerCase);
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.ICON, i, 
           getContentProperty(piece.getIcon(), iconContentEntryName, offlineFurnitureLibrary, 
               furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
@@ -418,7 +412,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       }
       if (piece.getPlanIcon() != null) {
         String planIconContentEntryName = getContentEntry(piece.getPlanIcon(), contentBaseName + "PlanIcon.png", 
-            keepURLContentUnchanged, existingEntryNames);
+            keepURLContentUnchanged, existingEntryNamesLowerCase);
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PLAN_ICON, i, 
             getContentProperty(piece.getPlanIcon(), planIconContentEntryName, offlineFurnitureLibrary,
                 furnitureResourcesRemoteAbsoluteUrlBase, furnitureResourcesRemoteRelativeUrlBase));
@@ -438,10 +432,10 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
             pieceModel instanceof TemporaryURLContent
                 ? contentBaseName + "/" + jarEntryName 
                 : contentBaseName + "/" + jarEntryName.substring(jarEntryName.lastIndexOf('/') + 1),  
-            keepURLContentUnchanged, existingEntryNames);
+            keepURLContentUnchanged, existingEntryNamesLowerCase);
       } else {
         modelContentEntryName = getContentEntry(pieceModel, 
-            contentBaseName + ".obj", keepURLContentUnchanged, existingEntryNames);
+            contentBaseName + ".obj", keepURLContentUnchanged, existingEntryNamesLowerCase);
       }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MODEL, i, 
           getContentProperty(pieceModel, modelContentEntryName, offlineFurnitureLibrary, 
@@ -630,12 +624,12 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
   private String getContentEntry(Content content,
                                  String entryName,
                                  boolean keepURLContentUnchanged, 
-                                 Set<String> existingEntryNames) throws IOException {
+                                 Set<String> existingEntryNamesLowerCase) throws IOException {
     if (content instanceof TemporaryURLContent
         || content instanceof ResourceURLContent) {
       int slashIndex = entryName.indexOf('/'); 
       if (slashIndex == -1) {
-        if (existingEntryNames.contains(entryName)) {
+        if (existingEntryNamesLowerCase.contains(entryName.toLowerCase())) {
           // Search an unexisting entry name
           int i = 2;
           String defaultEntryName = entryName;
@@ -643,18 +637,18 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
             int dotIndex = defaultEntryName.lastIndexOf('.');
             entryName = defaultEntryName.substring(0, dotIndex) 
                 + i++ + defaultEntryName.substring(dotIndex);  
-          } while (existingEntryNames.contains(entryName));
+          } while (existingEntryNamesLowerCase.contains(entryName.toLowerCase()));
         }
       } else {
         String entryDirectory = entryName.substring(0, slashIndex + 1);
         int i = 2;
         while (true) {
           boolean entryDirectoryExists = false;
+          String entryDirectoryLowerCase = entryDirectory.toLowerCase();
           // Search an unexisting entry directory
-          for (String existingEntryName : existingEntryNames) {
+          for (String existingEntryNameLowerCase : existingEntryNamesLowerCase) {
             // If existingEntryName starts with entryDirectory ignoring case
-            if (existingEntryName.length() >= entryDirectory.length() 
-                && existingEntryName.substring(0, entryDirectory.length()).equalsIgnoreCase(entryDirectory)) {
+            if (existingEntryNameLowerCase.startsWith(entryDirectoryLowerCase)) {
               entryDirectoryExists = true;
               break;
             }
@@ -667,7 +661,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
           }
         }
       }
-      existingEntryNames.add(entryName);
+      existingEntryNamesLowerCase.add(entryName.toLowerCase());
       return entryName;
     } else if (content instanceof URLContent) {
       if (keepURLContentUnchanged) {
@@ -689,7 +683,7 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
           String file = urlContent.getURL().getFile();
           entryName = file.substring(file.lastIndexOf('/') + 1);
         }
-        existingEntryNames.add(entryName);
+        existingEntryNamesLowerCase.add(entryName.toLowerCase());
         return entryName;
       }
     } else {
