@@ -40,6 +40,7 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +51,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -348,7 +350,12 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
         && furnitureResourcesRemoteAbsoluteUrlBase == null 
         && furnitureResourcesRemoteRelativeUrlBase == null;
     DateFormat creationDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    Set<String> existingEntryNames = new HashSet<String>();
+    // Store existing entries in a tree set to be able to compare their names ignoring case
+    Set<String> existingEntryNames = new TreeSet<String>(new Comparator<String>() {
+          public int compare(String s1, String s2) {
+            return s1.compareToIgnoreCase(s2);
+          }
+        });
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "ISO-8859-1"));
     final String CATALOG_FILE_HEADER = "#\n# " 
         + DefaultFurnitureCatalog.PLUGIN_FURNITURE_CATALOG_FAMILY + ".properties %tc\n" 
@@ -645,7 +652,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
           boolean entryDirectoryExists = false;
           // Search an unexisting entry directory
           for (String existingEntryName : existingEntryNames) {
-            if (existingEntryName.startsWith(entryDirectory)) {
+            // If existingEntryName starts with entryDirectory ignoring case
+            if (existingEntryName.length() >= entryDirectory.length() 
+                && existingEntryName.substring(0, entryDirectory.length()).equalsIgnoreCase(entryDirectory)) {
               entryDirectoryExists = true;
               break;
             }
