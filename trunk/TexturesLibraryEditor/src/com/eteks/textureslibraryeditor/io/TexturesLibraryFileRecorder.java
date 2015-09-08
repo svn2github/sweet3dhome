@@ -328,7 +328,8 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
     boolean keepURLContentUnchanged = !offlineTexturesLibrary
         && texturesResourcesRemoteAbsoluteUrlBase == null 
         && texturesResourcesRemoteRelativeUrlBase == null;
-    Set<String> existingEntryNames = new HashSet<String>();
+    // Store existing entries in lower case to be able to compare their names ignoring case
+    Set<String> existingEntryNamesLowerCase = new HashSet<String>();
     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(output, "ISO-8859-1"));
     final String CATALOG_FILE_HEADER = "#\n# " 
         + DefaultTexturesCatalog.PLUGIN_TEXTURES_CATALOG_FAMILY + ".properties %tc\n" 
@@ -370,14 +371,18 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
           contentExtension = file.substring(file.lastIndexOf('.'));
         }
       }
-      String imageContentEntryName = getContentEntry(textureImage, contentBaseName + contentExtension, 
-          keepURLContentUnchanged, existingEntryNames);
+      String imageContentEntryName = contentEntries.get(textureImage);
+      // If image content not referenced among saved content yet
+      if (imageContentEntryName == null) {
+        imageContentEntryName = getContentEntry(textureImage, contentBaseName + contentExtension, 
+            keepURLContentUnchanged, existingEntryNamesLowerCase);
+        if (imageContentEntryName != null) {
+          contentEntries.put(textureImage, imageContentEntryName);
+        }
+      }
       writeProperty(writer, DefaultTexturesCatalog.PropertyKey.IMAGE, i, 
           getContentProperty(textureImage, imageContentEntryName, offlineTexturesLibrary, 
               texturesResourcesRemoteAbsoluteUrlBase, texturesResourcesRemoteRelativeUrlBase));
-      if (imageContentEntryName != null) {
-        contentEntries.put(textureImage, imageContentEntryName);
-      }
       writeProperty(writer, DefaultTexturesCatalog.PropertyKey.WIDTH, i, texture.getWidth());
       writeProperty(writer, DefaultTexturesCatalog.PropertyKey.HEIGHT, i, texture.getHeight());
       writeProperty(writer, DefaultTexturesCatalog.PropertyKey.CREATOR, i, texture.getCreator());
@@ -422,12 +427,12 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
   private String getContentEntry(Content content,
                                  String entryName,
                                  boolean keepURLContentUnchanged, 
-                                 Set<String> existingEntryNames) throws IOException {
+                                 Set<String> existingEntryNamesLowerCase) throws IOException {
     if (content instanceof TemporaryURLContent
         || content instanceof ResourceURLContent) {
       int slashIndex = entryName.indexOf('/'); 
       if (slashIndex == -1) {
-        if (existingEntryNames.contains(entryName)) {
+        if (existingEntryNamesLowerCase.contains(entryName.toLowerCase())) {
           // Search an unexisting entry name
           int i = 2;
           String defaultEntryName = entryName;
@@ -435,16 +440,18 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
             int dotIndex = defaultEntryName.lastIndexOf('.');
             entryName = defaultEntryName.substring(0, dotIndex) 
                 + i++ + defaultEntryName.substring(dotIndex);  
-          } while (existingEntryNames.contains(entryName));
+          } while (existingEntryNamesLowerCase.contains(entryName.toLowerCase()));
         }
       } else {
         String entryDirectory = entryName.substring(0, slashIndex + 1);
         int i = 2;
         while (true) {
           boolean entryDirectoryExists = false;
+          String entryDirectoryLowerCase = entryDirectory.toLowerCase();
           // Search an unexisting entry directory
-          for (String existingEntryName : existingEntryNames) {
-            if (existingEntryName.startsWith(entryDirectory)) {
+          for (String existingEntryNameLowerCase : existingEntryNamesLowerCase) {
+            // If existing entry name starts with entry directory ignoring case
+            if (existingEntryNameLowerCase.startsWith(entryDirectoryLowerCase)) {
               entryDirectoryExists = true;
               break;
             }
@@ -457,7 +464,7 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
           }
         }
       }
-      existingEntryNames.add(entryName);
+      existingEntryNamesLowerCase.add(entryName.toLowerCase());
       return entryName;
     } else if (content instanceof URLContent) {
       if (keepURLContentUnchanged) {
@@ -479,7 +486,7 @@ public class TexturesLibraryFileRecorder implements TexturesLibraryRecorder {
           String file = urlContent.getURL().getFile();
           entryName = file.substring(file.lastIndexOf('/') + 1);
         }
-        existingEntryNames.add(entryName);
+        existingEntryNamesLowerCase.add(entryName.toLowerCase());
         return entryName;
       }
     } else {
