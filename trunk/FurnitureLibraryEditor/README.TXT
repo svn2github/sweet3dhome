@@ -1,18 +1,18 @@
-FURNITURE LIBRARY EDITOR v 1.17
+FURNITURE LIBRARY EDITOR v 1.18
 -------------------------------
 
 This archive contains source code of the Furniture Library Editor for Sweet Home 3D.
 
 You may also download this source code with the following CVS command:
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_17 FurnitureLibraryEditor
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_18 FurnitureLibraryEditor
 
 
 As this project depends on Sweet Home 3D, download and install also Sweet Home 3D source code from 
-http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-5.0-src.zip 
+http://prdownloads.sourceforge.net/sweethome3d/SweetHome3D-5.1-src.zip 
 or with the following CVS command: 
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_5_0 SweetHome3D
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_5_1 SweetHome3D
 
 
 HOW TO USE THIS SOURCE CODE
@@ -55,4 +55,4 @@ Read LICENSE.TXT file for more details about licenses applicable to this softwar
 and included materials developed by third parties.
     
     
-Copyright (c) 2010-2014 Emmanuel Puybaret / eTeks. Distributed under GNU General Public License    
+Copyright (c) 2010-2015 Emmanuel Puybaret / eTeks. Distributed under GNU General Public License    
