@@ -33,6 +33,7 @@
       <classpath>
         <pathelement location="build/classes"/>
         <pathelement location="../SweetHome3D/lib/batik-svgpathparser-1.7.jar"/>
+        <pathelement location="../SweetHome3D/libtest/AppleJavaExtensions.jar"/>
       </classpath>
     </javac>
     
