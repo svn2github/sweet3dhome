@@ -1,0 +1,23 @@
+# pesePersonne.mtl  Produced by Art of Illusion 2.8.1, Sat Aug 10 00:18:33 CEST 2013
+#
+# Modeled by Emmanuel PUYBARET / eTeks under Art of Illusion for SweetHome3D
+# Copyright (c) 2013 Emmanuel PUYBARET / eTeks <info@eteks.com>
+#
+# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+#
+newmtl Red
+Kd 1 0 0
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Gray
+Kd 0.48 0.48 0.48
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl Black
+Kd 0.08 0.08 0.08
+Ks 0.5 0.5 0.5
+Ka 0 0 0
+illum 1
+Ns 50

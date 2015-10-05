@@ -1,0 +1,14 @@
+#Produced by Art of Illusion 2.8.1, Mon Sep 27 12:56:16 EDT 2010
+newmtl white
+Kd 0.87 0.87 0.87
+Ks 0.1 0.1 0.1
+Ka 0 0 0
+illum 2
+Ns 70
+newmtl paintedwhite
+Kd 1 1 1
+map_Kd privacyFence2.jpg
+Ks 0.03 0.03 0.03
+Ka 0 0 0
+illum 2
+Ns 103

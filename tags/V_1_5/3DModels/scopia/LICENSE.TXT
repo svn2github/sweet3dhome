@@ -1,0 +1,95 @@
+LICENSE
+
+The sh3f file and its contain are under the Creative Commons Attribution 3.0 Unported license:
+	
+http://creativecommons.org/licenses/by/3.0/
+	
+Your are free to:
+	
+	Share - copy and redistribute the material in any medium or format
+	
+	Adapt - remix, transform, and build upon the material
+	
+	for any purpose, even commercially.
+	
+ 	The licensor cannot revoke these freedoms as long as you follow the license terms.
+	
+Under the following terms:
+	
+	Attribution: If you want distribute this work, or
+	derivates, you must attribute it to  
+	Emmanuel PUYBARET / eTeks <info@eteks.com>  and
+	Scopia Visual Interfaces Systems, s.l. (http://www.scopia.es)
+
+
+(C) Copyrights 2014 Emmanuel PUYBARET / eTeks <info@eteks.com> and Scopia Visual Interfaces Systems, s.l. (http://www.scopia.es) 
+
+for the icons and the 35 following models:
+- baby_high_chair
+- basic_camera
+- basketball_net_and_board
+- birthday_cake
+- broom
+- cardboard-box
+- cat
+- chest-freezer
+- child_swing
+- christmas_tree
+- clothes-horse
+- clothes_washing_machine
+- coffee-table2
+- curtain
+- dryer_machine
+- dart_game
+- dog
+- dog-house
+- electric_water_heater
+- electric_water_heater_big
+- external-unity-air-conditioning
+- elevator
+- elevator-door
+- ficus
+- fireplace1
+- fireplace2
+- flipper
+- folded_clothes
+- gaz_water_heater
+- indoor-bike
+- inkjet_and_scanner_printer
+- intercom
+- intercom_with_screen
+- internal-unity-air-conditioning
+- jacuzzi
+- japanese_style_screen
+- letters_box
+- mini_stereo
+- mp3_base_for_ipad
+- open-cardboard-box
+- peugeot-308
+- punching-ball
+- puff
+- rectangle-swimming-pool
+- reflex_camera
+- renault-scenic
+- round-swimming-pool
+- sandpit
+- scooter
+- shopping-basket
+- shovel
+- sneakers
+- step-ladder-metal
+- step-ladder-wood
+- stereo_amplifier
+- stroller
+- trampoline
+- tricycle
+- wall-hanger
+- water_cooler
+- woman_shoes
+- wood_logs
+- yamaha-yzr-r6			
+						
+
+(C) Copyrights 2006-2014 Scopia Visual Interfaces Systems, s.l. (http://www.scopia.es) 
+
+for all the other models 	

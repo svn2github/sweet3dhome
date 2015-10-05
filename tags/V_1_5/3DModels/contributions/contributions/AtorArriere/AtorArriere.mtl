@@ -1,0 +1,47 @@
+# 3D model AtorArriere.obj
+
+newmtl ollaire_z
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd AtorArriere_ollaire_z.jpg
+
+newmtl noir
+illum 1
+Ka 0.0 0.0 0.0
+Kd 0.15 0.15 0.15
+Ks 0.0 0.0 0.0
+Ns 1.0
+
+newmtl ollaire_y
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd AtorArriere_ollaire_z.jpg
+
+newmtl Extruded_Object_6_6
+illum 1
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 1.0
+map_Kd AtorArriere_ollaire_z.jpg
+
+newmtl feuGB
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.15 0.15 0.15
+Ns 103.0
+map_Kd AtorArriere_feuGB.jpg
+
+newmtl gris
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.82118 0.82118 0.82118
+Ks 0.4888 0.4888 0.4888
+Ns 103.0

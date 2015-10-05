@@ -1,0 +1,17 @@
+# 3D model sedia.obj
+
+newmtl Loft03_1
+illum 2
+Ka 0.251 0.251 0.251
+Kd 0.251 0.251 0.251
+Ks 0.0 0.0 0.0
+Ns 10.0
+Ni 1.5
+
+newmtl ChamferBox07_7
+illum 2
+Ka 0.4 0.0 0.0
+Kd 0.4 0.0 0.0
+Ks 0.423 0.423 0.423
+Ns 10.0
+Ni 1.5

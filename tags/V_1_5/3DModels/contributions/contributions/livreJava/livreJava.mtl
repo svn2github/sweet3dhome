@@ -1,0 +1,17 @@
+# livreJava.mtl produced by Art of Illusion 2.8.1, Mon Jul 15 12:33:33 CEST 2013
+#
+# Copyright (c) 2013 Emmanuel PUYBARET / eTeks <info@eteks.com>
+#
+# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+#
+newmtl Default_Texture
+Kd 1 1 1
+Ks 0 0 0
+Ka 0 0 0
+illum 1
+newmtl cover
+Kd 1 1 1
+map_Kd BienProgrammerEnJava7.jpg
+Ks 0 0 0
+Ka 0 0 0
+illum 1

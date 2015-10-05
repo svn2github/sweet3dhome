@@ -1,0 +1,68 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl pCube1_1_1
+illum 2
+Ka 0.0 0.0 0.0
+Kd 0.4 0.4 0.4
+Ks 0.0 0.0 0.0
+Ns 8.0
+
+newmtl pCube12_2_2
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 8.0
+map_Kd CDsTOP.png
+
+newmtl pCube14_3_3
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 8.0
+map_Kd CDs1.png
+
+newmtl pCube24_6_6
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 8.0
+map_Kd CDs2.png
+
+newmtl pCube34_9_9
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 8.0
+map_Kd CDs3.png
+
+newmtl pCube44_12_12
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.0 0.0 0.0
+Ns 8.0
+map_Kd CDs4.png
+
+newmtl extrudedSurface152_25_25
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.5 0.5 0.5
+Ns 8.0
+map_Kd CDrackSide.png
+
+newmtl nurbsCylinder25_31_31
+illum 2
+Ka 0.2 0.2 0.2
+Kd 1.0 1.0 1.0
+Ks 0.5 0.5 0.5
+Ns 8.0
+map_Kd XhromwTube.png
+
