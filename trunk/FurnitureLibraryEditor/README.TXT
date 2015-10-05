@@ -38,11 +38,17 @@ You may execute com.eteks.furniturelibraryeditor.FurnitureLibraryEditor
 application included in this archive, with the Eclipse Run menu.
 As this application requires Java 3D, open Run Dialog in Eclipse, 
 select the Arguments tab of the target application, and add to the VM arguments 
-text field the option -Djava.ext.dirs=../SweetHome3D/lib;../SweetHome3D/lib/windows, 
+text field the option:
+-Djava.ext.dirs=../SweetHome3D/lib;../SweetHome3D/lib/windows/i386, 
+-Djava.ext.dirs=../SweetHome3D/lib;../SweetHome3D/lib/windows/x64, 
 -Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/macosx, 
 -Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/linux/i386 or 
--Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/linux/x64 depending on  
-your system and its architecture.
+-Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/linux/x64 
+according to your system and its architecture, except under Java 7 / 8 and Mac OS X, 
+where VM arguments should be:
+-Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/macosx/java3d-1.6 
+-Djava.library.path=../SweetHome3D/lib/macosx/java3d-1.6
+-Djogamp.gluegen.UseTempJarCache=false
 
 If you want to build Furniture Library Editor with Ant, please install last JDK or greater and 
 Ant available at http://ant.apache.org/, and run ant command in the directory where
