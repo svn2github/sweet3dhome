@@ -7,11 +7,11 @@ illum 2
 Ka 0 0 0
 Kd 0.063712 0.063712 0.063712
 Ks 0.5 0.5 0.5
-Ns 8
+Ns 20
 
 newmtl RoundTable_revolvedSurface1_6
 illum 2
 Ka 0 0 0
 Kd 0.761958 0.7032 0.8
-Ks 1 1 1
-Ns 8
+Ks 0.8 0.8 0.8
+Ns 80
