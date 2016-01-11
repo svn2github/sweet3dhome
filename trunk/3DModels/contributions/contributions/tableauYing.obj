@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Mon Oct 08 00:11:28 CEST 2007
+# tableauYing.obj Produced by Art of Illusion 2.5, Mon Oct 08 00:11:28 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g ying
 usemtl black
 v -2.19985 -1.46778 0.0714

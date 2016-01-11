@@ -1,4 +1,11 @@
-# 3D model lettoSoppalcoArancio.obj
+# lettoSoppalcoArancio.obj 3D model
+#
+# Created by LucaPresidente
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 mtllib lettoSoppalcoArancio.mtl
 g Box29_1
 usemtl Box29_1

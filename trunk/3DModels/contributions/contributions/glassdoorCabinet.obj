@@ -1,6 +1,12 @@
-# Blender3D v245 OBJ File: d-shelves.blend
+# glassdoorCabinet.obj Blender3D v245 OBJ File: d-shelves.blend
 # www.blender3d.org
-mtllib d-shelves.mtl
+#
+# Created by Robert Pastierovic
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 o sweethome3d_window_pane_Cube.002_Cube
 v -5.429577 75.027542 -1.420912
 v -5.429577 5.154737 -1.420909

@@ -1,4 +1,11 @@
-# Modelled with Arabaro 2.0
+# weepingWillow.mtl Produced with Arabaro 2.0 from weeping_willow.xml 
+#
+# Created by Wolfram Diestel and simplified by Emmanuel Puybaret
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 newmtl trunk
 Ns 96.078431
 Ka 0.290 0.271 0.255

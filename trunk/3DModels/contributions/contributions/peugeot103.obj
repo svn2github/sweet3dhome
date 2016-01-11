@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Sun Oct 07 01:21:44 CEST 2007
+# peugeot103.obj Produced by Art of Illusion 2.5, Sun Oct 07 01:21:44 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g roue_avant
 usemtl black
 v -0.12564 -2.64199 -2.35243

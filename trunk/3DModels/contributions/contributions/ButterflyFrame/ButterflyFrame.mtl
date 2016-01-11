@@ -1,9 +1,13 @@
-# Blender3D MTL File: ButterflyFrame.blend
+# ButterflyFrame.mtl Produced with Blender3D
+#
+# Created by Emmanuel Puybaret / eTeks for Sweet Home 3D
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+#
 # Material Count: 3
-#
-# Modelled by Emmanuel Puybaret / eTeks under Blender 3d modeller for SweetHome3D
-# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
-#
+
 newmtl Material.001
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000

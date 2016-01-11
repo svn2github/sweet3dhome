@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Mon Nov 12 11:23:55 EST 2007
+# simpleShutter.obj Produced by Art of Illusion 2.5, Mon Nov 12 11:23:55 EST 2007
+#
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g PolyMesh_2
 usemtl bone
 v 2.094 -5.07795 -3.9786

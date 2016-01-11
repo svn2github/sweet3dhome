@@ -1,9 +1,12 @@
-# Blender3D v245 OBJ File: AntelopeCanyonFrame.blend
-#
-# Modelled by Emmanuel Puybaret / eTeks under Blender 3d modeller for SweetHome3D
-# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
-#
+# AntelopeCanyonFrame.obj Produced with Blender3D
 # www.blender3d.org
+#
+# Created by Emmanuel Puybaret / eTeks for Sweet Home 3D
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+#
 mtllib AntelopeCanyonFrame.mtl
 o Frame_Black_Material.001
 v 0.713160 -41.999996 -0.683471

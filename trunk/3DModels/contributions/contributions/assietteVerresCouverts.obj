@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Fri Oct 05 19:08:21 CEST 2007
+# assietteVerresCouverts.obj Produced by Art of Illusion 2.5, Fri Oct 05 19:08:21 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g manche_couteau
 usemtl ltgrey
 v 2.80549 0.1705 0.60141

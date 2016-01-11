@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.4.1, Tue Mar 25 22:11:30 CET 2008
+# lamp.obj Produced by Art of Illusion 2.4.1, Tue Mar 25 22:11:30 CET 2008
+#
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g Tube_1_5
 usemtl silver
 v 0.42285 1.50915 -0.45124

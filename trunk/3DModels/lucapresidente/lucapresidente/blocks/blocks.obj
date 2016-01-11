@@ -1,4 +1,11 @@
-# 3D model blocks.obj
+# blocks.obj 3D model
+#
+# Created by LucaPresidente
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 mtllib blocks.mtl
 g Rectangle007_1
 usemtl Rectangle007_1

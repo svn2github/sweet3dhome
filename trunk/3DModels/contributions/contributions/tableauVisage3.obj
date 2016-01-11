@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Tue Oct 09 17:15:22 CEST 2007
+# tableauVisage3.obj Produced by Art of Illusion 2.5, Tue Oct 09 17:15:22 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g visage
 usemtl fldkgrey
 v -8.9437 2.38786 -0.08794

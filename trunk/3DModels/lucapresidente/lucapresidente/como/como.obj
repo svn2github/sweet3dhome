@@ -1,5 +1,12 @@
-# 3D model Com?.obj
-mtllib materials.mtl
+# como.obj 3D model
+#
+# Created by LucaPresidente
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
+mtllib como.mtl
 g Line35_1
 usemtl Line35_1
 v 360.0 0.0 140.0

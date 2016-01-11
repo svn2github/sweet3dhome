@@ -1,6 +1,12 @@
-# Blender3D v245 OBJ File: <memory>
+# bigCornerDesk.obj Blender3D v245 OBJ File: <memory>
 # www.blender3d.org
-
+#
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g Polygon_4_bone
 usemtl bone
 v 0.201705 4.663684 -0.082287

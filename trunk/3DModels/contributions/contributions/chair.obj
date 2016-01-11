@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Mon May 12 21:05:41 EDT 2008
+# chair.obj Produced by Art of Illusion 2.5, Mon May 12 21:05:41 EDT 2008
+#
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g PolyMesh_2
 usemtl lighttan
 v -1.08721 0.21123 0.14671

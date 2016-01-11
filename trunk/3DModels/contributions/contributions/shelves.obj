@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Thu Nov 22 15:13:03 EST 2007
+# shelves.obj Produced by Art of Illusion 2.5, Thu Nov 22 15:13:03 EST 2007
+#
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g Cube_3
 usemtl white
 v -4.70896 -2.53602 -1.62291

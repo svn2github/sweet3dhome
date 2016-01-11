@@ -1,6 +1,12 @@
-# Blender3D v245 OBJ File: <memory>
+# guitar.obj Blender3D v245  
 # www.blender3d.org
-mtllib guitar.mtl
+#
+# Created by Robert Pastierovic
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 o Circle.004
 v -6.673623 1.876168 -13.970301
 v -6.051821 1.876168 -13.212633

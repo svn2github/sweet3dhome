@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Sat Oct 06 02:09:23 CEST 2007
+# bougeoir.obj Produced by Art of Illusion 2.5, Sat Oct 06 02:09:23 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g Tube2
 usemtl grey
 v 0.94 1.415 -0

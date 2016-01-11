@@ -1,5 +1,12 @@
-# Blender3D v245 OBJ File: bike.blend
+# bike.obj Blender3D v245 OBJ File: bike.blend
 # www.blender3d.org
+#
+# Created by Robert Pastierovic
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 mtllib bike.mtl
 o Cube.001_Cube.002
 v 44.075977 11.834360 -6.572934

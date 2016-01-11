@@ -1,4 +1,11 @@
-#Produced by Art of Illusion 2.5, Sun Oct 07 15:29:55 CEST 2007
+# tableauMulet.obj Produced by Art of Illusion 2.5, Sun Oct 07 15:29:55 CEST 2007
+#
+# Created by Sleipnir1
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 g cadre
 usemtl black
 v -12.19608 6.59514 -0.00601

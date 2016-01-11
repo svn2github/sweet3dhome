@@ -1,6 +1,12 @@
-# Blender3D v245 OBJ File: clock.blend
+# clock.obj Blender3D v245 OBJ File: clock.blend
 # www.blender3d.org
-mtllib clock.mtl
+#
+# Created by Robert Pastierovic
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 o Font.003_Mesh.001
 v -13.350725 1.857691 1.294220
 v -13.230730 1.857691 1.204724

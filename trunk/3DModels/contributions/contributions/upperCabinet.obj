@@ -1,6 +1,12 @@
-# Blender3D v245 OBJ File: d-upper_cabinet.blend
+# upperCabinet.obj Blender3D v245 OBJ File: d-upper_cabinet.blend
 # www.blender3d.org
-mtllib d-upper_cabinet.mtl
+#
+# Created by Robert Pastierovic
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 o Cube.002_Cube
 v 19.994047 -0.000002 -3.614968
 v 19.994047 -0.000001 -1.614968

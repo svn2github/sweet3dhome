@@ -1,6 +1,11 @@
-# Modeled by Pencilart with Art of Illusion
+# TVCenter.obj Produced by Art of Illusion
 #
-# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# Created by Pencilart
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+# 
 mtllib TVCenter.mtl
 g PolyMesh_2_28
 v -4.052426 -60.637642 16.377840
