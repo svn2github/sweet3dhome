@@ -1,13 +1,20 @@
-# Created with Anim8or 0.95
-# Object "object01":
+# chaiseOrange.mtl
+#
+# Created by Icybones with Anim8or 0.95
+# Added illum parameter by Emmanuel Puybaret / eTeks
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# 
 
 newmtl FABRIC_orange
+illum 1
 Ka 0.298 0.141 0.00118
 Kd 0.695 0.329 0.00275
 Ks 0 0 0
 Ns 1.0
 
 newmtl WOOD
+illum 1
 Ka 0.286 0.209 0.125
 Kd 0.667 0.489 0.291
 Ks 0.1 0.1 0.1
