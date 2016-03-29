@@ -7,7 +7,7 @@
 # at your choice
 # 
 newmtl Glass
-Kd 0.5 0.5 0.5
+Kd 0.9 0.9 0.9
 Ks 0.042 0.042 0.042
 Ka 0 0 0
 illum 2
@@ -22,11 +22,6 @@ Ns 116
 newmtl mywood
 Kd 1 1 1
 map_Kd patioDoor1.jpg
-Ks 0 0 0
-Ka 0 0 0
-illum 1
-newmtl Default_Texture
-Kd 1 1 1
 Ks 0 0 0
 Ka 0 0 0
 illum 1
