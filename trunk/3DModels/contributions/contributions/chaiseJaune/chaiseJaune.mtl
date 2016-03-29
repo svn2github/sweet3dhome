@@ -1,20 +1,13 @@
-# chaiseJaune.mtl
-#
-# Created by Icybones with Anim8or 0.95
-# Added illum parameter by Emmanuel Puybaret / eTeks
-#
-# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
-# 
+# Created with Anim8or 0.95
+# Object "object01":
 
 newmtl FABRIC_DYELLOW
-illum 1
 Ka 0.3 0.271 0
 Kd 0.7 0.631 0
 Ks 0 0 0
 Ns 1.0
 
 newmtl WOOD
-illum 1
 Ka 0.286 0.209 0.125
 Kd 0.667 0.489 0.291
 Ks 0.1 0.1 0.1
