@@ -5,7 +5,7 @@
 #
 # This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
 #
-o antenaParabolica
+g antenaParabolica
 v 0.389345 -0.031414 -0.534464
 v 0.388525 -0.031414 -0.531566
 v 0.387213 -0.031414 -0.529235
