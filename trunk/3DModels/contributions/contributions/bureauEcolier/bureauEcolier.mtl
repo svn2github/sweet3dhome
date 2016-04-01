@@ -1,10 +1,15 @@
+# bureauEcolier.mtl
 # Blender MTL File
 #
 # Modelled by Fabrice Delobe 
 # Textures edited by Emmanuel Puybaret / eTeks
-# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
 #
 # Material Count: 12
+#
 newmtl Armature_auv_armature.jpg
 Ns 96.078431
 Ka 0.000000 0.000000 0.000000

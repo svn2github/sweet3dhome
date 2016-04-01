@@ -1,9 +1,12 @@
-# Blender v2.58 (sub 0) OBJ File: ''
+# bureauEcolier.obj Blender v2.58 (sub 0) OBJ File: ''
+# www.blender.org
 #
 # Modelled by Fabrice Delobe 
-# This file is under Free Art License, see http://artlibre.org/licence/lal/en for more informations
 #
-# www.blender.org
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# and under CC-BY Creative Commons Attribution 3.0 Unported license, see http://creativecommons.org/licenses/by/3.0/
+# at your choice
+#
 mtllib bureauEcolier.mtl
 o Armature
 v 0.165000 0.992823 -3.144525
