@@ -1,5 +1,10 @@
-# Blender v2.67 (sub 0) OBJ File: ''
+# pcstul.obj  Blender v2.67 (sub 0) OBJ File: 'pcstul.blend'
 # www.blender.org
+#
+# Copyrights (C) 2009  Jarda Benkovsky
+#
+# This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
+# 
 mtllib pcstul.mtl
 o Cube.006_Cube.007_Woo_Cube.006_Cube.007_Woo_Wood
 v 1.677811 -2.098649 -1.034577
@@ -198,7 +203,7 @@ f 113 114 112 111
 f 115 116 114 113
 f 117 118 116 115
 f 119 120 118 117
-f 119 120 27 26
+f 119 26 27 120 
 f 112 110 108
 f 112 108 106
 f 114 112 106
