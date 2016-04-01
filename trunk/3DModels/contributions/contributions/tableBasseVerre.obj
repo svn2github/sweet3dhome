@@ -1,4 +1,4 @@
-# tableBasseVerre.obj Produced by Art of Illusion 2.5, Mon Sep 24 17:35:38 CEST 2007
+# Produced by Art of Illusion 2.5, Mon Sep 24 17:35:38 CEST 2007
 #
 # Created by GdB / Damien Leduc
 #
@@ -391,7 +391,7 @@ f 84//140 86//140 87//140
 f 84//141 81//141 86//141
 f 88//142 82//142 83//142
 f 88//143 85//143 82//143
-g vitre
+g sweethome3d_window_pane
 usemtl glasstransparent
 v -0.64324 0.25407 0.63582
 v -0.64324 0.25407 -0.72418
