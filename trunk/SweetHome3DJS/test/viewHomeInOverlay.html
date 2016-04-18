@@ -1,0 +1,99 @@
+<!--
+   viewHomeInOverlay.html  version 
+   
+   Sweet Home 3D, Copyright (c) 2016 Emmanuel PUYBARET / eTeks <info@eteks.com>
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+ 
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>View home with Sweet Home 3D HTML5 Viewer</title>
+<base href="..">
+<script type="text/javascript" src="lib/big.min.js"></script>
+<script type="text/javascript" src="lib/gl-matrix-min.js"></script>
+<script type="text/javascript" src="lib/jszip.min.js"></script>
+
+<script type="text/javascript" src="lib/core.js"></script>
+<script type="text/javascript" src="lib/CollectionEvent.js"></script>
+<script type="text/javascript" src="lib/CollectionChangeSupport.js"></script>
+<script type="text/javascript" src="lib/URLContent.js"></script>
+<script type="text/javascript" src="lib/scene3d.js"></script>
+<script type="text/javascript" src="lib/HTMLCanvas3D.js"></script>
+<script type="text/javascript" src="lib/ModelManager.js"></script>
+<script type="text/javascript" src="lib/OBJLoader.js"></script>
+<script type="text/javascript" src="lib/Triangulator.js"></script>
+
+<script type="text/javascript" src="lib/geom.js"></script>
+<script type="text/javascript" src="lib/CatalogPieceOfFurniture.js"></script>
+<script type="text/javascript" src="lib/CatalogTexture.js"></script>
+<script type="text/javascript" src="lib/HomePieceOfFurniture.js"></script>
+<script type="text/javascript" src="lib/HomeFurnitureGroup.js"></script>
+<script type="text/javascript" src="lib/Camera.js"></script>
+<script type="text/javascript" src="lib/ObserverCamera.js"></script>
+<script type="text/javascript" src="lib/HomeMaterial.js"></script>
+<script type="text/javascript" src="lib/HomeTexture.js"></script>
+<script type="text/javascript" src="lib/TextStyle.js"></script>
+<script type="text/javascript" src="lib/HomeEnvironment.js"></script>
+<script type="text/javascript" src="lib/Level.js"></script>
+<script type="text/javascript" src="lib/Home.js"></script>
+<script type="text/javascript" src="lib/HomeRecorder.js"></script>
+<script type="text/javascript" src="lib/HomeComponent3D.js"></script>
+<script type="text/javascript" src="lib/Object3DBranch.js"></script>
+<script type="text/javascript" src="lib/HomePieceOfFurniture3D.js"></script>
+<script type="text/javascript" src="lib/HomeController3D.js"></script>
+<script type="text/javascript" src="lib/TextureManager.js"></script>
+<script type="text/javascript" src="lib/UserPreferences.js"></script>
+<script type="text/javascript" src="lib/LengthUnit.js"></script>
+<script type="text/javascript" src="lib/viewHome.js"></script>
+
+<style type="text/css">
+/* The class of components handled by the viewer */
+.viewerComponent  {
+  font-style: italic;
+}
+#viewerProgressLabel {
+  font-weight: bold; 
+}
+</style>
+</head>
+
+<body>
+<div>
+  <!-- Mouse and keyboard navigation explained at 
+       http://sweethome3d.cvs.sf.net/viewvc/sweethome3d/SweetHome3D/src/com/eteks/sweethome3d/viewcontroller/resources/help/en/editing3DView.html 
+       You may also switch between aerial view and virtual visit with the space bar -->
+  <button onclick='
+       viewerCanvasId = "viewerCanvas";
+       viewHomeInOverlay("test/resources/SweetHome3DExample3.zip", 
+              {roundsPerMinute:    2,                        /* Rotation speed of the animation launched once home is loaded in rounds per minute, no animation if missing */ 
+               widthByHeightRatio: 3/2,                      /* Size ratio of the displayed canvas */
+               navigationPanel:                              /* Displayed navigation arrows, "none" or "default" for default one or an HTML string containing elements with data-simulated-key 
+                                                                attribute set "UP", "DOWN", "LEFT", "RIGHT"... to replace the default navigation panel, "none" if missing */
+                     "<table style=\"margin: 20px;\"><tr><td></td><td><button data-simulated-key=\"UP\">&uarr;</button></td><td></td></tr>"
+                   + "<tr><td><button data-simulated-key=\"LEFT\">&larr;</button></td><td></td><td><button data-simulated-key=\"RIGHT\">&rarr;</button></td></tr>"
+                   + "<tr><td></td><td><button data-simulated-key=\"DOWN\">&darr;</button></td><td></td></tr></table>",
+               aerialViewButtonText: "Aerial view",          /* Text displayed for aerial view radio button, no radio buttons if missing */ 
+               virtualVisitButtonText: "Virtual visit",      /* Text displayed for virtual visit radio button, no radio buttons if missing */
+            /* selectableLevels: ["Level 0", "Level 1"], */  /* Uncomment to choose the list of displayed levels, no select component if empty array */
+               viewerControlsAdditionalHTML:                 /* Additional HTML text appended to controls displayed below the canvas 3D, by default empty */
+                    "<button onclick=\"document.getElementById(viewerCanvasId).homePreviewComponent.startRotationAnimation(Math.random() * 5);\">Retart animation</button>",
+               readingHomeText: "Reading",                   /* Comment displayed while reading home */
+               readingModelText: "Model",                    /* Comment displayed while reading models */
+               noWebGLSupportError: "No WebGL support"       /* Error message displayed if the browser do not support WebGL */
+              })'>View home</button>
+</div>
+</body>
+</html>
