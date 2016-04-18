@@ -594,7 +594,7 @@ HTMLCanvas3D.prototype.prepareTexture = function(textureImage) {
     var canvas3D = this;
     // If texture image isn't loaded yet, add a listener to follow its loading
     var loadListener = function() {
-        textureImage.removeEventListener(loadListener);
+        textureImage.removeEventListener("load", loadListener);
         canvas3D.bindTexture(texture);
         // Redraw scene
         canvas3D.repaint();
