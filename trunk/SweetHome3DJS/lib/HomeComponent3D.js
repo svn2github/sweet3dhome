@@ -33,8 +33,8 @@
  * @param {UserPreferences} preferences user preferences
  * @param {Object3DBranchFactory} object3dFactory a factory able to create 3D objects from <code>home</code> items
  *            or <code>null</code> to use default one.
- *            The {@link Object3DFactory#createObject3D(Home, Selectable, boolean) createObject3D} of 
- *            this factory is expected to return an instance of {@link Object3DBranch} in current implementation.
+ *            The <code>createObject3D</code> method of this factory is expected to return 
+ *            an instance of {@link Object3DBranch} in current implementation.
  * @param {HomeController3D} controller the controller that manages modifications in <code>home</code> (optional).
  * @constructor   
  * @author Emmanuel Puybaret

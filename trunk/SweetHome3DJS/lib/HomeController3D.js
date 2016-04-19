@@ -127,14 +127,14 @@ HomeController3D.prototype.getView = function() {
 }
 
 /**
- * Changes home camera for {@link Home#getTopCamera() top camera}.
+ * Changes home camera for the top camera in {@link Home}.
  */
 HomeController3D.prototype.viewFromTop = function() {
   this.home.setCamera(this.home.getTopCamera());
 }
 
 /**
- * Changes home camera for {@link Home#getObserverCamera() observer camera}.
+ * Changes home camera for the observer camera in {@link Home}.
  */
 HomeController3D.prototype.viewFromObserver = function() {
   this.home.setCamera(this.home.getObserverCamera());

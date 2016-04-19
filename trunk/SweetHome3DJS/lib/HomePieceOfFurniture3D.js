@@ -80,7 +80,7 @@ HomePieceOfFurniture3D.prototype.createPieceOfFurnitureNode = function(piece, wa
 }
 
 /**
- * Updates the this branch from the home object
+ * Updates this branch from the home piece it manages.
  */
 HomePieceOfFurniture3D.prototype.update = function() {
   this.updatePieceOfFurnitureTransform();

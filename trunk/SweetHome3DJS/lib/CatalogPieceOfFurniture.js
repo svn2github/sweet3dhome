@@ -209,7 +209,7 @@ CatalogPieceOfFurniture.prototype.isMovable = function() {
 
 /**
  * Returns <code>true</code> if this piece of furniture is a door or a window.
- * As this method existed before {@linkplain CatalogDoorOrWindow CatalogDoorOrWindow} class,
+ * As this method existed before {@link CatalogDoorOrWindow} class,
  * you shouldn't rely on the value returned by this method to guess if a piece
  * is an instance of <code>DoorOrWindow</code> class.
  * @return {boolean}

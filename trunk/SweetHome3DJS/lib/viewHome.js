@@ -34,9 +34,9 @@
  *          levelsAndCamerasListId: string,
  *          selectableLevels: string[]}} [params] the ids of the buttons and other information displayed in the user interface. 
  *                      If not provided, controls won't be managed if any, no animation and navigation arrows won't be displayed. 
- * @return {HomePreviewComponent} the returned object gives access to the displayed {@link Home} instance, 
- *                its {@linkplain HomeComponent3D view}, its {@linkplain HomeController3D controller} and the   
- *                {@linkplain UserPreferences preferences} in use.              
+ * @return {HomePreviewComponent} the returned object gives access to the loaded {@link Home} instance, 
+ *                the {@link HomeComponent3D} instance that displays it, the {@link HomeController3D} instance that manages 
+ *                camera changes and the {@link UserPreferences} in use.             
  */
 function viewHome(canvasId, homeUrl, onerror, onprogression, params) {
   return new HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params);
