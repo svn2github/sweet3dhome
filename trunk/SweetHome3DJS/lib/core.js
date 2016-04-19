@@ -216,6 +216,7 @@ PropertyChangeSupport.prototype.getPropertyChangeListeners = function(propertyNa
       listeners.push(this.listeners [i]);
     }
   }
+  return listeners;
 }
 
 /**
