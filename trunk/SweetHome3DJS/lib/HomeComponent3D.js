@@ -109,8 +109,10 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
   // Retrieve body elements with a data-simulated-key attribute
   var simulatedKeys = this.getSimulatedKeyElements(document.getElementsByTagName("body") [0]);
   var navigationPanelDiv = null;
-  var innerHtml = preferences.getLocalizedString(HomeComponent3D, "navigationPanel.innerHTML");
-  if (innerHtml === null) {
+  var innerHtml;
+  try {
+    innerHtml = preferences.getLocalizedString(HomeComponent3D, "navigationPanel.innerHTML");
+  } catch (ex) {
     innerHtml = 
           '<img src="' + ZIPTools.getScriptFolder("gl-matrix-min.js") + '/navigationPanel.png"'
         + '     style="width: 56px; height:59px; margin:5px; user-drag: none; user-select: none; -moz-user-select: none; -webkit-user-drag: none; -webkit-user-select: none; -ms-user-select: none;"' 

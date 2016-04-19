@@ -320,10 +320,11 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
                   UserPreferencesWithNavigationPanel.prototype.constructor = UserPreferencesWithNavigationPanel;
 
                   UserPreferencesWithNavigationPanel.prototype.getLocalizedString = function(resourceClass, resourceKey, resourceParameters) {
-                    if (resourceClass.name == "HomeComponent3D" && resourceKey == "navigationPanel.innerHTML") {
+                    // Return navigationPanel in parameter for the navigationPanel.innerHTML resource requested by HomeComponent3D
+                    if (resourceClass === HomeComponent3D && resourceKey == "navigationPanel.innerHTML") {
                       return this.navigationPanel;
                     } else {
-                      return DefaultUserPreferences.prototype.getLocalizedString.call(this, resourceClass, resourceKey, resourceParameters);
+                      return UserPreferences.prototype.getLocalizedString.call(this, resourceClass, resourceKey, resourceParameters);
                     }
                   }
                   preferences = new UserPreferencesWithNavigationPanel(params.navigationPanel);

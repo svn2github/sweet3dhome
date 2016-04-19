@@ -983,12 +983,3 @@ function DefaultUserPreferences() {
 }
 DefaultUserPreferences.prototype = Object.create(UserPreferences.prototype);
 DefaultUserPreferences.prototype.constructor = DefaultUserPreferences;
-
-DefaultUserPreferences.prototype.getLocalizedString = function(resourceClass, resourceKey, resourceParameters) {
-  if (resourceClass.name == "HomeComponent3D" 
-      && resourceKey == "navigationPanel.innerHTML") {
-    return null;
-  } else {
-    return UserPreferences.prototype.getLocalizedString.call(this, resourceClass, resourceKey, resourceParameters);
-  }
-}
