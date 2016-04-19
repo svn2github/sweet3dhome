@@ -47,7 +47,7 @@ function viewHome(canvasId, homeUrl, onerror, onprogression, params) {
  * Canvas size ratio is 4 / 3 by default. 
  * <code>params.navigationPanel</code> may be equal to <code>"none"</code>, <code>"default"</code> 
  * or an HTML string which content will replace the default navigation panel. 
- * If need, the id of the created canvas is <code>viewerCanvas</code> and its <code>homePreviewComponent</code> 
+ * If needed, the id of the created canvas is <code>viewerCanvas</code> and its <code>homePreviewComponent</code> 
  * property returns the instance of {@link HomePreviewComponent} associated to it.
  * @param {string} homeUrl the URL of the home to display
  * @param {{roundsPerMinute: number, 
