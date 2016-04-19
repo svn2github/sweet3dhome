@@ -2,7 +2,7 @@
 body
 {
 	font: 12px "Lucida Grande", Tahoma, Arial, Helvetica, sans-serif;
-	width: 800px;
+	width: 1024px;
 }
 
 .header
@@ -38,7 +38,7 @@ pre.code
 {
 	margin-top: 24px;
 	float: left;
-	width: 160px;
+	width: 200px;
 	position: absolute;
 	left: 8px;
 	background-color: #F3F3F3;
@@ -47,8 +47,8 @@ pre.code
 
 #content
 {
-	margin-left: 190px;
-	width: 600px;
+	margin-left: 230px;
+	width: 770px;
 }
 
 .classList
