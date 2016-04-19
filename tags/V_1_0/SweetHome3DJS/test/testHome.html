@@ -1,0 +1,269 @@
+<!--
+   testHome.html 
+   
+   Sweet Home 3D, Copyright (c) 2016 Emmanuel PUYBARET / eTeks <info@eteks.com>
+   
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+ 
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SweetHome3DJS Test</title>
+<base href="..">
+<script type="text/javascript" src="lib/big.min.js"></script>
+<script type="text/javascript" src="lib/gl-matrix-min.js"></script>
+<script type="text/javascript" src="lib/jszip.min.js"></script>
+<script type="text/javascript" src="lib/core.js"></script>
+<script type="text/javascript" src="lib/geom.js"></script>
+<script type="text/javascript" src="lib/scene3d.js"></script>
+<script type="text/javascript" src="lib/CollectionEvent.js"></script>
+<script type="text/javascript" src="lib/CollectionChangeSupport.js"></script>
+<script type="text/javascript" src="lib/URLContent.js"></script>
+<script type="text/javascript" src="lib/HTMLCanvas3D.js"></script>
+<script type="text/javascript" src="lib/ModelManager.js"></script>
+<script type="text/javascript" src="lib/OBJLoader.js"></script>
+<script type="text/javascript" src="lib/Triangulator.js"></script>
+<script type="text/javascript" src="lib/BackgroundImage.js"/></script>
+<script type="text/javascript" src="lib/CatalogPieceOfFurniture.js"></script>
+<script type="text/javascript" src="lib/CatalogTexture.js"></script>
+<script type="text/javascript" src="lib/HomePieceOfFurniture.js"></script>
+<script type="text/javascript" src="lib/HomeFurnitureGroup.js"></script>
+<script type="text/javascript" src="lib/Camera.js"></script>
+<script type="text/javascript" src="lib/ObserverCamera.js"></script>
+<script type="text/javascript" src="lib/HomeMaterial.js"></script>
+<script type="text/javascript" src="lib/HomeTexture.js"></script>
+<script type="text/javascript" src="lib/TextStyle.js"></script>
+<script type="text/javascript" src="lib/HomeEnvironment.js"></script>
+<script type="text/javascript" src="lib/Level.js"></script>
+<script type="text/javascript" src="lib/Home.js"></script>
+<script type="text/javascript" src="lib/HomeRecorder.js"></script>
+<script type="text/javascript" src="lib/HomeComponent3D.js"></script>
+<script type="text/javascript" src="lib/Object3DBranch.js"></script>
+<script type="text/javascript" src="lib/HomePieceOfFurniture3D.js"></script>
+<script type="text/javascript" src="lib/HomeController3D.js"></script>
+<script type="text/javascript" src="lib/TextureManager.js"></script>
+<script type="text/javascript" src="lib/UserPreferences.js"></script>
+<script type="text/javascript" src="lib/LengthUnit.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+function assertEquals(message, expected, actual) {
+  if (typeof expected === "number"
+    	  && Math.abs(actual - expected) > 1E-5
+      || typeof expected !== "number"
+	       && expected != actual) {
+    var report = message + ": " + actual + " not equal to " + expected;
+    console.log(report);
+    console.trace();
+    alert(report);
+  }
+}
+
+function assertTrue(message, condition) {
+  if (!condition) {
+    console.log(message);
+    console.trace();
+    alert(message);
+  }
+}
+
+/**
+ * Tests Javascript classes translated from OpenJDK classes found in java.awt.geom package.  
+ */
+function testGeom() {
+  // Create a piece of furniture 
+  var catalogPiece = new CatalogPieceOfFurniture("eTeks#Test", "Cube", null, null, [], null, null, 
+      new URLContent("test/resources/cube.png"), null, new URLContent("test/resources/cube.zip"), 100, 100, 100, 0, 1, 
+      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null);
+  var piece = new HomePieceOfFurniture(catalogPiece);
+  assertEquals("Wrong name", "Cube", piece.getName());
+  // Place it at center, rotate it of 45 deg
+  piece.setX(0);
+  piece.setY(0);
+  piece.setAngle(Math.PI / 4);
+  assertEquals("Wrong angle", Math.PI / 4, piece.getAngle());
+  // Check first point
+  assertEquals("Wrong point", 0, piece.getPoints() [0][0]);
+  assertEquals("Wrong point", -50 * Math.sqrt(2), piece.getPoints() [0][1]);
+  // Check perimeter
+  var perimeter = 0;
+  var piecePoints = piece.getPoints();
+  for (var i = piecePoints.length - 1; i >= 0; i--) {
+    perimeter += Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
+        piecePoints [i][0], piecePoints [i][1]);
+  }
+  assertEquals("Wrong perimeter", 400, perimeter);
+  // Check distance between center and first line
+  var distanceToCenter = Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  assertEquals("Wrong distance", 50, distanceToCenter);
+  // Rotate and move piece and check again location and distances 
+  piece.setAngle(-Math.PI / 3);
+  piece.setX(100);
+  piece.setY(300);
+  piece.setWidth(50);
+  piece.setDepth(20);
+  piecePoints = piece.getPoints();
+  assertEquals("Wrong point", 100 + 50 / 2 / 2 + 20 / 2 * Math.sqrt(3) / 2, piecePoints [2][0]);
+  assertEquals("Wrong point", 300 - 50 / 2 * Math.sqrt(3) / 2 + 20 / 2 / 2, piecePoints [2][1]);
+  perimeter = 0;
+  for (var i = piecePoints.length - 1; i >= 0; i--) {
+    perimeter += Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
+        piecePoints [i][0], piecePoints [i][1]);
+  }
+  assertEquals("Wrong perimeter", 50 * 2 + 20 * 2, perimeter);
+  distanceToCenter = Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  assertEquals("Wrong distance", 10, distanceToCenter);
+  distanceToCenter = Line2D.ptLineDist(piecePoints [2][0], piecePoints [2][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  assertEquals("Wrong distance", 25, distanceToCenter);
+  
+  // Create an area made of two overlapping rectangles 
+  var area = new Area();
+  area.add(new Area(new Rectangle2D(0, 0, 200, 100)));
+  area.add(new Area(new Rectangle2D(50, -50, 300, 100)));
+  // Check area bounds
+  var rectangle = area.getBounds2D();
+  assertEquals("Wrong rectangle", 0, rectangle.getX());
+  assertEquals("Wrong rectangle", -50, rectangle.getY());
+  assertEquals("Wrong rectangle", 350, rectangle.getWidth());
+  assertEquals("Wrong rectangle", 150, rectangle.getHeight());
+  var pointCount = 0;
+  var point = [0, 0];
+  for (var pathIterator = area.getPathIterator(null); !pathIterator.isDone(); pathIterator.next()) {
+    if (pathIterator.currentSegment(point) !== PathIterator.SEG_CLOSE) {
+      // console.log(point [0] + "  " + point [1])
+      pointCount++;
+    }
+  }
+  assertEquals("Wrong point count", 10, pointCount); // TODO 8 would be better 
+  
+  // Test circle curve
+  var polylinePath = new GeneralPath();
+  var curvePoints = [[100, 0], [0, 100], [-100, 0], [0, -100]];
+  for (var i = 0, n = curvePoints.length; i < n; i++) {
+    var curve2D = new CubicCurve2D();
+    var previousPoint = curvePoints [i == 0 ?  curvePoints.length - 1  : i - 1];
+    var point         = curvePoints [i];
+    var nextPoint     = curvePoints [i == curvePoints.length - 1 ?  0  : i + 1];
+    var vectorToBisectorPoint = [nextPoint [0] - previousPoint [0], nextPoint [1] - previousPoint [1]];
+    var nextNextPoint     = curvePoints [(i + 2) % curvePoints.length];
+    var vectorToBisectorNextPoint = [point[0] - nextNextPoint [0], point[1] - nextNextPoint [1]];
+    curve2D.setCurve(point[0], point[1], 
+        point [0] + vectorToBisectorPoint [0] / 3.625, 
+        point [1] + vectorToBisectorPoint [1] / 3.625, 
+        nextPoint [0] + vectorToBisectorNextPoint [0] / 3.625, 
+        nextPoint [1] + vectorToBisectorNextPoint [1] / 3.625, 
+        nextPoint [0], nextPoint [1]);
+    polylinePath.append(curve2D, true);
+  }
+  area = new Area(polylinePath);
+  // Check all points are at the right distance from center
+  for (var pathIterator = area.getPathIterator(null, 0.1); !pathIterator.isDone(); pathIterator.next()) {
+    if (pathIterator.currentSegment(point) !== PathIterator.SEG_CLOSE) {
+      var distance = Point2D.distance(point [0], point [1], area.getBounds2D().getCenterX(), area.getBounds2D().getCenterY());
+      assertTrue("Wrong distance " + distance, Math.abs(distance - 100) < 0.05);
+    }
+  }
+
+  console.log("End of testGeom");	      
+}
+
+/**
+ * Tests Home, HomeComponent3D and HomeController3D classes.
+ */
+function testHome(geomAvailable) {
+  // Create a home with furniture
+  var catalogPiece = new CatalogPieceOfFurniture("eTeks#Test", "Cube", null, null, [], null, null, 
+      new URLContent("test/resources/cube.png"), null, new URLContent("test/resources/cube.zip"), 100, 100, 100, 0, 1, 
+      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null);
+  var home = new Home();
+  var piece = new HomePieceOfFurniture(catalogPiece);
+  home.addPieceOfFurniture(piece);
+  piece = new HomePieceOfFurniture(catalogPiece);
+  piece.setX(100);
+  piece.setY(100);
+  home.addPieceOfFurniture(piece);
+  assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
+  home.deletePieceOfFurniture(piece);
+  assertEquals("Wrong number of pieces", 1, home.getFurniture().length);
+  var piece2 = new HomePieceOfFurniture(piece);
+  piece2.setName("2");
+  piece2.setX(200);
+  piece2.setAngle(Math.PI / 4);
+  var group = new HomeFurnitureGroup([piece, piece2], "Group");
+  home.addPieceOfFurniture(group);
+  assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
+  assertEquals("Wrong number of pieces in group", 2, group.getFurniture().length);
+  if (geomAvailable) {
+  	assertEquals("Wrong width", 150 + 50 * Math.sqrt(2), group.getWidth());
+  }
+  home.deletePieceOfFurniture(piece);
+  assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
+  assertEquals("Wrong number of pieces in group", 1, group.getFurniture().length);
+  
+  new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
+      {
+	    homeLoaded: function(home) {
+	      assertEquals("Wrong home name", "SweetHome3DExample3", home.getName().substring(0, home.getName().lastIndexOf(".")));
+	      assertEquals("Wrong furniture count", 117, home.getFurniture().length);
+          var preferences = new DefaultUserPreferences();
+	      displayHome(home, preferences);
+		  // Add a piece to home and make it blink	      
+	      home.addPieceOfFurniture(piece);
+	      piece.setY(750);
+	      setInterval(function() {
+	          // Make piece blink
+	          piece.setVisible(!piece.isVisible());
+	        }, 500);
+	      
+	      // View a clone of the home in the second canvas
+	      visitHome(home.clone(), preferences);
+	      
+	      console.log("End of testHome");	      
+	    },
+	    homeError: function(err) {
+	      console.log(err.stack);
+	      alert(err);
+	    },
+	    progression: function(part, info, percentage) {
+	    }
+	  });
+}
+
+function displayHome(home, preferences) {
+  var controller = new HomeController3D(home, preferences);
+  new HomeComponent3D("canvas3D", home, preferences, null, controller);
+}
+function visitHome(home, preferences) {
+  home.setCamera(home.getObserverCamera());
+  var controller = new HomeController3D(home, preferences);
+  new HomeComponent3D("canvas3D_2", home, preferences, null, controller);
+}
+</script>
+
+<canvas id="canvas3D" style="background-color: #CCCCCC; border: 1px solid gray;" 
+		width="600" height="600" tabIndex="1"></canvas>
+<canvas id="canvas3D_2" style="background-color: #CCCCCC; border: 1px solid gray;" 
+		width="600" height="300" tabIndex="2"></canvas>
+
+<script type="text/javascript">
+var geomAvailable = typeof PathIterator !== "undefined";
+if (geomAvailable) {
+  testGeom();
+}
+testHome(geomAvailable);
+</script>
+
+</body>
+</html>
