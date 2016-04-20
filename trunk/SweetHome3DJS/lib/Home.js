@@ -1350,7 +1350,7 @@ Home.copyHomeData = function(source, destination) {
         // As soon as there's more than one level, every object is supposed to have its level set
         // but as level can still be null for a undetermined reason, prefer to keep level
         // to null in the cloned object and having errors further than throwing exception here
-        destination.furniture.get[i].setLevel(destination.levels [source.levels.indexOf(pieceLevel)]);
+        destination.furniture [i].setLevel(destination.levels [source.levels.indexOf(pieceLevel)]);
       }
     }
     for (var i = 0; i < source.rooms.length; i++) {
