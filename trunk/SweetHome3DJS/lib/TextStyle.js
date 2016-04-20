@@ -61,6 +61,7 @@ TextStyle.textStylesCache = [];
 /**
  * Returns the text style instance matching the given parameters.
  * @return {TextStyle}
+ * @private
  */
 TextStyle.prototype.getInstance = function(fontName, fontSize, bold, italic) {
   var textStyle = new TextStyle(fontName, fontSize, bold, italic, false);
@@ -70,7 +71,7 @@ TextStyle.prototype.getInstance = function(fontName, fontSize, bold, italic) {
       return textStyle;
     }
   }
-  textStylesCache.push(textStyle);
+  TextStyle.textStylesCache.push(textStyle);
   return textStyle;
 }
 
@@ -115,7 +116,7 @@ TextStyle.prototype.deriveStyle = function(fontName) {
     if (this.getFontName() == fontName) {
       return this;
     } else {
-      return getInstance(this.fontName, this.getFontSize(), this.isBold(), this.isItalic());
+      return this.getInstance(this.fontName, this.getFontSize(), this.isBold(), this.isItalic());
     }
   } else {
     var fontSize = fontName;

@@ -314,7 +314,7 @@ UserPreferences.prototype.getResourceBundle = function(resourceFamily) {
                   "_" + language + "_" + country + ".properties"];
   for (var i = 0; i < suffixes.length; i++) {
     var suffix = suffixes [i];
-    var classLoaders = getResourceClassLoaders();
+    var classLoaders = this.getResourceClassLoaders();
     for (var j = 0; j < classLoaders.length; j++) {
       var classLoader = classLoaders [j];
       var input = classLoader.getResourceAsStream(resourceFamily + suffix);
@@ -777,7 +777,7 @@ UserPreferences.prototype.setRecentHomes = function(recentHomes) {
     var oldRecentHomes = this.recentHomes;
     this.recentHomes = new ArrayList<String>(recentHomes);
     this.propertyChangeSupport.firePropertyChange("RECENT_HOMES", 
-        oldRecentHomes, getRecentHomes());
+        oldRecentHomes, this.getRecentHomes());
   }
 }
 
@@ -900,11 +900,11 @@ UserPreferences.prototype.getAutoCompletedProperties = function() {
 }
 
 /**
- * Returns an unmodifiable list of the recent colors.
+ * Returns the list of the recent colors.
  * @ignore
  */
 UserPreferences.prototype.getRecentColors = function() {
-  return Collections.unmodifiableList(this.recentColors);
+  return this.recentColors;
 }
 
 /**
@@ -916,16 +916,16 @@ UserPreferences.prototype.setRecentColors = function(recentColors) {
     var oldRecentColors = this.recentColors;
     this.recentColors = recentColors.slice(0);
     this.propertyChangeSupport.firePropertyChange("RECENT_COLORS", 
-        oldRecentColors, getRecentColors());
+        oldRecentColors, this.getRecentColors());
   }
 }
 
 /**
- * Returns an unmodifiable list of the recent textures.
+ * Returns the list of the recent textures.
  * @ignore
  */
 UserPreferences.prototype.getRecentTextures = function() {
-  return Collections.unmodifiableList(this.recentTextures);
+  return this.recentTextures;
 }
 
 /**
@@ -937,7 +937,7 @@ UserPreferences.prototype.setRecentTextures = function(recentTextures) {
     var oldRecentTextures = this.recentTextures;
     this.recentTextures = recentTextures.slice(0);
     this.propertyChangeSupport.firePropertyChange("RECENT_TEXTURES", 
-        oldRecentTextures, getRecentTextures());
+        oldRecentTextures, this.getRecentTextures());
   }
 }
 
