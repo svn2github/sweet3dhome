@@ -48,7 +48,7 @@ Node3D.prototype.getCapability = function(capability) {
   if (this.capability === undefined) {
     return false;
   } else {
-    return this.capabilities & capability !== 0;
+    return (this.capabilities & capability) !== 0;
   }
 }
 
