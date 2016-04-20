@@ -47,6 +47,7 @@ function HomeComponent3D(canvasId, home, preferences, object3dFactory, controlle
   this.approximateHomeBoundsCache = null;
   this.defaultLights = [];
   this.camera = null;
+  this.windowSizeListener = null;
   // Listeners bound to home that updates 3D scene objects
   this.cameraChangeListener = null;
   this.homeCameraListener = null;
@@ -126,13 +127,20 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
         + '  <area shape="poly" coords="20,30,36,30,28,39" data-simulated-key="PAGE_DOWN" />'
         + '</map>';
   }
+  var component3D = this;
   if (innerHtml !== null) {
     navigationPanelDiv = document.createElement("div")
     navigationPanelDiv.setAttribute("id", "div" + Math.floor(Math.random() * 1E10));
     navigationPanelDiv.style.position = "absolute";
     var canvas = this.canvas3D.getCanvas();
-    navigationPanelDiv.style.left = parseInt(canvas.style.left) + "px";
-    navigationPanelDiv.style.top = parseInt(canvas.style.top) + "px";
+    this.windowSizeListener = function() {
+        var canvasBounds = canvas.getBoundingClientRect();
+        navigationPanelDiv.style.left = canvasBounds.left + "px";
+        navigationPanelDiv.style.top = canvasBounds.top + "px";
+      };
+    window.addEventListener("scroll", this.windowSizeListener);
+    window.addEventListener("resize", this.windowSizeListener);
+    this.windowSizeListener();
     navigationPanelDiv.style.zIndex = "200";
     navigationPanelDiv.style.visibility = "hidden";
     navigationPanelDiv.innerHTML = innerHtml;
@@ -146,7 +154,6 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
         });
   }
   
-  var component3D = this;
   this.simulatedElementMousePressedListener = function(ev) {
       var simulatedElement = ev.target;
       var repeatKeyAction = function() {
@@ -269,6 +276,8 @@ HomeComponent3D.prototype.dispose = function() {
   this.removeHomeListeners();
   this.removeMouseListeners(this.canvas3D);
   if (this.navigationPanelId != null) {
+    window.removeEventListener("scroll", this.windowSizeListener);
+    window.removeEventListener("resize", this.windowSizeListener);
     var simulatedKeys = this.getSimulatedKeyElements(document.getElementsByTagName("body") [0]);
     for (var i = 0; i < simulatedKeys.length; i++) {
       simulatedKeys [i].removeEventListener("mousedown", this.simulatedElementMousePressedListener);
