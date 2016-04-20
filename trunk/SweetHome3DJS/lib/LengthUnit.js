@@ -56,7 +56,7 @@ LengthUnit.getMagnetizedMeterLength = function(length, maxDelta) {
  */
 LengthUnit.getMagnetizedInchLength = function(length, maxDelta) {
   // Use a maximum precision of 1/8 inch depending on maxDelta
-  maxDelta = centimeterToInch(maxDelta) * 2;
+  maxDelta = LengthUnit.centimeterToInch(maxDelta) * 2;
   var precision = 1 / 8.;
   if (maxDelta > 6) {
     precision = 6;
@@ -69,7 +69,7 @@ LengthUnit.getMagnetizedInchLength = function(length, maxDelta) {
   } else if  (maxDelta > 0.25) {
     precision = 0.25;
   }
-  var magnetizedLength = inchToCentimeter(Math.round(centimeterToInch(length) / precision) * precision);
+  var magnetizedLength = LengthUnit.inchToCentimeter(Math.round(LengthUnit.centimeterToInch(length) / precision) * precision);
   if (magnetizedLength === 0 && length > 0) {
     return length;
   } else {
