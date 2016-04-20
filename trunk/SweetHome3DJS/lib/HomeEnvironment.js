@@ -424,7 +424,7 @@ HomeEnvironment.prototype.setVideoWidth = function(videoWidth) {
  * @ignore
  */
 HomeEnvironment.prototype.getVideoHeight = function() {
-  return Math.round(getVideoWidth() / getVideoAspectRatio().getValue());
+  return Math.round(getVideoWidth() / this.getVideoAspectRatio().getValue());
 }
 
 /**
