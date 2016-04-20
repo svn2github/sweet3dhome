@@ -870,7 +870,7 @@ UserPreferences.prototype.addAutoCompletionString = function(property, autoCompl
       return;
     }
     propertyAutoCompletionStrings.splice(0, 0, autoCompletionString);
-    setAutoCompletionStrings(property, propertyAutoCompletionStrings);
+    this.setAutoCompletionStrings(property, propertyAutoCompletionStrings);
   }
 }
 
