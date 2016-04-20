@@ -149,7 +149,7 @@ CatalogTexture.compare = function(texture1, texture2) {
  */
 CatalogTexture.prototype.matchesFilter = function(filter) {
   var regex = new RegExp(filter, 'i');
-  if (getName().match(regex)
+  if (this.getName().match(regex)
       || this.getCategory() !== null && this.getCategory().getName().match(regex)
       || this.getCreator() !== null && this.getCreator().match(regex))
     return true;

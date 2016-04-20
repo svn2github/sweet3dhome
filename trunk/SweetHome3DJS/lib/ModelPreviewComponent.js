@@ -47,7 +47,7 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
         rotationUpdater : function(x, y, altKey) {
           if (!userActionsListener.gesture && userActionsListener.buttonPressed === 0) {
             if (altKey) {
-              zoomUpdater(userActionsListener.yLastMove - y);
+              userActionsListener.zoomUpdater(userActionsListener.yLastMove - y);
             } else {
               previewComponent.viewYaw = previewComponent.viewYaw - ANGLE_FACTOR * (x - userActionsListener.xLastMove);
               previewComponent.viewPitch = Math.max(MIN_VIEW_PITCH, Math.min(0, previewComponent.viewPitch - ANGLE_FACTOR * (y - userActionsListener.yLastMove)));
@@ -88,7 +88,7 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
           userActionsListener.yLastMove = ev.targetTouches [ev.targetTouches.length - 1].pageY;
           previewComponent.stopRotationAnimation();
         },
-        touchMoved :  function(ev) {
+        touchMoved : function(ev) {
           ev.preventDefault();
           var x = ev.targetTouches [ev.targetTouches.length - 1].pageX;
           var y = ev.targetTouches [ev.targetTouches.length - 1].pageY;
