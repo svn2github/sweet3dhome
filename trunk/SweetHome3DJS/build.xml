@@ -10,10 +10,10 @@
 -->
 <project basedir="." default="build" name="SweetHome3DJS">
   <!-- The current version of Sweet Home 3D JS -->
-  <property name="version" value="1.0.1"/>
+  <property name="version" value="1.0.2"/>
 
-  <target name="build" 
-          description="Builds minified Javacript files in dist directory">
+  <target name="concat" 
+          description="Concat Javacript files in dist/build directory">
     <mkdir dir="dist/build"/>
   	<concat destfile="dist/build/viewmodel.min.js" encoding="UTF-8">
       <filelist dir="lib">
@@ -54,7 +54,9 @@
       	<file name="viewHome.js"/>
       </filelist>
   	</concat>
-
+  </target>	
+  <target name="build" depends="concat" 
+          description="Builds minified Javacript files in dist directory">
   	<!-- Download and build YUI Compressor -->
   	<available file="tools/yuicompressor" type="dir" property="yuicompressor.present"/>
   	<antcall target="install-yuicompressor"/>
