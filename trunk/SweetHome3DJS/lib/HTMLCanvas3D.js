@@ -280,6 +280,7 @@ HTMLCanvas3D.prototype.getScene = function() {
 
 /**
  * Returns the count of geometries in all the shapes children of the given node.
+ * @param [Node3D] node
  * @private
  */
 HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
@@ -299,10 +300,17 @@ HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
 
 /**
  * Prepares the scene to be rendered, creating the required buffers and textures in WebGL.  
+ * @param [Node3D]  node
+ * @param [Array]   displayedGeometries
+ * @param [boolean] background
+ * @param [Array]   lights
+ * @param parentTransformations
+ * @param onprogression
+ * @param [number]  displayedGeometryCount
  * @private
  */
 HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, background, lights, parentTransformations, 
-                                           onprogression, displayedGeometryCount) {
+                                               onprogression, displayedGeometryCount) {
   var canvas3D = this;
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
@@ -517,6 +525,10 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
 
 /**
  * Updates the transformation applied to the children of the given node.
+ * @param [Node3D]  node
+ * @param [Array]   displayedGeometries
+ * @param [Array]   lights
+ * @param parentTransformations
  * @private  
  */
 HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGeometries, lights, parentTransformations) {
@@ -548,6 +560,9 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
 
 /**
  * Removes the tree with the given root node.  
+ * @param [Node3D]  node
+ * @param [Array]   displayedGeometries
+ * @param [Array]   lights
  * @private  
  */
 HTMLCanvas3D.prototype.removeDisplayedItems = function(node, displayedGeometries, lights) {
@@ -643,6 +658,7 @@ HTMLCanvas3D.prototype.bindTexture = function(texture) {
 
 /** 
  * Returns true if x is a power of 2.
+ * @param {number} x
  * @return {boolean}
  * @private
  */
@@ -651,6 +667,8 @@ HTMLCanvas3D.prototype.isPowerOfTwo = function(x) {
 }
 
 /**
+ * Returns the closest higher number that is a power of 2.
+ * @param {number} x
  * @return {number}
  * @private
  */
