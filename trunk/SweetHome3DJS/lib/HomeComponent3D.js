@@ -1414,7 +1414,7 @@ HomeComponent3D.prototype.updateObjects = function(objects) {
     for (var i = 0; i < objects.length; i++) {
       var object = objects [i];
       if (this.homeObjectsToUpdate.indexOf(object) <= -1) {
-        objects.push(object);
+        this.homeObjectsToUpdate.push(object);
       }
     }
   } else {
