@@ -89,7 +89,44 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   
   observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 0);
   var document = new DOMParser().parseFromString(xmlContent, "text/xml");
-  var homeElement = document.getElementsByTagName("home") [0];
+  
+  var home = this.getHomeObject(document.documentElement, zipUrl, {}); 
+  
+  observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 1);
+  observer.homeLoaded(home);
+}
+
+/**
+ * Returns the home object matching the given element.
+ * @param {Element} element
+ * @param {string} zipUrl
+ * @param {levelsMap: Object.<string, Level>} params
+ * @return {Object}
+ * @protected
+ * @ignore
+ */
+HomeRecorder.prototype.getHomeObject = function(element, zipUrl, params) {
+  switch (element.tagName) {
+    case "home" :
+      return this.getHome(element, zipUrl, params);
+    case "furnitureGroup" :
+    case "pieceOfFurniture" : 
+    case "doorOrWindow" :
+    case "light" :
+      return this.getPieceOfFurniture(element, zipUrl, params);
+    default :
+      return null;
+  }
+}
+
+/**
+ * Returns the home matching the given element.
+ * @param {Element} pieceElement
+ * @param {string} zipUrl
+ * @return {Home}
+ * @private
+ */
+HomeRecorder.prototype.getHome = function(homeElement, zipUrl, params) {
   var wallHeight = parseFloat(homeElement.getAttribute("wallHeight"));
   if (isNaN(wallHeight)) {
     wallHeight = undefined;
@@ -98,7 +135,7 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   home.setVersion(parseInt(homeElement.getAttribute("version")));
   home.setName(homeElement.getAttribute("name"));
   // Parse environment
-  var environment = this.getHomeEnvironment(document.getElementsByTagName("environment") [0], zipUrl);
+  var environment = this.getHomeEnvironment(homeElement.getElementsByTagName("environment") [0], zipUrl);
   var homeEnvironment = home.getEnvironment();
   homeEnvironment.setObserverCameraElevationAdjusted(environment.isObserverCameraElevationAdjusted());
   homeEnvironment.setGroundColor(environment.getGroundColor());
@@ -126,9 +163,9 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
         || element.tagName == "observerCamera") {
       var camera = this.getCamera(element, zipUrl);
       if (element.getAttribute("attribute") == "observerCamera") {
-        home.observerCamera = camera;
+        home.getObserverCamera().setCamera(camera);
       } else if (element.getAttribute("attribute") == "topCamera") {
-        home.topCamera = camera;
+        home.getTopCamera().setCamera(camera);
       } else {
         storedCameras.push(camera);
       }
@@ -141,15 +178,16 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
      ? home.getObserverCamera()
      : home.getTopCamera());
   // Parse levels
-  var levelsMap = this.getLevels(document.getElementsByTagName("level"), zipUrl);
+  var levelsMap = this.getLevels(homeElement.getElementsByTagName("level"), zipUrl);
   for (var key in levelsMap) {
     home.addLevel(levelsMap [key]);
   }
+  params.levelsMap = levelsMap;
 
   // Parse furniture
   for (var i = 0; i < homeElement.childNodes.length; i++) {
     var element = homeElement.childNodes [i];
-    var object = this.getHomeObject(element, levelsMap, zipUrl);
+    var object = this.getHomeObject(element, zipUrl, params);
     if (object instanceof HomePieceOfFurniture) {
       home.setSelectedLevel(object.getLevel());
       home.addPieceOfFurniture(object);
@@ -161,29 +199,7 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   if (homeElement.hasAttribute("structure")) {
     home.structure = this.getContent(homeElement, "structure", zipUrl);
   }
-  observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 1);
-
-  observer.homeLoaded(home);
-}
-
-/**
- * Returns the home object matching the given element.
- * @param {Element} element
- * @param {Object.<string, Level>} levelsMap
- * @param {string} zipUrl
- * @return {Object}
- * @private
- */
-HomeRecorder.prototype.getHomeObject = function(element, levelsMap, zipUrl) {
-  switch (element.tagName) {
-    case "furnitureGroup" :
-    case "pieceOfFurniture" : 
-    case "doorOrWindow" :
-    case "light" :
-      return this.getPieceOfFurniture(element, levelsMap, zipUrl);
-    default :
-      return null;
-  }
+  return home;
 }
 
 /**
@@ -304,12 +320,13 @@ HomeRecorder.prototype.getLevels = function(levelElements, zipUrl) {
 /**
  * Returns a piece of furniture or a group matching the given element.
  * @param {Element} pieceElement
- * @param {Object.<string, Level>} levelsMap
  * @param {string} zipUrl
+ * @param {levelsMap: {Object.<string, Level>} params parameters with levels map
  * @return {HomePieceOfFurniture}
  * @private
  */
-HomeRecorder.prototype.getPieceOfFurniture = function(pieceElement, levelsMap, zipUrl) {
+HomeRecorder.prototype.getPieceOfFurniture = function(pieceElement, zipUrl, params) {
+  var levelsMap = params.levelsMap;
   var level = pieceElement.hasAttribute("level")  
       ? levelsMap [pieceElement.getAttribute("level")] 
       : null;
@@ -384,19 +401,19 @@ HomeRecorder.prototype.getPieceOfFurniture = function(pieceElement, levelsMap, z
   var modelMaterials = null;
   for (var i = 0; i < pieceElement.childNodes.length; i++) {
     var element = pieceElement.childNodes [i];
-    if (element.tagName == "furnitureGroup" 
-        || element.tagName == "pieceOfFurniture" 
-        || element.tagName == "doorOrWindow"
-        || element.tagName == "light") {
-      furniture.push(this.getPieceOfFurniture(element, levelsMap, zipUrl));
-    } else if (element.tagName == "texture") {
+    if (element.tagName == "texture") {
       texture = this.getTexture(element, zipUrl);
     } else if (element.tagName == "material") {
       if (modelMaterials === null) {
         modelMaterials = [];
       }
       modelMaterials.push(this.getMaterial(element, zipUrl));
-    } 
+    } else {
+      var homeObject = this.getHomeObject(element, zipUrl, params);
+      if (homeObject instanceof HomePieceOfFurniture) {
+        furniture.push(homeObject);
+      }
+    }
   }
   var piece;
   if (pieceElement.tagName == "furnitureGroup") {

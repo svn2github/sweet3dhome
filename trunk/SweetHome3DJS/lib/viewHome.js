@@ -239,9 +239,13 @@ function viewHomeInOverlay(homeUrl, params) {
     };
  
   // Display home in canvas 3D
+  var homePreviewComponentContructor = HomePreviewComponent;
   if (params) {
+    if (params.homePreviewComponentContructor) {
+      homePreviewComponentContructor = params.homePreviewComponentContructor;
+    }
     if (params.aerialViewButtonText && params.virtualVisitButtonText) {
-      canvas.homePreviewComponent = viewHome(
+      canvas.homePreviewComponent = new homePreviewComponentContructor(
           "viewerCanvas", homeUrl, onerror, onprogression, 
           {roundsPerMinute: params.roundsPerMinute, 
            navigationPanel: params.navigationPanel,
@@ -250,13 +254,13 @@ function viewHomeInOverlay(homeUrl, params) {
            levelsAndCamerasListId: "levelsAndCameras", 
            selectableLevels: params.selectableLevels});
     } else {
-      canvas.homePreviewComponent = viewHome(
+      canvas.homePreviewComponent = new homePreviewComponentContructor(
           "viewerCanvas", homeUrl, onerror, onprogression, 
           {roundsPerMinute: params.roundsPerMinute,
            navigationPanel: params.navigationPanel});
     }
   } else {
-    canvas.homePreviewComponent = viewHome("viewerCanvas", homeUrl, onerror, onprogression);
+    canvas.homePreviewComponent = new homePreviewComponentContructor("viewerCanvas", homeUrl, onerror, onprogression);
   }
 }
 
@@ -301,13 +305,12 @@ function hideHomeOverlay() {
 function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params) {
   if (document.getElementById(canvasId)) {
     var previewComponent = this;
-    this.getHomeRecorder().readHome(homeUrl,
+    this.createHomeRecorder().readHome(homeUrl,
         {
           homeLoaded: function(home) {
             try {
               var canvas = document.getElementById(canvasId);
               if (canvas) {
-                var preferences;
                 if (params  
                     && params.navigationPanel != "none"  
                     && params.navigationPanel != "default") {
@@ -327,13 +330,16 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
                       return UserPreferences.prototype.getLocalizedString.call(this, resourceClass, resourceKey, resourceParameters);
                     }
                   }
-                  preferences = new UserPreferencesWithNavigationPanel(params.navigationPanel);
+                  previewComponent.preferences = new UserPreferencesWithNavigationPanel(params.navigationPanel);
                 } else {
-                  preferences = new DefaultUserPreferences();
+                  previewComponent.preferences = new DefaultUserPreferences();
                 }
-                var controller = new HomeController3D(home, preferences);
+                previewComponent.home = home;
+                previewComponent.controller = new HomeController3D(home, previewComponent.preferences);
                 // Create component 3D with loaded home
-                previewComponent.createComponent3D(canvasId, home, preferences, controller, onprogression,
+                previewComponent.component3D = previewComponent.createComponent3D(
+                    canvasId, home, previewComponent.preferences, previewComponent.controller);
+                previewComponent.prepareComponent(canvasId, onprogression,
                     params ? {roundsPerMinute: params.roundsPerMinute, 
                               navigationPanelVisible: params.navigationPanel && params.navigationPanel != "none",
                               aerialViewButtonId: params.aerialViewButtonId, 
@@ -362,16 +368,24 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
  * @protected
  * @ignore
  */
-HomePreviewComponent.prototype.getHomeRecorder = function() { 
+HomePreviewComponent.prototype.createHomeRecorder = function() { 
   return new HomeRecorder();
 }
 
 /**
- * Creates the component 3D that will display the given <code>home</code>.
+ * Returns the component 3D that will display the given home.
+ * @param {string} canvasId  the value of the id attribute of the 3D canvas  
+ * @return {HomeComponent3D}
+ * @protected
+ * @ignore
+ */
+HomePreviewComponent.prototype.createComponent3D = function(canvasId) { 
+  return new HomeComponent3D(canvasId, this.getHome(), this.getUserPreferences(), null, this.getController());
+}
+
+/**
+ * Prepares this component and its user interface.
  * @param {string} canvasId  the value of the id attribute of the 3D canvas 
- * @param {Home} home the home to display in this component
- * @param {UserPreferences} preferences user preferences
- * @param {HomeController3D} controller the controller that manages modifications in <code>home</code> (optional).
  * @param onprogression callback with (part, info, percentage) parameters called during the download of the home 
  *                      and the 3D models it displays.
  * @param {{roundsPerMinute: number, 
@@ -381,21 +395,20 @@ HomePreviewComponent.prototype.getHomeRecorder = function() {
  *          levelsAndCamerasListId: string,
  *          selectableLevels: string[]}} [params] the ids of the buttons and other information displayed in the user interface. 
  *                      If not provided, controls won't be managed if any, no animation and navigation panel won't be displayed. 
- * @return {HomeComponent3D}
  * @protected
  * @ignore
  */
-HomePreviewComponent.prototype.createComponent3D = function(canvasId, home, preferences, controller, onprogression, params) { 
-  var component3D = new HomeComponent3D(canvasId, home, preferences, null, controller);
-  var roundsPerMinute = params ? params.roundsPerMinute : 0;
+HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogression, params) { 
+  var roundsPerMinute = params && params.roundsPerMinute ? params.roundsPerMinute : 0;
   this.startRotationAnimationAfterLoading = roundsPerMinute != 0;
   if (params && typeof params.navigationPanelVisible) {
-    preferences.setNavigationPanelVisible(params.navigationPanelVisible);
+    this.getUserPreferences().setNavigationPanelVisible(params.navigationPanelVisible);
   }
+  var home = this.getHome();
   home.getEnvironment().setAllLevelsVisible(true);
   home.getEnvironment().setObserverCameraElevationAdjusted(true);
   
-  this.trackFurnitureModels(home, onprogression, roundsPerMinute);
+  this.trackFurnitureModels(onprogression, roundsPerMinute);
   
   // Configure camera type buttons and shortcut
   var previewComponent = this;
@@ -496,6 +509,7 @@ HomePreviewComponent.prototype.createComponent3D = function(canvasId, home, pref
   
   if (roundsPerMinute) {
     home.setCamera(home.getTopCamera());
+    var controller = this.getController();
     controller.rotateCameraPitch(Math.PI / 6 - home.getCamera().getPitch());
     controller.moveCamera(10000);
     controller.moveCamera(-50);
@@ -507,7 +521,7 @@ HomePreviewComponent.prototype.createComponent3D = function(canvasId, home, pref
     canvas.addEventListener("mousedown", this.clickListener);
     canvas.addEventListener("touchstart",  this.clickListener);
     canvas.addEventListener("gesturechange",  this.clickListener);
-    var elements = component3D.getSimulatedKeyElements(document.getElementsByTagName("body").item(0));
+    var elements = this.component3D.getSimulatedKeyElements(document.getElementsByTagName("body").item(0));
     for (var i = 0; i < elements.length; i++) {
       elements [i].addEventListener("mousedown", this.clickListener);
     }
@@ -519,12 +533,6 @@ HomePreviewComponent.prototype.createComponent3D = function(canvasId, home, pref
     document.addEventListener("visibilitychange", this.visibilityChanged);
     document.getElementById(canvasId).focus();
   }
-  
-  // Store data after everything is set up
-  this.home = home;
-  this.preferences = preferences;
-  this.controller = controller;
-  this.component3D = component3D;
 }
 
 /**
@@ -563,10 +571,11 @@ HomePreviewComponent.prototype.getUserPreferences = function() {
  * Tracks furniture models loading to dispose unneeded files and data once read.
  * @private
  */
-HomePreviewComponent.prototype.trackFurnitureModels = function(home, onprogression, roundsPerMinute) {
+HomePreviewComponent.prototype.trackFurnitureModels = function(onprogression, roundsPerMinute) {
   var loadedFurniture = [];
   var loadedJars = {};
   var loadedModels = {};
+  var home = this.getHome();
   var furniture = home.getFurniture();          
   for (var i = 0; i < furniture.length; i++) { 
     var piece = furniture [i];
