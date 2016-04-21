@@ -363,10 +363,31 @@ TransformGroup3D.prototype.getTransform = function(transform) {
 }
 
 TransformGroup3D.prototype.setTransform = function(transform) {
-  var oldTransform = mat4.clone(this.transform); 
-  mat4.copy(this.transform, transform);
-  if (this.propertyChangeSupport !== undefined) {
-    this.propertyChangeSupport.firePropertyChange("TRANSFORM", oldTransform, transform);
+  if (!TransformGroup3D.areTransformationsEqual(this.transform, transform)) {
+    var oldTransform = mat4.clone(this.transform); 
+    mat4.copy(this.transform, transform);
+    if (this.propertyChangeSupport !== undefined) {
+      this.propertyChangeSupport.firePropertyChange("TRANSFORM", oldTransform, transform);
+    }
+  }
+}
+
+/**
+ * @package
+ * @ignore
+ */
+TransformGroup3D.areTransformationsEqual = function(transform1, transform2) {
+  if (transform1 
+      && transform2
+      && transform1.length === transform2.length) {
+    for (var i = 0; i < transform1.length; i++) {
+      if (transform1 [i] !== transform2 [i]) {
+      return false;
+      }
+    }
+    return true;
+  } else {
+    return transform1 === transform2;
   }
 }
 
@@ -485,10 +506,12 @@ Appearance3D.prototype.getIllumination = function() {
 }
 
 Appearance3D.prototype.setTextureImage = function(textureImage) {
-  var oldTextureImage = this.textureImage;
-  this.textureImage = textureImage;
-  if (this.propertyChangeSupport !== undefined) {
-    this.propertyChangeSupport.firePropertyChange("TEXTURE_IMAGE", oldTextureImage, textureImage);
+  if (this.textureImage !== textureImage) {
+    var oldTextureImage = this.textureImage;
+    this.textureImage = textureImage;
+    if (this.propertyChangeSupport !== undefined) {
+      this.propertyChangeSupport.firePropertyChange("TEXTURE_IMAGE", oldTextureImage, textureImage);
+    }
   }
 }
 
@@ -497,10 +520,40 @@ Appearance3D.prototype.getTextureImage = function() {
 }
 
 Appearance3D.prototype.setTextureCoordinatesGeneration = function(textureCoordinatesGeneration) {
-  var oldTextureCoordinatesGeneration = this.textureCoordinatesGeneration;
-  this.textureCoordinatesGeneration = textureCoordinatesGeneration;
-  if (this.propertyChangeSupport !== undefined) {
-    this.propertyChangeSupport.firePropertyChange("TEXTURE_COORDINATES_GENERATION", oldTextureCoordinatesGeneration, textureCoordinatesGeneration);
+  if (!Appearance3D.areTextureCoordinatesGenerationsEqual(this.textureCoordinatesGeneration, textureCoordinatesGeneration)) {
+    var oldTextureCoordinatesGeneration = this.textureCoordinatesGeneration;
+    this.textureCoordinatesGeneration = textureCoordinatesGeneration;
+    if (this.propertyChangeSupport !== undefined) {
+      this.propertyChangeSupport.firePropertyChange("TEXTURE_COORDINATES_GENERATION", oldTextureCoordinatesGeneration, textureCoordinatesGeneration);
+    }
+  }
+}
+
+/**
+ * @package
+ * @ignore
+ */
+Appearance3D.areTextureCoordinatesGenerationsEqual = function(textureCoordinatesGeneration1, textureCoordinatesGeneration2) {
+  if (textureCoordinatesGeneration1 
+      && textureCoordinatesGeneration2) {
+    var planeS1 = textureCoordinatesGeneration1.planeS;
+    var planeS2 = textureCoordinatesGeneration2.planeS;
+    if (planeS1 && planeS2
+        && planeS1 [0] === planeS2 [0]
+        && planeS1 [1] === planeS2 [1]
+        && planeS1 [2] === planeS2 [2]
+        && planeS1 [3] === planeS2 [3]) {
+      var planeT1 = textureCoordinatesGeneration1.planeT;
+      var planeT2 = textureCoordinatesGeneration2.planeT;
+      return planeT1 && planeT2
+          && planeT1 [0] === planeT2 [0]
+          && planeT1 [1] === planeT2 [1]
+          && planeT1 [2] === planeT2 [2]
+          && planeT1 [3] === planeT2 [3];
+    }
+    return false;
+  } else {
+    return textureCoordinatesGeneration1 === textureCoordinatesGeneration2;
   }
 }
 
@@ -509,10 +562,12 @@ Appearance3D.prototype.getTextureCoordinatesGeneration = function() {
 }
 
 Appearance3D.prototype.setTextureTransform = function(textureTransform) {
-  var oldTextureTransform = this.textureTransform;
-  this.textureTransform = textureTransform;
-  if (this.propertyChangeSupport !== undefined) {
-    this.propertyChangeSupport.firePropertyChange("TEXTURE_TRANSFORM", oldTextureTransform, textureTransform);
+  if (!TransformGroup3D.areTransformationsEqual(this.textureTransform, textureTransform)) {
+    var oldTextureTransform = this.textureTransform;
+    this.textureTransform = textureTransform;
+    if (this.propertyChangeSupport !== undefined) {
+      this.propertyChangeSupport.firePropertyChange("TEXTURE_TRANSFORM", oldTextureTransform, textureTransform);
+    }
   }
 }
 
