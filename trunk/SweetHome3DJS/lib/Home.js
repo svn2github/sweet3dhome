@@ -432,10 +432,7 @@ Home.prototype.getPieceOfFurnitureGroup = function(piece, furnitureGroup, furnit
  * @param listener the listener to add
  */
 Home.prototype.addSelectionListener = function(listener) {
-  var index = this.selectionListeners.indexOf(listener);
-  if (index !== -1) {
-    this.selectionListeners.splice(index, 1);
-  }
+  this.selectionListeners.push(listener);
 }
 
 /**
@@ -470,7 +467,7 @@ Home.prototype.setSelectedItems = function(selectedItems) {
     // can modify safely listeners list
     var listeners = this.selectionListeners.slice(0);
     for (var i = 0; i < listeners.length; i++) {
-      listeners [i].selectionChanged(selectionEvent);
+      listeners [i](selectionEvent);
     }
   }
 }

@@ -42,6 +42,7 @@
       	<file name="TextStyle.js"/>
       	<file name="HomeEnvironment.js"/>
       	<file name="Level.js"/>
+      	<file name="SelectionEvent.js"/>
       	<file name="Home.js"/>
       	<file name="LengthUnit.js"/>
       	<file name="UserPreferences.js"/>
