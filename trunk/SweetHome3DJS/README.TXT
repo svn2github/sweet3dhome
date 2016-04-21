@@ -1,4 +1,4 @@
-SWEET HOME 3D JS v 1.0.1
+SWEET HOME 3D JS v 1.0.2
 ------------------------
 
 This archive contains source code of Sweet Home 3D JS, an HTML5 3D viewer 
@@ -6,7 +6,7 @@ for Sweet Home 3D files exported with Export to HTML5 plug-in.
 
 You may also download this source code with the following CVS command:
 
-cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_0_1 SweetHome3DJS
+cvs -z3 -d:pserver:anonymous@sweethome3d.cvs.sourceforge.net:/cvsroot/sweethome3d co -P -r V_1_0_2 SweetHome3DJS
 
 
 HOW TO USE THIS SOURCE CODE
