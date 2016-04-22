@@ -1257,9 +1257,7 @@ Home.prototype.setBasePlanLocked = function(basePlanLocked) {
 }
 
 /**
- * Returns the version of this home, the last time it was serialized or 
- * or {@link Home.CURRENT_VERSION} if it is not serialized yet or 
- * was serialized with Sweet Home 3D 0.x.  
+ * Returns the version of this home the last time it was saved.  
  * Version is useful to know with which Sweet Home 3D version this home was saved
  * and warn user that he may lose information if he saves with 
  * current application a home created by a more recent version.
@@ -1270,8 +1268,9 @@ Home.prototype.getVersion = function() {
 }
 
 /**
- * Sets the version of this home.
+ * Sets the application version of this home.
  * @return {number} version  the new version
+ * @ignore
  */
 Home.prototype.setVersion = function(version) {
   this.version = version;
