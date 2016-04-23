@@ -101,6 +101,7 @@ HomePieceOfFurniture.IDENTITY = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
 
 /**
  * Adds the property change <code>listener</code> in parameter to this piece.
+ * The listener is a function that will receive in parameter an event of {@link PropertyChangeEvent} class.
  * @param listener the listener to add
  */
 HomePieceOfFurniture.prototype.addPropertyChangeListener = function(listener) {

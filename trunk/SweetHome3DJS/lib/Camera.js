@@ -65,6 +65,7 @@ Camera.midday = function() {
 
 /**
  * Adds the property change <code>listener</code> in parameter to this camera.
+ * The listener is a function that will receive in parameter an event of {@link PropertyChangeEvent} class.
  * @param listener  the listener that will receive {@link PropertyChangeEvent} events 
  */
 Camera.prototype.addPropertyChangeListener = function(listener) {

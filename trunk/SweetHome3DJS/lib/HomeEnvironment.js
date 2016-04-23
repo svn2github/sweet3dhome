@@ -64,6 +64,7 @@ HomeEnvironment.DrawingMode = {FILL : 0, OUTLINE : 1, FILL_AND_OUTLINE : 2}
 
 /**
  * Adds the property change <code>listener</code> in parameter to this environment.
+ * The listener is a function that will receive in parameter an event of {@link PropertyChangeEvent} class.
  * @param listener  the listener that will receive {@link PropertyChangeEvent} events 
  */
 HomeEnvironment.prototype.addPropertyChangeListener = function(property, listener) {

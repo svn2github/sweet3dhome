@@ -90,6 +90,7 @@ UserPreferences.DEFAULT_ROOM_TEXT_STYLE = new TextStyle(24);
 
 /**
  * Adds the <code>listener</code> in parameter to these preferences. 
+ * The listener is a function that will receive in parameter an event of {@link PropertyChangeEvent} class.
  */
 UserPreferences.prototype.addPropertyChangeListener = function(property,  listener) {
   this.propertyChangeSupport.addPropertyChangeListener(property, listener);

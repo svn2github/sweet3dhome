@@ -166,6 +166,7 @@ Home.prototype.getGroupFurniture = function(furnitureGroup) {
 
 /**
  * Adds the level <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  */
 Home.prototype.addLevelsListener = function(listener) {
@@ -322,6 +323,7 @@ Home.prototype.setAllLevelsSelection = function(selectionAtAllLevels) {
 
 /**
  * Adds the furniture <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  */
 Home.prototype.addFurnitureListener = function(listener) {
@@ -429,6 +431,7 @@ Home.prototype.getPieceOfFurnitureGroup = function(piece, furnitureGroup, furnit
 
 /**
  * Adds the selection <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link SelectionEvent} class.
  * @param listener the listener to add
  */
 Home.prototype.addSelectionListener = function(listener) {
@@ -487,6 +490,7 @@ Home.prototype.deselectItem = function(item) {
 
 /**
  * Adds the room <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  * @ignore
  */
@@ -554,6 +558,7 @@ Home.prototype.deleteRoom = function(room) {
 
 /**
  * Adds the wall <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  * @ignore
  */
@@ -627,6 +632,7 @@ Home.prototype.deleteWall = function(wall) {
 
 /**
  * Adds the polyline <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  * @ignore
  */
@@ -694,6 +700,7 @@ Home.prototype.deletePolyline = function(polyline) {
 
 /**
  * Adds the dimension line <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  * @ignore
  */
@@ -758,6 +765,7 @@ Home.prototype.deleteDimensionLine = function(dimensionLine) {
 
 /**
  * Adds the label <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link CollectionEvent} class.
  * @param listener the listener to add
  * @ignore
  */
@@ -879,6 +887,7 @@ Home.prototype.isEmpty = function() {
 
 /**
  * Adds the property change <code>listener</code> in parameter to this home.
+ * The listener is a function that will receive in parameter an event of {@link PropertyChangeEvent} class.
  * @param {string} property the property to follow
  * @param listener the listener to add
  */
