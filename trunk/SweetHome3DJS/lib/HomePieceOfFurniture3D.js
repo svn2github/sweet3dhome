@@ -33,7 +33,7 @@
  */
 function HomePieceOfFurniture3D(piece, home, waitModelAndTextureLoadingEnd) {
   Object3DBranch.call(this);
-  this.piece = piece;      
+  this.setUserData(piece);      
   this.home = home;
   
   this.createPieceOfFurnitureNode(piece, waitModelAndTextureLoadingEnd);
@@ -96,7 +96,7 @@ HomePieceOfFurniture3D.prototype.update = function() {
  */
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureTransform = function() {
   var pieceTransform = ModelManager.getInstance().
-      getPieceOFFurnitureNormalizedModelTransformation(this.piece);
+      getPieceOFFurnitureNormalizedModelTransformation(this.getUserData());
   // Change model transformation      
   this.getChild(0).setTransform(pieceTransform);
 }
@@ -106,21 +106,22 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureTransform = function() {
  * @private
  */
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureColorAndTexture = function(waitTextureLoadingEnd) {
+  var piece = this.getUserData();
   var modelNode = this.getModelNode();
-  if (this.piece.getColor() !== null) {
-    this.setColorAndTexture(modelNode, this.piece.getColor(), null, this.piece.getShininess(), null, false, 
+  if (piece.getColor() !== null) {
+    this.setColorAndTexture(modelNode, piece.getColor(), null, piece.getShininess(), null, false, 
         null, null, []);
-  } else if (this.piece.getTexture() !== null) {
-    this.setColorAndTexture(modelNode, null, this.piece.getTexture(), this.piece.getShininess(), null, waitTextureLoadingEnd,
-        vec3.fromValues(this.piece.getWidth(), this.piece.getHeight(), this.piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)),
+  } else if (piece.getTexture() !== null) {
+    this.setColorAndTexture(modelNode, null, piece.getTexture(), piece.getShininess(), null, waitTextureLoadingEnd,
+        vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)),
         []);
-  } else if (this.piece.getModelMaterials() !== null) {
-    this.setColorAndTexture(modelNode, null, null, null, this.piece.getModelMaterials(), waitTextureLoadingEnd,
-        vec3.fromValues(this.piece.getWidth(), this.piece.getHeight(), this.piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)), 
+  } else if (piece.getModelMaterials() !== null) {
+    this.setColorAndTexture(modelNode, null, null, null, piece.getModelMaterials(), waitTextureLoadingEnd,
+        vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)), 
         []);
   } else {
     // Set default material and texture of model
-    this.setColorAndTexture(modelNode, null, null, this.piece.getShininess(), null, false, null, null, []);
+    this.setColorAndTexture(modelNode, null, null, piece.getShininess(), null, false, null, null, []);
   }
 }
 
@@ -139,12 +140,13 @@ HomePieceOfFurniture3D.prototype.getModelNode = function() {
  * @private
  */
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureVisibility = function() {
+  var piece = this.getUserData();
   // Update visibility of filled model shapes
-  var visible = this.piece.isVisible() 
-      && (this.piece.getLevel() === null
-          || this.piece.getLevel().isViewableAndVisible()); 
-  var materials = this.piece.getColor() === null && this.piece.getTexture() === null
-      ? this.piece.getModelMaterials()
+  var visible = piece.isVisible() 
+      && (piece.getLevel() === null
+          || piece.getLevel().isViewableAndVisible()); 
+  var materials = piece.getColor() === null && piece.getTexture() === null
+      ? piece.getModelMaterials()
       : null;
   this.setVisible(this.getModelNode(), visible, materials);
 }
@@ -154,8 +156,9 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureVisibility = function() {
  * @private
  */
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelMirrored = function() {
+  var piece = this.getUserData();
   // Cull front or back model faces whether its model is mirrored or not
-  this.setCullFace(this.getModelNode(), this.piece.isModelMirrored(), this.piece.isBackFaceShown());
+  this.setCullFace(this.getModelNode(), piece.isModelMirrored(), piece.isBackFaceShown());
 }
 
 /**
@@ -175,7 +178,7 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(mode
   transformGroup.addChild(modelBranch);
 
   // Flip normals if back faces of model are shown
-  if (this.piece.isBackFaceShown()) {
+  if (this.getUserData().isBackFaceShown()) {
     this.setBackFaceNormalFlip(this.getModelNode(), true);
   }
   // Update piece color, visibility and model mirror in dispatch thread as
@@ -477,7 +480,7 @@ HomePieceOfFurniture3D.prototype.setVisible = function(node, visible, materials)
         && this.home !== null
         && !this.isSelected(this.home.getSelectedItems())
         && (typeof HomeLight === "undefined"
-            || this.piece instanceof HomeLight)) {
+            || this.getUserData() instanceof HomeLight)) {
       // Don't display light sources shapes of unselected lights
       visible = false;
     }
@@ -509,7 +512,7 @@ HomePieceOfFurniture3D.prototype.setVisible = function(node, visible, materials)
 HomePieceOfFurniture3D.prototype.isSelected = function(selectedItems) {
   for (var i = 0; i < selectedItems.length; i++) {
     var item = selectedItems [i];
-    if (item === this.piece
+    if (item === this.getUserData()
         || (item instanceof HomeFurnitureGroup
             && this.isSelected(item.getFurniture()))) {
       return true;

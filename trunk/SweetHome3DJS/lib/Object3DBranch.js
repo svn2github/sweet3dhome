@@ -57,3 +57,24 @@ Object3DBranch.prototype.updateAppearanceMaterial = function(appearance, diffuse
     appearance.setShininess(shininess * 128);
   }
 }
+
+/**
+ * Returns the user data associated with this object.
+ * @return {Object}
+ * @package
+ * @ignore
+ */
+Object3DBranch.prototype.getUserData = function() {
+  return this.userData;
+}
+
+/**
+ * Sets the user data associated with this object. It's generally used to store 
+ * the home object matching this 3D object. 
+ * @param {Object} userData
+ * @package
+ * @ignore
+ */
+Object3DBranch.prototype.setUserData = function(userData) {
+  this.userData = userData;
+}
