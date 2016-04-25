@@ -240,7 +240,7 @@ TextureManager.prototype.getErrorImage = function() {
     canvas.width = 2;
     canvas.height = 2;
     var context = canvas.getContext('2d');
-    context.fillStyle="#FF0000";
+    context.fillStyle = "#FF0000";
     context.fillRect(0, 0, 2, 2);
     var errorImageUrl = canvas.toDataURL();
     var errorImage = new Image();
