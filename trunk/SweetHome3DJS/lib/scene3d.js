@@ -52,6 +52,14 @@ Node3D.prototype.getCapability = function(capability) {
   }
 }
 
+Node3D.prototype.getParent = function() {
+  if (this.parent === undefined) {
+    return null;
+  } else {
+    return this.parent;
+  }    
+}
+
 /**
  * Adds the property change <code>listener</code> in parameter to this node.
  */
@@ -255,9 +263,7 @@ Group3D.prototype.addChild = function(child) {
 
 Group3D.prototype.insertChild = function(child, index) {
   this.children.splice(index, 0, child);
-  if (child instanceof BranchGroup3D) {
-    child.parent = this; 
-  }
+  child.parent = this; 
   if (this.childrenChangeSupport !== undefined) {
     this.childrenChangeSupport.fireCollectionChanged(child, index, CollectionEvent.Type.ADD);
   }

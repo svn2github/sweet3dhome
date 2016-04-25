@@ -221,6 +221,26 @@ HomeComponent3D.prototype.setNavigationPanelVisible = function(visible) {
 }
 
 /**
+ * Returns the closest home item displayed at client coordinates (x, y). 
+ * @param {number} x
+ * @param {number} y
+ * @returns {Object}
+ * @since 1.1
+ */
+HomeComponent3D.prototype.getClosestItemAt = function(x, y) {
+  var node = this.canvas3D.getClosestShapeAt(x, y);
+  while (node !== null
+         && !(node instanceof Object3DBranch)) {
+    node = node.getParent();
+  }
+  if (node != null) {
+    return node.getUserData();
+  } else {
+    return null;
+  }
+}
+
+/**
  * Remove all listeners bound to home that updates 3D scene objects.
  * @private 
  */

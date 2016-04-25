@@ -46,7 +46,6 @@ function HTMLCanvas3D(canvasId) {
     }
   }
   this.updateViewportSize();
-  this.gl.clearColor(0.9, 0.9, 0.9, 1.0);
   
   // Initialize shader
   this.shaderProgram = this.gl.createProgram();
@@ -108,33 +107,37 @@ function HTMLCanvas3D(canvasId) {
     + "varying vec3  varTransformedNormal;"
     + "void main(void) {" 
     + "  vec3 lightWeight;"
-    + "  if (lightingEnabled && directionalLightCount > 0) {"
-    + "    vec3 diffuseLightWeight = vec3(0., 0., 0.);"
-    + "    vec3 specularLightWeight = vec3(0., 0., 0.);"
-    + "    vec3 eyeDirection = vec3(0., 0., 0.);"
-    + "    bool computeSpecularLightWeight = false;"
-    + "    if (vertexSpecularColor.r > 0." 
-    + "        && vertexSpecularColor.g > 0."
-    + "        && vertexSpecularColor.b > 0.) {"
-    + "      eyeDirection = normalize(-varVertexPosition.xyz);"
-    + "      computeSpecularLightWeight = length(eyeDirection) <= 1.0001;"  // May happen under iOS even after a normalization
-    + "    }"
+    + "  if (lightingEnabled) {"
+    + "    lightWeight = ambientColor;"
     + ""
-    + "    for (int i = 0; i < " + HTMLCanvas3D.MAX_DIRECTIONAL_LIGHT + "; i++) {" 
-    + "      if (i >= directionalLightCount) {" 
-    + "        break;" 
-    + "      }" 
-    + "      float directionalLightWeight = max(dot(varTransformedNormal, lightDirections[i]), 0.);"
-    + "      diffuseLightWeight += directionalLightColors[i] * directionalLightWeight;"
-    + "      if (computeSpecularLightWeight) {"
-    + "        vec3 reflectionDirection = reflect(-lightDirections[i], varTransformedNormal);"
-    + "        specularLightWeight += directionalLightColors[i] * pow(max(dot(reflectionDirection, eyeDirection), 0.), shininess);"
+    + "    if (directionalLightCount > 0) {"
+    + "      vec3 diffuseLightWeight = vec3(0., 0., 0.);"
+    + "      vec3 specularLightWeight = vec3(0., 0., 0.);"
+    + "      vec3 eyeDirection = vec3(0., 0., 0.);"
+    + "      bool computeSpecularLightWeight = false;"
+    + "      if (vertexSpecularColor.r > 0." 
+    + "          && vertexSpecularColor.g > 0."
+    + "          && vertexSpecularColor.b > 0.) {"
+    + "        eyeDirection = normalize(-varVertexPosition.xyz);"
+    + "        computeSpecularLightWeight = length(eyeDirection) <= 1.0001;"  // May happen under iOS even after a normalization
     + "      }"
-    + "    }"
     + ""
-    + "    lightWeight = ambientColor + vertexDiffuseColor * diffuseLightWeight;"
-    + "    if (computeSpecularLightWeight) {"
-    + "      lightWeight += vertexSpecularColor * specularLightWeight;"
+    + "      for (int i = 0; i < " + HTMLCanvas3D.MAX_DIRECTIONAL_LIGHT + "; i++) {" 
+    + "        if (i >= directionalLightCount) {" 
+    + "          break;" 
+    + "        }" 
+    + "        float directionalLightWeight = max(dot(varTransformedNormal, lightDirections[i]), 0.);"
+    + "        diffuseLightWeight += directionalLightColors[i] * directionalLightWeight;"
+    + "        if (computeSpecularLightWeight) {"
+    + "          vec3 reflectionDirection = reflect(-lightDirections[i], varTransformedNormal);"
+    + "          specularLightWeight += directionalLightColors[i] * pow(max(dot(reflectionDirection, eyeDirection), 0.), shininess);"
+    + "        }"
+    + "      }"
+    + ""
+    + "      lightWeight += vertexDiffuseColor * diffuseLightWeight;"
+    + "      if (computeSpecularLightWeight) {"
+    + "        lightWeight += vertexSpecularColor * specularLightWeight;"
+    + "      }"
     + "    }"
     + "  } else {"
     + "    lightWeight = vertexDiffuseColor;"
@@ -174,6 +177,9 @@ function HTMLCanvas3D(canvasId) {
   // Set default transformation
   this.viewPlatformTransform = mat4.create();
   mat4.translate(this.viewPlatformTransform, this.viewPlatformTransform, [0.0, 0.0, -2.4]);
+
+  this.canvasNeededRepaint = false;
+  this.pickingFrameBufferNeededRepaint = true;
 }
 
 HTMLCanvas3D.MAX_DIRECTIONAL_LIGHT = 16;
@@ -706,6 +712,7 @@ HTMLCanvas3D.prototype.prepareBuffer = function(data, indices) {
  */
 HTMLCanvas3D.prototype.drawScene = function() {
   this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
+  this.gl.clearColor(0.9, 0.9, 0.9, 1.0);
   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   
   // Set lights
@@ -755,7 +762,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
   for (var i = 0; i < this.displayedGeometries.length; i++) {
     var displayedGeometry = this.displayedGeometries [i];
     if (displayedGeometry.background) {
-      this.drawGeometry(displayedGeometry, backgroundTransform, ambientLightColor);
+      this.drawGeometry(displayedGeometry, backgroundTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
     }
   }
 
@@ -772,7 +779,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
     if (!displayedGeometry.background
         && !this.isTextureTransparent(displayedGeometry)
         && !this.isGeometryTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor);
+      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
     }
   }
   // Then draw transparent geometries
@@ -782,7 +789,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
     var displayedGeometry = this.displayedGeometries [i];
     if (!displayedGeometry.background
         && this.isTextureTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor);
+      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
     }
   }
   for (var i = 0; i < this.displayedGeometries.length; i++) {
@@ -790,7 +797,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
     if (!displayedGeometry.background
         && !this.isTextureTransparent(displayedGeometry)
         && this.isGeometryTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor);
+      this.drawGeometry(displayedGeometry, this.viewPlatformTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
     }
   }
   
@@ -838,7 +845,8 @@ HTMLCanvas3D.prototype.isTextureTransparent = function(displayedGeometry) {
  * Draws the given shape geometry.
  * @private
  */
-HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTransform, ambientLightColor) {
+HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTransform, ambientLightColor, 
+                                               lightingEnabled, textureEnabled, transparencyEnabled) {
   if (displayedGeometry.visible
       && (displayedGeometry.transparency === undefined 
           || displayedGeometry.transparency > 0)) {
@@ -854,17 +862,37 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTr
       this.gl.enable(this.gl.CULL_FACE);
       this.gl.cullFace(this.gl.BACK);
     }
-    
-    var ambientColor = vec3.create();
-    if (displayedGeometry.ambientColor !== undefined
-        && displayedGeometry.lightingEnabled
-        && displayedGeometry.texture === undefined) {
-      vec3.multiply(ambientColor, displayedGeometry.ambientColor, ambientLightColor);
-    }
-    this.gl.uniform3fv(this.shaderProgram.ambientColor, ambientColor);
+
+    var shapeModelViewMatrix = mat4.invert(mat4.create(), viewPlatformTransform);
+    this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, 
+        mat4.mul(shapeModelViewMatrix, shapeModelViewMatrix, displayedGeometry.transformation));
+
+    this.gl.uniform1i(this.shaderProgram.lightingEnabled, lightingEnabled);
+    if (lightingEnabled) {
+      var ambientColor = vec3.create();
+      if (displayedGeometry.ambientColor !== undefined
+          && displayedGeometry.texture === undefined) {
+        vec3.multiply(ambientColor, displayedGeometry.ambientColor, ambientLightColor);
+      }
+      this.gl.uniform3fv(this.shaderProgram.ambientColor, ambientColor);
+      
+      if (!this.ignoreShininess
+          && displayedGeometry.specularColor !== undefined 
+          && displayedGeometry.shininess !== undefined) {
+        this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, displayedGeometry.specularColor);
+        this.gl.uniform1f(this.shaderProgram.shininess, displayedGeometry.shininess);
+      } else {
+        this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, vec3.create());
+      }
+
+      var normalMatrix = mat3.fromMat4(mat3.create(), shapeModelViewMatrix);
+      this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, normalMatrix);
+      this.gl.uniform1i(this.shaderProgram.backFaceNormalFlip, displayedGeometry.backFaceNormalFlip);
+    } 
     
     var diffuseColor = vec3.fromValues(1, 1, 1);
-    if (displayedGeometry.texture !== undefined) {
+    if (textureEnabled 
+        && displayedGeometry.texture !== undefined) {
       this.gl.activeTexture(this.gl.TEXTURE0);
       if (displayedGeometry.textureCoordinatesGeneration) {
         this.gl.uniform1i(this.shaderProgram.textureCoordinatesGenerated, true);
@@ -894,23 +922,13 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTr
     }
     this.gl.uniform3fv(this.shaderProgram.vertexDiffuseColor, diffuseColor);
     
-    if (!this.ignoreShininess
-        && displayedGeometry.specularColor !== undefined 
-        && displayedGeometry.shininess !== undefined) {
-      this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, displayedGeometry.specularColor);
-      this.gl.uniform1f(this.shaderProgram.shininess, displayedGeometry.shininess);
-    } else {
-      this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, vec3.create());
-    }
-    this.gl.uniform1i(this.shaderProgram.lightingEnabled, displayedGeometry.lightingEnabled);
-    
     this.shaderProgram.vertexPositionAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexPosition");
     this.gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.vertexBuffer);
     this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
-    if (displayedGeometry.mode === this.gl.TRIANGLES 
-        && displayedGeometry.lightingEnabled) {
-      this.shaderProgram.normalAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexNormal");
+    this.shaderProgram.normalAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexNormal");
+    if (lightingEnabled 
+        && displayedGeometry.mode === this.gl.TRIANGLES) {
       this.gl.enableVertexAttribArray(this.shaderProgram.normalAttribute);
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.normalBuffer);
       this.gl.vertexAttribPointer(this.shaderProgram.normalAttribute, 3, this.gl.FLOAT, false, 0, 0);
@@ -918,7 +936,8 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTr
       this.gl.disableVertexAttribArray(this.shaderProgram.normalAttribute);
     }
     this.shaderProgram.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexTextureCoord");
-    if (displayedGeometry.textureCoordinatesBuffer !== null
+    if (textureEnabled
+        && displayedGeometry.textureCoordinatesBuffer !== null
         && displayedGeometry.texture !== undefined) {
       this.gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.textureCoordinatesBuffer);
@@ -927,17 +946,9 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTr
       this.gl.disableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
     }
   
-    var shapeModelViewMatrix = mat4.invert(mat4.create(), viewPlatformTransform);
-    this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, 
-        mat4.mul(shapeModelViewMatrix, shapeModelViewMatrix, displayedGeometry.transformation));
-    if (this.lights.length > 0) {
-      var normalMatrix = mat3.fromMat4(mat3.create(), shapeModelViewMatrix);
-      this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, normalMatrix);
-      this.gl.uniform1i(this.shaderProgram.backFaceNormalFlip, displayedGeometry.backFaceNormalFlip);
-    }
-    
     // Manage transparency 
-    this.gl.uniform1f(this.shaderProgram.alpha, displayedGeometry.transparency ? displayedGeometry.transparency : 1);
+    this.gl.uniform1f(this.shaderProgram.alpha, 
+        displayedGeometry.transparency && transparencyEnabled  ? displayedGeometry.transparency  : 1);
     
     this.gl.drawArrays(displayedGeometry.mode, 0, displayedGeometry.vertexCount);
   }
@@ -947,14 +958,15 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformTr
  * Repaints as soon as possible the scene of this canvas.
  */
 HTMLCanvas3D.prototype.repaint = function() {
-  if (!this.needRepaint) {
-    this.needRepaint = true;
+  if (!this.canvasNeededRepaint) {
+    this.canvasNeededRepaint = true;
     var canvas3D = this;
     requestAnimationFrame(
         function () {
-          if (canvas3D.needRepaint) {
+          if (canvas3D.canvasNeededRepaint) {
             canvas3D.drawScene(); 
-            canvas3D.needRepaint = false;
+            canvas3D.canvasNeededRepaint = false;
+            canvas3D.pickingFrameBufferNeededRepaint = true;
           }
         });
   }
@@ -986,7 +998,98 @@ HTMLCanvas3D.prototype.clear = function() {
   this.repaint();
 }
 
+/**
+ * Sets whether shininess should be taken into account by the shader or not.
+ */
 HTMLCanvas3D.prototype.setIgnoreShininess = function(ignoreShininess) {
   this.ignoreShininess = ignoreShininess;
   this.repaint();
 }
+
+/**
+ * Returns the closest shape displayed at client coordinates (x, y) among the displayed objects. 
+ * @param {number} x
+ * @param {number} y
+ * @returns {Node3D}
+ */
+HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
+  // Inspired from http://coffeesmudge.blogspot.fr/2013/08/implementing-picking-in-webgl.html
+  if (this.pickingFrameBuffer === undefined) {
+    this.pickingFrameBuffer = this.gl.createFramebuffer();
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.pickingFrameBuffer);
+    this.pickingFrameBuffer.width = this.isPowerOfTwo(this.canvas.width) 
+        ? this.canvas.width 
+        : this.getNextHighestPowerOfTwo(this.canvas.width) / 2;
+    this.pickingFrameBuffer.height = this.isPowerOfTwo(this.canvas.height) 
+        ? this.canvas.height 
+        : this.getNextHighestPowerOfTwo(this.canvas.height) / 2;
+    this.pickingFrameBuffer.colorMap = new Uint8Array(this.pickingFrameBuffer.width * this.pickingFrameBuffer.height * 4);
+
+    var renderedTexture = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, renderedTexture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height, 
+        0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null);
+    var renderBuffer = this.gl.createRenderbuffer();
+    this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, renderBuffer);
+    this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, renderedTexture, 0);
+    this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT16, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height);
+    this.gl.framebufferRenderbuffer(this.gl.FRAMEBUFFER, this.gl.DEPTH_ATTACHMENT, this.gl.RENDERBUFFER, renderBuffer);
+  }
+
+  if (this.pickingFrameBufferNeededRepaint) {
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.pickingFrameBuffer);
+    this.gl.viewport(0, 0, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height);
+    this.gl.clearColor(1., 1., 1., 1.);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    
+    // Convert horizontal field of view to vertical
+    var projectionMatrix = mat4.create();
+    var verticalFieldOfView = 2 * Math.atan(this.canvas.height / this.canvas.width * Math.tan(this.fieldOfView / 2));
+    mat4.perspective(projectionMatrix, verticalFieldOfView, this.canvas.width / this.canvas.height,  
+        this.frontClipDistance, this.backClipDistance); 
+    this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
+    
+    // Draw not background and opaque geometries without light and textures
+    this.gl.enable(this.gl.DEPTH_TEST);
+    for (var i = 0; i < this.displayedGeometries.length; i++) {
+      var displayedGeometry = this.displayedGeometries [i];
+      if (!displayedGeometry.background
+          && !this.isGeometryTransparent(displayedGeometry)) {
+        var defaultColor = displayedGeometry.diffuseColor;
+        // Change diffuse color by geometry index
+        displayedGeometry.diffuseColor =  
+          vec3.fromValues(((i >>> 16) & 0xFF) / 255.,
+                           ((i >>> 8) & 0xFF) / 255.,
+                                   (i & 0xFF) / 255.);
+        this.drawGeometry(displayedGeometry, this.viewPlatformTransform, null, false, false, false);
+        displayedGeometry.diffuseColor = defaultColor;
+      }
+    }
+    
+    this.gl.readPixels(0, 0, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE,
+        this.pickingFrameBuffer.colorMap);
+    this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
+    this.pickingFrameBufferNeededRepaint = false;
+  }
+  
+  var canvasBounds = this.canvas.getBoundingClientRect();
+  if (x >= canvasBounds.left && y >= canvasBounds.top && x < canvasBounds.right && y < canvasBounds.bottom) {
+    x -= canvasBounds.left;
+    y -= canvasBounds.top;
+    // Find pixel index in the color map taking into the ratio between the size of the canvas at screen and the poser of two of the texture attached to the frame buffer
+    var pixelIndex = (this.pickingFrameBuffer.height - 1 - Math.floor(y / canvasBounds.height * this.pickingFrameBuffer.height)) * this.pickingFrameBuffer.width 
+        + Math.floor(x / canvasBounds.width * this.pickingFrameBuffer.width);
+    pixelIndex *= 4;
+    var geometryIndex = 
+        this.pickingFrameBuffer.colorMap[pixelIndex] * 65536
+      + this.pickingFrameBuffer.colorMap[pixelIndex + 1] * 256
+      + this.pickingFrameBuffer.colorMap[pixelIndex + 2];
+    if (geometryIndex != 0xFFFFFF) {
+      return this.displayedGeometries [geometryIndex].node;
+    }
+  }
+  
+  return null;
+} 
