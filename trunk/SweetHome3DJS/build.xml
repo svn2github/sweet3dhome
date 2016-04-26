@@ -10,7 +10,7 @@
 -->
 <project basedir="." default="build" name="SweetHome3DJS">
   <!-- The current version of Sweet Home 3D JS -->
-  <property name="version" value="1.0.3"/>
+  <property name="version" value="1.1"/>
 
   <target name="concat" 
           description="Concat Javacript files in dist/build directory">
