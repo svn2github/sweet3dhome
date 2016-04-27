@@ -144,6 +144,18 @@ Shape3D.prototype.setAppearance = function(appearance) {
   this.appearance = appearance;
 }
 
+Shape3D.prototype.setPickable = function(pickable) {
+  this.pickable = pickable;
+}
+
+Shape3D.prototype.isPickable = function() {
+  if (this.pickable !== undefined) {
+    return this.pickable;
+  } else {
+    return true;
+  }
+}
+
 Shape3D.prototype.clone = function() {
   var clone = new Shape3D(null, this.appearance);
   if (this.name !== undefined) {
@@ -151,6 +163,9 @@ Shape3D.prototype.clone = function() {
   }
   clone.geometries = this.geometries;
   clone.bounds = this.bounds;
+  if (this.pickable !== undefined) {
+    clone.pickable = this.pickable;
+  }
   return clone;
 }
 

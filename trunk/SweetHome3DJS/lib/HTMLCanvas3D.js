@@ -1056,7 +1056,7 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
     for (var i = 0; i < this.displayedGeometries.length; i++) {
       var displayedGeometry = this.displayedGeometries [i];
       if (!displayedGeometry.background
-          && !this.isGeometryTransparent(displayedGeometry)) {
+          && displayedGeometry.node.isPickable()) {
         var defaultColor = displayedGeometry.diffuseColor;
         // Change diffuse color by geometry index
         displayedGeometry.diffuseColor =  

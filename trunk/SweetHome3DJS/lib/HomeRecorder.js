@@ -376,7 +376,7 @@ HomeRecorder.prototype.getPieceOfFurniture = function(pieceElement, zipUrl, para
       ? pieceElement.getAttribute("information")
       : null;
   var movable = "false" != pieceElement.getAttribute("movable");
-  var doorOrWindow = "true" == pieceElement.getAttribute("doorOrWindow");
+  var doorOrWindow = "true" == pieceElement.getAttribute("doorOrWindow") || pieceElement.tagName == "doorOrWindow";
   var resizable  = "false" !=  pieceElement.getAttribute("resizable");
   var deformable = "false" != pieceElement.getAttribute("deformable");
   var texturable = "false" != pieceElement.getAttribute("texturable");

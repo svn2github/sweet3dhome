@@ -186,6 +186,9 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(mode
   this.updatePieceOfFurnitureModelMirrored();
   this.updatePieceOfFurnitureColorAndTexture(waitTextureLoadingEnd);      
   this.updatePieceOfFurnitureVisibility();
+  if (this.getUserData().isDoorOrWindow()) {
+    this.setTransparentShapeNotPickable(this);
+  }
 }
 
 /**
@@ -580,3 +583,24 @@ HomePieceOfFurniture3D.prototype.setBackFaceNormalFlip = function(node, backFace
         backFaceNormalFlip ^ appearance.getCullFace() === Appearance3D.CULL_FRONT);
   }
 }
+
+/**
+ * Cancels the pickability of the <code>Shape3D</code> children nodes of <code>node</code> 
+ * when it uses a transparent appearance. 
+ * @private
+ */
+HomePieceOfFurniture3D.prototype.setTransparentShapeNotPickable = function(node) {
+  if (node instanceof Group3D) {
+    var children = node.getChildren(); 
+    for (var i = 0; i < children.length; i++) {
+      this.setTransparentShapeNotPickable(children [i]);
+    }
+  } else if (node instanceof Shape3D) {
+    var appearance = node.getAppearance();
+    if (appearance !== null
+        && appearance.getTransparency() > 0) {
+      node.setPickable(false);
+    }
+  }
+}
+
