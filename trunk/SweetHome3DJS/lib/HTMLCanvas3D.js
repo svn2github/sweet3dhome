@@ -246,8 +246,10 @@ HTMLCanvas3D.prototype.setViewPlatformTransform = function(viewPlatformTransform
  * @ignore
  */
 HTMLCanvas3D.prototype.updateViewportSize = function() {
-  this.gl.viewportWidth = this.canvas.width;
-  this.gl.viewportHeight = this.canvas.height;
+  var canvasBounds = this.canvas.getBoundingClientRect();
+  this.gl.viewportWidth = canvasBounds.width;
+  this.gl.viewportHeight = canvasBounds.height;
+  this.repaint();
 }
 
 /**
