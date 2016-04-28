@@ -137,6 +137,7 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
         var canvasBounds = canvas.getBoundingClientRect();
         navigationPanelDiv.style.left = canvasBounds.left + "px";
         navigationPanelDiv.style.top = canvasBounds.top + "px";
+        component3D.canvas3D.updateViewportSize();
       };
     window.addEventListener("scroll", this.windowSizeListener);
     window.addEventListener("resize", this.windowSizeListener);
