@@ -210,8 +210,10 @@ HTMLCanvas3D.prototype.getCanvas = function() {
  * @param {number} fieldOfView
  */
 HTMLCanvas3D.prototype.setFieldOfView = function(fieldOfView) {
-  this.fieldOfView = fieldOfView;
-  this.repaint();
+  if (this.fieldOfView != fieldOfView) {
+    this.fieldOfView = fieldOfView;
+    this.repaint();
+  }
 }
 
 /**
@@ -219,8 +221,10 @@ HTMLCanvas3D.prototype.setFieldOfView = function(fieldOfView) {
  * @param {number} frontClipDistance
  */
 HTMLCanvas3D.prototype.setFrontClipDistance = function(frontClipDistance) {
-  this.frontClipDistance = frontClipDistance;
-  this.repaint();
+  if (this.frontClipDistance != frontClipDistance) {
+    this.frontClipDistance = frontClipDistance;
+    this.repaint();
+  }
 }
 
 /**
@@ -228,16 +232,20 @@ HTMLCanvas3D.prototype.setFrontClipDistance = function(frontClipDistance) {
  * @param {number} frontClipDistance
  */
 HTMLCanvas3D.prototype.setBackClipDistance = function(backClipDistance) {
-  this.backClipDistance = backClipDistance;
-  this.repaint();
+  if (this.backClipDistance != backClipDistance) {
+    this.backClipDistance = backClipDistance;
+    this.repaint();
+  }
 }
 
 /**
  * Updates the transformation used to view the scene and redraws it.
  */
 HTMLCanvas3D.prototype.setViewPlatformTransform = function(viewPlatformTransform) {
-  this.viewPlatformTransform = viewPlatformTransform;
-  this.repaint();
+  if (this.viewPlatformTransform != viewPlatformTransform) {
+    this.viewPlatformTransform = viewPlatformTransform;
+    this.repaint();
+  }
 }
 
 /**
@@ -247,9 +255,12 @@ HTMLCanvas3D.prototype.setViewPlatformTransform = function(viewPlatformTransform
  */
 HTMLCanvas3D.prototype.updateViewportSize = function() {
   var canvasBounds = this.canvas.getBoundingClientRect();
-  this.gl.viewportWidth = canvasBounds.width;
-  this.gl.viewportHeight = canvasBounds.height;
-  this.repaint();
+  if (this.gl.viewportWidth != canvasBounds.width
+      || this.gl.viewportHeight != canvasBounds.height) {
+    this.gl.viewportWidth = canvasBounds.width;
+    this.gl.viewportHeight = canvasBounds.height;
+    this.repaint();
+  }
 }
 
 /**
