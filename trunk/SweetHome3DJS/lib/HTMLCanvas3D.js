@@ -259,6 +259,11 @@ HTMLCanvas3D.prototype.updateViewportSize = function() {
       || this.gl.viewportHeight != canvasBounds.height) {
     this.gl.viewportWidth = canvasBounds.width;
     this.gl.viewportHeight = canvasBounds.height;
+    
+    if (this.pickingFrameBuffer !== undefined) {
+      this.gl.deleteFramebuffer(this.pickingFrameBuffer);
+      delete this.pickingFrameBuffer;
+    }
     this.repaint();
   }
 }
@@ -1008,6 +1013,10 @@ HTMLCanvas3D.prototype.clear = function() {
   }
   this.displayedGeometries = [];
   this.lights = [];
+  if (this.pickingFrameBuffer !== undefined) {
+    this.gl.deleteFramebuffer(this.pickingFrameBuffer);
+    delete this.pickingFrameBuffer;
+  }
   this.repaint();
 }
 
