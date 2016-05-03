@@ -611,46 +611,50 @@ HomePreviewComponent.prototype.trackFurnitureModels = function(onprogression, ro
     }
   }
 
-  // Add an observer that will close ZIP files and free geometries once all models are loaded
-  var modelsCount = 0;
-  var previewComponent = this;
-  for (var i = 0; i < loadedFurniture.length; i++) {
-    var managerCall = function(piece) {
+  if (loadedFurniture.length === 0) {
+    onprogression(Node3D.READING_MODEL, undefined, 1);
+  } else {
+    // Add an observer that will close ZIP files and free geometries once all models are loaded
+    var modelsCount = 0;
+    var previewComponent = this;
+    for (var i = 0; i < loadedFurniture.length; i++) {
+      var managerCall = function(piece) {
         ModelManager.getInstance().loadModel(piece.getModel(), false, {
-            modelUpdated : function(modelRoot) {
-              var model = piece.getModel();
-              if (model.isJAREntry()) {
-                var jar = model.getJAREntryURL();
-                if (--loadedJars [jar] === 0) {
-                  ZIPTools.disposeZIP(jar);
-                  delete loadedJars [jar];
-                }
+          modelUpdated : function(modelRoot) {
+            var model = piece.getModel();
+            if (model.isJAREntry()) {
+              var jar = model.getJAREntryURL();
+              if (--loadedJars [jar] === 0) {
+                ZIPTools.disposeZIP(jar);
+                delete loadedJars [jar];
               }
-              var modelUrl = model.getURL();
-              if (--loadedModels [modelUrl] === 0) {
-                ModelManager.getInstance().unloadModel(model);
-                delete loadedModels [modelUrl];
-              }
-              onprogression(Node3D.READING_MODEL, piece.getName(), ++modelsCount / loadedFurniture.length);
-              if (modelsCount === loadedFurniture.length) {
-                // Home and its models fully loaded
-                // Free all other geometries (background, structure...)  
-                previewComponent.component3D.disposeGeometries();
-                loadedFurniture = [];
-                if (previewComponent.startRotationAnimationAfterLoading) {
-                  delete previewComponent.startRotationAnimationAfterLoading;
-                  previewComponent.startRotationAnimation(roundsPerMinute); 
-                }
-              }
-            },        
-            modelError : function(ex) {
-              this.modelUpdated();
-            },
-            progression : function() {
             }
-          });
+            var modelUrl = model.getURL();
+            if (--loadedModels [modelUrl] === 0) {
+              ModelManager.getInstance().unloadModel(model);
+              delete loadedModels [modelUrl];
+            }
+            onprogression(Node3D.READING_MODEL, piece.getName(), ++modelsCount / loadedFurniture.length);
+            if (modelsCount === loadedFurniture.length) {
+              // Home and its models fully loaded
+              // Free all other geometries (background, structure...)  
+              previewComponent.component3D.disposeGeometries();
+              loadedFurniture = [];
+              if (previewComponent.startRotationAnimationAfterLoading) {
+                delete previewComponent.startRotationAnimationAfterLoading;
+                previewComponent.startRotationAnimation(roundsPerMinute); 
+              }
+            }
+          },        
+          modelError : function(ex) {
+            this.modelUpdated();
+          },
+          progression : function() {
+          }
+        });
       };
-    managerCall(loadedFurniture [i]);
+      managerCall(loadedFurniture [i]);
+    }
   }
 }
 
