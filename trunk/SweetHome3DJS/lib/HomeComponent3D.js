@@ -135,11 +135,10 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
     var canvas = this.canvas3D.getCanvas();
     this.windowSizeListener = function() {
         var canvasBounds = canvas.getBoundingClientRect();
-        navigationPanelDiv.style.left = canvasBounds.left + "px";
-        navigationPanelDiv.style.top = canvasBounds.top + "px";
+        navigationPanelDiv.style.left = (canvasBounds.left + window.pageXOffset) + "px";
+        navigationPanelDiv.style.top = (canvasBounds.top + window.pageYOffset) + "px";
         component3D.canvas3D.updateViewportSize();
       };
-    window.addEventListener("scroll", this.windowSizeListener);
     window.addEventListener("resize", this.windowSizeListener);
     this.windowSizeListener();
     navigationPanelDiv.style.zIndex = "200";
@@ -297,7 +296,6 @@ HomeComponent3D.prototype.dispose = function() {
   this.removeHomeListeners();
   this.removeMouseListeners(this.canvas3D);
   if (this.navigationPanelId != null) {
-    window.removeEventListener("scroll", this.windowSizeListener);
     window.removeEventListener("resize", this.windowSizeListener);
     var simulatedKeys = this.getSimulatedKeyElements(document.getElementsByTagName("body") [0]);
     for (var i = 0; i < simulatedKeys.length; i++) {
