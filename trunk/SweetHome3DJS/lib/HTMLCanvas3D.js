@@ -255,10 +255,10 @@ HTMLCanvas3D.prototype.setViewPlatformTransform = function(viewPlatformTransform
  */
 HTMLCanvas3D.prototype.updateViewportSize = function() {
   var canvasBounds = this.canvas.getBoundingClientRect();
-  if (this.gl.viewportWidth != canvasBounds.width
-      || this.gl.viewportHeight != canvasBounds.height) {
-    this.gl.viewportWidth = canvasBounds.width;
-    this.gl.viewportHeight = canvasBounds.height;
+  if (this.viewportWidth != canvasBounds.width
+      || this.viewportHeight != canvasBounds.height) {
+    this.viewportWidth = canvasBounds.width;
+    this.viewportHeight = canvasBounds.height;
     
     if (this.pickingFrameBuffer !== undefined) {
       this.gl.deleteFramebuffer(this.pickingFrameBuffer);
@@ -729,7 +729,7 @@ HTMLCanvas3D.prototype.prepareBuffer = function(data, indices) {
  * @private
  */
 HTMLCanvas3D.prototype.drawScene = function() {
-  this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
+  this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
   this.gl.clearColor(0.9, 0.9, 0.9, 1.0);
   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
   
@@ -766,10 +766,10 @@ HTMLCanvas3D.prototype.drawScene = function() {
   this.gl.uniform3fv(this.shaderProgram.lightDirections, lightDirections);
   
   // Convert horizontal field of view to vertical
-  var verticalFieldOfView = 2 * Math.atan(this.gl.viewportHeight / this.gl.viewportWidth * Math.tan(this.fieldOfView / 2));
+  var verticalFieldOfView = 2 * Math.atan(this.viewportHeight / this.viewportWidth * Math.tan(this.fieldOfView / 2));
   // First draw background geometries (contained in a unit sphere)
   var projectionMatrix = mat4.create();
-  mat4.perspective(projectionMatrix, verticalFieldOfView, this.gl.viewportWidth / this.gl.viewportHeight, 
+  mat4.perspective(projectionMatrix, verticalFieldOfView, this.viewportWidth / this.viewportHeight, 
                    0.001, 1.0);
   this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
   // Translate to center
@@ -786,7 +786,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
 
   // Reset depth buffer to draw the scene above background
   this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
-  mat4.perspective(projectionMatrix, verticalFieldOfView, this.gl.viewportWidth / this.gl.viewportHeight,  
+  mat4.perspective(projectionMatrix, verticalFieldOfView, this.viewportWidth / this.viewportHeight,  
                    this.frontClipDistance, this.backClipDistance); 
   this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
 
