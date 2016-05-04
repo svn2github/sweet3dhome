@@ -141,7 +141,13 @@ HomeComponent3D.prototype.createNavigationPanel = function(home, preferences, co
       };
     window.addEventListener("resize", this.windowSizeListener);
     this.windowSizeListener();
-    navigationPanelDiv.style.zIndex = "200";
+    // Search the first existing zIndex among parents
+    var parentZIndex = 0;
+    for (var element = this.canvas3D.getCanvas();  
+         element && element.style && isNaN(parentZIndex = parseInt(element.style.zIndex));
+         element = element.parentElement) {
+    }
+    navigationPanelDiv.style.zIndex = isNaN(parentZIndex) ? "1" : (parentZIndex + 1).toString();
     navigationPanelDiv.style.visibility = "hidden";
     navigationPanelDiv.innerHTML = innerHtml;
     simulatedKeys.push.apply(simulatedKeys, this.getSimulatedKeyElements(navigationPanelDiv));
