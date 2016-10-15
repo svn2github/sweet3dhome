@@ -46,8 +46,8 @@ text field the option:
 -Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/linux/x64 
 according to your system and its architecture, except under Java 7 / 8 and Mac OS X, 
 where VM arguments should be:
--Djava.ext.dirs=../SweetHome3D/lib:../SweetHome3D/lib/macosx/java3d-1.6 
--Djava.library.path=../SweetHome3D/lib/macosx/java3d-1.6
+-Djava.ext.dirs=../SweetHome3D/lib/java3d-1.6 
+-Djava.library.path=../SweetHome3D/lib/java3d-1.6/macosx
 -Djogamp.gluegen.UseTempJarCache=false
 
 If you want to build Furniture Library Editor with Ant, please install last JDK or greater and 
