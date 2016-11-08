@@ -42,44 +42,84 @@ public class FurnitureLibraryEditorBootstrap {
     List<String> extensionJarsAndDlls = new ArrayList<String>(Arrays.asList(new String [] {
         "batik-svgpathparser-1.7.jar", // Jars included in editor executable jar file 
         "jnlp.jar"}));
-    if (!System.getProperty("os.name").startsWith("Mac OS X")
-        || System.getProperty("java.version").startsWith("1.5")
-        || System.getProperty("java.version").startsWith("1.6")) {
-      extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
-          "j3dcore.jar", // Main Java 3D jars
-          "vecmath.jar",
-          "j3dutils.jar",
-          "macosx/gluegen-rt.jar", // Mac OS X jars and DLLs
-          "macosx/jogl.jar",
-          "macosx/libgluegen-rt.jnilib",
-          "macosx/libjogl.jnilib",
-          "macosx/libjogl_awt.jnilib",
-          "macosx/libjogl_cg.jnilib"}));
-    } else {
-      extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
-          "java3d-1.6/j3dcore.jar", // Mac OS X Java 3D 1.6 jars and DLLs
-          "java3d-1.6/vecmath.jar",
-          "java3d-1.6/j3dutils.jar",
-          "java3d-1.6/gluegen.jar", 
-          "java3d-1.6/jogl-java3d.jar",
-          "java3d-1.6/macosx/libgluegen-rt.jnilib",
-          "java3d-1.6/macosx/libjogl_desktop.jnilib",
-          "java3d-1.6/macosx/libnativewindow_awt.jnilib",
-          "java3d-1.6/macosx/libnativewindow_macosx.jnilib"}));
-      // Disable JOGL library loader
-      System.setProperty("jogamp.gluegen.UseTempJarCache", "false");
-    }
-    if ("64".equals(System.getProperty("sun.arch.data.model"))) {
-      extensionJarsAndDlls.add("linux/x64/libj3dcore-ogl.so"); // Linux 64 bits DLLs
-      extensionJarsAndDlls.add("windows/x64/j3dcore-ogl.dll"); // Windows 64 bits DLLs
-    } else {
-      extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
-          "linux/i386/libj3dcore-ogl.so", // Linux 32 bits DLLs
-          "linux/i386/libj3dcore-ogl-cg.so", // Windows 32 bits DLLs
-          "windows/i386/j3dcore-d3d.dll",
-          "windows/i386/j3dcore-ogl.dll",
-          "windows/i386/j3dcore-ogl-cg.dll",
-          "windows/i386/j3dcore-ogl-chk.dll"}));
+    if (System.getProperty("os.name").startsWith("Mac OS X")) {
+      if (System.getProperty("java.version").startsWith("1.5")
+          || System.getProperty("java.version").startsWith("1.6")) {
+        extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+            "j3dcore.jar", // Main Java 3D jars
+            "vecmath.jar",
+            "j3dutils.jar",
+            "macosx/gluegen-rt.jar", // Mac OS X jars and DLLs
+            "macosx/jogl.jar",
+            "macosx/libgluegen-rt.jnilib",
+            "macosx/libjogl.jnilib",
+            "macosx/libjogl_awt.jnilib",
+            "macosx/libjogl_cg.jnilib"}));
+      } else {
+        extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+            "java3d-1.6/j3dcore.jar", // Mac OS X Java 3D 1.6 jars and DLLs
+            "java3d-1.6/vecmath.jar",
+            "java3d-1.6/j3dutils.jar",
+            "java3d-1.6/gluegen-rt.jar", 
+            "java3d-1.6/jogl-java3d.jar",
+            "java3d-1.6/macosx/libgluegen-rt.jnilib",
+            "java3d-1.6/macosx/libjogl_desktop.jnilib",
+            "java3d-1.6/macosx/libnativewindow_awt.jnilib",
+            "java3d-1.6/macosx/libnativewindow_macosx.jnilib"}));
+        // Disable JOGL library loader
+        System.setProperty("jogamp.gluegen.UseTempJarCache", "false");
+      }
+    } else { // Other OS
+      if ("1.5.2".equals(System.getProperty("com.eteks.sweethome3d.j3d.version", "1.6"))
+          || "d3d".equals(System.getProperty("j3d.rend", "jogl"))) {
+        extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+            "j3dcore.jar", // Main Java 3D jars
+            "vecmath.jar",
+            "j3dutils.jar"}));
+        if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+          extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+              "linux/x64/libj3dcore-ogl.so",    // Linux 64 bits DLL for Java 3D 1.5.2
+              "windows/x64/j3dcore-ogl.dll"})); // Windows 64 bits DLL for Java 3D 1.5.2
+        } else {
+          extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+              "linux/i386/libj3dcore-ogl.so", // Linux 32 bits DLLs
+              "linux/i386/libj3dcore-ogl-cg.so", 
+              "windows/i386/j3dcore-d3d.dll", // Windows 32 bits DLLs
+              "windows/i386/j3dcore-ogl.dll",
+              "windows/i386/j3dcore-ogl-cg.dll",
+              "windows/i386/j3dcore-ogl-chk.dll"}));
+        }
+      } else {
+        extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+            "java3d-1.6/j3dcore.jar", // Java 3D 1.6 jars
+            "java3d-1.6/vecmath.jar",
+            "java3d-1.6/j3dutils.jar",
+            "java3d-1.6/gluegen-rt.jar", 
+            "java3d-1.6/jogl-java3d.jar"}));
+        // Disable JOGL library loader
+        System.setProperty("jogamp.gluegen.UseTempJarCache", "false");
+        if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+          extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+              "java3d-1.6/linux/amd64/libgluegen-rt.so", // Linux 64 bits DLLs for Java 3D 1.6
+              "java3d-1.6/linux/amd64/libjogl_desktop.so",
+              "java3d-1.6/linux/amd64/libnativewindow_awt.so",
+              "java3d-1.6/linux/amd64/libnativewindow_x11.so",
+              "java3d-1.6/windows/amd64/gluegen-rt.dll", // Windows 64 bits DLLs for Java 3D 1.6
+              "java3d-1.6/windows/amd64/jogl_desktop.dll",
+              "java3d-1.6/windows/amd64/nativewindow_awt.dll",
+              "java3d-1.6/windows/amd64/nativewindow_win32.dll"}));
+        } else {
+          extensionJarsAndDlls.addAll(Arrays.asList(new String [] {
+              "java3d-1.6/linux/i586/libgluegen-rt.so", // Linux 32 bits DLLs for Java 3D 1.6
+              "java3d-1.6/linux/i586/libjogl_desktop.so",
+              "java3d-1.6/linux/i586/libnativewindow_awt.so",
+              "java3d-1.6/linux/i586/libnativewindow_x11.so",
+              "java3d-1.6/windows/i586/gluegen-rt.dll", // Windows 32 bits DLLs for Java 3D 1.6
+              "java3d-1.6/windows/i586/jogl_desktop.dll",
+              "java3d-1.6/windows/i586/nativewindow_awt.dll",
+              "java3d-1.6/windows/i586/nativewindow_win32.dll"}));
+        }
+      }
     }
     
     String [] applicationPackages = {
