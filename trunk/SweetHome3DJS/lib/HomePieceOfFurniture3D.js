@@ -289,7 +289,7 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
           mat3.rotate(transform, transform, texture.getAngle());
           appearance.setTextureTransform(transform);
           this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, materialShininess);
-          TextureManager.getInstance().loadTexture(texture.getImage(), texture.getAngle(), 
+          TextureManager.getInstance().loadTexture(texture.getImage(), 0, 
               waitTextureLoadingEnd, this.getTextureObserver(appearance));
         }
       } else if (materialModified) {
@@ -330,7 +330,7 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
               appearance.setTextureTransform(transform);
               this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, materialShininess);
               var materialTexture = material.getTexture();
-              TextureManager.getInstance().loadTexture(materialTexture.getImage(), materialTexture.getAngle(), 
+              TextureManager.getInstance().loadTexture(materialTexture.getImage(), 0, 
                   waitTextureLoadingEnd, this.getTextureObserver(appearance));
             } else {
               this.restoreDefaultAppearance(appearance, material.getShininess());
