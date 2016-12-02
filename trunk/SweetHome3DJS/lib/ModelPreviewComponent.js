@@ -42,10 +42,10 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
     var previewComponent = this;
     var userActionsListener = {
         buttonPressed : -1, 
-        gesture : false,
+        distancePinchTouchStarted : -1,
         
         rotationUpdater : function(x, y, altKey) {
-          if (!userActionsListener.gesture && userActionsListener.buttonPressed === 0) {
+          if (userActionsListener.buttonPressed === 0) {
             if (altKey) {
               userActionsListener.zoomUpdater(userActionsListener.yLastMove - y);
             } else {
@@ -83,18 +83,33 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
         },
         touchStarted : function(ev) {
           ev.preventDefault();
-          userActionsListener.buttonPressed = 0;
-          userActionsListener.xLastMove = ev.targetTouches [ev.targetTouches.length - 1].pageX;
-          userActionsListener.yLastMove = ev.targetTouches [ev.targetTouches.length - 1].pageY;
+          if (ev.targetTouches.length == 1) {
+            userActionsListener.buttonPressed = 0;
+            userActionsListener.xLastMove = ev.targetTouches [0].pageX;
+            userActionsListener.yLastMove = ev.targetTouches [0].pageY;
+          } else if (ev.targetTouches.length == 2) {
+            userActionsListener.distancePinchTouchStarted = userActionsListener.distance(
+                ev.targetTouches [0], ev.targetTouches [1]);
+          }
           previewComponent.stopRotationAnimation();
         },
         touchMoved : function(ev) {
           ev.preventDefault();
-          var x = ev.targetTouches [ev.targetTouches.length - 1].pageX;
-          var y = ev.targetTouches [ev.targetTouches.length - 1].pageY;
-          userActionsListener.rotationUpdater(x, y, false);
-          userActionsListener.xLastMove = x;
-          userActionsListener.yLastMove = y;
+          if (ev.targetTouches.length == 1) {
+            var x = ev.targetTouches [0].pageX;
+            var y = ev.targetTouches [0].pageY;
+            userActionsListener.rotationUpdater(x, y, false);
+            userActionsListener.xLastMove = x;
+            userActionsListener.yLastMove = y;
+          } else if (ev.targetTouches.length == 2) {
+            var newDistance = userActionsListener.distance(ev.targetTouches [0], ev.targetTouches [1]);
+            var scale = userActionsListener.distancePinchTouchStarted / newDistance;
+            previewComponent.viewScale = Math.max(0.5, Math.min(1.3, scale));
+            previewComponent.updateViewPlatformTransform();
+          }
+        },
+        distance : function(p1, p2) {
+          return Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2));
         },
         mouseScrolled : function(ev) {
           ev.preventDefault();
@@ -103,19 +118,6 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
         mouseWheelMoved : function(ev) {
           ev.preventDefault();
           userActionsListener.zoomUpdater(ev.deltaY !== undefined ? ev.deltaY / 2 : -ev.wheelDelta / 3);
-        },
-        gestureStarted : function(ev) {
-          userActionsListener.gesture = true;
-          userActionsListener.scale = previewComponent.viewScale;
-        },
-        gestureChanged : function(ev) {
-          ev.preventDefault();
-          previewComponent.viewScale = Math.max(0.5, Math.min(1.3, userActionsListener.scale / ev.scale));
-          previewComponent.stopRotationAnimation();
-          previewComponent.updateViewPlatformTransform();
-        },
-        gestureEnded : function(ev) {
-          userActionsListener.gesture = false;
         },
         visibilityChanged : function(ev) {
           if (document.visibilityState == "hidden") {
@@ -131,12 +133,9 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
     this.canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.mousePressed);
     this.canvas3D.getCanvas().addEventListener("touchstart", userActionsListener.touchStarted);
     this.canvas3D.getCanvas().addEventListener("touchmove", userActionsListener.touchMoved);
-    this.canvas3D.getCanvas().addEventListener("touchend", userActionsListener.mouseupListener);
+    this.canvas3D.getCanvas().addEventListener("touchend", userActionsListener.windowMouseReleased);
     this.canvas3D.getCanvas().addEventListener("DOMMouseScroll", userActionsListener.mouseScrolled);
     this.canvas3D.getCanvas().addEventListener("mousewheel", userActionsListener.mouseWheelMoved);
-    this.canvas3D.getCanvas().addEventListener("gesturestart",  userActionsListener.gestureStarted);
-    this.canvas3D.getCanvas().addEventListener("gesturechange", userActionsListener.gestureChanged);
-    this.canvas3D.getCanvas().addEventListener("gestureend", userActionsListener.gestureEnded);
     document.addEventListener("visibilitychange", userActionsListener.visibilityChanged);
     this.userActionsListener = userActionsListener;
   }

@@ -289,9 +289,6 @@ HomeComponent3D.prototype.removeMouseListeners = function(canvas3D) {
     canvas3D.getCanvas().removeEventListener("touchend", this.userActionsListener.windowMouseReleased);
     canvas3D.getCanvas().removeEventListener("DOMMouseScroll", this.userActionsListener.mouseScrolled);
     canvas3D.getCanvas().removeEventListener("mousewheel", this.userActionsListener.mouseWheelMoved);
-    canvas3D.getCanvas().removeEventListener("gesturestart", this.userActionsListener.gestureStarted);
-    canvas3D.getCanvas().removeEventListener("gesturechange", this.userActionsListener.gestureChanged);
-    canvas3D.getCanvas().removeEventListener("gestureend", this.userActionsListener.gestureEnded);
   }
 }
 
@@ -608,8 +605,8 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
   var userActionsListener = {
       xLastMove : -1,
       yLastMove : -1,
-      buttonPressed  : -1,
-      gestureScale : -1,
+      buttonPressed : -1,
+      distanceLastPinch : -1,
       
       mousePressed : function(ev) {
         userActionsListener.xLastMove = ev.clientX;
@@ -631,26 +628,39 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
       },
       touchStarted : function(ev) {
         ev.preventDefault();
-        userActionsListener.xLastMove = ev.targetTouches [ev.targetTouches.length - 1].pageX;
-        userActionsListener.yLastMove = ev.targetTouches [ev.targetTouches.length - 1].pageY;
-        if (component3D.home.getCamera() === component3D.home.getObserverCamera()) {
-          userActionsListener.xLastMove = -userActionsListener.xLastMove;
-          userActionsListener.yLastMove = -userActionsListener.yLastMove;
+        if (ev.targetTouches.length == 1) {
+          userActionsListener.xLastMove = ev.targetTouches [0].pageX;
+          userActionsListener.yLastMove = ev.targetTouches [0].pageY;
+          if (component3D.home.getCamera() === component3D.home.getObserverCamera()) {
+            userActionsListener.xLastMove = -userActionsListener.xLastMove;
+            userActionsListener.yLastMove = -userActionsListener.yLastMove;
+          }
+          userActionsListener.buttonPressed = 0;
+        } else if (ev.targetTouches.length == 2) {
+          userActionsListener.distanceLastPinch = userActionsListener.distance(
+              ev.targetTouches [0], ev.targetTouches [1]);
         }
-        userActionsListener.buttonPressed  = 0;
       },
       touchMoved : function(ev) {
         ev.preventDefault();
-        if (component3D.home.getCamera() === component3D.home.getObserverCamera()) {
-          userActionsListener.moved(-ev.targetTouches [ev.targetTouches.length - 1].pageX, 
-              -ev.targetTouches [ev.targetTouches.length - 1].pageY, false, false);
-        } else {
-          userActionsListener.moved(ev.targetTouches [ev.targetTouches.length - 1].pageX, 
-              ev.targetTouches [ev.targetTouches.length - 1].pageY, false, false);
+        if (ev.targetTouches.length == 1) {
+          if (component3D.home.getCamera() === component3D.home.getObserverCamera()) {
+            userActionsListener.moved(-ev.targetTouches [0].pageX, -ev.targetTouches [0].pageY, false, false);
+          } else {
+            userActionsListener.moved(ev.targetTouches [0].pageX,  ev.targetTouches [0].pageY, false, false);
+          }
+        } else if (ev.targetTouches.length == 2) {
+          var newDistance = userActionsListener.distance(ev.targetTouches [0], ev.targetTouches [1]);
+          var scaleDifference = newDistance / userActionsListener.distanceLastPinch;
+          userActionsListener.zoomed((1 - scaleDifference) * 50, false);
+          userActionsListener.distanceLastPinch = newDistance;
         }
       },
+      distance : function(p1, p2) {
+        return Math.sqrt(Math.pow(p2.pageX - p1.pageX, 2) + Math.pow(p2.pageY - p1.pageY, 2));
+      },
       moved : function(x, y, altKey, shiftKey) {
-        if (userActionsListener.gestureScale === -1 && userActionsListener.buttonPressed === 0) {
+        if (userActionsListener.buttonPressed === 0) {
           if (altKey) {
             // Mouse move along Y axis while alt is down changes camera location
             var delta = 1.25 * (userActionsListener.yLastMove - y);
@@ -677,7 +687,6 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
           userActionsListener.yLastMove = y;
         }
       },
-        
       mouseScrolled : function(ev) {
         userActionsListener.zoomed(ev.detail, ev.shiftKey);
       },
@@ -685,18 +694,6 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
         ev.preventDefault();
         userActionsListener.zoomed((ev.deltaY !== undefined ? ev.deltaY : -ev.wheelDelta) / 4, ev.shiftKey);
       },        
-      gestureStarted : function(ev) {
-        userActionsListener.gestureScale = 1;
-      },
-      gestureChanged : function(ev) {
-        ev.preventDefault();
-        var scaleDifference = ev.scale / userActionsListener.gestureScale;
-        userActionsListener.zoomed((1 - scaleDifference) * 50, false);
-        userActionsListener.gestureScale = ev.scale;
-      },
-      gestureEnded : function(ev) {
-        userActionsListener.gestureScale = -1;
-      },
       zoomed : function(delta, shiftKey) {
         // Mouse wheel changes camera location 
         var delta = -2.5 * delta;
@@ -717,10 +714,7 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
   canvas3D.getCanvas().addEventListener("touchend", userActionsListener.windowMouseReleased);
   canvas3D.getCanvas().addEventListener("DOMMouseScroll", userActionsListener.mouseScrolled);
   canvas3D.getCanvas().addEventListener("mousewheel", userActionsListener.mouseWheelMoved);
-  canvas3D.getCanvas().addEventListener("gesturestart", userActionsListener.gestureStarted);
-  canvas3D.getCanvas().addEventListener("gesturechange", userActionsListener.gestureChanged);
-  canvas3D.getCanvas().addEventListener("gestureend", userActionsListener.gestureEnded);
-  
+
   this.userActionsListener = userActionsListener;
 }
 
