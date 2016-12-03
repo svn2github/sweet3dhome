@@ -148,7 +148,7 @@ function createModel3DOverlay() {
 
   var modelViewDiv = document.createElement("div");
   modelViewDiv.innerHTML =
-        '<canvas id="canvas3D" style="background-color: #CCCCCC; border: 1px solid gray; position: absolute"></canvas>'
+        '<canvas id="canvas3D" style="background-color: #CCCCCC; border: 1px solid gray; position: absolute; touch-action: none"></canvas>'
       + '<div id="modelViewerProgressDiv" style="position:absolute; width: 300px;">'
       + '  <progress id="modelViewerProgress" value="0" max="460" style="width: 300px;"></progress>'
       + '  <label id="modelViewerProgressLabel" style="margin-top: 2px; font-family: Sans-serif; margin-left: 10px; margin-right: 0px; display: block;"></label>'

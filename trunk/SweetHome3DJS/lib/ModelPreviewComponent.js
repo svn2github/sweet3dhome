@@ -41,8 +41,8 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
     var MIN_VIEW_PITCH = -Math.PI / 2;
     var previewComponent = this;
     var userActionsListener = {
-        buttonPressed : -1, 
-        distancePinchTouchStarted : -1,
+        buttonPressed : -1,
+        pointerTouches : {},
         
         rotationUpdater : function(x, y, altKey) {
           if (userActionsListener.buttonPressed === 0) {
@@ -81,6 +81,35 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
             delete userActionsListener.mousePressedInCanvas;
           }
         },
+        pointerPressed : function(ev) {
+          if (ev.pointerType == "mouse") {
+            userActionsListener.mousePressed(ev);
+          } else {
+            // Multi touch support for IE and Edge
+            userActionsListener.copyPointerToTargetTouches(ev);
+            userActionsListener.touchStarted(ev);
+          }
+        },
+        pointerMousePressed : function(ev) {
+          ev.stopPropagation();
+        },
+        windowPointerMoved : function(ev) {
+          if (ev.pointerType == "mouse") {
+            userActionsListener.windowMouseMoved(ev);
+          } else {
+            // Multi touch support for IE and Edge
+            userActionsListener.copyPointerToTargetTouches(ev);
+            userActionsListener.touchMoved(ev);
+          }
+        },
+        windowPointerReleased : function(ev) {
+          if (ev.pointerType == "mouse") {
+            userActionsListener.windowMouseReleased(ev);
+          } else {
+            delete userActionsListener.pointerTouches [ev.pointerId];
+            userActionsListener.touchEnded(ev);
+          }
+        },
         touchStarted : function(ev) {
           ev.preventDefault();
           if (ev.targetTouches.length == 1) {
@@ -88,7 +117,7 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
             userActionsListener.xLastMove = ev.targetTouches [0].pageX;
             userActionsListener.yLastMove = ev.targetTouches [0].pageY;
           } else if (ev.targetTouches.length == 2) {
-            userActionsListener.distancePinchTouchStarted = userActionsListener.distance(
+            userActionsListener.distanceLastPinch = userActionsListener.distance(
                 ev.targetTouches [0], ev.targetTouches [1]);
           }
           previewComponent.stopRotationAnimation();
@@ -103,9 +132,23 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
             userActionsListener.yLastMove = y;
           } else if (ev.targetTouches.length == 2) {
             var newDistance = userActionsListener.distance(ev.targetTouches [0], ev.targetTouches [1]);
-            var scale = userActionsListener.distancePinchTouchStarted / newDistance;
-            previewComponent.viewScale = Math.max(0.5, Math.min(1.3, scale));
+            var scale = userActionsListener.distanceLastPinch / newDistance;
+            previewComponent.viewScale = Math.max(0.5, Math.min(1.3, previewComponent.viewScale * scale));
             previewComponent.updateViewPlatformTransform();
+            userActionsListener.distanceLastPinch = newDistance;
+          }
+        },
+        touchEnded : function(ev) {
+          userActionsListener.buttonPressed = -1;
+        },
+        copyPointerToTargetTouches : function (ev) {
+          // Copy the IE and Edge pointer location to ev.targetTouches
+          userActionsListener.pointerTouches [ev.pointerId] = {pageX: ev.clientX, pageY: ev.clientY};
+          ev.targetTouches = [];
+          for (var attribute in userActionsListener.pointerTouches) {
+            if (userActionsListener.pointerTouches.hasOwnProperty(attribute)) {
+              ev.targetTouches.push(userActionsListener.pointerTouches [attribute]);
+            }
           }
         },
         distance : function(p1, p2) {
@@ -126,14 +169,22 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
         }
       };
       
-    // Add mousemove and mouseup event listeners to window to capture mouse events out of the canvas 
-    window.addEventListener("mousemove", userActionsListener.windowMouseMoved);
-    window.addEventListener("mouseup", userActionsListener.windowMouseReleased);
-    // Add other listeners on canvas
-    this.canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.mousePressed);
-    this.canvas3D.getCanvas().addEventListener("touchstart", userActionsListener.touchStarted);
-    this.canvas3D.getCanvas().addEventListener("touchmove", userActionsListener.touchMoved);
-    this.canvas3D.getCanvas().addEventListener("touchend", userActionsListener.windowMouseReleased);
+    if (window.PointerEvent) {
+      // Multi touch support for IE and Edge
+      this.canvas3D.getCanvas().addEventListener("pointerdown", userActionsListener.pointerPressed);
+      this.canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.pointerMousePressed);
+      // Add pointermove and pointerup event listeners to window to capture pointer events out of the canvas 
+      window.addEventListener("pointermove", userActionsListener.windowPointerMoved);
+      window.addEventListener("pointerup", userActionsListener.windowPointerReleased);
+    } else {
+      this.canvas3D.getCanvas().addEventListener("touchstart", userActionsListener.touchStarted);
+      this.canvas3D.getCanvas().addEventListener("touchmove", userActionsListener.touchMoved);
+      this.canvas3D.getCanvas().addEventListener("touchend", userActionsListener.touchEnded);
+      this.canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.mousePressed);
+      // Add mousemove and mouseup event listeners to window to capture mouse events out of the canvas 
+      window.addEventListener("mousemove", userActionsListener.windowMouseMoved);
+      window.addEventListener("mouseup", userActionsListener.windowMouseReleased);
+    }
     this.canvas3D.getCanvas().addEventListener("DOMMouseScroll", userActionsListener.mouseScrolled);
     this.canvas3D.getCanvas().addEventListener("mousewheel", userActionsListener.mouseWheelMoved);
     document.addEventListener("visibilitychange", userActionsListener.visibilityChanged);
@@ -242,8 +293,13 @@ ModelPreviewComponent.prototype.clear = function() {
  * This method should be called to free resources in the browser when this component is not needed anymore.
  */
 ModelPreviewComponent.prototype.dispose = function() {
-  window.removeEventListener("mousemove", this.userActionsListener.windowMouseMoved);
-  window.removeEventListener("mouseup", this.userActionsListener.windowMouseReleased);
+  if (window.PointerEvent) {
+    window.removeEventListener("pointermove", this.userActionsListener.windowPointerMoved);
+    window.removeEventListener("pointerup", this.userActionsListener.windowPointerReleased);
+  } else {
+    window.removeEventListener("mousemove", this.userActionsListener.windowMouseMoved);
+    window.removeEventListener("mouseup", this.userActionsListener.windowMouseReleased);
+  }
   document.removeEventListener("visibilitychange", this.userActionsListener.visibilityChanged);
   this.clear();
 }

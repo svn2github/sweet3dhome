@@ -281,12 +281,20 @@ HomeComponent3D.prototype.removeHomeListeners = function() {
  */
 HomeComponent3D.prototype.removeMouseListeners = function(canvas3D) {
   if (this.userActionsListener) {
-    window.removeEventListener("mousemove", this.userActionsListener.windowMouseMoved);
-    window.removeEventListener("mouseup", this.userActionsListener.windowMouseReleased);
-    canvas3D.getCanvas().removeEventListener("mousedown", this.userActionsListener.mousePressed);
-    canvas3D.getCanvas().removeEventListener("touchstart", this.userActionsListener.touchStarted);
-    canvas3D.getCanvas().removeEventListener("touchmove", this.userActionsListener.touchMoved);
-    canvas3D.getCanvas().removeEventListener("touchend", this.userActionsListener.windowMouseReleased);
+    if (window.PointerEvent) {
+      // Multi touch support for IE and Edge
+      canvas3D.getCanvas().removeEventListener("pointerdown", this.userActionsListener.pointerPressed);
+      canvas3D.getCanvas().removeEventListener("mousedown", this.userActionsListener.pointerMousePressed);
+      window.removeEventListener("pointermove", this.userActionsListener.windowPointerMoved);
+      window.removeEventListener("pointerup", this.userActionsListener.windowPointerReleased);
+    } else {
+      canvas3D.getCanvas().removeEventListener("touchstart", this.userActionsListener.touchStarted);
+      canvas3D.getCanvas().removeEventListener("touchmove", this.userActionsListener.touchMoved);
+      canvas3D.getCanvas().removeEventListener("touchend", this.userActionsListener.touchEnded);
+      canvas3D.getCanvas().removeEventListener("mousedown", this.userActionsListener.mousePressed);
+      window.removeEventListener("mousemove", this.userActionsListener.windowMouseMoved);
+      window.removeEventListener("mouseup", this.userActionsListener.windowMouseReleased);
+    }
     canvas3D.getCanvas().removeEventListener("DOMMouseScroll", this.userActionsListener.mouseScrolled);
     canvas3D.getCanvas().removeEventListener("mousewheel", this.userActionsListener.mouseWheelMoved);
   }
@@ -606,6 +614,7 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
       xLastMove : -1,
       yLastMove : -1,
       buttonPressed : -1,
+      pointerTouches : {},
       distanceLastPinch : -1,
       
       mousePressed : function(ev) {
@@ -624,6 +633,36 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
         userActionsListener.buttonPressed = -1;
         if (userActionsListener.mousePressedInCanvas) {
           delete userActionsListener.mousePressedInCanvas;
+        }
+      },
+      pointerPressed : function(ev) {
+        if (ev.pointerType == "mouse") {
+          userActionsListener.mousePressed(ev);
+        } else {
+          // Multi touch support for IE and Edge
+          userActionsListener.copyPointerToTargetTouches(ev);
+          userActionsListener.touchStarted(ev);
+        }
+      },
+      pointerMousePressed : function(ev) {
+        // Required to avoid click simulation
+        ev.stopPropagation();
+      },
+      windowPointerMoved : function(ev) {
+        if (ev.pointerType == "mouse") {
+          userActionsListener.windowMouseMoved(ev);
+        } else {
+          // Multi touch support for IE and Edge
+          userActionsListener.copyPointerToTargetTouches(ev);
+          userActionsListener.touchMoved(ev);
+        }
+      },
+      windowPointerReleased : function(ev) {
+        if (ev.pointerType == "mouse") {
+          userActionsListener.windowMouseReleased(ev);
+        } else {
+          delete userActionsListener.pointerTouches [ev.pointerId];
+          userActionsListener.touchEnded(ev);
         }
       },
       touchStarted : function(ev) {
@@ -654,6 +693,19 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
           var scaleDifference = newDistance / userActionsListener.distanceLastPinch;
           userActionsListener.zoomed((1 - scaleDifference) * 50, false);
           userActionsListener.distanceLastPinch = newDistance;
+        }
+      },
+      touchEnded : function(ev) {
+        userActionsListener.buttonPressed = -1;
+      },
+      copyPointerToTargetTouches : function (ev) {
+        // Copy the IE and Edge pointer location to ev.targetTouches
+        userActionsListener.pointerTouches [ev.pointerId] = {pageX: ev.clientX, pageY: ev.clientY};
+        ev.targetTouches = [];
+        for (var attribute in userActionsListener.pointerTouches) {
+          if (userActionsListener.pointerTouches.hasOwnProperty(attribute)) {
+            ev.targetTouches.push(userActionsListener.pointerTouches [attribute]);
+          }
         }
       },
       distance : function(p1, p2) {
@@ -705,13 +757,22 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
       }
     };
     
-  // Add mousedown, mousemove, mouseup event listeners to window to capture mouse events out of the canvas 
-  window.addEventListener("mousemove", userActionsListener.windowMouseMoved);
-  window.addEventListener("mouseup", userActionsListener.windowMouseReleased);
-  canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.mousePressed);
-  canvas3D.getCanvas().addEventListener("touchstart", userActionsListener.touchStarted);
-  canvas3D.getCanvas().addEventListener("touchmove", userActionsListener.touchMoved);
-  canvas3D.getCanvas().addEventListener("touchend", userActionsListener.windowMouseReleased);
+  if (window.PointerEvent) {
+    // Multi touch support for IE and Edge
+    canvas3D.getCanvas().addEventListener("pointerdown", userActionsListener.pointerPressed);
+    canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.pointerMousePressed);
+    // Add pointermove and pointerup event listeners to window to capture pointer events out of the canvas 
+    window.addEventListener("pointermove", userActionsListener.windowPointerMoved);
+    window.addEventListener("pointerup", userActionsListener.windowPointerReleased);
+  } else {
+    canvas3D.getCanvas().addEventListener("touchstart", userActionsListener.touchStarted);
+    canvas3D.getCanvas().addEventListener("touchmove", userActionsListener.touchMoved);
+    canvas3D.getCanvas().addEventListener("touchend", userActionsListener.touchEnded);
+    canvas3D.getCanvas().addEventListener("mousedown", userActionsListener.mousePressed);
+    // Add mousemove and mouseup event listeners to window to capture mouse events out of the canvas 
+    window.addEventListener("mousemove", userActionsListener.windowMouseMoved);
+    window.addEventListener("mouseup", userActionsListener.windowMouseReleased);
+  }
   canvas3D.getCanvas().addEventListener("DOMMouseScroll", userActionsListener.mouseScrolled);
   canvas3D.getCanvas().addEventListener("mousewheel", userActionsListener.mouseWheelMoved);
 

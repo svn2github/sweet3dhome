@@ -85,7 +85,7 @@ function viewHomeInOverlay(homeUrl, params) {
 
   var homeViewDiv = document.createElement("div");
   var divHTML =
-        '<canvas id="viewerCanvas" class="viewerComponent"  style="background-color: #CCCCCC; border: 1px solid gray; position: absolute; outline:none" tabIndex="1"></canvas>'
+        '<canvas id="viewerCanvas" class="viewerComponent"  style="background-color: #CCCCCC; border: 1px solid gray; position: absolute; outline: none; touch-action: none" tabIndex="1"></canvas>'
       + '<div id="viewerProgressDiv" style="position:absolute; width: 300px; background-color: rgba(128, 128, 128, 0.7); padding: 20px; border-radius: 25px">'
       + '  <progress id="viewerProgress"  class="viewerComponent" value="0" max="200" style="width: 300px;"></progress>'
       + '  <label id="viewerProgressLabel" class="viewerComponent" style="margin-top: 2px; margin-left: 10px; margin-right: 0px; display: block;"></label>'
@@ -518,12 +518,22 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
         previewComponent.stopRotationAnimation();
       };
     canvas.addEventListener("keydown", this.clickListener);
-    canvas.addEventListener("mousedown", this.clickListener);
-    canvas.addEventListener("touchstart",  this.clickListener);
-    canvas.addEventListener("gesturechange",  this.clickListener);
+    if (window.PointerEvent) {
+      // Multi touch support for IE and Edge
+      canvas.addEventListener("pointerdown", this.clickListener);
+      canvas.addEventListener("pointermove", this.clickListener);
+    } else {
+      canvas.addEventListener("mousedown", this.clickListener);
+      canvas.addEventListener("touchstart",  this.clickListener);
+      canvas.addEventListener("touchmove",  this.clickListener);
+    }
     var elements = this.component3D.getSimulatedKeyElements(document.getElementsByTagName("body").item(0));
     for (var i = 0; i < elements.length; i++) {
-      elements [i].addEventListener("mousedown", this.clickListener);
+      if (window.PointerEvent) {
+        elements [i].addEventListener("pointerdown", this.clickListener);
+      } else {
+        elements [i].addEventListener("mousedown", this.clickListener);
+      }
     }
     this.visibilityChanged = function(ev) {
         if (document.visibilityState == "hidden") {
@@ -670,7 +680,11 @@ HomePreviewComponent.prototype.dispose = function() {
       document.removeEventListener("visibilitychange", this.visibilityChanged);
       var elements = this.component3D.getSimulatedKeyElements(document.getElementsByTagName("body").item(0));
       for (var i = 0; i < elements.length; i++) {
-        elements [i].removeEventListener("mousedown", this.clickListener);
+        if (window.PointerEvent) {
+          elements [i].removeEventListener("pointerdown", this.clickListener);
+        } else {
+          elements [i].removeEventListener("mousedown", this.clickListener);
+        }
       }
     }
     this.component3D.dispose();
