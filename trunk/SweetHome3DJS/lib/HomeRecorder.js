@@ -217,7 +217,9 @@ HomeRecorder.prototype.getHomeEnvironment = function(environmentElement, zipUrl)
       ? parseInt("0x" + environmentElement.getAttribute("skyColor"))
       : null;
   var lightColor = parseInt("0x" + environmentElement.getAttribute("lightColor"));
-  var wallsAlpha = parseFloat(environmentElement.getAttribute("wallsAlpha"));
+  var wallsAlpha = environmentElement.hasAttribute("wallsAlpha")
+      ? parseFloat(environmentElement.getAttribute("wallsAlpha"))
+      : 0;
   var allLevelsVisible = "true" == environmentElement.getAttribute("allLevelsVisible");
   var observerCameraElevationAdjusted = "false" != environmentElement.getAttribute("observerCameraElevationAdjusted");
   var textureElements = environmentElement.getElementsByTagName("texture");
