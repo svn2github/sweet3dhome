@@ -88,7 +88,7 @@ function Home(wallHeight) {
  * in <code>Home</code> class or in one of the classes that it uses,
  * this number is increased.
  */
-Home.CURRENT_VERSION = 5200;
+Home.CURRENT_VERSION = 5300;
 
 /**
  * @private
