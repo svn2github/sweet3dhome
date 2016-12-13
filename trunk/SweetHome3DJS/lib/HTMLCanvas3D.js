@@ -426,7 +426,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
             displayedGeometry.mode = canvas3D.gl.TRIANGLES;
             displayedGeometry.normalBuffer = canvas3D.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
           } else {
-            displayedGeometry.mode = canvas3D.gl.LINE_STRIP;
+            displayedGeometry.mode = canvas3D.gl.LINES;
           } 
         } 
         // Set parameters not shared
