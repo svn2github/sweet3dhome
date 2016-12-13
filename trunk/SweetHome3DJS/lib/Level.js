@@ -28,6 +28,7 @@
  * @param {number} floorThickness the floor thickness of the level
  * @param {number} height the height of the level
  * @constructor
+ * @extends HomeObject
  * @author Emmanuel Puybaret
  */
 function Level(name, elevation, floorThickness, height) {

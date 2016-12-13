@@ -29,6 +29,7 @@
  * @param {Object} piece  the piece from which data are copied, either an 
  *          instance of {@link CatalogPieceOfFurniture} or of this class   
  * @constructor
+ * @extends HomeObject
  * @author Emmanuel Puybaret
  */
 function HomePieceOfFurniture(piece) {

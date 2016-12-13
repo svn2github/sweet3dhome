@@ -33,7 +33,8 @@
  * @param {number} [time] the date / time of this camera
  * @param {number} [lens] <code>Camera.Lens.PINHOLE</code>, <code>Camera.Lens.NORMAL</code>, 
  *                        <code>Camera.Lens.FISHEYE</code> or <code>Camera.Lens.SPHERICAL</code>
- * @constructor   
+ * @constructor     
+ * @extends HomeObject
  * @author Emmanuel Puybaret
  */
 function Camera(x, y, z, yaw, pitch, fieldOfView, time, lens) {
