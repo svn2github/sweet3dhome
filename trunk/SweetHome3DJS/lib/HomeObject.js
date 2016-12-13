@@ -21,6 +21,7 @@
 /**
  * An object with data where users can stored their own properties.
  * @constructor   
+ * @since 1.2
  * @author Emmanuel Puybaret
  */
 function HomeObject() {
