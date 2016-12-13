@@ -22,6 +22,7 @@
 //          geom.js
 //          big.js
 //          URLContent.js
+//          HomeObject.js
 
 /**
  * Creates a home piece of furniture from an existing piece.
@@ -95,6 +96,8 @@ function HomePieceOfFurniture(piece) {
   this.propertyChangeSupport = new PropertyChangeSupport(this);
   this.shapeCache = null;
 }
+HomePieceOfFurniture.prototype = Object.create(HomeObject.prototype);
+HomePieceOfFurniture.prototype.constructor = HomePieceOfFurniture;
 
 HomePieceOfFurniture.TWICE_PI = 2 * Math.PI;
 HomePieceOfFurniture.IDENTITY = [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
@@ -1062,6 +1065,7 @@ HomePieceOfFurniture.prototype.move = function(dx, dy) {
  */
 HomePieceOfFurniture.prototype.clone = function() {
   var clone = new HomePieceOfFurniture(this);
+  this.duplicateAttributes(clone);
   clone.shapeCache = this.shapeCache; 
   return clone;
 }

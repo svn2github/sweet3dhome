@@ -21,6 +21,8 @@
 // Requires URLContent.js
 //          scene3d.js
 //          ObjLoader.js
+//          HomeObject.js
+//          HomePieceOfFurniture.js
 
 /**
  * Singleton managing 3D models cache.

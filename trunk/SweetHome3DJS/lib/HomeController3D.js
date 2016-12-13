@@ -18,6 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+// Requires UserPreferences.js
+//          Home.js
+//          HomeObject.js
+//          HomePieceOfFurniture.js
+
 /**
  * Creates the controller of home 3D view.
  * @param {Home} home the home edited by this controller and its view

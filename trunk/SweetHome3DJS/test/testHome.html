@@ -38,6 +38,7 @@
 <script type="text/javascript" src="lib/BackgroundImage.js"/></script>
 <script type="text/javascript" src="lib/CatalogPieceOfFurniture.js"></script>
 <script type="text/javascript" src="lib/CatalogTexture.js"></script>
+<script type="text/javascript" src="lib/HomeObject.js"></script>
 <script type="text/javascript" src="lib/HomePieceOfFurniture.js"></script>
 <script type="text/javascript" src="lib/HomeFurnitureGroup.js"></script>
 <script type="text/javascript" src="lib/Camera.js"></script>
@@ -194,6 +195,9 @@ function testHome(geomAvailable) {
   piece = new HomePieceOfFurniture(catalogPiece);
   piece.setX(100);
   piece.setY(100);
+  piece.setProperty("id", "piece1");
+  assertEquals("Wrong property", "id", piece.getPropertyNames() [0]);
+  assertEquals("Wrong id", "piece1", piece.getProperty("id"));
   home.addPieceOfFurniture(piece);
   assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   home.deletePieceOfFurniture(piece);
@@ -212,6 +216,7 @@ function testHome(geomAvailable) {
   home.deletePieceOfFurniture(piece);
   assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   assertEquals("Wrong number of pieces in group", 1, group.getFurniture().length);
+  assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   
   new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
       {

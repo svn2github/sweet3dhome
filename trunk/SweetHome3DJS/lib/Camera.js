@@ -19,6 +19,7 @@
  */
 
 // Requires core.js
+//          HomeObject.js
 
 /**
  * Creates a camera at given location and angles.
@@ -46,6 +47,8 @@ function Camera(x, y, z, yaw, pitch, fieldOfView, time, lens) {
   this.lens = lens !== undefined ? lens : Camera.Lens.PINHOLE;
   this.propertyChangeSupport = new PropertyChangeSupport(this);
 }
+Camera.prototype = Object.create(HomeObject.prototype);
+Camera.prototype.constructor = Camera;
 
 /**
  * The kind of lens that can be used with a camera.
@@ -303,6 +306,8 @@ Camera.prototype.setCamera = function(camera) {
  * @return {Camera}
  */
 Camera.prototype.clone = function() {
-  return new Camera(this.getX(), this.getY(), this.getZ(), this.getYaw(), 
+  var clone = new Camera(this.getX(), this.getY(), this.getZ(), this.getYaw(), 
       this.getPitch(), this.getFieldOfView(), this.getTime(), this.getLens());
+  this.duplicateAttributes(clone);
+  return clone;
 }

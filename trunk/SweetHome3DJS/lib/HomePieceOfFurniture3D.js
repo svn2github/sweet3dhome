@@ -21,6 +21,9 @@
 // Requires scene3d.js
 //          Object3DBranch.js
 //          ModelManager.js
+//          HomeObject.js
+//          HomePieceOfFurniture.js
+
 
 /**
  * Creates the 3D piece matching the given home <code>piece</code>.

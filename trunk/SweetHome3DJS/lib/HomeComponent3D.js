@@ -19,6 +19,7 @@
  */
 
 // Requires Home.js
+//          HomeObject.js
 //          HomePieceOfFurniture.js
 //          scene3d.js
 //          ModelManager.js

@@ -38,6 +38,7 @@
       	<file name="ObserverCamera.js"/>
       	<file name="BackgroundImage.js"/>
       	<file name="HomeMaterial.js"/>
+      	<file name="HomeObject.js"/>
       	<file name="HomeTexture.js"/>
       	<file name="TextStyle.js"/>
       	<file name="HomeEnvironment.js"/>

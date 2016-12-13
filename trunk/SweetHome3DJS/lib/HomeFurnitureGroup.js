@@ -22,6 +22,7 @@
 //          geom.js
 //          big.js
 //          URLContent.js
+//          HomeObject.js
 //          HomePieceOfFurniture.js
 
 /**
@@ -54,26 +55,11 @@ function HomeFurnitureGroup(furniture, angle, modelMirrored, name) {
   }
   this.furniture = furniture.slice(0); 
   var movable = true;
-  this.resizable = true;
-  this.deformable = true;
-  this.texturable = true;
-  this.doorOrWindow = true;
   var visible = false;
-  this.currency = furniture [0].getCurrency();
   for (var i = 0; i < furniture.length; i++) {
     var piece = furniture[i]; 
     movable &= piece.isMovable();
-    this.resizable &= piece.isResizable();
-    this.deformable &= piece.isDeformable();
-    this.texturable &= piece.isTexturable();
-    this.doorOrWindow &= piece.isDoorOrWindow();
     visible |= piece.isVisible();
-    if (this.currency !== null) {
-      if (piece.getCurrency() === null
-          || !piece.getCurrency() === this.currency) {
-        this.currency = null; 
-      }
-    }
   }
   
   this.setName(name);
@@ -82,7 +68,7 @@ function HomeFurnitureGroup(furniture, angle, modelMirrored, name) {
   this.setNameYOffset(0);
   this.setNameStyle(null);
   this.setDescription(null);
-  this.setMovable(movable);
+  HomePieceOfFurniture.prototype.setMovable.call(this, movable);
   this.setVisible(visible);
   
   this.updateLocationAndSize(furniture, angle, true);
@@ -99,6 +85,26 @@ HomeFurnitureGroup.prototype.constructor = HomeFurnitureGroup;
  * @private
  */
 HomeFurnitureGroup.prototype.updateLocationAndSize = function(furniture, angle, init) {
+  // Update abilities of the group according to its furniture
+  this.resizable = true;
+  this.deformable = true;
+  this.texturable = true;
+  this.doorOrWindow = true;
+  this.currency = furniture [0].getCurrency();
+  for (var i = 0; i < furniture.length; i++) {
+    var piece = furniture[i]; 
+    this.resizable &= piece.isResizable();
+    this.deformable &= piece.isDeformable();
+    this.texturable &= piece.isTexturable();
+    this.doorOrWindow &= piece.isDoorOrWindow();
+    if (this.currency !== null) {
+      if (piece.getCurrency() === null
+          || !piece.getCurrency() === this.currency) {
+        this.currency = null; 
+      }
+    }
+  }
+  
   var elevation = Number.MAX_VALUE;
   if (init) {
     // Search the lowest level elevation among grouped furniture
@@ -140,12 +146,15 @@ HomeFurnitureGroup.prototype.updateLocationAndSize = function(furniture, angle, 
           piece.getElevation() + piece.getHeight() * piece.getDropOnTopElevation());
     }
   }
+  height -= elevation;
+  dropOnTopElevation -= elevation;
+
   if (this.resizable) {
-    HomePieceOfFurniture.prototype.setHeight.call(this, height - elevation);
+    HomePieceOfFurniture.prototype.setHeight.call(this, height);
   } else {
-    this.fixedHeight = height - elevation;
+    this.fixedHeight = height;
   }
-  this.dropOnTopElevation = (dropOnTopElevation - elevation) / height;
+  this.dropOnTopElevation = dropOnTopElevation / height;
   
   if (typeof Rectangle2D !== "undefined") {
     // Search the size of the furniture group
@@ -900,6 +909,7 @@ HomeFurnitureGroup.prototype.clone = function() {
   }
   
   var clone = new HomeFurnitureGroup(furniture, name);
+  this.duplicateAttributes(clone);
   clone.description = this.description;
   clone.information = this.information;
   clone.icon = this.icon;
