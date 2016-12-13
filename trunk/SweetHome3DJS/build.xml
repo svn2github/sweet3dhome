@@ -32,13 +32,13 @@
       <filelist dir="lib">
       	<file name="CatalogPieceOfFurniture.js"/>
       	<file name="CatalogTexture.js"/>
+      	<file name="HomeObject.js"/>
       	<file name="HomePieceOfFurniture.js"/>
       	<file name="HomeFurnitureGroup.js"/>
       	<file name="Camera.js"/>
       	<file name="ObserverCamera.js"/>
       	<file name="BackgroundImage.js"/>
       	<file name="HomeMaterial.js"/>
-      	<file name="HomeObject.js"/>
       	<file name="HomeTexture.js"/>
       	<file name="TextStyle.js"/>
       	<file name="HomeEnvironment.js"/>
