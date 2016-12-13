@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!-- build.xml
+
+     Copyright (c) 2008-2010 Emmanuel PUYBARET / eTeks <info@eteks.com>. All Rights Reserved.
+     
+     Ant build file. Available targets :
+     - 3DModels : Builds *.sh3f files and include each of them in a .zip file for distribution
+-->
+<project basedir="." default="3DModels" name="SweetHome3D models">
+  <!-- The current version of Sweet Home 3D -->
+  <property name="version" value="1.1"/>
+	
+  <target name="3DModels">
+  	<mkdir dir="install"/>
+  	
+    <zip destfile="install/Contributions.sh3f" basedir="contributions"/>
+    <zip destfile="install/3DModels-Contributions-${version}.zip" basedir="install" includes="Contributions.sh3f"/>
+    <zip destfile="install/3DModels-Contributions-${version}.zip" update="true" basedir="." includes="README.TXT"/>
+    <zip destfile="install/3DModels-Contributions-${version}.zip" update="true" basedir="contributions" includes="LICENSE.TXT"/>
+    <delete file="install/Contributions.sh3f"/>
+    
+    <zip destfile="install/Trees.sh3f" basedir="trees"/>
+    <zip destfile="install/3DModels-Trees-${version}.zip" basedir="install" includes="Trees.sh3f"/>
+    <zip destfile="install/3DModels-Trees-${version}.zip" update="true" basedir="." includes="README.TXT"/>
+    <zip destfile="install/3DModels-Trees-${version}.zip" update="true" basedir="trees" includes="LICENSE.TXT"/>
+    <delete file="install/Trees.sh3f"/>
+    
+    <zip destfile="install/Scopia.sh3f" basedir="scopia"/>
+    <zip destfile="install/3DModels-Scopia-${version}.zip" basedir="install" includes="Scopia.sh3f"/>
+    <zip destfile="install/3DModels-Scopia-${version}.zip" update="true" basedir="." includes="README.TXT"/>
+    <zip destfile="install/3DModels-Scopia-${version}.zip" update="true" basedir="scopia" includes="LICENSE.TXT"/>
+    <delete file="install/Scopia.sh3f"/>
+    
+    <zip destfile="install/KatorLegaz.sh3f" basedir="katorlegaz"/>
+    <zip destfile="install/3DModels-KatorLegaz-${version}.zip" basedir="install" includes="KatorLegaz.sh3f"/>
+    <zip destfile="install/3DModels-KatorLegaz-${version}.zip" update="true" basedir="." includes="README.TXT"/>
+    <zip destfile="install/3DModels-KatorLegaz-${version}.zip" update="true" basedir="katorlegaz" includes="LICENSE.TXT"/>
+    <delete file="install/KatorLegaz.sh3f"/>
+
+    <echo message="SH3F files generated in install folder"/>
+  </target>
+</project>
