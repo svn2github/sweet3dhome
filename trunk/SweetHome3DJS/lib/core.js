@@ -101,7 +101,7 @@ System.arraycopy = function(srcPts, srcOff, dstPts, dstOff, size) {
     }
   } else {
     // In case copied items overlap  
-    var tmp = scrOff.slice(srcOff, srcOff + size);
+    var tmp = srcPts.slice(srcOff, srcOff + size);
     for (var i = 0; i < size; i++) {
       dstPts[dstOff++] = tmp[i];
     }
