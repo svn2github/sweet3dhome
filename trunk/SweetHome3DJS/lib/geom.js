@@ -2230,7 +2230,7 @@ AffineTransform.prototype.createInverse = function() {
       /* NOTREACHED */
     case (AffineTransform.APPLY_SHEAR | AffineTransform.APPLY_SCALE | AffineTransform.APPLY_TRANSLATE):
       det = this.m00 * this.m11 - this.m01 * this.m10;
-      if (Math.abs(det) <= Double.MIN_VALUE) {
+      if (Math.abs(det) <= Number.MIN_VALUE) {
         throw new NoninvertibleTransformException("Determinant is "+ det);
       }
       return new AffineTransform( this.m11 / det, -this.m10 / det,
@@ -2242,7 +2242,7 @@ AffineTransform.prototype.createInverse = function() {
                                   AffineTransform.APPLY_TRANSLATE));
     case (AffineTransform.APPLY_SHEAR | AffineTransform.APPLY_SCALE):
       det = this.m00 * this.m11 - this.m01 * this.m10;
-      if (Math.abs(det) <= Double.MIN_VALUE) {
+      if (Math.abs(det) <= Number.MIN_VALUE) {
         throw new NoninvertibleTransformException("Determinant is "+ det);
       }
       return new AffineTransform( this.m11 / det, -this.m10 / det,
@@ -2303,7 +2303,7 @@ AffineTransform.prototype.invert = function() {
       M00 = this.m00; M01 = this.m01; M02 = this.m02;
       M10 = this.m10; M11 = this.m11; M12 = this.m12;
       det = M00 * M11 - M01 * M10;
-      if (Math.abs(det) <= Double.MIN_VALUE) {
+      if (Math.abs(det) <= Number.MIN_VALUE) {
         throw new NoninvertibleTransformException("Determinant is "+ det);
       }
       this.m00 =  M11 / det;
@@ -2317,7 +2317,7 @@ AffineTransform.prototype.invert = function() {
       M00 = this.m00; M01 = this.m01;
       M10 = this.m10; M11 = this.m11;
       det = M00 * M11 - M01 * M10;
-      if (Math.abs(det) <= Double.MIN_VALUE) {
+      if (Math.abs(det) <= Number.MIN_VALUE) {
         throw new NoninvertibleTransformException("Determinant is "+ det);
       }
       this.m00 =  M11 / det;
@@ -2589,7 +2589,7 @@ AffineTransform.prototype.inverseTransform = function(srcPts, srcOff, dstPts, ds
         /* NOBREAK */
       case (AffineTransform.APPLY_SHEAR | AffineTransform.APPLY_SCALE):
         var det = this.m00 * this.m11 - this.m01 * this.m10;
-        if (Math.abs(det) <= Double.MIN_VALUE) {
+        if (Math.abs(det) <= Number.MIN_VALUE) {
           throw new NoninvertibleTransformException("Determinant is "+ det);
         }
         ptDst.setLocation((x * this.m11 - y * this.m01) / det,
@@ -2639,7 +2639,7 @@ AffineTransform.prototype.inverseTransform = function(srcPts, srcOff, dstPts, ds
         M00 = this.m00; M01 = this.m01; M02 = this.m02;
         M10 = this.m10; M11 = this.m11; M12 = this.m12;
         det = M00 * M11 - M01 * M10;
-        if (Math.abs(det) <= Double.MIN_VALUE) {
+        if (Math.abs(det) <= Number.MIN_VALUE) {
           throw new NoninvertibleTransformException("Determinant is "+ det);
         }
         while (--numPts >= 0) {
@@ -2653,7 +2653,7 @@ AffineTransform.prototype.inverseTransform = function(srcPts, srcOff, dstPts, ds
         M00 = this.m00; M01 = this.m01;
         M10 = this.m10; M11 = this.m11;
         det = M00 * M11 - M01 * M10;
-        if (Math.abs(det) <= Double.MIN_VALUE) {
+        if (Math.abs(det) <= Number.MIN_VALUE) {
           throw new NoninvertibleTransformException("Determinant is "+ det);
         }
         while (--numPts >= 0) {
@@ -5587,7 +5587,7 @@ Curve.rectCrossingsForQuad = function(crossings, rxmin, rymin, rxmax, rymax, x0,
   var yc1 = (yc + y1) / 2;
   xc = (x0c + xc1) / 2;
   yc = (y0c + yc1) / 2;
-  if (Double.isNaN(xc) || Double.isNaN(yc)) {
+  if (Number.isNaN(xc) || Number.isNaN(yc)) {
     return 0;
   }
   crossings = Curve.rectCrossingsForQuad(crossings,
@@ -5646,7 +5646,7 @@ Curve.rectCrossingsForCubic = function(crossings, rxmin, rymin, rxmax, rymax, x0
   var ymc1 = (ymid + yc1) / 2;
   xmid = (xc0m + xmc1) / 2;
   ymid = (yc0m + ymc1) / 2;
-  if (Double.isNaN(xmid) || Double.isNaN(ymid)) {
+  if (Number.isNaN(xmid) || Number.isNaN(ymid)) {
     return 0;
   }
   crossings = Curve.rectCrossingsForCubic(crossings,
