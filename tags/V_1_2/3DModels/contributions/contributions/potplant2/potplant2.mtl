@@ -1,0 +1,26 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl Potplant2_1
+illum 2
+Ka 0.321569 0.301961 0.207843
+Kd 0 0 0
+Ks 0.576 0.6024 0.536
+Ns 2.81368
+
+newmtl Potplant2_2
+illum 2
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.4 0.4 0.4
+Ns 3.7815
+map_Kd 0010.png
+
+newmtl Potplant2_3
+illum 2
+Ka 0.74902 0.74902 0.74902
+Kd 0 0 0
+Ks 1 1 1
+Ns 2.81368

@@ -1,0 +1,33 @@
+# 
+# Copyrights (C) 2010  Peter Smolik
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+
+newmtl lmp4blk_1_1
+illum 2
+Ka 0.0980392 0.0980392 0.0980392
+Kd 0.0470588 0.0470588 0.0470588
+Ks 0.898039 0.898039 0.898039
+Ns 3.241
+
+newmtl lmp4bulb_2_2
+illum 2
+Ka 0.94902 0.945098 0.913726
+Kd 0.964706 0.964706 0.964706
+Ks 0.898039 0.898039 0.898039
+Ns 15.8423
+d 0.8
+
+newmtl lmp4gold_3_3
+illum 2
+Ka 0.658824 0.584314 0.0705882
+Kd 0.858824 0.819608 0.607843
+Ks 1.0 0.952941 0.705882
+Ns 128.0
+
+newmtl lmp4shd_4_4
+illum 2
+Ka 0.741176 0.737255 0.678431
+Kd 0.94902 0.945098 0.882353
+Ks 0.898039 0.898039 0.898039
+Ns 2.46766

@@ -1,0 +1,11 @@
+# 
+# Copyrights (C) 2011  Pencilart
+# Released under Free Art  Licence Art Libre http://www.artlibre.org
+# 
+# Produced by Art of Illusion 2.9, Mon Dec 26 16:19:27 EST 2011
+newmtl Glass
+Kd 0 0 0
+Ks 0.144 0.144 0.144
+Ka 0 0 0
+illum 2
+Ns 127
