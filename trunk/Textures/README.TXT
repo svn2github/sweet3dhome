@@ -1,12 +1,12 @@
-LIBRARY OF TEXTURES FOR SWEET HOME 3D v 1.1
+LIBRARY OF TEXTURES FOR SWEET HOME 3D v 1.2
 -------------------------------------------
 
 This archive contains a SH3T file that describes a set of additional Textures for Sweet Home 3D, 
 localized in the following languages:
 + Bulgarian
-- Chinese (Simplified)
++ Chinese (Simplified)
 + Chinese (Traditional)
-- Czech
++ Czech
 + Dutch
 + English
 - Finnish
@@ -17,7 +17,7 @@ localized in the following languages:
 + Italian
 + Japanese
 + Polish
-+ Portuguese (Brazilian)
+- Portuguese (Brazilian)
 + Portuguese (Portugal)
 + Russian
 + Spanish
@@ -50,7 +50,7 @@ The location of this folder depends on your system:
     "data/textures" found in the folder where the portable archive was deployed. 
 
 To uninstall a SH3T file, simply remove it from textures plug-in folder and restart Sweet Home 3D.
-The textures plug-in folder can be also shown when you click on a SH3F file listed in the "Textures 
+The textures plug-in folder is also displayed when you click on a SH3F file listed in the "Textures 
 libraries" section of the "Libraries in use" pane. The latter pane is displayed by clicking on the 
 "Libraries..." button shown at the bottom of Sweet Home 3D About dialog box.
 
@@ -60,4 +60,4 @@ For your information, a SH3T file is a ZIP file containing some image files and 
 Read LICENSE.TXT file for more details about licenses applicable to the textures contained in the SH3T file.
 
     
-(C) 2014 Emmanuel Puybaret / eTeks and others     
+(C) 2014-2017 Emmanuel Puybaret / eTeks and others     
