@@ -88,7 +88,7 @@ function testGeom() {
   // Create a piece of furniture 
   var catalogPiece = new CatalogPieceOfFurniture("eTeks#Test", "Cube", null, null, [], null, null, 
       new URLContent("test/resources/cube.png"), null, new URLContent("test/resources/cube.zip"), 100, 100, 100, 0, 1, 
-      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null);
+      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null, false);
   var piece = new HomePieceOfFurniture(catalogPiece);
   assertEquals("Wrong name", "Cube", piece.getName());
   // Place it at center, rotate it of 45 deg

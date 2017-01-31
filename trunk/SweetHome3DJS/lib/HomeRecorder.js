@@ -433,7 +433,7 @@ HomeRecorder.prototype.getPieceOfFurniture = function(pieceElement, zipUrl, para
         icon, planIcon, model, width, depth, height, elevation, dropOnTopElevation, 
         movable, doorOrWindow, color, staircaseCutOutShape, modelRotation, backFaceShown, 
         creator, resizable, deformable, texturable, 
-        price, valueAddedTaxPercentage, currency));
+        price, valueAddedTaxPercentage, currency, false));
     piece.setX(x);
     piece.setY(y);
     piece.setAngle(angle);
