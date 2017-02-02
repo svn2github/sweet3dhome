@@ -270,7 +270,7 @@ HomeRecorder.prototype.getCamera = function(cameraElement, zipUrl) {
   var yaw = parseFloat(cameraElement.getAttribute("yaw"));
   var pitch       = parseFloat(cameraElement.getAttribute("pitch"));
   var fieldOfView = parseFloat(cameraElement.getAttribute("fieldOfView"));
-  var time        = cameraElement.getAttribute("time");
+  var time        = parseFloat(cameraElement.getAttribute("time")); // TODO Time should be a long
   var fixedSize   = "true" == cameraElement.getAttribute("fixedSize"); 
   var lens;
   if (lensString == "NORMAL") {
