@@ -61,6 +61,26 @@ Node3D.prototype.getParent = function() {
 }
 
 /**
+ * Returns the user data associated with this object.
+ * @return {Object}
+ */
+Node3D.prototype.getUserData = function() {
+  if (this.userData === undefined) {
+    return null;
+  } else {
+    return this.userData;
+  }
+}
+
+/**
+ * Sets the user data associated with this object. 
+ * @param {Object} userData
+ */
+Node3D.prototype.setUserData = function(userData) {
+  this.userData = userData;
+}
+
+/**
  * Adds the property change <code>listener</code> in parameter to this node.
  */
 Node3D.prototype.addPropertyChangeListener = function(property, listener) {
