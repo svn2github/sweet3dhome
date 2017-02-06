@@ -44,6 +44,8 @@ function HomePieceOfFurniture3D(piece, home, waitModelAndTextureLoadingEnd) {
 HomePieceOfFurniture3D.prototype = Object.create(Object3DBranch.prototype);
 HomePieceOfFurniture3D.prototype.constructor = HomePieceOfFurniture3D;
 
+HomePieceOfFurniture3D.DEFAULT_BOX = new Object();
+
 /**
  * Creates the piece node with its transform group and add it to the piece branch. 
  * @private
@@ -56,7 +58,9 @@ HomePieceOfFurniture3D.prototype.createPieceOfFurnitureNode = function(piece, wa
   
   // While loading model use a temporary node that displays a white box  
   var waitBranch = new BranchGroup3D();
-  waitBranch.addChild(this.getModelBox(vec3.fromValues(1, 1, 1)));      
+  var normalization = new TransformGroup3D();
+  normalization.addChild(this.getModelBox(vec3.fromValues(1, 1, 1)));
+  waitBranch.addChild(normalization);      
   pieceTransformGroup.addChild(waitBranch);
   
   // Set piece model initial location, orientation and size      
@@ -111,20 +115,23 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureTransform = function() {
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureColorAndTexture = function(waitTextureLoadingEnd) {
   var piece = this.getUserData();
   var modelNode = this.getModelNode();
-  if (piece.getColor() !== null) {
-    this.setColorAndTexture(modelNode, piece.getColor(), null, piece.getShininess(), null, false, 
-        null, null, []);
-  } else if (piece.getTexture() !== null) {
-    this.setColorAndTexture(modelNode, null, piece.getTexture(), piece.getShininess(), null, waitTextureLoadingEnd,
-        vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)),
-        []);
-  } else if (piece.getModelMaterials() !== null) {
-    this.setColorAndTexture(modelNode, null, null, null, piece.getModelMaterials(), waitTextureLoadingEnd,
-        vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelNode.getChild(0)), 
-        []);
-  } else {
-    // Set default material and texture of model
-    this.setColorAndTexture(modelNode, null, null, piece.getShininess(), null, false, null, null, []);
+  var modelChild = modelNode.getChild(0);
+  if (modelChild.getUserData() !== HomePieceOfFurniture3D.DEFAULT_BOX) {
+    if (piece.getColor() !== null) {
+      this.setColorAndTexture(modelNode, piece.getColor(), null, piece.getShininess(), null, false, 
+          null, null, []);
+    } else if (piece.getTexture() !== null) {
+      this.setColorAndTexture(modelNode, null, piece.getTexture(), piece.getShininess(), null, waitTextureLoadingEnd,
+          vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelChild),
+          []);
+    } else if (piece.getModelMaterials() !== null) {
+      this.setColorAndTexture(modelNode, null, null, null, piece.getModelMaterials(), waitTextureLoadingEnd,
+          vec3.fromValues(piece.getWidth(), piece.getHeight(), piece.getDepth()), ModelManager.getInstance().getBounds(modelChild), 
+          []);
+    } else {
+      // Set default material and texture of model
+      this.setColorAndTexture(modelNode, null, null, piece.getShininess(), null, false, null, null, []);
+    }
   }
 }
 
@@ -202,7 +209,9 @@ HomePieceOfFurniture3D.prototype.getModelBox = function(color) {
   var boxAppearance = new Appearance3D();
   boxAppearance.setDiffuseColor(color);
   boxAppearance.setAmbientColor(vec3.scale(vec3.create(), color, 0.7));
-  return new Box3D(0.5, 0.5, 0.5, boxAppearance);
+  var box = new Box3D(0.5, 0.5, 0.5, boxAppearance);
+  box.setUserData(HomePieceOfFurniture3D.DEFAULT_BOX);
+  return box;
 }
 
 /**
