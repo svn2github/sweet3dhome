@@ -137,8 +137,8 @@
     <copy file="src/close.png" todir="dist" />
     <copy file="src/navigationPanel.png" todir="dist" />
 
-    <!-- Clean build 
-    <delete dir="dist/build" />-->
+    <!-- Clean build -->
+    <delete dir="dist/build" />
 
     <echo message="Javascript files in dist ready for ftp" />
   </target>
