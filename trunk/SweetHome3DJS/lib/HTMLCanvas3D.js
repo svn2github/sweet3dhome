@@ -364,14 +364,16 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
     if (node.getCapability(Group3D.ALLOW_CHILDREN_EXTEND)) {
       // Add listener to group to update the scene when children change
       node.addChildrenListener(
-          function(ev) {
-            if (ev.getType() === CollectionEvent.Type.ADD) {
-              canvas3D.prepareScene(ev.getItem(), displayedGeometries, background, lights, parentTransformations);
-            } else if (ev.getType() === CollectionEvent.Type.DELETE) {
-              canvas3D.removeDisplayedItems(ev.getItem(), displayedGeometries, lights);
+          {  
+            childAdded: function(ev) {
+              canvas3D.prepareScene(ev.child, displayedGeometries, background, lights, parentTransformations);
+              canvas3D.repaint();
+            },
+            childRemoved: function(ev) {
+              canvas3D.removeDisplayedItems(ev.child, displayedGeometries, lights);
               // TODO Should remove listeners on deleted item
+              canvas3D.repaint();
             }
-            canvas3D.repaint();
           });
     }
   } else if (node instanceof Shape3D) {

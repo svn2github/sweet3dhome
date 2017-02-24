@@ -106,6 +106,8 @@ Node3D.prototype.clone = function() {
 
 /**
  * Creates a 3D shape.
+ * @param {IndexedGeometryArray3D} geometry
+ * @param {Appearance3D} appearance
  * @constructor
  * @extends Node3D
  * @author Emmanuel Puybaret
@@ -299,8 +301,12 @@ Group3D.prototype.addChild = function(child) {
 Group3D.prototype.insertChild = function(child, index) {
   this.children.splice(index, 0, child);
   child.parent = this; 
-  if (this.childrenChangeSupport !== undefined) {
-    this.childrenChangeSupport.fireCollectionChanged(child, index, CollectionEvent.Type.ADD);
+  if (this.childrenListeners !== undefined) {
+    var event = {source: this, child: child, index: index};
+    var listeners = this.childrenListeners.slice(0);
+    for (var i = 0; i < listeners.length; i++) {
+      listeners [i].childAdded(event);
+    }
   }
 }
 
@@ -322,8 +328,12 @@ Group3D.prototype.removeChild = function(index) {
   }
   this.children.splice(index, 1);
   delete child.parent; 
-  if (this.childrenChangeSupport !== undefined) {
-    this.childrenChangeSupport.fireCollectionChanged(child, index, CollectionEvent.Type.DELETE);
+  if (this.childrenListeners !== undefined) {
+    var event = {source: this, child: child, index: index};
+    var listeners = this.childrenListeners.slice(0);
+    for (var i = 0; i < listeners.length; i++) {
+      listeners [i].childRemoved(event);
+    }
   }
 }
 
@@ -335,20 +345,25 @@ Group3D.prototype.removeAllChildren = function() {
 
 /**
  * Adds the children <code>listener</code> in parameter to this home.
+ * @param {{childAdded, childRemoved}} listener  
  */
 Group3D.prototype.addChildrenListener = function(listener) {
-  if (this.childrenChangeSupport === undefined) {
-    this.childrenChangeSupport = new CollectionChangeSupport(this);
+  if (this.childrenListeners === undefined) {
+    this.childrenListeners = [];
   }
-  this.childrenChangeSupport.addCollectionListener(listener);
+  this.childrenListeners.push(listener);
 }
 
 /**
  * Removes the children <code>listener</code> in parameter from this home.
+ * @param {{childAdded, childRemoved}} listener  
  */
 Group3D.prototype.removeChildrenListener = function(listener) {
-  if (this.childrenChangeSupport !== undefined) {
-    this.childrenChangeSupport.removeCollectionListener(listener);
+  if (this.childrenListeners !== undefined) {
+    var index = this.childrenListeners.indexOf(listener);
+    if (index !== - 1) {
+      this.childrenListeners.splice(index, 1);
+    }
   }
 } 
 
@@ -382,6 +397,7 @@ BranchGroup3D.prototype.clone = function() {
 
 /**
  * Creates a transform group.
+ * @param {mat4} transform
  * @constructor
  * @extends Group3D
  * @author Emmanuel Puybaret
@@ -414,6 +430,9 @@ TransformGroup3D.prototype.setTransform = function(transform) {
 }
 
 /**
+ * Returns <code>true</code> if transformations in parameter are equal.
+ * @param {mat4} transform1
+ * @param {mat4} transform2
  * @package
  * @ignore
  */
@@ -439,6 +458,7 @@ TransformGroup3D.prototype.clone = function() {
 
 /**
  * Creates an appearance to store material attributes, transparency and texture.
+ * @param {string} name
  * @constructor
  * @author Emmanuel Puybaret
  */
@@ -473,6 +493,10 @@ Appearance3D.prototype.getName = function() {
   return this.name;
 }
 
+/**
+ * Sets the ambient color of this appearance. 
+ * @param {vec3} ambientColor
+ */
 Appearance3D.prototype.setAmbientColor = function(ambientColor) {
   var oldAmbientColor = this.ambientColor;
   this.ambientColor = ambientColor;
@@ -485,6 +509,10 @@ Appearance3D.prototype.getAmbientColor = function() {
   return this.ambientColor;
 }
 
+/**
+ * Sets the diffuse color of this appearance. 
+ * @param {vec3} diffuseColor
+ */
 Appearance3D.prototype.setDiffuseColor = function(diffuseColor) {
   var oldDiffuseColor = this.diffuseColor;
   this.diffuseColor = diffuseColor;
@@ -497,6 +525,10 @@ Appearance3D.prototype.getDiffuseColor = function() {
   return this.diffuseColor;
 }
 
+/**
+ * Sets the specular color of this appearance. 
+ * @param {vec3} specularColor
+ */
 Appearance3D.prototype.setSpecularColor = function(specularColor) {
   var oldSpecularColor = this.specularColor;
   this.specularColor = specularColor;
@@ -509,6 +541,10 @@ Appearance3D.prototype.getSpecularColor = function() {
   return this.specularColor;
 }
 
+/**
+ * Sets the shininess of this appearance. 
+ * @param {number} shininess
+ */
 Appearance3D.prototype.setShininess = function(shininess) {
   shininess = Math.max(shininess, 1);
   var oldShininess = this.shininess;
@@ -522,6 +558,10 @@ Appearance3D.prototype.getShininess = function() {
   return this.shininess;
 }
 
+/**
+ * Sets the transparency of this appearance. 
+ * @param {number} transparency
+ */
 Appearance3D.prototype.setTransparency = function(transparency) {
   var oldTransparency = this.transparency;
   this.transparency = transparency;
@@ -546,6 +586,10 @@ Appearance3D.prototype.getIllumination = function() {
   return this.illumination;
 }
 
+/**
+ * Sets the texture image of this appearance. 
+ * @param {Image} textureImage
+ */
 Appearance3D.prototype.setTextureImage = function(textureImage) {
   if (this.textureImage !== textureImage) {
     var oldTextureImage = this.textureImage;
@@ -556,6 +600,10 @@ Appearance3D.prototype.setTextureImage = function(textureImage) {
   }
 }
 
+/**
+ * Returns the texture image of this appearance. 
+ * @returns {Image}
+ */
 Appearance3D.prototype.getTextureImage = function() {
   return this.textureImage;
 }
@@ -668,6 +716,10 @@ Appearance3D.prototype.clone = function() {
 
 /**
  * Creates an indexed 3D geometry array.
+ * @param {vec3 []} vertices 
+ * @param {number []} vertexIndices
+ * @param {vec2 []} textureCoordinates
+ * @param {number []} textureCoordinateIndices
  * @constructor
  * @author Emmanuel Puybaret
  */
@@ -697,6 +749,10 @@ IndexedGeometryArray3D.prototype.disposeCoordinates = function() {
 
 /**
  * Creates the 3D geometry of an indexed line array.
+ * @param {vec3 []} vertices 
+ * @param {number []} vertexIndices
+ * @param {vec2 []} textureCoordinates
+ * @param {number []} textureCoordinateIndices
  * @constructor
  * @extends IndexedGeometryArray3D
  * @author Emmanuel Puybaret
@@ -711,6 +767,12 @@ IndexedLineArray3D.prototype.constructor = IndexedLineArray3D;
 
 /**
  * Creates the 3D geometry of an indexed triangle array.
+ * @param {vec3 []} vertices 
+ * @param {number []} vertexIndices
+ * @param {vec2 []} textureCoordinates
+ * @param {number []} textureCoordinateIndices
+ * @param {vec3 []} normals 
+ * @param {number []} normalsIndices
  * @constructor
  * @extends IndexedGeometryArray3D
  * @author Emmanuel Puybaret
@@ -737,6 +799,8 @@ IndexedTriangleArray3D.prototype.disposeCoordinates = function() {
 
 /**
  * Creates a 3D bounding box.
+ * @param {vec3} lower
+ * @param {vec3} upper
  * @constructor
  * @author Emmanuel Puybaret
  */
@@ -749,14 +813,26 @@ function BoundingBox3D(lower, upper) {
       : vec3.fromValues( 1.0,  1.0,  1.0);
 }
 
+/**
+ * Returns a copy of the lower point of this bounding box.
+ * @returns {vec3}
+ */
 BoundingBox3D.prototype.getLower = function(p) {
   vec3.copy(p, this.lower);
 }
 
+/**
+ * Returns a copy of the upper point of this bounding box.
+ * @returns {vec3}
+ */
 BoundingBox3D.prototype.getUpper = function(p) {
   vec3.copy(p, this.upper);
 }
 
+/** 
+ * Combines this bounding box by the bounds or point given in parameter.
+ * @param {BoundingBox3D|vec3} bounds
+ */
 BoundingBox3D.prototype.combine = function(bounds) {
   if (bounds instanceof BoundingBox3D) {
     if (this.lower[0] > bounds.lower[0]) {
@@ -802,6 +878,7 @@ BoundingBox3D.prototype.combine = function(bounds) {
 
 /** 
  * Transforms this bounding box by the given matrix.
+ * @param {mat4} transform
  */
 BoundingBox3D.prototype.transform = function(transform) {
   var xUpper = this.upper [0]; 
@@ -974,6 +1051,10 @@ BoundingBox3D.prototype.clone = function() {
 
 /**
  * Creates a 3D box shape.
+ * @param {number} xdim
+ * @param {number} ydim
+ * @param {number} zdim
+ * @param {Appearance3D} appearance
  * @constructor
  * @extends Shape3D
  * @author Emmanuel Puybaret
@@ -1021,3 +1102,13 @@ function Box3D(xdim, ydim, zdim, appearance) {
 }
 Box3D.prototype = Object.create(Shape3D.prototype);
 Box3D.prototype.constructor = Box3D;
+
+
+/**
+ * Creates an IncorrectFormat3DException instance.
+ * @constructor
+ */
+function IncorrectFormat3DException(message) {
+  this.message = message;
+}
+
