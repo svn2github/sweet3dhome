@@ -41,7 +41,7 @@
       </filelist>
     </concat>
   </target>
-	
+
   <target name="build" depends="concat" 
           description="Builds minified Javacript files in dist directory">
     <!-- Download and build YUI Compressor -->
@@ -112,6 +112,15 @@
       </filterchain>
       <file name="dist/build/core.min.js" />
     </concat>
+    <concat destfile="dist/geom.min.js" encoding="UTF-8">
+      <file name="lib/generated/geom.js" />
+      <filterchain>
+        <headfilter lines="1" skip="5" />
+      </filterchain>
+    </concat>
+    <concat destfile="dist/geom.min.js" encoding="UTF-8" append="true">
+      <file name="dist/build/geom.min.js" />
+    </concat>
     <concat destfile="dist/triangulator.min.js" encoding="UTF-8">
       <header file="src/Triangulator.js" />
       <filterchain>
@@ -122,15 +131,14 @@
       </filterchain>
       <file name="dist/build/triangulator.min.js" />
     </concat>
-  	<move file="dist/build/geom.min.js" todir="dist" />
     <copy file="lib/big.min.js" todir="dist" />
     <copy file="lib/gl-matrix-min.js" todir="dist" />
     <copy file="lib/jszip.min.js" todir="dist" />
     <copy file="src/close.png" todir="dist" />
     <copy file="src/navigationPanel.png" todir="dist" />
 
-    <!-- Clean build -->
-    <delete dir="dist/build" />
+    <!-- Clean build 
+    <delete dir="dist/build" />-->
 
     <echo message="Javascript files in dist ready for ftp" />
   </target>
@@ -162,8 +170,8 @@
         <include name=".settings/**" />
         <include name=".classpath" />
         <include name=".project" />
-      	<!-- Exclude generated libs --> 
-      	<exclude name="lib/generated/**" />
+        <!-- Exclude generated libs --> 
+        <exclude name="lib/generated/**" />
       </fileset>
     </copy>
 
@@ -177,7 +185,7 @@
   </target>
 
   <!-- Builds dist/SweetHome3DJS-version-jsdoc.zip archive that contains 
-	   the generated JSDoc of Javascript source files found in SweetHome3D-version-src -->
+     the generated JSDoc of Javascript source files found in SweetHome3D-version-src -->
   <target name="jsdoc" depends="jsBundle"
           description="Builds dist/SweetHome3DJS-version-jsdoc.zip archive">
     <!-- Download and build JSDoc Toolkit Ant task -->
@@ -185,8 +193,8 @@
     <antcall target="install-jsdoc-toolkit-ant-task" />
     <!-- Generate JSDoc -->
     <mkdir dir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc" />
-  	<taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" 
-  		     classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-1.2.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
+    <taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" 
+           classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-1.2.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
     <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
       <fileset dir="src" includes="*.js" excludes="scene3d.js, HTMLCanvas3D.js, Triangulator.js" />
       <fileset dir="lib/generated" includes="SweetHome3DModel.js" />
