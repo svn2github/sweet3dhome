@@ -208,7 +208,7 @@ ZIPTools.isTranparentImage = function(imageData) {
  * @ignore
  */
 ZIPTools.getScriptFolder = function(script) {
-  var baseUrl = "http://www.sweethome3d.com/lib/"; 
+  var baseUrl = "http://www.sweethome3d.com/libjs/"; 
   // Search the base URL of this script
   var scripts = document.getElementsByTagName("script");      
   for (var i = 0; i < scripts.length; i++) {
