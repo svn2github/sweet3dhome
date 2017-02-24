@@ -25,39 +25,23 @@
 <script type="text/javascript" src="lib/big.min.js"></script>
 <script type="text/javascript" src="lib/gl-matrix-min.js"></script>
 <script type="text/javascript" src="lib/jszip.min.js"></script>
-<script type="text/javascript" src="lib/core.js"></script>
-<script type="text/javascript" src="lib/geom.js"></script>
-<script type="text/javascript" src="lib/scene3d.js"></script>
-<script type="text/javascript" src="lib/URLContent.js"></script>
-<script type="text/javascript" src="lib/HTMLCanvas3D.js"></script>
-<script type="text/javascript" src="lib/ModelManager.js"></script>
-<script type="text/javascript" src="lib/OBJLoader.js"></script>
-<script type="text/javascript" src="lib/Triangulator.js"></script>
-<script type="text/javascript" src="lib/CollectionEvent.js"></script>
-<script type="text/javascript" src="lib/CollectionChangeSupport.js"></script>
-<script type="text/javascript" src="lib/BackgroundImage.js"/></script>
-<script type="text/javascript" src="lib/CatalogPieceOfFurniture.js"></script>
-<script type="text/javascript" src="lib/CatalogTexture.js"></script>
-<script type="text/javascript" src="lib/HomeObject.js"></script>
-<script type="text/javascript" src="lib/HomePieceOfFurniture.js"></script>
-<script type="text/javascript" src="lib/HomeFurnitureGroup.js"></script>
-<script type="text/javascript" src="lib/Camera.js"></script>
-<script type="text/javascript" src="lib/ObserverCamera.js"></script>
-<script type="text/javascript" src="lib/HomeMaterial.js"></script>
-<script type="text/javascript" src="lib/HomeTexture.js"></script>
-<script type="text/javascript" src="lib/TextStyle.js"></script>
-<script type="text/javascript" src="lib/HomeEnvironment.js"></script>
-<script type="text/javascript" src="lib/Level.js"></script>
-<script type="text/javascript" src="lib/SelectionEvent.js"></script>
-<script type="text/javascript" src="lib/Home.js"></script>
-<script type="text/javascript" src="lib/HomeRecorder.js"></script>
-<script type="text/javascript" src="lib/HomeComponent3D.js"></script>
-<script type="text/javascript" src="lib/Object3DBranch.js"></script>
-<script type="text/javascript" src="lib/HomePieceOfFurniture3D.js"></script>
-<script type="text/javascript" src="lib/HomeController3D.js"></script>
-<script type="text/javascript" src="lib/TextureManager.js"></script>
-<script type="text/javascript" src="lib/UserPreferences.js"></script>
-<script type="text/javascript" src="lib/LengthUnit.js"></script>
+<script type="text/javascript" src="src/core.js"></script>
+<script type="text/javascript" src="src/URLContent.js"></script>
+<script type="text/javascript" src="src/scene3d.js"></script>
+<script type="text/javascript" src="lib/generated/geom.js"></script>
+<script type="text/javascript" src="lib/generated/SweetHome3DModel.js"></script>
+<script type="text/javascript" src="src/HTMLCanvas3D.js"></script>
+<script type="text/javascript" src="src/ModelManager.js"></script>
+<script type="text/javascript" src="src/OBJLoader.js"></script>
+<script type="text/javascript" src="src/Triangulator.js"></script>
+<script type="text/javascript" src="src/HomeRecorder.js"></script>
+<script type="text/javascript" src="src/HomeComponent3D.js"></script>
+<script type="text/javascript" src="src/Object3DBranch.js"></script>
+<script type="text/javascript" src="src/HomePieceOfFurniture3D.js"></script>
+<script type="text/javascript" src="src/HomeController3D.js"></script>
+<script type="text/javascript" src="src/TextureManager.js"></script>
+<script type="text/javascript" src="src/UserPreferences.js"></script>
+<script type="text/javascript" src="src/LengthUnit.js"></script>
 </head>
 <body>
 <script type="text/javascript">
@@ -88,7 +72,7 @@ function testGeom() {
   // Create a piece of furniture 
   var catalogPiece = new CatalogPieceOfFurniture("eTeks#Test", "Cube", null, null, [], null, null, 
       new URLContent("test/resources/cube.png"), null, new URLContent("test/resources/cube.zip"), 100, 100, 100, 0, 1, 
-      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null, false);
+      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null, 0, false, false);
   var piece = new HomePieceOfFurniture(catalogPiece);
   assertEquals("Wrong name", "Cube", piece.getName());
   // Place it at center, rotate it of 45 deg
@@ -130,10 +114,13 @@ function testGeom() {
   distanceToCenter = Line2D.ptLineDist(piecePoints [2][0], piecePoints [2][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
   assertEquals("Wrong distance", 25, distanceToCenter);
   
+  var area = new Area(new Rectangle2D.Double(50, -50, 300, 100));
+  var rectangle = area.getBounds2D();
+  
   // Create an area made of two overlapping rectangles 
   var area = new Area();
-  area.add(new Area(new Rectangle2D(0, 0, 200, 100)));
-  area.add(new Area(new Rectangle2D(50, -50, 300, 100)));
+  area.add(new Area(new Rectangle2D.Float(0, 0, 200, 100)));
+  area.add(new Area(new Rectangle2D.Float(50, -50, 300, 100)));
   // Check area bounds
   var rectangle = area.getBounds2D();
   assertEquals("Wrong rectangle", 0, rectangle.getX());
@@ -148,13 +135,13 @@ function testGeom() {
       pointCount++;
     }
   }
-  assertEquals("Wrong point count", 10, pointCount); // TODO 8 would be better 
+  assertEquals("Wrong point count", 8, pointCount); 
   
   // Test circle curve
   var polylinePath = new GeneralPath();
   var curvePoints = [[100, 0], [0, 100], [-100, 0], [0, -100]];
   for (var i = 0, n = curvePoints.length; i < n; i++) {
-    var curve2D = new CubicCurve2D();
+    var curve2D = new CubicCurve2D.Float();
     var previousPoint = curvePoints [i == 0 ?  curvePoints.length - 1  : i - 1];
     var point         = curvePoints [i];
     var nextPoint     = curvePoints [i == curvePoints.length - 1 ?  0  : i + 1];
@@ -188,16 +175,13 @@ function testHome(geomAvailable) {
   // Create a home with furniture
   var catalogPiece = new CatalogPieceOfFurniture("eTeks#Test", "Cube", null, null, [], null, null, 
       new URLContent("test/resources/cube.png"), null, new URLContent("test/resources/cube.zip"), 100, 100, 100, 0, 1, 
-      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null);
+      true, false, null, null, null, false, "eTeks", true, true, true, null, null, null, 0, false, false);
   var home = new Home();
   var piece = new HomePieceOfFurniture(catalogPiece);
   home.addPieceOfFurniture(piece);
   piece = new HomePieceOfFurniture(catalogPiece);
   piece.setX(100);
   piece.setY(100);
-  piece.setProperty("id", "piece1");
-  assertEquals("Wrong property", "id", piece.getPropertyNames() [0]);
-  assertEquals("Wrong id", "piece1", piece.getProperty("id"));
   home.addPieceOfFurniture(piece);
   assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   home.deletePieceOfFurniture(piece);
@@ -216,7 +200,6 @@ function testHome(geomAvailable) {
   home.deletePieceOfFurniture(piece);
   assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   assertEquals("Wrong number of pieces in group", 1, group.getFurniture().length);
-  assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   
   new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
       {
@@ -258,9 +241,9 @@ function visitHome(home, preferences) {
 }
 </script>
 
-<canvas id="canvas3D" style="background-color: #CCCCCC; border: 1px solid gray; touch-action: none;" 
+<canvas id="canvas3D" style="background-color: #CCCCCC; border: 1px solid gray;" 
 		width="600" height="600" tabIndex="1"></canvas>
-<canvas id="canvas3D_2" style="background-color: #CCCCCC; border: 1px solid gray; touch-action: none;" 
+<canvas id="canvas3D_2" style="background-color: #CCCCCC; border: 1px solid gray;" 
 		width="600" height="300" tabIndex="2"></canvas>
 
 <script type="text/javascript">
