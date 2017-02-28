@@ -231,7 +231,7 @@ PropertyChangeSupport.prototype.firePropertyChange = function(propertyName, oldV
     for (var i = 0; i < this.listeners.length; i++) {
       if (!("propertyName" in this.listeners [i])
           || this.listeners [i].propertyName == propertyName) {
-        if(typeof (this.listeners [i].listener) === "function") {
+        if (typeof(this.listeners [i].listener) === "function") {
           this.listeners [i].listener(ev);
         } else {
           this.listeners [i].listener.propertyChange(ev);
