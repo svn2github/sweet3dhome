@@ -1267,8 +1267,8 @@ HomeComponent3D.prototype.createGroundNode = function(groundOriginX, groundOrigi
     var ground3D = new Ground3D(this.home, 
         groundOriginX, groundOriginY, groundWidth, groundDepth, waitForLoading);
     var translation = mat4.create();
-    translation.translate(vec3.fromValues(0, -0.2, 0));
-    var transformGroup = new TransformGroup(translation);
+    mat4.translate(translation, translation, vec3.fromValues(0, -0.2, 0));
+    var transformGroup = new TransformGroup3D(translation);
     transformGroup.addChild(ground3D);
     return transformGroup;
   }
