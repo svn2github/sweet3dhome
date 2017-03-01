@@ -229,6 +229,10 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
           texture, shininess, materials, waitTextureLoadingEnd, pieceSize,
           modelBounds, modifiedAppearances);
     }
+  } else if (node instanceof Link3D) {
+    this.setColorAndTexture(node.getSharedGroup(), color,
+        texture, shininess, materials, waitTextureLoadingEnd, pieceSize,
+        modelBounds, modifiedAppearances);
   } else if (node instanceof Shape3D) {
     var shape = node;
     var shapeName = shape.getName();
@@ -481,6 +485,8 @@ HomePieceOfFurniture3D.prototype.setVisible = function(node, visible, materials)
     for (var i = 0; i < children.length; i++) {
       this.setVisible(children [i], visible, materials);
     }
+  } else if (node instanceof Link3D) {
+    this.setVisible(node.getSharedGroup(), visible, materials);
   } else if (node instanceof Shape3D) {
     var shape = node;
     var appearance = shape.getAppearance();
@@ -548,6 +554,8 @@ HomePieceOfFurniture3D.prototype.setCullFace = function(node, mirrored, backFace
     for (var i = 0; i < children.length; i++) {
       this.setCullFace(children [i], mirrored, backFaceShown);
     }
+  } else if (node instanceof Link3D) {
+    this.setCullFace(node.getSharedGroup(), mirrored, backFaceShown);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
     if (appearance === null) {
@@ -584,6 +592,8 @@ HomePieceOfFurniture3D.prototype.setBackFaceNormalFlip = function(node, backFace
     for (var i = 0; i < children.length; i++) {
       this.setBackFaceNormalFlip(children [i], backFaceNormalFlip);
     }
+  } else if (node instanceof Link3D) {
+    this.setBackFaceNormalFlip(node.getSharedGroup(), backFaceNormalFlip);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
     if (appearance === null) {
@@ -607,6 +617,8 @@ HomePieceOfFurniture3D.prototype.setTransparentShapeNotPickable = function(node)
     for (var i = 0; i < children.length; i++) {
       this.setTransparentShapeNotPickable(children [i]);
     }
+  } else if (node instanceof Link3D) {
+    this.setTransparentShapeNotPickable(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
     if (appearance !== null

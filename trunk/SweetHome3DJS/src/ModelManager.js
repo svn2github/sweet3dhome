@@ -146,6 +146,8 @@ ModelManager.prototype.computeBounds = function(node, bounds, parentTransformati
     for (var i = 0; i < node.children.length; i++) {
       this.computeBounds(node.children [i], bounds, parentTransformations, transformShapeGeometry);
     }
+  } else if (node instanceof Link3D) {
+    this.computeBounds(node.getSharedGroup(), bounds, parentTransformations, transformShapeGeometry);
   } else if (node instanceof Shape3D) {
     var shapeBounds;
     if (transformShapeGeometry) {
@@ -385,6 +387,9 @@ ModelManager.prototype.disposeGeometries = function(node) {
     for (var i = 0; i < node.children.length; i++) {
       this.disposeGeometries(node.children [i]);
     }
+  } else if (node instanceof Link3D) {
+    // Not a problem to dispose more than once geometries of a shared group
+    this.disposeGeometries(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
     var nodeGeometries = node.getGeometries();
     for (var i = 0; i < nodeGeometries.length; i++) {
@@ -399,24 +404,48 @@ ModelManager.prototype.disposeGeometries = function(node) {
  * and the texture images of shapes.
  * @param {Node3D} node  the root of a model 
  */
-ModelManager.prototype.cloneNode = function(node) {
-  var clonedNode = node.clone();
-  if (node instanceof Shape3D) {
-    var clonedAppearance;
-    if (node.getAppearance()) {
-      clonedNode.setAppearance(node.getAppearance().clone());
-    }
+ModelManager.prototype.cloneNode = function(node, clonedSharedGroups) {
+  if (clonedSharedGroups === undefined) {
+    return this.cloneNode(node, []);
   } else {
-    clonedNode = node.clone();
-    if (node instanceof Group3D) {
-      var children = node.getChildren();
-      for (var i = 0; i < children.length; i++) {
-        var clonedChild = this.cloneNode(children [i]);
-        clonedNode.addChild(clonedChild);
+    var clonedNode = node.clone();
+    if (node instanceof Shape3D) {
+      var clonedAppearance;
+      if (node.getAppearance()) {
+        clonedNode.setAppearance(node.getAppearance().clone());
+      }
+    } else if (node instanceof Link3D) {
+      var clonedLink = node.clone();
+      // Force duplication of shared groups too if not duplicated yet
+      var sharedGroup = clonedLink.getSharedGroup();
+      if (sharedGroup !== null) {
+        var clonedSharedGroup = null;
+        for (var i = 0; i < clonedSharedGroups.length; i++) {
+          if (clonedSharedGroups [i].sharedGroup === sharedGroup) {
+            clonedSharedGroup = clonedSharedGroups [i].clonedSharedGroup;
+            break;
+          }
+        }
+        if (clonedSharedGroup === null) {
+          clonedSharedGroup = this.cloneNode(sharedGroup, clonedSharedGroups);
+          clonedSharedGroups.push({sharedGroup: sharedGroup, 
+                                   clonedSharedGroup: clonedSharedGroup});          
+        }
+        clonedLink.setSharedGroup(clonedSharedGroup);
+      }
+      return clonedLink;
+    } else {
+      clonedNode = node.clone();
+      if (node instanceof Group3D) {
+        var children = node.getChildren();
+        for (var i = 0; i < children.length; i++) {
+          var clonedChild = this.cloneNode(children [i]);
+          clonedNode.addChild(clonedChild);
+        }
       }
     }
+    return clonedNode;
   }
-  return clonedNode;
 }
 
 /**
@@ -428,6 +457,8 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
     for (var i = 0; i < node.children.length; i++) {
       this.updateWindowPanesTransparency(node.children [i]);
     }
+  } else if (node instanceof Link3D) {
+    this.updateWindowPanesTransparency(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
     if (node.getName().indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0) {
       var appearance = node.getAppearance();

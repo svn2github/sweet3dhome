@@ -396,6 +396,48 @@ BranchGroup3D.prototype.clone = function() {
 
 
 /**
+ * Creates a shared group that may have multiple links parents.
+ * @constructor
+ * @extends Group3D
+ * @author Emmanuel Puybaret
+ */
+function SharedGroup3D() {
+  Group3D.call(this);
+}
+SharedGroup3D.prototype = Object.create(Group3D.prototype);
+SharedGroup3D.prototype.constructor = SharedGroup3D;
+
+SharedGroup3D.prototype.clone = function() {
+  return new SharedGroup3D();
+}
+
+
+/**
+ * Creates a link that allows to use more than once a shared group in the graph.
+ * @constructor
+ * @extends Node3D
+ * @author Emmanuel Puybaret
+ */
+function Link3D(sharedGroup) {
+  Node3D.call(this);
+  this.sharedGroup = sharedGroup;
+}
+Link3D.prototype = Object.create(Node3D.prototype);
+Link3D.prototype.constructor = Link3D;
+
+Link3D.prototype.getSharedGroup = function() {
+  return this.sharedGroup;
+}
+
+Link3D.prototype.setSharedGroup = function(sharedGroup) {
+  this.sharedGroup = sharedGroup;
+}
+
+Link3D.prototype.clone = function() {
+  return new Link3D(this.sharedGroup);
+}
+
+/**
  * Creates a transform group.
  * @param {mat4} transform
  * @constructor

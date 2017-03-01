@@ -277,7 +277,7 @@ HTMLCanvas3D.prototype.setScene = function(scene, onprogression) {
   var displayedGeometries = [];
   var lights = [];
   var displayedGeometryCount = this.countDisplayedGeometries(scene);
-  this.prepareScene(scene, displayedGeometries, false, lights, mat4.create(), onprogression, displayedGeometryCount);
+  this.prepareScene(scene, displayedGeometries, false, [], lights, mat4.create(), onprogression, displayedGeometryCount);
   this.scene = scene;
   
   var canvas3D = this;
@@ -315,6 +315,8 @@ HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
       displayedGeometryCount += this.countDisplayedGeometries(children [i]);
     }
     return displayedGeometryCount;
+  } else if (node instanceof Link3D) {
+    return this.countDisplayedGeometries(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
     return node.getGeometries().length;
   } else {
@@ -327,13 +329,14 @@ HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
  * @param [Node3D]  node
  * @param [Array]   displayedGeometries
  * @param [boolean] background
+ * @param [Link3D]  parentLinks
  * @param [Array]   lights
  * @param parentTransformations
  * @param onprogression
  * @param [number]  displayedGeometryCount
  * @private
  */
-HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, background, lights, parentTransformations, 
+HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, background, parentLinks, lights, parentTransformations, 
                                                onprogression, displayedGeometryCount) {
   var canvas3D = this;
   if (node instanceof Group3D) {
@@ -350,7 +353,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
               mat4.mul(parentTransformations, parentTransformations, ev.getNewValue());
               var children = node.getChildren();
               for (var i = 0; i < children.length; i++) {
-                canvas3D.updateChildrenTransformation(children [i], displayedGeometries, lights, parentTransformations);
+                canvas3D.updateChildrenTransformation(children [i], displayedGeometries, parentLinks, lights, parentTransformations);
               }
               canvas3D.repaint();
             });
@@ -359,14 +362,14 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
 
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      this.prepareScene(children [i], displayedGeometries, background, lights, parentTransformations, onprogression, displayedGeometryCount);
+      this.prepareScene(children [i], displayedGeometries, background, parentLinks, lights, parentTransformations, onprogression, displayedGeometryCount);
     }
     if (node.getCapability(Group3D.ALLOW_CHILDREN_EXTEND)) {
       // Add listener to group to update the scene when children change
       node.addChildrenListener(
           {  
             childAdded: function(ev) {
-              canvas3D.prepareScene(ev.child, displayedGeometries, background, lights, parentTransformations);
+              canvas3D.prepareScene(ev.child, displayedGeometries, background, parentLinks, lights, parentTransformations);
               canvas3D.repaint();
             },
             childRemoved: function(ev) {
@@ -376,6 +379,10 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
             }
           });
     }
+  } else if (node instanceof Link3D) {
+    parentLinks = parentLinks.slice(0);
+    parentLinks.push(node);
+    this.prepareScene(node.getSharedGroup(), displayedGeometries, background, parentLinks, lights, parentTransformations, onprogression, displayedGeometryCount);
   } else if (node instanceof Shape3D) {
     // Log each time 10% more shape geometries are bound
     if (onprogression !== undefined
@@ -433,6 +440,9 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
         } 
         // Set parameters not shared
         displayedGeometry.transformation = parentTransformations;
+        if (parentLinks.length > 0) {
+          displayedGeometry.parentLinks = parentLinks;
+        }
         if (ambientColor !== undefined) {
           displayedGeometry.ambientColor = ambientColor;
         }
@@ -469,7 +479,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
           function(ev) {
             for (var i = 0; i < displayedGeometries.length; i++) {
               var displayedGeometry = displayedGeometries [i];
-              if (displayedGeometries [i].node === node) {
+              if (displayedGeometry.node === node) {
                 var newValue = ev.getNewValue();
                 switch (ev.getPropertyName()) {
                   case "AMBIENT_COLOR" : 
@@ -515,13 +525,14 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                     displayedGeometry.backFaceNormalFlip = newValue === true;
                     break;
                 }
+                break;
               }
             }
             canvas3D.repaint();
           });
     }
   } else if (node instanceof Background3D) {
-    this.prepareScene(node.getGeometry(), displayedGeometries, true, lights, parentTransformations);
+    this.prepareScene(node.getGeometry(), displayedGeometries, true, parentLinks, lights, parentTransformations);
   } else if (node instanceof Light3D) {
     var light = {"node" : node,
                  "color" : node.getColor()};
@@ -542,6 +553,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                   light.color = newValue;
                   break;
               }
+              break;
             }
           }
           canvas3D.repaint();
@@ -553,11 +565,12 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
  * Updates the transformation applied to the children of the given node.
  * @param [Node3D]  node
  * @param [Array]   displayedGeometries
+ * @param [Link3D]  parentLinks
  * @param [Array]   lights
  * @param parentTransformations
  * @private  
  */
-HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGeometries, lights, parentTransformations) {
+HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGeometries, parentLinks, lights, parentTransformations) {
   var canvas3D = this;
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
@@ -567,18 +580,39 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
     }
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      this.updateChildrenTransformation(children [i], displayedGeometries, lights, parentTransformations);
+      this.updateChildrenTransformation(children [i], displayedGeometries, parentLinks, lights, parentTransformations);
     }
+  } else if (node instanceof Link3D) {
+    parentLinks = parentLinks.slice(0);
+    parentLinks.push(node);
+    this.updateChildrenTransformation(node.getSharedGroup(), displayedGeometries, parentLinks, lights, parentTransformations);
   } else if (node instanceof Shape3D) {
     for (var i = 0; i < displayedGeometries.length; i++) {
       if (displayedGeometries [i].node === node) {
-        displayedGeometries [i].transformation = parentTransformations;
+        var updateNode = displayedGeometries [i].parentLinks === undefined; 
+        if (!updateNode) {
+          // Check the node of the displayed geometry references the same parent links
+          if (displayedGeometries [i].parentLinks.length === parentLinks.length) {
+            var j;
+            for (j = 0; j < parentLinks.length; j++) {
+              if (displayedGeometries [i].parentLinks [j] !== parentLinks [j]) {
+                break;
+              }
+            }
+            updateNode = j === parentLinks.length;
+          } 
+        }
+        if (updateNode) {
+          displayedGeometries [i].transformation = parentTransformations;
+          break;
+        }
       }
     }
   } else if (node instanceof Light3D) {
     for (var i = 0; i < lights.length; i++) {
       if (lights [i].node === node) {
         lights [i].transformation = parentTransformations;
+        break;
       }
     }
   }
@@ -598,16 +632,20 @@ HTMLCanvas3D.prototype.removeDisplayedItems = function(node, displayedGeometries
     for (var i = 0; i < children.length; i++) {
       this.removeDisplayedItems(children [i], displayedGeometries, lights);
     }
+  } else if (node instanceof Link3D) {
+    this.removeDisplayedItems(node.getSharedGroup(), displayedGeometries, lights);
   } else if (node instanceof Shape3D) {
     for (var i = 0; i < displayedGeometries.length; i++) {
       if (displayedGeometries [i].node === node) {
         displayedGeometries.splice(i, 1);
+        break;
       }
     }
   } else if (node instanceof Light3D) {
     for (var i = 0; i < lights.length; i++) {
       if (lights [i].node === node) {
         lights.splice(i, 1);
+        break;
       }
     }
   }
