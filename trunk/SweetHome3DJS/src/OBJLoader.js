@@ -1215,19 +1215,23 @@ OBJLoader.prototype.parseDependencies = function(objContent, objEntryName, zip, 
     modelContext.appearances [appearance.getName()] = appearance;
   }
 
-  var mtllibIndex = objContent.indexOf("mtllib");
-  while (mtllibIndex !== -1) {
-    var endOfLine = mtllibIndex + 6;
-    while (endOfLine < objContent.length
-           && objContent.charAt(endOfLine) != '\n'
-           && objContent.charAt(endOfLine) != '\r') {
-      endOfLine++;
+  try {
+    var mtllibIndex = objContent.indexOf("mtllib");
+    while (mtllibIndex !== -1) {
+      var endOfLine = mtllibIndex + 6;
+      while (endOfLine < objContent.length
+          && objContent.charAt(endOfLine) != '\n'
+            && objContent.charAt(endOfLine) != '\r') {
+        endOfLine++;
+      }
+      var line = objContent.substring(mtllibIndex, endOfLine).trim();
+      var mtllib = line.substring(7, line.length).trim();
+      this.parseMaterialEntry(mtllib, modelContext.appearances, objEntryName, zip);
+      
+      mtllibIndex = objContent.indexOf("mtllib", endOfLine);
     }
-    var line = objContent.substring(mtllibIndex, endOfLine).trim();
-    var mtllib = line.substring(7, line.length).trim();
-    this.parseMaterialEntry(mtllib, modelContext.appearances, objEntryName, zip);
-
-    mtllibIndex = objContent.indexOf("mtllib", endOfLine);
+  } catch (ex) {
+    modelContext.appearances = {};
   }
 }
 
@@ -1247,44 +1251,48 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
                         material: "default", 
                         smooth: false}; 
   
-  if (onmodelloaded === null) {
-    onprogression(Node3D.PARSING_MODEL, objEntryName, 0);
-    for (var startOfLine = 0; startOfLine <= objContent.length; ) {
-      startOfLine = this.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
-          materialGroupsWithNormals, currentObjects);
-    } 
-    onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
-    return this.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, null, onprogression);
-  } else {
-    var startOfLine = 0;
-    var loader = this;
-    var objEntryParser = function() {
-        onprogression(Node3D.PARSING_MODEL, objEntryName, startOfLine / objContent.length);
-        var minimumIndexBeforeTimeout = startOfLine + 200000; 
-        var start = Date.now();
-        while (startOfLine <= objContent.length) {
-          startOfLine = loader.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
-              materialGroupsWithNormals, currentObjects);
-          if (startOfLine <= objContent.length 
-              && startOfLine > minimumIndexBeforeTimeout // Don't call Date.now() after parsing each line!
-              && Date.now() - start > 10) { 
-            // Continue entry parsing later
-            setTimeout(objEntryParser, 0);
-            return;
+  try {
+    if (onmodelloaded === null) {
+      onprogression(Node3D.PARSING_MODEL, objEntryName, 0);
+      for (var startOfLine = 0; startOfLine <= objContent.length; ) {
+        startOfLine = this.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
+            materialGroupsWithNormals, currentObjects);
+      } 
+      onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
+      return this.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, null, onprogression);
+    } else {
+      var startOfLine = 0;
+      var loader = this;
+      var objEntryParser = function() {
+          onprogression(Node3D.PARSING_MODEL, objEntryName, startOfLine / objContent.length);
+          var minimumIndexBeforeTimeout = startOfLine + 200000; 
+          var start = Date.now();
+          while (startOfLine <= objContent.length) {
+            startOfLine = loader.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
+                materialGroupsWithNormals, currentObjects);
+            if (startOfLine <= objContent.length 
+                && startOfLine > minimumIndexBeforeTimeout // Don't call Date.now() after parsing each line!
+                && Date.now() - start > 10) { 
+              // Continue entry parsing later
+              setTimeout(objEntryParser, 0);
+              return;
+            }
           }
-        }
-        // Parsing is finished
-        setTimeout(
-            function() {
-              onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
-              loader.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, 
-                  function(scene) { 
-                    onmodelloaded(scene); 
-                  }, 
-                  onprogression);
-            }, 0);
-      };
-    objEntryParser();
+          // Parsing is finished
+          setTimeout(
+              function() {
+                onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
+                loader.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, 
+                    function(scene) { 
+                      onmodelloaded(scene); 
+                    }, 
+                    onprogression);
+              }, 0);
+        };
+      objEntryParser();
+    }
+  } catch (ex) {
+    this.createScene([], [], [], {}, modelContext.appearances, onmodelloaded, onprogression);
   }
 }
 
@@ -1393,11 +1401,11 @@ OBJLoader.prototype.parseLine = function(strings, material) {
       var firstSlashIndex = indices.indexOf('/');
       if (firstSlashIndex === -1) {
         // l v 
-        vertexIndices.push(parseInt(indices) - 1);
+        vertexIndices.push(OBJLoader.parseInteger(indices) - 1);
       } else {
         // l v/vt
-        vertexIndices.push(parseInt(indices.substring(0, firstSlashIndex)) - 1);
-        textureCoordinateIndices.push(parseInt(indices.substring(firstSlashIndex + 1)) - 1);
+        vertexIndices.push(OBJLoader.parseInteger(indices.substring(0, firstSlashIndex)) - 1);
+        textureCoordinateIndices.push(OBJLoader.parseInteger(indices.substring(firstSlashIndex + 1)) - 1);
       }
     }
   }
@@ -1427,21 +1435,21 @@ OBJLoader.prototype.parseFace = function(strings, smooth, material) {
       var firstSlashIndex = indices.indexOf('/');
       if (firstSlashIndex === -1) {
         // f v 
-        vertexIndices.push(parseInt(indices) - 1);
+        vertexIndices.push(OBJLoader.parseInteger(indices) - 1);
       } else {
-        vertexIndices.push(parseInt(indices.substring(0, firstSlashIndex)) - 1);
+        vertexIndices.push(OBJLoader.parseInteger(indices.substring(0, firstSlashIndex)) - 1);
         var lastSlashIndex = indices.lastIndexOf('/');
         if (firstSlashIndex === lastSlashIndex) {
           // f v/vt
-          textureCoordinateIndices.push(parseInt(indices.substring(firstSlashIndex + 1)) - 1);
+          textureCoordinateIndices.push(OBJLoader.parseInteger(indices.substring(firstSlashIndex + 1)) - 1);
         } else {
           if (firstSlashIndex + 1 !== lastSlashIndex) {
             // f v/vt/vn
-            textureCoordinateIndices.push(parseInt(indices.substring(firstSlashIndex + 1, lastSlashIndex)) - 1);
+            textureCoordinateIndices.push(OBJLoader.parseInteger(indices.substring(firstSlashIndex + 1, lastSlashIndex)) - 1);
           }
           //    f v//vn
           // or f v/vt/vn
-          normalIndices.push(parseInt(indices.substring(lastSlashIndex + 1)) - 1);
+          normalIndices.push(OBJLoader.parseInteger(indices.substring(lastSlashIndex + 1)) - 1);
         }
       }
     }
@@ -1482,7 +1490,9 @@ OBJLoader.parseVector3f = function(strings) {
   // or Ka r g b
   // or Kd r g b
   // or Ks r g b
-  return vec3.fromValues(parseFloat(strings [1]), parseFloat(strings [2]), parseFloat(strings [3]));
+  return vec3.fromValues(OBJLoader.parseNumber(strings [1]), 
+      OBJLoader.parseNumber(strings [2]),
+      OBJLoader.parseNumber(strings [3]));
 }
 
 /**
@@ -1491,7 +1501,32 @@ OBJLoader.parseVector3f = function(strings) {
  */
 OBJLoader.parseVector2f = function(strings) {
   // vt x y z
-  return vec2.fromValues(parseFloat(strings [1]), parseFloat(strings [2]));
+  return vec2.fromValues(OBJLoader.parseNumber(strings [1]), 
+      OBJLoader.parseNumber(strings [2]));
+}
+
+/**
+ * Returns the integer contained in the given parameter. 
+ * @private
+ */
+OBJLoader.parseInteger = function(string) {
+  var i = parseInt(string);
+  if (isNaN(i)) {
+    throw IncorrectFormat3DException("Incorrect integer " + string);
+  }
+  return i;
+}
+
+/**
+ * Returns the number contained in the given parameter. 
+ * @private
+ */
+OBJLoader.parseNumber = function(string) {
+  var x = parseFloat(string);
+  if (isNaN(x)) {
+    throw IncorrectFormat3DException("Incorrect number " + string);
+  }
+  return x;
 }
 
 /**
@@ -1516,12 +1551,12 @@ OBJLoader.parseMaterial = function(mtlContent, appearances, objEntryName, zip) {
       } else if (start == "Ks") {
         currentAppearance.setSpecularColor(OBJLoader.parseVector3f(strings));
       } else if (start == "Ns") {
-        currentAppearance.setShininess(Math.max(1, Math.min(parseFloat(strings [1]), 128)));
+        currentAppearance.setShininess(Math.max(1, Math.min(OBJLoader.parseNumber(strings [1]), 128)));
       } else if (start == "d") {
         // Store transparency opposite value
-        currentAppearance.setTransparency(1 - Math.max(0, parseFloat(strings [1] == "-halo" ? strings [2] : strings [1])));
+        currentAppearance.setTransparency(1 - Math.max(0, OBJLoader.parseNumber(strings [1] == "-halo" ? strings [2] : strings [1])));
       } else if (start == "illum") {
-        currentAppearance.setIllumination(parseInt(strings [1]));
+        currentAppearance.setIllumination(OBJLoader.parseInteger(strings [1]));
       } else if (start == "map_Kd") {
         var imageEntryName = strings [strings.length - 1];
         var lastSlash = objEntryName.lastIndexOf("/");
