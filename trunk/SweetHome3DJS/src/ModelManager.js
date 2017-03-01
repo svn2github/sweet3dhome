@@ -20,7 +20,8 @@
 
 // Requires URLContent.js
 //          scene3d.js
-//          ObjLoader.js
+//          ModelLoader.js
+//          OBJLoader.js
 //          HomeObject.js
 //          HomePieceOfFurniture.js
 
@@ -67,8 +68,10 @@ ModelManager.getInstance = function() {
 ModelManager.prototype.clear = function() {
   this.loadedModelNodes = {};
   this.loadingModelObservers = {};
-  if (this.objLoader) {
-    this.objLoader.clear();
+  if (this.modelLoaders) {
+    for (var i = 0; i < this.modelLoaders.length; i++) {
+      this.modelLoaders [i].clear();
+    } 
   }
 }
 
@@ -322,14 +325,19 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
       var observers = [];
       observers.push(modelObserver);
       this.loadingModelObservers [contentUrl] = observers;
-      if (!this.objLoader) {
-        // As OBJLoader#load is reentrant, use the same loader for multiple loading
-        this.objLoader = new OBJLoader();
+      if (!this.modelLoaders) {
+        // As model loaders are reentrant, use the same loaders for multiple loading
+        this.modelLoaders = [new OBJLoader()];
+        // Optional loaders
+        if (typeof Max3DSLoader !== "undefined") {
+          this.modelLoaders.push(new Max3DSLoader());
+        }
       }
       var modelManager = this;
-      this.objLoader.load(contentUrl, synchronous,
-          {
-            modelLoaded: function(model) {
+      var modelObserver = {
+          modelLoaderIndex: 0,
+          modelLoaded: function(model) {
+            if (model.getChildren().length !== 0) {
               var observers = modelManager.loadingModelObservers [contentUrl];
               if (observers) {
                 delete modelManager.loadingModelObservers [contentUrl];
@@ -339,25 +347,31 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
                   observers [i].modelUpdated(modelManager.cloneNode(model));
                 }
               }
-            },
-            modelError: function(err) {
-              var observers = modelManager.loadingModelObservers [contentUrl];
-              if (observers) {
-                delete modelManager.loadingModelObservers [contentUrl];
-                for (var i = 0; i < observers.length; i++) {
-                  observers [i].modelError(err);
-                }
-              }
-            },
-            progression: function(part, info, percentage) {
-              var observers = modelManager.loadingModelObservers [contentUrl];
-              if (observers) {
-                for (var i = 0; i < observers.length; i++) {
-                  observers [i].progression(part, info, percentage);
-                } 
+            } else if (++this.modelLoaderIndex < modelManager.modelLoaders.length) {
+              modelManager.modelLoaders [this.modelLoaderIndex].load(contentUrl, synchronous, this);
+            } else {
+              this.modelError("Unsupported 3D format");
+            }
+          },
+          modelError: function(err) {
+            var observers = modelManager.loadingModelObservers [contentUrl];
+            if (observers) {
+              delete modelManager.loadingModelObservers [contentUrl];
+              for (var i = 0; i < observers.length; i++) {
+                observers [i].modelError(err);
               }
             }
-          });
+          },
+          progression: function(part, info, percentage) {
+            var observers = modelManager.loadingModelObservers [contentUrl];
+            if (observers) {
+              for (var i = 0; i < observers.length; i++) {
+                observers [i].progression(part, info, percentage);
+              } 
+            }
+          }
+        };
+      modelManager.modelLoaders [0].load(contentUrl, synchronous, modelObserver);
     }
   }
 }

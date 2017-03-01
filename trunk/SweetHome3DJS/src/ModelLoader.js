@@ -71,9 +71,17 @@ ModelLoader.prototype.load = function(url, synchronous, modelObserver) {
                 return;
               } 
             }
-          } else {
-            loader.parseModelEntry(zip.file(decodeURIComponent(modelEntryName)), zip, url, synchronous, modelObserver);
+            if (entries.length > 0) {
+              // If not found, try with the first entry
+              modelEntryName = entries [0].name;
+            } else {
+              if (modelObserver.modelError !== undefined) {
+                modelObserver.modelError("Empty file");
+              }
+              return;
+            }
           }
+          loader.parseModelEntry(zip.file(decodeURIComponent(modelEntryName)), zip, url, synchronous, modelObserver);
         } catch (ex) {
           zipObserver.zipError(ex);
         }
