@@ -20,6 +20,7 @@
         <file name="scene3d.js" />
         <file name="HTMLCanvas3D.js" />
         <file name="URLContent.js" />
+      	<file name="ModelLoader.js" />
         <file name="OBJLoader.js" />
         <file name="ModelManager.js" />
         <file name="ModelPreviewComponent.js" />

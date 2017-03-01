@@ -24,16 +24,17 @@
 //          scene3d.js
 //          Triangulator.js
 //          URLContent.js
+//          ModelLoader.js
 
 /**
  * Creates an instance of an OBJ + MTL loader.
  * @constructor
+ * @extends ModelLoader
  * @author Emmanuel Puybaret
  */
 function OBJLoader() {
-  this.parserBusy = false;
-  this.waitingParsedOBJEntries = [];
-  
+  ModelLoader.call(this, "obj");
+
   if (OBJLoader.defaultAppearances === null) {
     OBJLoader.defaultAppearances = {};
     OBJLoader.parseMaterial(
@@ -938,72 +939,10 @@ function OBJLoader() {
         "sharpness 60.0000\n", OBJLoader.defaultAppearances, null, null);
   }
 }
+OBJLoader.prototype = Object.create(ModelLoader.prototype);
+OBJLoader.prototype.constructor = OBJLoader;
 
 OBJLoader.defaultAppearances = null;
-
-/**
- * Loads the 3D model from the given URL. This method is reentrant when run asynchronously.
- * @param {string} url The URL of a zip file containing an OBJ entry that will be loaded
- *            or an URL noted as jar:url!/objEntry where objEntry will be loaded.
- * @param {boolean} [synchronous] optional parameter equal to false by default
- * @param {{modelLoaded, modelError, progression}} modelObserver 
- *            An observer containing modelLoaded(model), 
- *            modelError(error), progression(part, info, percentage) methods that
- *            will called at various phases.
- */
-OBJLoader.prototype.load = function(url, synchronous, modelObserver) {
-  if (modelObserver === undefined) {
-    modelObserver = synchronous;
-    synchronous = false;
-  }
-  var objEntryName = null;
-  if (url.indexOf("jar:") === 0) {
-    var entrySeparatorIndex = url.indexOf("!/");
-    objEntryName = url.substring(entrySeparatorIndex + 2);
-    url = url.substring(4, entrySeparatorIndex);
-  }
-  
-  modelObserver.progression(Node3D.READING_MODEL, url, 0);
-  var loader = this;
-  var zipObserver = {
-      zipReady: function(zip) {
-        try {
-          if (objEntryName === null) {
-            // Search an OBJ entry
-            var entries = zip.file(/.*/);
-            for (var i = 0; i < entries.length; i++) {
-              if (entries [i].name.toLowerCase().match(/\.obj$/)) {
-                loader.parseOBJEntry(entries [i], zip, url, synchronous, modelObserver);
-                return;
-              } 
-            }
-          } else {
-            loader.parseOBJEntry(zip.file(decodeURIComponent(objEntryName)), zip, url, synchronous, modelObserver);
-          }
-        } catch (ex) {
-          zipObserver.zipError(ex);
-        }
-      },
-      zipError: function(error) {
-        if (modelObserver.modelError !== undefined) {
-          modelObserver.modelError(error);
-        }
-      },
-      progression: function(part, info, percentage) {
-        if (modelObserver.progression !== undefined) {
-          modelObserver.progression(Node3D.READING_MODEL, info, percentage);
-        }
-      }
-    };
-  ZIPTools.getZIP(url, synchronous, zipObserver);
-}
-
-/**
- * Clears the list of 3D models waiting to be parsed by this loader. 
- */
-OBJLoader.prototype.clear = function() {
-  this.waitingParsedOBJEntries = [];
-}
 
 /**
  * Creates a new scene from the parsed <code>groups</code> and calls onmodelcreated asynchronously or 
@@ -1265,119 +1204,15 @@ OBJLoader.prototype.generateNormals = function(vertices, coordinatesIndices, nor
 }
 
 /**
- * Parses the content of the given entry to create the scene it contains. 
+ * Parses the given OBJ content and stores the materials it describes in appearances attribute 
+ * of <code>modelContext</code>.
  * @private
  */
-OBJLoader.prototype.parseOBJEntry = function(objEntry, zip, zipUrl, synchronous, modelObserver) {
-  if (synchronous) { 
-    var objContent = objEntry.asBinary();
-    modelObserver.progression(Node3D.READING_MODEL, objEntry.name, 1);
-    var appearances = this.parseOBJEntryMaterials(objContent, objEntry.name, zip);
-    var scene = this.parseOBJEntryScene(objContent, objEntry.name, appearances, null, modelObserver.progression);
-    this.loadTextureImages(scene, {}, zip, zipUrl, synchronous);
-    modelObserver.modelLoaded(scene);
-  } else {
-    var parsedOBJEntry = {"objEntry": objEntry, 
-                          "zip": zip, 
-                          "zipUrl": zipUrl, 
-                          "modelObserver": modelObserver};
-    this.waitingParsedOBJEntries.push(parsedOBJEntry);
-    this.parseNextWaitingEntry();
-  }
-}  
-
-/**
- * Parses asynchronously the waiting entries.
- * @private
- */
-OBJLoader.prototype.parseNextWaitingEntry = function() {
-  if (!this.parserBusy) {
-    // Parse OBJ files one at a time to avoid keeping in memory unzipped content not yet used
-    for (var key in this.waitingParsedOBJEntries) {
-      if (this.waitingParsedOBJEntries.hasOwnProperty(key)) {
-        var parsedOBJEntry = this.waitingParsedOBJEntries [key];
-        var objEntryName = parsedOBJEntry.objEntry.name;
-        // Get OBJ content to parse
-        var objContent = parsedOBJEntry.objEntry.asBinary();
-        parsedOBJEntry.modelObserver.progression(Node3D.READING_MODEL, objEntryName, 1);
-        var appearances = this.parseOBJEntryMaterials(objContent, objEntryName, parsedOBJEntry.zip);
-        var loader = this;
-        // Post future work (avoid worker because the amount of data to transfer back and forth slows the program) 
-        setTimeout(
-            function() {
-              loader.parseOBJEntryScene(objContent, objEntryName, appearances,
-                  function(scene) {
-                      loader.loadTextureImages(scene, {}, parsedOBJEntry.zip, parsedOBJEntry.zipUrl);
-                      parsedOBJEntry.modelObserver.modelLoaded(scene);
-                      loader.parserBusy = false;
-                      loader.parseNextWaitingEntry();
-                    },
-                  parsedOBJEntry.modelObserver.progression);
-            }, 0);
-        
-        this.parserBusy = true;
-        // Remove parsed entry from waiting list
-        delete this.waitingParsedOBJEntries [key];
-        break;
-      }
-    }
-  }
-}
-
-/**
- * Loads the textures images used by appearances of the scene.
- * @private
- */
-OBJLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, synchronous) {
-  if (node instanceof Group3D) {
-    for (var i = 0; i < node.children.length; i++) {
-      this.loadTextureImages(node.children [i], images, zip, zipUrl, synchronous);
-    }
-  } else if (node instanceof Shape3D
-             && node.appearance.imageEntryName !== undefined) {
-    var imageEntryName = node.appearance.imageEntryName;
-    if (imageEntryName !== undefined) {
-      delete node.appearance [imageEntryName];
-      if (imageEntryName in images) {
-        node.appearance.setTextureImage(images [imageEntryName]);
-      } else { 
-        var image = new Image();
-        node.appearance.setTextureImage(image);
-        image.url = "jar:" + zipUrl + "!/" + imageEntryName;
-        // Store loaded image to avoid duplicates
-        images [imageEntryName] = image;
-        
-        var loader = function() {
-            var imageEntry = zip.file(decodeURIComponent(imageEntryName));
-            var imageData = imageEntry.asBinary();
-            var base64Image = btoa(imageData);
-            var extension = imageEntryName.substring(imageEntryName.lastIndexOf('.') + 1).toLowerCase();
-            var mimeType = extension == "jpg"
-                ? "image/jpeg" 
-                : ("image/" + extension);
-            // Detect quickly if a PNG image use transparency
-            image.transparent = ZIPTools.isTranparentImage(imageData);
-            image.src = "data:" + mimeType + ";base64," + base64Image;
-          };
-        if (synchronous) {
-          loader();
-        } else {
-          setTimeout(loader, 0);
-        }
-      }
-    }
-  }
-}
-
-/**
- * Parses the given OBJ content and returns the materials it describes.
- * @private
- */
-OBJLoader.prototype.parseOBJEntryMaterials = function(objContent, objEntryName, zip) {
-  var appearances = {};
+OBJLoader.prototype.parseDependencies = function(objContent, objEntryName, zip, modelContext) {
+  modelContext.appearances = {};
   for (var k in OBJLoader.defaultAppearances) {
     var appearance = OBJLoader.defaultAppearances [k];
-    appearances [appearance.getName()] = appearance;
+    modelContext.appearances [appearance.getName()] = appearance;
   }
 
   var mtllibIndex = objContent.indexOf("mtllib");
@@ -1390,12 +1225,10 @@ OBJLoader.prototype.parseOBJEntryMaterials = function(objContent, objEntryName, 
     }
     var line = objContent.substring(mtllibIndex, endOfLine).trim();
     var mtllib = line.substring(7, line.length).trim();
-    this.parseMaterialEntry(mtllib, appearances, objEntryName, zip);
+    this.parseMaterialEntry(mtllib, modelContext.appearances, objEntryName, zip);
 
     mtllibIndex = objContent.indexOf("mtllib", endOfLine);
   }
-
-  return appearances;
 }
 
 /**
@@ -1403,7 +1236,7 @@ OBJLoader.prototype.parseOBJEntryMaterials = function(objContent, objEntryName, 
  * returns the scene it describes if onmodelloaded is null.
  * @private
  */
-OBJLoader.prototype.parseOBJEntryScene = function(objContent, objEntryName, appearances, onmodelloaded, onprogression) {
+OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, modelContext, onmodelloaded, onprogression) {
   var vertices = [];
   var textureCoordinates = [];
   var normals = [];
@@ -1421,7 +1254,7 @@ OBJLoader.prototype.parseOBJEntryScene = function(objContent, objEntryName, appe
           materialGroupsWithNormals, currentObjects);
     } 
     onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
-    return this.createScene(vertices, textureCoordinates, normals, groups, appearances, null, onprogression);
+    return this.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, null, onprogression);
   } else {
     var startOfLine = 0;
     var loader = this;
@@ -1444,7 +1277,7 @@ OBJLoader.prototype.parseOBJEntryScene = function(objContent, objEntryName, appe
         setTimeout(
             function() {
               onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
-              loader.createScene(vertices, textureCoordinates, normals, groups, appearances, 
+              loader.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, 
                   function(scene) { 
                     onmodelloaded(scene); 
                   }, 
