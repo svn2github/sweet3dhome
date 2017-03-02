@@ -89,6 +89,19 @@ URLContent.prototype.equals = function(obj) {
   }
 }
 
+/**
+ * An URL content read from a home stream.
+ * @param {string} url  the URL from which this content will be read
+ * @constructor
+ * @author Emmanuel Puybaret
+ */
+function HomeURLContent(url) {
+  URLContent.call(this, url);
+}
+HomeURLContent.prototype = Object.create(URLContent.prototype);
+HomeURLContent.prototype.constructor = HomeURLContent;
+
+HomeURLContent["__interfaces"] = ["com.eteks.sweethome3d.model.Content"];
 
 /**
  * ZIP reading utilities.
