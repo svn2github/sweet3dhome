@@ -21,7 +21,7 @@ package com.eteks.sweethome3d;
 
 import org.jsweet.transpiler.JSweetContext;
 import org.jsweet.transpiler.JSweetFactory;
-import org.jsweet.transpiler.typescript.Java2TypeScriptAdapter;
+import org.jsweet.transpiler.util.PrinterAdapter;
 
 /**
  * JSweet extension to generate JavaScript code from the SweetHome3D Java code
@@ -34,8 +34,8 @@ public class SweetHome3DJSweetFactory extends JSweetFactory {
   public SweetHome3DJSweetFactory() {
   }
 
-  public Java2TypeScriptAdapter createAdapter(JSweetContext context) {
-    return new SweetHome3DJSweetAdapter(super.createAdapter(context));
+  public PrinterAdapter createAdapter(JSweetContext context) {
+    return new SweetHome3DJava3DJSweetAdapter(new SweetHome3DJSweetAdapter(super.createAdapter(context)));
   }
 
 }
