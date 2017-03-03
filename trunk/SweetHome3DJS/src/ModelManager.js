@@ -332,12 +332,18 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
         if (typeof Max3DSLoader !== "undefined") {
           this.modelLoaders.push(new Max3DSLoader());
         }
+        if (typeof DAELoader !== "undefined") {
+          this.modelLoaders.push(new DAELoader());
+        }
       }
       var modelManager = this;
       var modelObserver = {
           modelLoaderIndex: 0,
           modelLoaded: function(model) {
-            if (model.getChildren().length !== 0) {
+            var bounds = modelManager.getBounds(model);
+            var lower = vec3.create();
+            bounds.getLower(lower);
+            if (lower [0] !== Infinity) {
               var observers = modelManager.loadingModelObservers [contentUrl];
               if (observers) {
                 delete modelManager.loadingModelObservers [contentUrl];
@@ -453,7 +459,7 @@ ModelManager.prototype.cloneNode = function(node, clonedSharedGroups) {
       if (node instanceof Group3D) {
         var children = node.getChildren();
         for (var i = 0; i < children.length; i++) {
-          var clonedChild = this.cloneNode(children [i]);
+          var clonedChild = this.cloneNode(children [i], clonedSharedGroups);
           clonedNode.addChild(clonedChild);
         }
       }
@@ -474,7 +480,8 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
   } else if (node instanceof Link3D) {
     this.updateWindowPanesTransparency(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
-    if (node.getName().indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0) {
+    var name = node.getName();
+    if (name && name.indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0) {
       var appearance = node.getAppearance();
       if (appearance === null) {
         appearance = new Appearance3D();
