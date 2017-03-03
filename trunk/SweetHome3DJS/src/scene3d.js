@@ -81,6 +81,26 @@ Node3D.prototype.setUserData = function(userData) {
 }
 
 /**
+ * Returns the string of this object.
+ * @return {string}
+ */
+Node3D.prototype.getName = function() {
+  if (this.name === undefined) {
+    return null;
+  } else {
+    return this.name;
+  }
+}
+
+/**
+ * Sets the name of this object. 
+ * @param {string} name
+ */
+Node3D.prototype.setName = function(name) {
+  this.name = name;
+}
+
+/**
  * Adds the property change <code>listener</code> in parameter to this node.
  */
 Node3D.prototype.addPropertyChangeListener = function(property, listener) {
@@ -116,7 +136,6 @@ function Shape3D(geometry, appearance) {
   Node3D.call(this);
   this.appearance = appearance;
   this.bounds = null; 
-  this.name = null;
   this.geometries = [];
   if (geometry !== null) {
     this.addGeometry(geometry);
@@ -146,14 +165,6 @@ Shape3D.prototype.getBounds = function() {
   return this.bounds.clone();
 }
 
-Shape3D.prototype.setName = function(name) {
-  this.name = name;
-}
-
-Shape3D.prototype.getName = function() {
-  return this.name;
-}
-
 Shape3D.prototype.getGeometries = function() {
   return this.geometries;
 }
@@ -180,6 +191,9 @@ Shape3D.prototype.isPickable = function() {
 
 Shape3D.prototype.clone = function() {
   var clone = new Shape3D(null, this.appearance);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
   if (this.name !== undefined) {
     clone.name = this.name;
   }
@@ -209,7 +223,14 @@ Background3D.prototype.getGeometry = function() {
 }
 
 Background3D.prototype.clone = function() {
-  return new Background3D(this.geometry);
+  var clone = new Background3D(this.geometry);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -253,7 +274,14 @@ AmbientLight3D.prototype.constructor = AmbientLight3D;
 
 
 AmbientLight3D.prototype.clone = function() {
-  return new AmbientLight3D(this.color);
+  var clone = new AmbientLight3D(this.color);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -275,7 +303,14 @@ Light3D.prototype.getDirection = function() {
 }
 
 DirectionalLight3D.prototype.clone = function() {
-  return new DirectionalLight3D(this.color, this.direction);
+  var clone = new DirectionalLight3D(this.color, this.direction);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -368,7 +403,14 @@ Group3D.prototype.removeChildrenListener = function(listener) {
 } 
 
 Group3D.prototype.clone = function() {
-  return new Group3D();
+  var clone = new Group3D();
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -391,7 +433,14 @@ BranchGroup3D.prototype.detach = function() {
 }
 
 BranchGroup3D.prototype.clone = function() {
-  return new BranchGroup3D();
+  var clone = new BranchGroup3D();
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -408,7 +457,14 @@ SharedGroup3D.prototype = Object.create(Group3D.prototype);
 SharedGroup3D.prototype.constructor = SharedGroup3D;
 
 SharedGroup3D.prototype.clone = function() {
-  return new SharedGroup3D();
+  var clone = new SharedGroup3D();
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -434,7 +490,14 @@ Link3D.prototype.setSharedGroup = function(sharedGroup) {
 }
 
 Link3D.prototype.clone = function() {
-  return new Link3D(this.sharedGroup);
+  var clone = new Link3D(this.sharedGroup);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 /**
@@ -494,7 +557,14 @@ TransformGroup3D.areTransformationsEqual = function(transform1, transform2) {
 }
 
 TransformGroup3D.prototype.clone = function() {
-  return new TransformGroup3D(this.transform);
+  var clone = new TransformGroup3D(this.transform);
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
@@ -505,7 +575,9 @@ TransformGroup3D.prototype.clone = function() {
  * @author Emmanuel Puybaret
  */
 function Appearance3D(name) {
-  this.name = name;
+  if (name !== undefined) {
+    this.name = name;
+  }
 }
 
 Appearance3D.CULL_NONE = 0;
@@ -531,8 +603,20 @@ Appearance3D.prototype.removePropertyChangeListener = function(listener) {
   }
 }
 
+/**
+ * Returns the name of this appearance. 
+ * @returns {string}
+ */
 Appearance3D.prototype.getName = function() {
   return this.name;
+}
+
+/**
+ * Sets the name of this object. 
+ * @param {string} name
+ */
+Appearance3D.prototype.setName = function(name) {
+  this.name = name;
 }
 
 /**
@@ -549,6 +633,22 @@ Appearance3D.prototype.setAmbientColor = function(ambientColor) {
 
 Appearance3D.prototype.getAmbientColor = function() {
   return this.ambientColor;
+}
+
+/**
+ * Sets the emissive color of this appearance. 
+ * @param {vec3} emissiveColor
+ */
+Appearance3D.prototype.setEmissiveColor = function(emissiveColor) {
+  var oldEmissiveColor = this.emissiveColor;
+  this.emissiveColor = emissiveColor;
+  if (this.propertyChangeSupport !== undefined) {
+    this.propertyChangeSupport.firePropertyChange("EMISSIVE_COLOR", oldEmissiveColor, emissiveColor);
+  }
+}
+
+Appearance3D.prototype.getEmissiveColor = function() {
+  return this.emissiveColor;
 }
 
 /**
