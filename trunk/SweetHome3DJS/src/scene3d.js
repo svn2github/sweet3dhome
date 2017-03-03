@@ -120,7 +120,14 @@ Node3D.prototype.removePropertyChangeListener = function(property, listener) {
 }
 
 Node3D.prototype.clone = function() {
-  return new Node3D();
+  var clone = new Node3D();
+  if (this.userData !== undefined) {
+    clone.userData = this.userData;
+  }
+  if (this.name !== undefined) {
+    clone.name = this.name;
+  }
+  return clone;
 }
 
 
