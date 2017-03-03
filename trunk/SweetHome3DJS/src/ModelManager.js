@@ -282,7 +282,7 @@ ModelManager.prototype.getPieceOFFurnitureNormalizedModelTransformation = functi
   mat4.scale(scale, scale, vec3.fromValues(pieceWidth, piece.getHeight(), piece.getDepth()));
   // Change its angle around y axis
   var orientation = mat4.create();
-  mat4.rotateY(orientation, orientation, -piece.getAngle());
+  mat4.fromYRotation(orientation, -piece.getAngle());
   mat4.mul(orientation, orientation, scale);
   // Translate it to its location
   var pieceTransform = mat4.create();

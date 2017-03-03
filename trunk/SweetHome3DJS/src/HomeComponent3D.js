@@ -592,10 +592,10 @@ HomeComponent3D.prototype.computeTransform = function(alpha, transform) {
  */
 HomeComponent3D.prototype.computeViewPlatformTransform = function(transform, cameraX, cameraY, cameraZ, cameraYaw, cameraPitch) {
   var yawRotation = mat4.create();
-  mat4.rotateY(yawRotation, yawRotation, -cameraYaw + Math.PI);
+  mat4.fromYRotation(yawRotation, -cameraYaw + Math.PI);
   
   var pitchRotation = mat4.create();
-  mat4.rotateX(pitchRotation, pitchRotation, -cameraPitch);
+  mat4.fromXRotation(pitchRotation, -cameraPitch);
   mat4.mul(yawRotation, yawRotation, pitchRotation);
 
   mat4.identity(transform);

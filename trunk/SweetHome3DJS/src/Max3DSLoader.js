@@ -108,7 +108,7 @@ Max3DSLoader.DEFAULT_APPEARANCE = null;
 Max3DSLoader.prototype.createScene = function(meshes, meshesGroups, materials, root, masterScale, onmodelcreated, onprogression) {
   var sceneRoot = new Group3D();
   var transform = mat4.create();
-  mat4.rotateX(transform, transform, -Math.PI / 2);
+  mat4.fromXRotation(transform, -Math.PI / 2);
   mat4.scale(transform, transform, vec3.fromValues(masterScale, masterScale, masterScale));
   var mainGroup = new TransformGroup3D(transform);
   sceneRoot.addChild(mainGroup);
@@ -398,7 +398,7 @@ Max3DSLoader.prototype.getModelContent = function(modelEntry) {
 /**
  * Parses the given 3DS content and calls onmodelloaded asynchronously or 
  * returns the scene it describes if onmodelloaded is null.
- * @private
+ * @protected
  */
 Max3DSLoader.prototype.parseEntryScene = function(max3dsContent, max3dsEntryName, zip, modelContext, onmodelloaded, onprogression) {
   var meshes = [];       // Mesh3DS 
