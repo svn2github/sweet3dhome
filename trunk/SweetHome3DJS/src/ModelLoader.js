@@ -194,15 +194,19 @@ ModelLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, sy
         
         var loader = function() {
             var imageEntry = zip.file(decodeURIComponent(imageEntryName));
-            var imageData = imageEntry.asBinary();
-            var base64Image = btoa(imageData);
-            var extension = imageEntryName.substring(imageEntryName.lastIndexOf('.') + 1).toLowerCase();
-            var mimeType = extension == "jpg"
+            if (imageEntry !== null) {
+              var imageData = imageEntry.asBinary();
+              var base64Image = btoa(imageData);
+              var extension = imageEntryName.substring(imageEntryName.lastIndexOf('.') + 1).toLowerCase();
+              var mimeType = extension == "jpg"
                 ? "image/jpeg" 
-                : ("image/" + extension);
-            // Detect quickly if a PNG image use transparency
-            image.transparent = ZIPTools.isTranparentImage(imageData);
-            image.src = "data:" + mimeType + ";base64," + base64Image;
+                    : ("image/" + extension);
+              // Detect quickly if a PNG image use transparency
+              image.transparent = ZIPTools.isTranparentImage(imageData);
+              image.src = "data:" + mimeType + ";base64," + base64Image;
+            } else {
+              appearance.setTextureImage(null);
+            }
           };
         if (synchronous) {
           loader();
