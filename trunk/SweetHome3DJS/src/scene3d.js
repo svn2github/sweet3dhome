@@ -20,6 +20,7 @@
 
 // Requires gl-matrix-min.js
 //          core.js
+//          Triangulator.js
 
 // Classes used to manage a scene tree of 3D objects displayed by a HTMLCanvas3D instance 
 // inspired from Java 3D API
@@ -1251,6 +1252,299 @@ function Box3D(xdim, ydim, zdim, appearance) {
 }
 Box3D.prototype = Object.create(Shape3D.prototype);
 Box3D.prototype.constructor = Box3D;
+
+
+/**
+ * Creates data used to build the geometry of a shape.
+ * @param {number} geometry type
+ */
+function GeometryInfo(type) {
+  this.type = type;
+}
+
+GeometryInfo.TRIANGLE_ARRAY = 0;
+GeometryInfo.TRIANGLE_STRIP_ARRAY = 1;
+GeometryInfo.TRIANGLE_FAN_ARRAY = 2;
+GeometryInfo.QUAD_ARRAY = 10;
+GeometryInfo.POLYGON_ARRAY = 20;
+
+/**
+ * Sets the coordinates of the vertices of the geometry.
+ * @param {vec3 []} vertices
+ */
+GeometryInfo.prototype.setCoordinates = function(vertices) {
+  this.vertices = vertices;
+}
+
+/**
+ * Sets the indices of each vertex of the geometry.
+ * @param {vec3 []} coordinatesIndices
+ */
+GeometryInfo.prototype.setCoordinateIndices = function(coordinatesIndices) {
+  this.coordinatesIndices = coordinatesIndices;
+}
+
+/**
+ * Sets the coordinates of the normals of the geometry.
+ * @param {vec3 []} normals
+ */
+GeometryInfo.prototype.setNormals = function(normals) {
+  this.normals = normals;
+}
+
+/**
+ * Sets the indices of each normal of the geometry.
+ * @param {vec3 []} normalIndices
+ */
+GeometryInfo.prototype.setNormalIndices = function(normalIndices) {
+  this.normalIndices = normalIndices;
+}
+
+/**
+ * Sets the texture coordinates of the vertices of the geometry.
+ * @param {vec2 []} textureCoordinates
+ */
+GeometryInfo.prototype.setTextureCoordinates = function(textureCoordinates) {
+  this.textureCoordinates = textureCoordinates;
+}
+
+/**
+ * Sets the indices of texture coordinates of the geometry.
+ * @param {vec2 []} textureCoordinateIndices
+ */
+GeometryInfo.prototype.setTextureCoordinateIndices = function(textureCoordinateIndices) {
+  this.textureCoordinateIndices = textureCoordinateIndices;
+}
+
+/**
+ * Sets the strip counts of a polygon geometry.
+ * @param {number []} stripCounts
+ */
+GeometryInfo.prototype.setStripCounts = function(stripCounts) {
+  this.stripCounts = stripCounts;
+}
+
+/**
+ * Sets the countour counts of a polygon geometry.
+ * @param {number []} contourCounts
+ * @private
+ */
+GeometryInfo.prototype.setContourCounts = function(contourCounts) {
+  this.contourCounts = contourCounts; // TODO implement countours
+}
+
+/**
+ * Generates the normals of a geometry.
+ * @param {number} [creaseAngle]
+ */
+GeometryInfo.prototype.generateNormals = function(creaseAngle) {
+  if (creaseAngle === undefined) {
+    this.creaseAngle = 44. * Math.PI / 180.;
+  } else {
+    this.creaseAngle = creaseAngle; 
+  }
+}
+
+/**
+ * Generates the normals and their indices for the shape defined by the given vertices and their indices.
+ * @private
+ */
+GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, normals, normalIndices) {
+  // Generate normals
+  var vector1 = vec3.create();
+  var vector2 = vec3.create();
+  if (this.creaseAngle > 0) {
+    var sharedVertices = [];
+    for (var i = 0; i < coordinatesIndices.length; i += 3) {
+      for (var j = 0; j < 3; j++) {
+        var vertexIndex = coordinatesIndices [i + j];
+        var vertex = vertices [vertexIndex];
+        vec3.sub(vector1, vertices [coordinatesIndices [i + (j < 2 ? j + 1 : 0)]], vertex);
+        vec3.sub(vector2, vertices [coordinatesIndices [i + (j > 0 ? j - 1 : 2)]], vertex);
+        var normal = vec3.cross(vec3.create(), vector1, vector2);
+        // Add vertex index to the list of shared vertices 
+        var sharedVertex = {"normal" : normal};
+        sharedVertex.nextVertex = sharedVertices [vertexIndex];
+        sharedVertices [vertexIndex] = sharedVertex;
+        // Add normal to normals set
+        normals.push(normal);
+        normalIndices.push(normals.length - 1);
+      }
+    }
+    
+    // Adjust the normals of shared vertices belonging to the smoothing group
+    var crossProduct = vec3.create();
+    for (var i = 0; i < coordinatesIndices.length; i += 3) {
+      for (var j = 0; j < 3; j++) {
+        var vertexIndex = coordinatesIndices [i + j];
+        var normalIndex = normalIndices [i + j];
+        var defaultNormal = normals [normalIndex];
+        var normal = vec3.create();
+        for (var sharedVertex = sharedVertices [vertexIndex]; 
+             sharedVertex !== undefined; 
+             sharedVertex = sharedVertex.nextVertex) {
+          // Take into account only normals of shared vertex with a crease angle  
+          // smaller than the given one 
+          if (sharedVertex.normal === defaultNormal) {
+            vec3.add(normal, normal, sharedVertex.normal);
+          } else {
+            var dotProduct = vec3.dot(sharedVertex.normal, defaultNormal);
+            // Eliminate angles > PI/2 quickly if dotProduct is negative
+            if (dotProduct > 0 || this.creaseAngle > Math.PI / 2) {
+              var angle = Math.abs(Math.atan2(vec3.length(vec3.cross(crossProduct, sharedVertex.normal, defaultNormal)), dotProduct));
+              if (angle < this.creaseAngle - 1E-3) {
+                vec3.add(normal, normal, sharedVertex.normal);
+              }
+            }
+          }
+        }
+        
+        if (vec3.squaredLength(normal) !== 0) {
+          vec3.normalize(normal, normal);
+        } else {
+          // If smoothing leads to a null normal, use default normal
+          vec3.copy(normal, defaultNormal);
+          vec3.normalize(normal, normal);
+        }    
+        // Store updated normal
+        normals [normalIndex] = normal;
+      }
+    }
+  } else {
+    for (var i = 0; i < coordinatesIndices.length; i += 3) {
+      var vertex = vertices [coordinatesIndices [i + 1]];
+      vec3.sub(vector1, vertices [coordinatesIndices [i + 2]], vertex);
+      vec3.sub(vector2, vertices [coordinatesIndices [i]], vertex);
+      var normal = vec3.cross(vec3.create(), vector1, vector2);
+      vec3.normalize(normal, normal);
+      var normalIndex = normals.length - 1;
+      if (normals.length === 0
+          || (normals[normalIndex][0] !== normal[0]
+              || normals[normalIndex][1] !== normal[1]
+              || normals[normalIndex][2] !== normal[2])) {
+        // Add normal to normals set
+        normals.push(normal);
+        normalIndex++;
+      }
+      for (var j = 0; j < 3; j++) {
+        normalIndices.push(normalIndex);
+      }
+    }
+  }
+}
+
+/**
+ * Returns an instance of {@link IndexedTriangleArray3D} configured from 
+ * the geometry data.
+ */
+GeometryInfo.prototype.getGeometryArray = function() {
+  var triangleCoordinatesIndices;
+  var triangleTextureCoordinateIndices;
+  var triangleNormalIndices;
+  if (this.type === GeometryInfo.POLYGON_ARRAY) {
+    triangleCoordinatesIndices = [];
+    triangleTextureCoordinateIndices = [];
+    triangleNormalIndices = [];
+    new Triangulator().triangulate(this.vertices, this.coordinatesIndices, 
+        this.textureCoordinates  ? this.textureCoordinateIndices  : [], 
+        this.normals  ? this.normalIndices  : [], 
+        this.stripCounts, 
+        triangleCoordinatesIndices, triangleTextureCoordinateIndices, triangleNormalIndices);
+  } else if (this.type === GeometryInfo.QUAD_ARRAY) {
+    triangleCoordinatesIndices = [];
+    triangleTextureCoordinateIndices = [];
+    triangleNormalIndices = [];
+    for (var i = 0; i < this.coordinatesIndices; i += 4) {
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i]);
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 1]);
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 2]);
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 2]);
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 1]);
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 3]);
+      if (this.textureCoordinateIndices.length > 0) {
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 1]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 2]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 2]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 1]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 3]);
+      }
+      if (this.normalIndices.length > 0) {
+        triangleNormalIndices.push(this.normalIndices [i]);
+        triangleNormalIndices.push(this.normalIndices [i + 1]);
+        triangleNormalIndices.push(this.normalIndices [i + 2]);
+        triangleNormalIndices.push(this.normalIndices [i + 2]);
+        triangleNormalIndices.push(this.normalIndices [i + 1]);
+        triangleNormalIndices.push(this.normalIndices [i + 3]);
+      }
+    }
+  } else if (this.type === GeometryInfo.TRIANGLE_STRIP_ARRAY) {
+    triangleCoordinatesIndices = [];
+    triangleTextureCoordinateIndices = [];
+    triangleNormalIndices = [];
+    for (var i = 0, index = 0; i < this.stripCounts.length; i++) {
+      var stripCount = this.stripCounts [i];
+      for (var k = 0; k < stripCount - 2; k++) {
+        var nextVertexIndex = index + (k % 2 === 0  ? k + 1  : k + 2);
+        var nextNextVertexIndex = index + (k % 2 === 0  ? k + 2  : k + 1);
+        triangleCoordinatesIndices.push(this.coordinatesIndices [index + k]);
+        triangleCoordinatesIndices.push(this.coordinatesIndices [nextVertexIndex]);
+        triangleCoordinatesIndices.push(this.coordinatesIndices [nextNextVertexIndex]);
+        if (this.textureCoordinateIndices.length > 0) {
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k]);
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [nextVertexIndex]);
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [nextNextVertexIndex]);
+        }
+        if (this.normalIndices.length > 0) {
+          triangleNormalIndices.push(this.normalIndices [index + k]);
+          triangleNormalIndices.push(this.normalIndices [nextVertexIndex]);
+          triangleNormalIndices.push(this.normalIndices [nextNextVertexIndex]);
+        }
+      }
+      index += stripCount;
+    }
+  } else if (this.type === GeometryInfo.TRIANGLE_FAN_ARRAY) {
+    triangleCoordinatesIndices = [];
+    triangleTextureCoordinateIndices = [];
+    triangleNormalIndices = [];
+    for (var i = 0, index = 0; i < this.stripCounts.length; i++) {
+      var stripCount = this.stripCounts [i];
+      for (var k = 0; k < stripCount - 2; k++) {
+        triangleCoordinatesIndices.push(this.coordinatesIndices [index]);
+        triangleCoordinatesIndices.push(this.coordinatesIndices [index + k + 1]);
+        triangleCoordinatesIndices.push(this.coordinatesIndices [index + k + 2]);
+        if (textureCoordinateIndices.length > 0) {
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index]);
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k + 1]);
+          triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k + 2]);
+        }
+        if (normalIndices.length > 0) {
+          triangleNormalIndices.push(this.normalIndices [index]);
+          triangleNormalIndices.push(this.normalIndices [index + k + 1]);
+          triangleNormalIndices.push(this.normalIndices [index + k + 2]);
+        }
+      }
+      index += stripCount;
+    }
+  } else {
+    triangleCoordinatesIndices = this.vertices  ? this.coordinatesIndices  : [];
+    triangleTextureCoordinateIndices = this.textureCoordinates  ? this.textureCoordinateIndices  : [];
+    triangleNormalIndices = this.normals  ? this.normalIndices  : [];
+  }
+  
+  var normals;
+  if (this.creaseAngle !== undefined) {
+    normals = [];
+    triangleNormalIndices = [];
+    this.computeNormals(this.vertices, triangleCoordinatesIndices, normals, triangleNormalIndices);
+  } else {
+    normals = this.normals;
+  }
+  
+  return new IndexedTriangleArray3D(this.vertices, triangleCoordinatesIndices,
+      this.textureCoordinates, triangleTextureCoordinateIndices, 
+      normals, triangleNormalIndices);
+}
 
 
 /**

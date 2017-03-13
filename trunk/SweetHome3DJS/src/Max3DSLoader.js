@@ -362,10 +362,17 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
       }
       
       // Generate geometry 
-      geometryArray = new IndexedTriangleArray3D(vertices, coordinateIndices, 
-          textureCoordinates != null ? textureCoordinates : [], 
-          textureCoordinates != null ? coordinateIndices : [], 
-          normals, normalIndices);
+      var geometryInfo = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+      geometryInfo.setCoordinates(vertices);
+      geometryInfo.setCoordinateIndices(coordinateIndices);
+      geometryInfo.setNormals(normals);
+      geometryInfo.setNormalIndices(normalIndices);
+      if (textureCoordinates !== null) {
+        geometryInfo.setTextureCoordinates(textureCoordinates);
+        geometryInfo.setTextureCoordinateIndices(coordinateIndices);
+      }
+      geometryArray = geometryInfo.getGeometryArray();
+
       if (shape === null || material !== firstMaterial) {
         material = firstMaterial;
         var appearance = appearances [firstMaterial.name];

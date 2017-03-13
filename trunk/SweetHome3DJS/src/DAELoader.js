@@ -475,7 +475,7 @@ DAEHandler.prototype.endElement = function(uri, localName, name) {
     this.mulTransformGroup(matrix); 
   } else if ("node" == parent && "rotate" == name) {
     var rotation = mat4.create(); 
-    mat4.fromRotation(rotation, floats [3] * Math.PI / 180., 
+    mat4.fromRotation(rotation, this.floats [3] * Math.PI / 180., 
         vec3.fromValues(this.floats [0], this.floats [1], this.floats [2]));
     this.mulTransformGroup(rotation);
   } else if ("scale" == name) {
@@ -756,8 +756,24 @@ DAEHandler.prototype.handleGeometryElementsEnd = function(name, parent) {
  * @private
  */
 DAEHandler.prototype.getFacesGeometry = function(name) {
-  var vertices = this.geometryVertices;
-  var textureCoordinates;
+  var primitiveType;
+  if ("triangles" == name) {
+    primitiveType = GeometryInfo.TRIANGLE_ARRAY;
+  } else if ("trifans" == name) {
+    primitiveType = GeometryInfo.TRIANGLE_FAN_ARRAY;
+  } else if ("tristrips" == name) {
+    primitiveType = GeometryInfo.TRIANGLE_STRIP_ARRAY;
+  } else {
+    primitiveType = GeometryInfo.POLYGON_ARRAY;
+  }
+  
+  var geometryInfo = new GeometryInfo(primitiveType);
+  geometryInfo.setCoordinates(this.geometryVertices);
+  geometryInfo.setCoordinateIndices(this.getIndices(this.geometryVertexOffset));
+  if (this.geometryNormals) {
+    geometryInfo.setNormals(this.geometryNormals);
+    geometryInfo.setNormalIndices(this.getIndices(this.geometryNormalOffset));
+  }
   if (this.geometryTextureCoordinates) {
     var stride;
     for (var i = 0; i < this.sourceAccessorStrides.length; i++) {
@@ -778,79 +794,24 @@ DAEHandler.prototype.getFacesGeometry = function(name) {
     } else {
       textureCoordinates = this.geometryTextureCoordinates;
     }
-  } else {
-    textureCoordinates = null;
+    geometryInfo.setTextureCoordinates(textureCoordinates);
+    geometryInfo.setTextureCoordinateIndices(this.getIndices(this.geometryTextureCoordinatesOffset));
   }
-  var normals = this.geometryNormals;
-  var coordinatesIndices = this.getIndices(this.geometryVertexOffset);
-  var textureCoordinatesIndices = textureCoordinates !== null
-      ? this.getIndices(this.geometryTextureCoordinatesOffset)
-      : [];
-  var normalIndices = normals !== null 
-      ? this.getIndices(this.geometryNormalOffset)
-      : [];
+
   
-  if ("tristrips" == name) {
-    var noStripCoordinatesIndices = [];
-    var noStripTextureCoordinatesIndices = [];
-    var noStripNormalIndices = [];
-    for (var i = 0, index = 0; i < this.facesAndLinesPrimitives.length; i++) {
-      var stripCount = this.facesAndLinesPrimitives [i].length / this.inputCount;
-      for (var k = 0; k < stripCount - 2; k++) {
-        var nextVertexIndex = index + (k % 2 === 0  ? k + 1  : k + 2);
-        var nextNextVertexIndex = index + (k % 2 === 0  ? k + 2  : k + 1);
-        noStripCoordinatesIndices.push(coordinatesIndices [index + k]);
-        noStripCoordinatesIndices.push(coordinatesIndices [nextVertexIndex]);
-        noStripCoordinatesIndices.push(coordinatesIndices [nextNextVertexIndex]);
-        if (textureCoordinateIndices.length > 0) {
-          noStripTextureCoordinatesIndices.push(textureCoordinateIndices [index + k]);
-          noStripTextureCoordinatesIndices.push(textureCoordinateIndices [nextVertexIndex]);
-          noStripTextureCoordinatesIndices.push(textureCoordinateIndices [nextNextVertexIndex]);
-        }
-        if (normalIndices.length > 0) {
-          noStripNormalIndices.push(normalIndices [index + k]);
-          noStripNormalIndices.push(normalIndices [nextVertexIndex]);
-          noStripNormalIndices.push(normalIndices [nextNextVertexIndex]);
-        }
-      }
-      index += stripCount;
+  if ("tristrips" == name
+      || "trifans" == name) {
+    var stripCounts = new Array(this.facesAndLinesPrimitives.length);
+    for (var i = 0; i < stripCounts.length; i++) {
+      stripCounts [i] = this.facesAndLinesPrimitives [i].length / this.inputCount;
     }
-    coordinatesIndices = noStripCoordinatesIndices;
-    textureCoordinatesIndices = noStripTextureCoordinatesIndices;
-    normalIndices = noStripNormalIndices;
-  } else if ("trifans" == name) {
-    var noFanCoordinatesIndices = [];
-    var noFanTextureCoordinatesIndices = [];
-    var noFanNormalIndices = [];
-    for (var i = 0, index = 0; i < this.facesAndLinesPrimitives.length; i++) {
-      var stripCount = this.facesAndLinesPrimitives [i].length / this.inputCount;
-      for (var k = 0; k < stripCount - 2; k++) {
-        noFanCoordinatesIndices.push(coordinatesIndices [index]);
-        noFanCoordinatesIndices.push(coordinatesIndices [index + k + 1]);
-        noFanCoordinatesIndices.push(coordinatesIndices [index + k + 2]);
-        if (textureCoordinateIndices.length > 0) {
-          noFanTextureCoordinatesIndices.push(textureCoordinateIndices [index]);
-          noFanTextureCoordinatesIndices.push(textureCoordinateIndices [index + k + 1]);
-          noFanTextureCoordinatesIndices.push(textureCoordinateIndices [index + k + 2]);
-        }
-        if (normalIndices.length > 0) {
-          noFanNormalIndices.push(normalIndices [index]);
-          noFanNormalIndices.push(normalIndices [index + k + 1]);
-          noFanNormalIndices.push(normalIndices [index + k + 2]);
-        }
-      }
-      index += stripCount;
-    }
-    coordinatesIndices = noFanCoordinatesIndices;
-    textureCoordinatesIndices = noFanTextureCoordinatesIndices;
-    normalIndices = noFanNormalIndices;
+    geometryInfo.setStripCounts(stripCounts);
   } else if ("polylist" == name) {
-    // TODO
-    // geometryInfo.setStripCounts(this.vcount);
+    geometryInfo.setStripCounts(this.vcount);
   } else if ("polygons" == name) {
     var polygonHolesCount = 0;
     for (var i = 0; i < this.polygonsHoles.length; i++) {
-      polygonHolesCount += polygonsHoles [i].length;
+      polygonHolesCount += this.polygonsHoles [i].length;
     }
     var stripCounts = new Array(this.facesAndLinesPrimitives.length + this.polygonsPrimitives.length 
                                 + polygonHolesCount);
@@ -869,17 +830,14 @@ DAEHandler.prototype.getFacesGeometry = function(name) {
       }
       contourCounts [countourIndex++] = 1 + polygonHoles.length; // One polygon + its holes count
     }
-    // TODO
-    // geometryInfo.setStripCounts(stripCounts);
-    // geometryInfo.setContourCounts(contourCounts);
+    geometryInfo.setStripCounts(stripCounts);
+    geometryInfo.setContourCounts(contourCounts);
   }
 
-  if (!normals) {
-    var normals = [];
-    this.generateNormals(vertices, coordinatesIndices, normals, normalIndices, Math.PI / 2);
+  if (!this.geometryNormals) {
+    geometryInfo.generateNormals(Math.PI / 2);
   }
-  return new IndexedTriangleArray3D(vertices, coordinatesIndices, 
-      textureCoordinates, textureCoordinatesIndices, normals, normalIndices);
+  return geometryInfo.getGeometryArray();
 }
 
 /**
@@ -929,7 +887,7 @@ DAEHandler.prototype.getIndices = function(indexOffset) {
     var indexCount = this.getIndexCount(this.facesAndLinesPrimitives);
     indexCount += this.getIndexCount(this.polygonsPrimitives);
     for (var i = 0; i < this.polygonsHoles.length; i++) {
-      indexCount += getIndexCount(this.polygonsHoles [i]);
+      indexCount += this.getIndexCount(this.polygonsHoles [i]);
     }
     
     var indices = new Array(indexCount / this.inputCount);
@@ -941,7 +899,7 @@ DAEHandler.prototype.getIndices = function(indexOffset) {
       }
     }
     for (var j = 0; j < this.polygonsPrimitives.length; j++) {
-      var polygonPrimitives = polygonsPrimitives [j];
+      var polygonPrimitives = this.polygonsPrimitives [j];
       for (var k = indexOffset; k < polygonPrimitives.length; k += this.inputCount) {
         indices [i++] = polygonPrimitives [k];
       }

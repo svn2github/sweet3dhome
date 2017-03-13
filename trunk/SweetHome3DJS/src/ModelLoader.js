@@ -182,19 +182,20 @@ ModelLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, sy
     this.loadTextureImages(node.getSharedGroup(), images, zip, zipUrl, synchronous);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
-    var imageEntryName = appearance.imageEntryName;
-    if (imageEntryName !== undefined) {
-      delete appearance [imageEntryName];
-      if (imageEntryName in images) {
-        appearance.setTextureImage(images [imageEntryName]);
-      } else { 
-        var image = new Image();
-        appearance.setTextureImage(image);
-        image.url = "jar:" + zipUrl + "!/" + imageEntryName;
-        // Store loaded image to avoid duplicates
-        images [imageEntryName] = image;
-        
-        var loader = function() {
+    if (appearance) {
+      var imageEntryName = appearance.imageEntryName;
+      if (imageEntryName !== undefined) {
+        delete appearance [imageEntryName];
+        if (imageEntryName in images) {
+          appearance.setTextureImage(images [imageEntryName]);
+        } else { 
+          var image = new Image();
+          appearance.setTextureImage(image);
+          image.url = "jar:" + zipUrl + "!/" + imageEntryName;
+          // Store loaded image to avoid duplicates
+          images [imageEntryName] = image;
+          
+          var loader = function() {
             var imageEntry = zip.file(decodeURIComponent(imageEntryName));
             if (imageEntry !== null) {
               var imageData = imageEntry.asBinary();
@@ -210,102 +211,12 @@ ModelLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, sy
               appearance.setTextureImage(null);
             }
           };
-        if (synchronous) {
-          loader();
-        } else {
-          setTimeout(loader, 0);
-        }
-      }
-    }
-  }
-}
-
-/**
- * Generates the normals and their indices for the shape defined by the given vertices and their indices.
- * @protected
- */
-ModelLoader.prototype.generateNormals = function(vertices, coordinatesIndices, normals, normalIndices, creaseAngle) {
-  if (creaseAngle === undefined) {
-    creaseAngle = 44. * Math.PI / 180.;
-  }
-  // Generate normals
-  var vector1 = vec3.create();
-  var vector2 = vec3.create();
-  if (creaseAngle > 0) {
-    var sharedVertices = [];
-    for (var i = 0; i < coordinatesIndices.length; i += 3) {
-      for (var j = 0; j < 3; j++) {
-        var vertexIndex = coordinatesIndices [i + j];
-        var vertex = vertices [vertexIndex];
-        vec3.sub(vector1, vertices [coordinatesIndices [i + (j < 2 ? j + 1 : 0)]], vertex);
-        vec3.sub(vector2, vertices [coordinatesIndices [i + (j > 0 ? j - 1 : 2)]], vertex);
-        var normal = vec3.cross(vec3.create(), vector1, vector2);
-        // Add vertex index to the list of shared vertices 
-        var sharedVertex = {"normal" : normal};
-        sharedVertex.nextVertex = sharedVertices [vertexIndex];
-        sharedVertices [vertexIndex] = sharedVertex;
-        // Add normal to normals set
-        normals.push(normal);
-        normalIndices.push(normals.length - 1);
-      }
-    }
-    
-    // Adjust the normals of shared vertices belonging to the smoothing group
-    var crossProduct = vec3.create();
-    for (var i = 0; i < coordinatesIndices.length; i += 3) {
-      for (var j = 0; j < 3; j++) {
-        var vertexIndex = coordinatesIndices [i + j];
-        var normalIndex = normalIndices [i + j];
-        var defaultNormal = normals [normalIndex];
-        var normal = vec3.create();
-        for (var sharedVertex = sharedVertices [vertexIndex]; 
-             sharedVertex !== undefined; 
-             sharedVertex = sharedVertex.nextVertex) {
-          // Take into account only normals of shared vertex with a crease angle  
-          // smaller than the given one 
-          if (sharedVertex.normal === defaultNormal) {
-            vec3.add(normal, normal, sharedVertex.normal);
+          if (synchronous) {
+            loader();
           } else {
-            var dotProduct = vec3.dot(sharedVertex.normal, defaultNormal);
-            // Eliminate angles > PI/2 quickly if dotProduct is negative
-            if (dotProduct > 0 || creaseAngle > Math.PI / 2) {
-              var angle = Math.abs(Math.atan2(vec3.length(vec3.cross(crossProduct, sharedVertex.normal, defaultNormal)), dotProduct));
-              if (angle < creaseAngle - 1E-3) {
-                vec3.add(normal, normal, sharedVertex.normal);
-              }
-            }
+            setTimeout(loader, 0);
           }
         }
-        
-        if (vec3.squaredLength(normal) !== 0) {
-          vec3.normalize(normal, normal);
-        } else {
-          // If smoothing leads to a null normal, use default normal
-          vec3.copy(normal, defaultNormal);
-          vec3.normalize(normal, normal);
-        }    
-        // Store updated normal
-        normals [normalIndex] = normal;
-      }
-    }
-  } else {
-    for (var i = 0; i < coordinatesIndices.length; i += 3) {
-      var vertex = vertices [coordinatesIndices [i + 1]];
-      vec3.sub(vector1, vertices [coordinatesIndices [i + 2]], vertex);
-      vec3.sub(vector2, vertices [coordinatesIndices [i]], vertex);
-      var normal = vec3.cross(vec3.create(), vector1, vector2);
-      vec3.normalize(normal, normal);
-      var normalIndex = normals.length - 1;
-      if (normals.length === 0
-          || (normals[normalIndex][0] !== normal[0]
-              || normals[normalIndex][1] !== normal[1]
-              || normals[normalIndex][2] !== normal[2])) {
-        // Add normal to normals set
-        normals.push(normal);
-        normalIndex++;
-      }
-      for (var j = 0; j < 3; j++) {
-        normalIndices.push(normalIndex);
       }
     }
   }

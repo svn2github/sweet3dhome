@@ -1055,23 +1055,20 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
             normalIndices.push.apply(normalIndices, geometries [i + j].normalIndices);
           }
         }
-        var triangleCoordinateIndices = [];
-        var triangleTextureCoordinateIndices = [];
-        var triangleNormalIndices = [];
-        if (onlyTriangles) {
-          triangleCoordinateIndices = coordinatesIndices;
-          triangleTextureCoordinateIndices = textureCoordinateIndices;
-          triangleNormalIndices = normalIndices;
-        } else {
-          new Triangulator().triangulate(vertices, coordinatesIndices, textureCoordinateIndices, normalIndices,
-              stripCounts, triangleCoordinateIndices, triangleTextureCoordinateIndices, triangleNormalIndices);
-        }
+        var geometryInfo = new GeometryInfo(onlyTriangles  
+            ? GeometryInfo.TRIANGLE_ARRAY  
+            : GeometryInfo.POLYGON_ARRAY);
+        geometryInfo.setCoordinates(vertices);
+        geometryInfo.setCoordinateIndices(coordinatesIndices);
+        geometryInfo.setNormals(normals);
+        geometryInfo.setNormalIndices(normalIndices);
+        geometryInfo.setTextureCoordinates(textureCoordinates);
+        geometryInfo.setTextureCoordinateIndices(textureCoordinateIndices);
+        geometryInfo.setStripCounts(stripCounts);
         if (!firstFaceHasNormalIndices) {
-          this.generateNormals(vertices, triangleCoordinateIndices, normals, triangleNormalIndices, 
-              firstFaceIsSmooth  ? Math.PI / 2  : 0);
+          geometryInfo.generateNormals(firstFaceIsSmooth  ? Math.PI / 2  : 0);
         }
-        geometryArray = new IndexedTriangleArray3D(vertices, triangleCoordinateIndices, 
-            textureCoordinates, triangleTextureCoordinateIndices, normals, triangleNormalIndices);                  
+        geometryArray = geometryInfo.getGeometryArray();                  
       } else { // Line
         var lineCoordinatesIndices = [];
         var lineTextureCoordinateIndices = [];
