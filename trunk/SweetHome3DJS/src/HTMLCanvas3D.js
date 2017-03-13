@@ -324,6 +324,8 @@ HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
   }
 }
 
+HTMLCanvas3D.DEFAULT_APPEARANCE = new Appearance3D();
+
 /**
  * Prepares the scene to be rendered, creating the required buffers and textures in WebGL.  
  * @param [Node3D]  node
@@ -390,91 +392,94 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
       onprogression(Node3D.BINDING_MODEL, "", displayedGeometries.length / displayedGeometryCount);
     }
     var nodeAppearance = node.getAppearance();
-    if (nodeAppearance !== undefined) {
-      var texture = null;
-      if (nodeAppearance.getTextureImage()) {
-        texture = canvas3D.prepareTexture(nodeAppearance.getTextureImage());
-      }
-      var ambientColor = nodeAppearance.getAmbientColor();
-      var diffuseColor;
-      if (nodeAppearance.getDiffuseColor() !== undefined) {
-        diffuseColor = nodeAppearance.getDiffuseColor();
-      } else {
-        diffuseColor = new Float32Array([1., 1., 1.]);
-      }
-      var specularColor = nodeAppearance.getSpecularColor();
-      var shininess = nodeAppearance.getShininess();
-      
-      var nodeGeometries = node.getGeometries();
-      for (var i = 0; i < nodeGeometries.length; i++) {
-        var nodeGeometry = nodeGeometries [i];
-        var displayedGeometry = null;
-        // Search if node geometry is already used
-        for (var j = 0; j < displayedGeometries.length; j++) {
-          if (displayedGeometries [j].nodeGeometry === nodeGeometry) {
-            displayedGeometry = {"node" : node,
-                                 "background"   : background,
-                                 "nodeGeometry" : nodeGeometry,
-                                 "vertexCount"  : displayedGeometries [j].vertexCount, 
-                                 "vertexBuffer" : displayedGeometries [j].vertexBuffer, 
-                                 "textureCoordinatesBuffer" : displayedGeometries [j].textureCoordinatesBuffer,
-                                 "normalBuffer" : displayedGeometries [j].normalBuffer,
-                                 "mode" : displayedGeometries [j].mode};
-            break;
-          }
-        }
-        
-        if (displayedGeometry === null) {
+    if (!nodeAppearance) {
+      nodeAppearance = HTMLCanvas3D.DEFAULT_APPEARANCE;
+    }
+    var texture = null;
+    if (nodeAppearance.getTextureImage()) {
+      texture = canvas3D.prepareTexture(nodeAppearance.getTextureImage());
+    }
+    var ambientColor = nodeAppearance.getAmbientColor();
+    var diffuseColor;
+    if (nodeAppearance.getDiffuseColor() !== undefined) {
+      diffuseColor = nodeAppearance.getDiffuseColor();
+    } else {
+      diffuseColor = new Float32Array([1., 1., 1.]);
+    }
+    var specularColor = nodeAppearance.getSpecularColor();
+    var shininess = nodeAppearance.getShininess();
+    
+    var nodeGeometries = node.getGeometries();
+    for (var i = 0; i < nodeGeometries.length; i++) {
+      var nodeGeometry = nodeGeometries [i];
+      var displayedGeometry = null;
+      // Search if node geometry is already used
+      for (var j = 0; j < displayedGeometries.length; j++) {
+        if (displayedGeometries [j].nodeGeometry === nodeGeometry) {
           displayedGeometry = {"node" : node,
                                "background"   : background,
                                "nodeGeometry" : nodeGeometry,
-                               "vertexCount"  : nodeGeometry.vertexIndices.length};
-          displayedGeometry.vertexBuffer = canvas3D.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
-          displayedGeometry.textureCoordinatesBuffer = canvas3D.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
-          if (nodeGeometry instanceof IndexedTriangleArray3D) {
-            displayedGeometry.mode = canvas3D.gl.TRIANGLES;
-            displayedGeometry.normalBuffer = canvas3D.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
-          } else {
-            displayedGeometry.mode = canvas3D.gl.LINES;
-          } 
-        } 
-        // Set parameters not shared
-        displayedGeometry.transformation = parentTransformations;
-        if (parentLinks.length > 0) {
-          displayedGeometry.parentLinks = parentLinks;
+                               "vertexCount"  : displayedGeometries [j].vertexCount, 
+                               "vertexBuffer" : displayedGeometries [j].vertexBuffer, 
+                               "textureCoordinatesBuffer" : displayedGeometries [j].textureCoordinatesBuffer,
+                               "normalBuffer" : displayedGeometries [j].normalBuffer,
+                               "mode" : displayedGeometries [j].mode};
+          break;
         }
-        if (ambientColor !== undefined) {
-          displayedGeometry.ambientColor = ambientColor;
-        }
-        if (diffuseColor !== undefined) {
-          displayedGeometry.diffuseColor = diffuseColor;
-        }
-        if (specularColor !== undefined) {
-          displayedGeometry.specularColor = specularColor;
-        }
-        if (shininess !== undefined) {
-          displayedGeometry.shininess = shininess;
-        }
-        if (texture !== null) {
-          displayedGeometry.textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
-          displayedGeometry.textureTransform = nodeAppearance.getTextureTransform();
-          displayedGeometry.texture = texture;
-        }
-        displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
-        if (nodeAppearance.getCullFace() !== undefined) {
-          displayedGeometry.cullFace = nodeAppearance.getCullFace();
-        }
-        var illumination = nodeAppearance.getIllumination();
-        displayedGeometry.lightingEnabled =  
-               (illumination === undefined || illumination >= 1)
-            && displayedGeometry.normalBuffer !== null;
-        displayedGeometry.transparency = nodeAppearance.getTransparency() !== undefined 
-            ? 1 - nodeAppearance.getTransparency()
-            : 1;
-        displayedGeometry.visible = nodeAppearance.isVisible();
-        displayedGeometries.push(displayedGeometry);
       }
+      
+      if (displayedGeometry === null) {
+        displayedGeometry = {"node" : node,
+                             "background"   : background,
+                             "nodeGeometry" : nodeGeometry,
+                             "vertexCount"  : nodeGeometry.vertexIndices.length};
+        displayedGeometry.vertexBuffer = canvas3D.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
+        displayedGeometry.textureCoordinatesBuffer = canvas3D.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
+        if (nodeGeometry instanceof IndexedTriangleArray3D) {
+          displayedGeometry.mode = canvas3D.gl.TRIANGLES;
+          displayedGeometry.normalBuffer = canvas3D.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
+        } else {
+          displayedGeometry.mode = canvas3D.gl.LINES;
+        } 
+      } 
+      // Set parameters not shared
+      displayedGeometry.transformation = parentTransformations;
+      if (parentLinks.length > 0) {
+        displayedGeometry.parentLinks = parentLinks;
+      }
+      if (ambientColor !== undefined) {
+        displayedGeometry.ambientColor = ambientColor;
+      }
+      if (diffuseColor !== undefined) {
+        displayedGeometry.diffuseColor = diffuseColor;
+      }
+      if (specularColor !== undefined) {
+        displayedGeometry.specularColor = specularColor;
+      }
+      if (shininess !== undefined) {
+        displayedGeometry.shininess = shininess;
+      }
+      if (texture !== null) {
+        displayedGeometry.textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
+        displayedGeometry.textureTransform = nodeAppearance.getTextureTransform();
+        displayedGeometry.texture = texture;
+      }
+      displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
+      if (nodeAppearance.getCullFace() !== undefined) {
+        displayedGeometry.cullFace = nodeAppearance.getCullFace();
+      }
+      var illumination = nodeAppearance.getIllumination();
+      displayedGeometry.lightingEnabled =  
+             (illumination === undefined || illumination >= 1)
+          && displayedGeometry.normalBuffer !== null;
+      displayedGeometry.transparency = nodeAppearance.getTransparency() !== undefined 
+          ? 1 - nodeAppearance.getTransparency()
+          : 1;
+      displayedGeometry.visible = nodeAppearance.isVisible();
+      displayedGeometries.push(displayedGeometry);
+    }
 
+    if (nodeAppearance !== HTMLCanvas3D.DEFAULT_APPEARANCE) {
       nodeAppearance.addPropertyChangeListener(
           function(ev) {
             for (var i = 0; i < displayedGeometries.length; i++) {
