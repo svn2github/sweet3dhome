@@ -178,6 +178,8 @@ ModelLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, sy
     for (var i = 0; i < node.children.length; i++) {
       this.loadTextureImages(node.children [i], images, zip, zipUrl, synchronous);
     }
+  } else if (node instanceof Link3D) {
+    this.loadTextureImages(node.getSharedGroup(), images, zip, zipUrl, synchronous);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
     var imageEntryName = appearance.imageEntryName;
