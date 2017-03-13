@@ -53,9 +53,6 @@ DAELoader.prototype.parseEntryScene = function(daeContent, daeEntryName, zip, mo
   onprogression(Node3D.PARSING_MODEL, daeEntryName, 0);
   try {
     saxParser.parseString(daeContent);
-    if (handler.saxParseExceptions.length > 0) {
-      throw handler.saxParseExceptions [0];
-    }
   } catch (ex) {
     sceneRoot.removeAllChildren();
   }
