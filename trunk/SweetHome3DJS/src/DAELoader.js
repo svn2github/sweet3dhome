@@ -535,14 +535,20 @@ DAEHandler.prototype.handleRootAssetElementsEnd = function(name) {
 DAEHandler.prototype.handleImageElementsEnd = function(name) {
   if ("init_from" == name) {
     var imageName = this.getCharacters();
+    if (imageName.indexOf("./") === 0) {
+      // Remove leading dot
+      imageName = imageName.substring(2);
+    }
     var lastSlash = this.daeEntryName.lastIndexOf("/");
     if (lastSlash >= 0) {
       // Build imageName path simplifying .. relative paths if necessary
       var daeEntryNameParts = this.daeEntryName.split("/");
       var imageNameParts = imageName.split("/");
       daeEntryNameParts.splice(daeEntryNameParts.length - 1, 1);
-      while (imageNameParts [0] == "..") {
-        daeEntryNameParts.splice(daeEntryNameParts.length - 1, 1);
+      while (imageNameParts [0] == ".." || imageNameParts [0] == ".") {
+        if (imageNameParts [0] == "..") {
+          daeEntryNameParts.splice(daeEntryNameParts.length - 1, 1);
+        }
         imageNameParts.splice(0, 1);
       }
       imageName = "";
