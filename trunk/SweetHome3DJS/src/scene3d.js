@@ -306,7 +306,7 @@ function DirectionalLight3D(color, direction) {
 DirectionalLight3D.prototype = Object.create(Light3D.prototype);
 DirectionalLight3D.prototype.constructor = DirectionalLight3D;
 
-Light3D.prototype.getDirection = function() {
+DirectionalLight3D.prototype.getDirection = function() {
   return this.direction;
 }
 
@@ -612,19 +612,19 @@ Appearance3D.prototype.removePropertyChangeListener = function(listener) {
 }
 
 /**
- * Returns the name of this appearance. 
- * @returns {string}
- */
-Appearance3D.prototype.getName = function() {
-  return this.name;
-}
-
-/**
  * Sets the name of this object. 
  * @param {string} name
  */
 Appearance3D.prototype.setName = function(name) {
   this.name = name;
+}
+
+/**
+ * Returns the name of this appearance. 
+ * @returns {string}
+ */
+Appearance3D.prototype.getName = function() {
+  return this.name;
 }
 
 /**
@@ -1257,6 +1257,8 @@ Box3D.prototype.constructor = Box3D;
 /**
  * Creates data used to build the geometry of a shape.
  * @param {number} geometry type
+ * @constructor
+ * @author Emmanuel Puybaret
  */
 function GeometryInfo(type) {
   this.type = type;
@@ -1325,7 +1327,7 @@ GeometryInfo.prototype.setStripCounts = function(stripCounts) {
 }
 
 /**
- * Sets the countour counts of a polygon geometry.
+ * Sets the contour counts of a polygon geometry.
  * @param {number []} contourCounts
  * @private
  */
