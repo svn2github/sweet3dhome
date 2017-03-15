@@ -1066,7 +1066,8 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
         geometryInfo.setTextureCoordinateIndices(textureCoordinateIndices);
         geometryInfo.setStripCounts(stripCounts);
         if (!firstFaceHasNormalIndices) {
-          geometryInfo.generateNormals(firstFaceIsSmooth  ? Math.PI / 2  : 0);
+          geometryInfo.setCreaseAngle(firstFaceIsSmooth  ? Math.PI / 2  : 0);
+          geometryInfo.setGeneratedNormals(true);
         }
         geometryArray = geometryInfo.getGeometryArray();                  
       } else { // Line

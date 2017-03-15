@@ -838,7 +838,8 @@ DAEHandler.prototype.getFacesGeometry = function(name) {
   }
 
   if (!this.geometryNormals) {
-    geometryInfo.generateNormals(Math.PI / 2);
+    geometryInfo.setCreaseAngle(Math.PI / 2);
+    geometryInfo.setGeneratedNormals(true);
   }
   return geometryInfo.getGeometryArray();
 }

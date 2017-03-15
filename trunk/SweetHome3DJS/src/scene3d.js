@@ -1336,15 +1336,19 @@ GeometryInfo.prototype.setContourCounts = function(contourCounts) {
 }
 
 /**
- * Generates the normals of a geometry.
- * @param {number} [creaseAngle]
+ * Generates the crease angle used to generate the normals of a geometry.
+ * @param {number} creaseAngle
  */
-GeometryInfo.prototype.generateNormals = function(creaseAngle) {
-  if (creaseAngle === undefined) {
-    this.creaseAngle = 44. * Math.PI / 180.;
-  } else {
-    this.creaseAngle = creaseAngle; 
-  }
+GeometryInfo.prototype.setCreaseAngle = function(creaseAngle) {
+  this.creaseAngle = creaseAngle; 
+}
+
+/**
+ * Sets whether the normals of the geometry should be generated or not.
+ * @param {boolean} generatedNormals
+ */
+GeometryInfo.prototype.setGeneratedNormals = function(generatedNormals) {
+  this.generatedNormals = generatedNormals;
 }
 
 /**
@@ -1352,10 +1356,16 @@ GeometryInfo.prototype.generateNormals = function(creaseAngle) {
  * @private
  */
 GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, normals, normalIndices) {
+  var creaseAngle;
+  if (this.creaseAngle === undefined) {
+    creaseAngle = 44. * Math.PI / 180.;
+  } else {
+    creaseAngle = this.creaseAngle; 
+  }
   // Generate normals
   var vector1 = vec3.create();
   var vector2 = vec3.create();
-  if (this.creaseAngle > 0) {
+  if (creaseAngle > 0) {
     var sharedVertices = [];
     for (var i = 0; i < coordinatesIndices.length; i += 3) {
       for (var j = 0; j < 3; j++) {
@@ -1392,9 +1402,9 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
           } else {
             var dotProduct = vec3.dot(sharedVertex.normal, defaultNormal);
             // Eliminate angles > PI/2 quickly if dotProduct is negative
-            if (dotProduct > 0 || this.creaseAngle > Math.PI / 2) {
+            if (dotProduct > 0 || creaseAngle > Math.PI / 2) {
               var angle = Math.abs(Math.atan2(vec3.length(vec3.cross(crossProduct, sharedVertex.normal, defaultNormal)), dotProduct));
-              if (angle < this.creaseAngle - 1E-3) {
+              if (angle < creaseAngle - 1E-3) {
                 vec3.add(normal, normal, sharedVertex.normal);
               }
             }
@@ -1535,7 +1545,7 @@ GeometryInfo.prototype.getGeometryArray = function() {
   }
   
   var normals;
-  if (this.creaseAngle !== undefined) {
+  if (this.generatedNormals) {
     normals = [];
     triangleNormalIndices = [];
     this.computeNormals(this.vertices, triangleCoordinatesIndices, normals, triangleNormalIndices);
