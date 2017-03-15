@@ -35,16 +35,16 @@ import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 
 import org.jsweet.JSweetConfig;
-import org.jsweet.transpiler.AnnotationAdapter;
-import org.jsweet.transpiler.element.CaseElement;
-import org.jsweet.transpiler.element.ExtendedElement;
-import org.jsweet.transpiler.element.FieldAccessElement;
-import org.jsweet.transpiler.element.IdentifierElement;
-import org.jsweet.transpiler.element.LiteralElement;
-import org.jsweet.transpiler.element.MethodInvocationElement;
-import org.jsweet.transpiler.element.NewClassElement;
-import org.jsweet.transpiler.extensions.RemoveJavaDependenciesAdapter;
-import org.jsweet.transpiler.util.PrinterAdapter;
+import org.jsweet.transpiler.extension.AnnotationManager;
+import org.jsweet.transpiler.extension.PrinterAdapter;
+import org.jsweet.transpiler.extension.RemoveJavaDependenciesAdapter;
+import org.jsweet.transpiler.model.CaseElement;
+import org.jsweet.transpiler.model.ExtendedElement;
+import org.jsweet.transpiler.model.IdentifierElement;
+import org.jsweet.transpiler.model.LiteralElement;
+import org.jsweet.transpiler.model.MethodInvocationElement;
+import org.jsweet.transpiler.model.NewClassElement;
+import org.jsweet.transpiler.model.SelectElement;
 import org.jsweet.transpiler.util.Util;
 
 /**
@@ -57,7 +57,7 @@ import org.jsweet.transpiler.util.Util;
  * 
  * @author Renaud Pawlak
  */
-public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
+public class SweetHome3DJSweetAdapter extends PrinterAdapter {
 
   // A local type map to save mapping that can be handled in a generic way
   private Map<String, String> sh3dTypeMapping = new HashMap<>();
@@ -83,56 +83,55 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
     addTypeMapping("com.eteks.sweethome3d.tools.ResourceURLContent", "URLContent");
     // All enums that are named *Property will be translated to string in JS
     addTypeMapping(
-        (typeTree, name) -> typeTree.getTypeElement().getKind() == ElementKind.ENUM && name.endsWith("Property")
+        (typeTree, name) -> typeTree.getTypeAsElement().getKind() == ElementKind.ENUM && name.endsWith("Property")
             ? "string" : null);
 
     // All the Java elements to be ignored (will generate no JS)
     addAnnotation("jsweet.lang.Erased", //
-        "*.readObject(*)", //
-        "*.writeObject(*)", //
-        "*.hashCode(*)", //
-        "*.Compass.updateSunLocation(*)", //
-        "*.Compass.getSunAzimuth(*)", //
-        "*.Compass.getSunElevation(*)", //
-        "*.serialVersionUID", //
-        "*.Content.openStream(*)", //
+        "**.readObject(..)", //
+        "**.writeObject(..)", //
+        "**.hashCode(..)", //
+        "**.Compass.updateSunLocation(..)", //
+        "**.Compass.getSunAzimuth(..)", //
+        "**.Compass.getSunElevation(..)", //
+        "**.serialVersionUID", //
+        "**.Content.openStream(..)", //
         "com.eteks.sweethome3d.model.UserPreferences", //
         "com.eteks.sweethome3d.model.LengthUnit", //
         "com.eteks.sweethome3d.mobile", //
-        "com.eteks.sweethome3d.io.HomeContentContext", //
-        "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext");
+        "com.eteks.sweethome3d.io.*", //
+        "com.eteks.sweethome3d.tools", //
+        "com.eteks.sweethome3d.viewcontroller", //
+        "com.eteks.sweethome3d.j3d", //
+        //"!com.eteks.sweethome3d.io.HomeXMLHandler", //
+        "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
+        "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)");
 
     // We now ignore some Java elements with a programmatic adapter
-    addAnnotationAdapter(new AnnotationAdapter() {
+    addAnnotationManager(new AnnotationManager() {
       @Override
-      public AnnotationState getAnnotationState(Element element, String annotationType) {
+      public Action manageAnnotation(Element element, String annotationType) {
         // We add the @Erased annotation upon some specific conditions
         if (JSweetConfig.ANNOTATION_ERASED.equals(annotationType)) {
           if (element.getKind() == ElementKind.ENUM && element.getSimpleName().toString().endsWith("Property")) {
             // All enums named *Property will be erased (because they will be
             // strings in the generated code)
-            return AnnotationState.ADDED;
+            return Action.ADD;
           } else if (Util.isDeprecated(element)) {
             // All deprecated elements will be erased
-            return AnnotationState.ADDED;
+            return Action.ADD;
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
             // Only keep the 3 constructors of CatalogPieceOfFurniture
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
               if (c.getParameters().size() != 14 && c.getParameters().size() != 24 && c.getParameters().size() != 26) {
-                return AnnotationState.ADDED;
+                return Action.ADD;
               }
             }
           }
         }
-        return AnnotationState.UNCHANGED;
-      }
-
-      @Override
-      public String getAnnotationValue(Element element, String annotationType, String propertyName,
-          String defaultValue) {
-        return null;
+        return Action.VOID;
       }
 
     });
@@ -159,8 +158,7 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
   public boolean substituteNewClass(NewClassElement newClass, TypeElement type, String className) {
     // Handle generically all types that are locally mapped
     if (sh3dTypeMapping.containsKey(className)) {
-      print("new ").print(newClass.getTypeElement().getSimpleName().toString()).print("(")
-          .printArgList(newClass.getArguments()).print(")");
+      print("new ").print(sh3dTypeMapping.get(className)).print("(").printArgList(newClass.getArguments()).print(")");
       return true;
     }
     switch (className) {
@@ -181,81 +179,85 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
           return true;
         }
       }
+    case "com.eteks.sweethome3d.io.DefaultUserPreferences":
+      print("new UserPreferences()");
+      return true;
     }
     return super.substituteNewClass(newClass, type, className);
   }
 
   @Override
-  public boolean substituteMethodInvocation(MethodInvocationElement invocation, FieldAccessElement fieldAccess,
-      Element targetType, String targetClassName, String targetMethodName) {
-    if (targetClassName != null) {
-      switch (targetClassName) {
+  public boolean substituteMethodInvocation(MethodInvocationElement invocation) {
+    if (invocation.getTargetExpression() != null) {
+      Element targetType = invocation.getTargetExpression().getTypeAsElement();
+      switch (targetType.toString()) {
       case "java.text.Collator":
-        switch (targetMethodName) {
+        switch (invocation.getMethodName()) {
         case "setStrength":
-          printMacroName(targetMethodName);
+          printMacroName(invocation.getMethodName());
           // Erase setStrength completely
-          print(fieldAccess.getExpression());
+          print(invocation.getTargetExpression());
           return true;
         }
         break;
       case "java.math.BigDecimal":
-        // Support for Java big decimal (method are mapped to their Big.js equivalent)
-        switch (targetMethodName) {
+        // Support for Java big decimal (method are mapped to their Big.js
+        // equivalent)
+        switch (invocation.getMethodName()) {
         case "multiply":
-          printMacroName(targetMethodName);
-          print(fieldAccess.getExpression()).print(".times(").printArgList(invocation.getArguments()).print(")");
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression()).print(".times(").printArgList(invocation.getArguments()).print(")");
           return true;
         case "add":
-          printMacroName(targetMethodName);
-          print(fieldAccess.getExpression()).print(".plus(").printArgList(invocation.getArguments()).print(")");
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression()).print(".plus(").printArgList(invocation.getArguments()).print(")");
           return true;
         case "scale":
-          printMacroName(targetMethodName);
-          // Always have a scale of 2 (we only have currencies, so 2 is a standard)
+          printMacroName(invocation.getMethodName());
+          // Always have a scale of 2 (we only have currencies, so 2 is a
+          // standard)
           print("2");
           return true;
         case "setScale":
-          printMacroName(targetMethodName);
-          print(fieldAccess.getExpression()).print(".round(").print(invocation.getArguments().get(0)).print(")");
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression()).print(".round(").print(invocation.getArguments().get(0)).print(")");
           return true;
         case "compareTo":
-          printMacroName(targetMethodName);
-          print(fieldAccess.getExpression()).print(".cmp(").print(invocation.getArguments().get(0)).print(")");
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression()).print(".cmp(").print(invocation.getArguments().get(0)).print(")");
           return true;
         }
         break;
 
       }
       // SH3D maps Property enums to strings
-      if (targetType.getKind() == ElementKind.ENUM && targetClassName.endsWith("Property")) {
-        switch (targetMethodName) {
+      if (targetType.getKind() == ElementKind.ENUM && targetType.toString().endsWith("Property")) {
+        switch (invocation.getMethodName()) {
         case "name":
-          printMacroName(targetMethodName);
-          print(fieldAccess.getExpression());
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression());
           return true;
         case "equals":
-          printMacroName(targetMethodName);
-          print("(").print(fieldAccess.getExpression()).print(" == ").print(invocation.getArguments().get(0))
+          printMacroName(invocation.getMethodName());
+          print("(").print(invocation.getTargetExpression()).print(" == ").print(invocation.getArguments().get(0))
               .print(")");
           return true;
         }
       }
       // special case for the AspectRatio enum
-      if (targetClassName.endsWith(".AspectRatio") && targetMethodName.equals("getValue")) {
+      if (targetType.toString().endsWith(".AspectRatio") && invocation.getMethodName().equals("getValue")) {
         print(
             "{FREE_RATIO:null,VIEW_3D_RATIO:null,RATIO_4_3:4/3,RATIO_3_2:1.5,RATIO_16_9:16/9,RATIO_2_1:2/1,SQUARE_RATIO:1}[")
-                .print(fieldAccess.getExpression()).print("]");
+                .print(invocation.getTargetExpression()).print("]");
         return true;
       }
     }
-    boolean substituted = super.substituteMethodInvocation(invocation, fieldAccess, targetType, targetClassName,
-        targetMethodName);
+    boolean substituted = super.substituteMethodInvocation(invocation);
     if (!substituted) {
       // support for equals in case not supported by existing adapters
-      if (targetMethodName.equals("equals")) {
-        print("((o:any, o2) => { return o.equals?o.equals(o2):o===o2 })(").print(fieldAccess.getExpression()).print(",")
-            .print(invocation.getArguments().get(0)).print(")");
+      if (invocation.getMethodName().equals("equals")) {
+        print("((o:any, o2) => { return o.equals?o.equals(o2):o===o2 })(").print(invocation.getTargetExpression())
+            .print(",").print(invocation.getArguments().get(0)).print(")");
         return true;
       }
     }
@@ -263,11 +265,10 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
   }
 
   @Override
-  public boolean substituteFieldAccess(FieldAccessElement fieldAccess, Element targetType, String targetClassName,
-      String targetFieldName) {
-    switch (targetClassName) {
+  public boolean substituteSelect(SelectElement select) {
+    switch (select.getTargetElement().toString()) {
     case "java.text.Collator":
-      switch (targetFieldName) {
+      switch (select.getName()) {
       case "CANONICAL_DECOMPOSITION":
       case "FULL_DECOMPOSITION":
       case "IDENTICAL":
@@ -280,18 +281,19 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
       }
     }
     // Map *Property enums to strings
-    if (targetType.getKind() == ElementKind.ENUM && targetClassName.endsWith("Property")) {
-      print("\"" + targetFieldName + "\"");
+    if (select.getTargetElement().getKind() == ElementKind.ENUM
+        && select.getTargetElement().toString().endsWith("Property")) {
+      print("\"" + select.getName() + "\"");
       return true;
     }
-    return super.substituteFieldAccess(fieldAccess, targetType, targetClassName, targetFieldName);
+    return super.substituteSelect(select);
   }
 
   @Override
   public boolean substituteIdentifier(IdentifierElement identifier) {
     // Map *Property enums to strings
-    if (identifier.getTypeElement().getKind() == ElementKind.ENUM && Util.isConstant(identifier)
-        && identifier.getTypeElement().getSimpleName().toString().endsWith("Property")) {
+    if (identifier.getTypeAsElement().getKind() == ElementKind.ENUM && identifier.isConstant()
+        && identifier.getTypeAsElement().getSimpleName().toString().endsWith("Property")) {
       print("\"" + identifier + "\"");
       return true;
     }
@@ -301,8 +303,8 @@ public class SweetHome3DJSweetAdapter extends RemoveJavaDependenciesAdapter {
   @Override
   public boolean substituteCaseStatementPattern(CaseElement caseStatement, ExtendedElement pattern) {
     // Map *Property enums to strings
-    if (pattern.getTypeElement().getKind() == ElementKind.ENUM
-        && pattern.getTypeElement().getSimpleName().toString().endsWith("Property")) {
+    if (pattern.getTypeAsElement().getKind() == ElementKind.ENUM
+        && pattern.getTypeAsElement().getSimpleName().toString().endsWith("Property")) {
       print("\"" + pattern + "\"");
       return true;
     }

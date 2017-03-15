@@ -261,7 +261,7 @@
       <arg value="-i" />
       <arg value="../SweetHome3D/src:tools/JSweet/src" />
       <arg value="--includes" />
-      <arg value="com/eteks/sweethome3d/model:def" />
+      <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
       <!-- TODO: transpile io, j3d, and viewcontroller
       <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
       -->

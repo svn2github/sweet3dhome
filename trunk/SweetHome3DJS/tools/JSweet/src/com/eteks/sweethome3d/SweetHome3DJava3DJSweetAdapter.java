@@ -19,11 +19,8 @@
  */
 package com.eteks.sweethome3d;
 
-import javax.lang.model.element.Element;
-
-import org.jsweet.transpiler.element.FieldAccessElement;
-import org.jsweet.transpiler.element.MethodInvocationElement;
-import org.jsweet.transpiler.util.PrinterAdapter;
+import org.jsweet.transpiler.extension.PrinterAdapter;
+import org.jsweet.transpiler.model.MethodInvocationElement;
 
 /**
  * This adapter tunes the JavaScript generation for some SweetHome3D
@@ -42,21 +39,20 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
   }
 
   @Override
-  public boolean substituteMethodInvocation(MethodInvocationElement invocation, FieldAccessElement fieldAccess,
-      Element targetType, String targetClassName, String targetMethodName) {
-    if (targetClassName != null) {
-      switch (targetClassName) {
+  public boolean substituteMethodInvocation(MethodInvocationElement invocation) {
+    if (invocation.getTargetExpression() != null) {
+      switch (invocation.getTargetExpression().getTypeAsElement().toString()) {
       case "javax.media.j3d.Appearance":
-        switch (targetMethodName) {
+        switch (invocation.getMethodName()) {
         case "getTransparencyAttributes":
-          print(fieldAccess.getExpression());
+          print(invocation.getTargetExpression());
           return true;
         }
         break;
 
       }
     }
-    return super.substituteMethodInvocation(invocation, fieldAccess, targetType, targetClassName, targetMethodName);
+    return super.substituteMethodInvocation(invocation);
   }
 
 }
