@@ -19,8 +19,6 @@
  */
 package com.eteks.sweethome3d;
 
-import javax.lang.model.element.TypeElement;
-
 import org.jsweet.transpiler.extension.PrinterAdapter;
 import org.jsweet.transpiler.model.MethodInvocationElement;
 import org.jsweet.transpiler.model.NewClassElement;
@@ -48,13 +46,13 @@ public class SAXParserJSweetAdapter extends PrinterAdapter {
   }
 
   @Override
-  public boolean substituteNewClass(NewClassElement newClass, TypeElement type, String className) {
+  public boolean substituteNewClass(NewClassElement newClass) {
     switch (newClass.getTypeAsElement().toString()) {
     case "org.xml.sax.SAXException":
       print("new SAXException(").printArgList(newClass.getArguments()).print(")");
       return true;
     }
-    return super.substituteNewClass(newClass, type, className);
+    return super.substituteNewClass(newClass);
   }
 
 }

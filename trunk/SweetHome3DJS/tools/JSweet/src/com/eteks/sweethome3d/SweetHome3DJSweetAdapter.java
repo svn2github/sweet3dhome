@@ -32,7 +32,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
-import javax.lang.model.element.TypeElement;
 
 import org.jsweet.JSweetConfig;
 import org.jsweet.transpiler.extension.AnnotationManager;
@@ -44,7 +43,7 @@ import org.jsweet.transpiler.model.IdentifierElement;
 import org.jsweet.transpiler.model.LiteralElement;
 import org.jsweet.transpiler.model.MethodInvocationElement;
 import org.jsweet.transpiler.model.NewClassElement;
-import org.jsweet.transpiler.model.SelectElement;
+import org.jsweet.transpiler.model.VariableAccessElement;
 import org.jsweet.transpiler.util.Util;
 
 /**
@@ -155,7 +154,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
   }
 
   @Override
-  public boolean substituteNewClass(NewClassElement newClass, TypeElement type, String className) {
+  public boolean substituteNewClass(NewClassElement newClass) {
+    String className = newClass.getTypeAsElement().toString();
     // Handle generically all types that are locally mapped
     if (sh3dTypeMapping.containsKey(className)) {
       print("new ").print(sh3dTypeMapping.get(className)).print("(").printArgList(newClass.getArguments()).print(")");
@@ -183,7 +183,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
       print("new UserPreferences()");
       return true;
     }
-    return super.substituteNewClass(newClass, type, className);
+    return super.substituteNewClass(newClass);
   }
 
   @Override
@@ -265,10 +265,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
   }
 
   @Override
-  public boolean substituteSelect(SelectElement select) {
+  public boolean substituteVariableAccess(VariableAccessElement select) {
     switch (select.getTargetElement().toString()) {
     case "java.text.Collator":
-      switch (select.getName()) {
+      switch (select.getVariableName()) {
       case "CANONICAL_DECOMPOSITION":
       case "FULL_DECOMPOSITION":
       case "IDENTICAL":
@@ -283,10 +283,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     // Map *Property enums to strings
     if (select.getTargetElement().getKind() == ElementKind.ENUM
         && select.getTargetElement().toString().endsWith("Property")) {
-      print("\"" + select.getName() + "\"");
+      print("\"" + select.getVariableName() + "\"");
       return true;
     }
-    return super.substituteSelect(select);
+    return super.substituteVariableAccess(select);
   }
 
   @Override
