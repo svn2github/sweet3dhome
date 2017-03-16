@@ -614,14 +614,14 @@ TopCameraState.prototype.updateAerialViewBoundsFromHomeBounds = function(centerO
     var room = rooms [i];
     if (this.isItemAtVisibleLevel(room)) {
       var minZ = 0;
-      var maxZ = MIN_HEIGHT;
+      var maxZ = TopCameraState.MIN_HEIGHT;
       var roomLevel = room.getLevel();
       if (roomLevel !== null) {
         minZ = roomLevel.getElevation() - roomLevel.getFloorThickness();
         maxZ = roomLevel.getElevation();
         if (selectionEmpty) {
           minZ = Math.max(0, minZ);
-          maxZ = Math.max(MIN_HEIGHT, roomLevel.getElevation());
+          maxZ = Math.max(TopCameraState.MIN_HEIGHT, roomLevel.getElevation());
         }
       }
       var points = room.getPoints();
@@ -642,7 +642,7 @@ TopCameraState.prototype.updateAerialViewBoundsFromHomeBounds = function(centerO
       var maxZ;
       if (selectionEmpty) {
         minZ = Math.max(0, label.getGroundElevation());
-        maxZ = Math.max(MIN_HEIGHT, label.getGroundElevation());
+        maxZ = Math.max(TopCameraState.MIN_HEIGHT, label.getGroundElevation());
       } else {
         minZ = 
         maxZ = label.getGroundElevation();
@@ -660,17 +660,17 @@ TopCameraState.prototype.updateAerialViewBoundsFromHomeBounds = function(centerO
     this.aerialViewBoundsUpperPoint = [TopCameraState.MIN_WIDTH, TopCameraState.MIN_DEPTH, TopCameraState.MIN_HEIGHT];
   } else if (containsVisibleWalls && selectionEmpty) {
     // If home contains walls, ensure bounds are always minimum 1 meter wide centered in middle of 3D view
-    if (MIN_WIDTH > this.aerialViewBoundsUpperPoint [0] - this.aerialViewBoundsLowerPoint [0]) {
-      this.aerialViewBoundsLowerPoint [0] = (this.aerialViewBoundsLowerPoint [0] + this.aerialViewBoundsUpperPoint [0]) / 2 - MIN_WIDTH / 2;
-      this.aerialViewBoundsUpperPoint [0] = this.aerialViewBoundsLowerPoint [0] + MIN_WIDTH;
+    if (TopCameraState.MIN_WIDTH > this.aerialViewBoundsUpperPoint [0] - this.aerialViewBoundsLowerPoint [0]) {
+      this.aerialViewBoundsLowerPoint [0] = (this.aerialViewBoundsLowerPoint [0] + this.aerialViewBoundsUpperPoint [0]) / 2 - TopCameraState.MIN_WIDTH / 2;
+      this.aerialViewBoundsUpperPoint [0] = this.aerialViewBoundsLowerPoint [0] + TopCameraState.MIN_WIDTH;
     }
-    if (MIN_DEPTH > this.aerialViewBoundsUpperPoint [1] - this.aerialViewBoundsLowerPoint [1]) {
-      this.aerialViewBoundsLowerPoint [1] = (this.aerialViewBoundsLowerPoint [1] + this.aerialViewBoundsUpperPoint [1]) / 2 - MIN_DEPTH / 2;
-      this.aerialViewBoundsUpperPoint [1] = this.aerialViewBoundsLowerPoint [1] + MIN_DEPTH;
+    if (TopCameraState.MIN_DEPTH > this.aerialViewBoundsUpperPoint [1] - this.aerialViewBoundsLowerPoint [1]) {
+      this.aerialViewBoundsLowerPoint [1] = (this.aerialViewBoundsLowerPoint [1] + this.aerialViewBoundsUpperPoint [1]) / 2 - TopCameraState.MIN_DEPTH / 2;
+      this.aerialViewBoundsUpperPoint [1] = this.aerialViewBoundsLowerPoint [1] + TopCameraState.MIN_DEPTH;
     }
-    if (MIN_HEIGHT > this.aerialViewBoundsUpperPoint [2] - this.aerialViewBoundsLowerPoint [2]) {
-      this.aerialViewBoundsLowerPoint [2] = (this.aerialViewBoundsLowerPoint [2] + this.aerialViewBoundsUpperPoint [2]) / 2 - MIN_HEIGHT / 2;
-      this.aerialViewBoundsUpperPoint [2] = this.aerialViewBoundsLowerPoint [2] + MIN_HEIGHT;
+    if (TopCameraState.MIN_HEIGHT > this.aerialViewBoundsUpperPoint [2] - this.aerialViewBoundsLowerPoint [2]) {
+      this.aerialViewBoundsLowerPoint [2] = (this.aerialViewBoundsLowerPoint [2] + this.aerialViewBoundsUpperPoint [2]) / 2 - TopCameraState.MIN_HEIGHT / 2;
+      this.aerialViewBoundsUpperPoint [2] = this.aerialViewBoundsLowerPoint [2] + TopCameraState.MIN_HEIGHT;
     }
   }
 }
