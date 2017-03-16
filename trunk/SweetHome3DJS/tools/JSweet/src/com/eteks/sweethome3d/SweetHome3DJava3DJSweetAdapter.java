@@ -170,26 +170,28 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
   }
   
   @Override
-  public boolean substituteVariableAccess(VariableAccessElement select) {
-    switch (select.getTargetElement().toString()) {
+  public boolean substituteVariableAccess(VariableAccessElement variableAccess) {
+    if (variableAccess.getTargetExpression() != null) {
+      switch (variableAccess.getTargetExpression().getTypeAsElement().toString()) {
       case "javax.vecmath.Point3f":
       case "javax.vecmath.TexCoord2f":
       case "javax.vecmath.Vector3f":
       case "javax.vecmath.Vector3d":
-        switch (select.getVariableName()) {
-          case "x":
-            print(select.getTargetExpression()).print("[0]");
-            return true;
-          case "y":
-            print(select.getTargetExpression()).print("[1]");
-            return true;
-          case "z":
-            print(select.getTargetExpression()).print("[2]");
-            return true;
+        switch (variableAccess.getVariableName()) {
+        case "x":
+          print(variableAccess.getTargetExpression()).print("[0]");
+          return true;
+        case "y":
+          print(variableAccess.getTargetExpression()).print("[1]");
+          return true;
+        case "z":
+          print(variableAccess.getTargetExpression()).print("[2]");
+          return true;
         }
         break;
+      }
     }
-    return super.substituteVariableAccess(select);
+    return super.substituteVariableAccess(variableAccess);
   }
 
   @Override
