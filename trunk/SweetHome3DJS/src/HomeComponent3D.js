@@ -444,7 +444,7 @@ HomeComponent3D.prototype.getApproximateHomeBoundsCache = function() {
         } else {
           approximateHomeBounds.combine(startPoint);
         }
-        approximateHomeBounds.combine(new Point3d(wall.getXEnd(), wall.getYEnd(), 
+        approximateHomeBounds.combine(vec3.fromValues(wall.getXEnd(), wall.getYEnd(), 
             startPoint [2] + (wall.getHeight() !== null ? wall.getHeight() : this.home.getWallHeight())));
       }
     }
