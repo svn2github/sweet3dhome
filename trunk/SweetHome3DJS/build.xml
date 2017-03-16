@@ -262,20 +262,10 @@
       <arg value="../SweetHome3D/src:tools/JSweet/src" />
       <arg value="--includes" />
       <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
-      <!-- TODO: transpile io, j3d, and viewcontroller
-      <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
-      -->
+      <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
       <classpath>
         <fileset dir="tools/JSweet/lib" />
         <pathelement location="build/SweetHome3DJSweetExtension.jar"/>
-        <pathelement location="../SweetHome3D/lib/j3dcore.jar"/>
-        <pathelement location="../SweetHome3D/lib/j3dutils.jar"/>
-        <pathelement location="../SweetHome3D/lib/vecmath.jar"/>
-        <pathelement location="../SweetHome3D/lib/batik-svgpathparser-1.7.jar"/>
-        <pathelement location="../SweetHome3D/lib/sunflow-0.07.3i.jar"/>
-        <pathelement location="../SweetHome3D/lib/freehep-vectorgraphics-svg-2.1.1b.jar"/>
-        <pathelement location="../SweetHome3D/lib/iText-2.1.7.jar"/>
-        <pathelement location="../SweetHome3D/lib/jmf.jar"/>
         <pathelement location="../SweetHome3D/libtest/jnlp.jar"/>
         <pathelement location="../SweetHome3D/libtest/AppleJavaExtensions.jar"/>
       </classpath>
