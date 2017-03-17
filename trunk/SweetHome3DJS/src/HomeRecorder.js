@@ -78,9 +78,18 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   observer.progression(HomeRecorder.READING_HOME, homeXmlEntry.name, 1);
   
   observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 0);
-  var document = new DOMParser().parseFromString(xmlContent, "text/xml");
   
-  var home = this.getHomeObject(document.documentElement, zipUrl, {}); 
+  var handler = new HomeXMLHandler();
+  // the handler needs the zip URL for creating the right content URL (see parseContent)
+  handler.homeUrl = zipUrl;
+  var saxParser = new SAXParser(handler, handler, handler, handler, handler);
+  try {
+    saxParser.parseString(xmlContent);
+  } catch (ex) {
+    observer.homeError(ex);
+  }
+  
+  var home = handler.getHome(); 
   
   observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 1);
   observer.homeLoaded(home);

@@ -1541,6 +1541,6 @@ Object3DBranchFactory.prototype.createObject3D = function(home, item, waitForLoa
   // } else if (item instanceof Label) {
   //   return new Label3D(item, home, waitForLoading);
   } else {
-    return null;
+    return new Group3D();
   }  
 }

@@ -44,7 +44,6 @@ import org.jsweet.transpiler.model.LiteralElement;
 import org.jsweet.transpiler.model.MethodInvocationElement;
 import org.jsweet.transpiler.model.NewClassElement;
 import org.jsweet.transpiler.model.VariableAccessElement;
-import org.jsweet.transpiler.util.Util;
 
 /**
  * This adapter tunes the JavaScript generation for some SweetHome3D
@@ -102,7 +101,9 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.tools", //
         "com.eteks.sweethome3d.viewcontroller", //
         "com.eteks.sweethome3d.j3d", //
-        //"!com.eteks.sweethome3d.io.HomeXMLHandler", //
+        // "com.eteks.sweethome3d.j3d.*", //
+        // "!com.eteks.sweethome3d.j3d.Wall3D", //
+        "!com.eteks.sweethome3d.io.HomeXMLHandler", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)");
 
@@ -116,12 +117,13 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
             // All enums named *Property will be erased (because they will be
             // strings in the generated code)
             return Action.ADD;
-          } else if (Util.isDeprecated(element)) {
+          } else if (util().isDeprecated(element)) {
             // All deprecated elements will be erased
             return Action.ADD;
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
-            // Only keep the 3 constructors of CatalogPieceOfFurniture
+            // Only keep 3 public constructors of CatalogPieceOfFurniture (and
+            // the private one)
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
               if (c.getParameters().size() != 14 && c.getParameters().size() != 24 && c.getParameters().size() != 26) {
@@ -137,15 +139,27 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
 
     // We erase some packages: all the elements in these packages will be top
     // level in JS
-    addAnnotation("@Root", "java.awt.geom", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io");
+    addAnnotation("@Root", "java.awt.geom", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io",
+        "com.eteks.sweethome3d.j3d");
 
     // Replace some Java implementations with some JS-specific implementations
     addAnnotation(
-        "@TypeScriptBody('if (this.shapeCache == null) { this.shapeCache = this.getPolylinePath(); } return this.shapeCache; ')",
+        "@Replace('if (this.shapeCache == null) { this.shapeCache = this.getPolylinePath(); } return this.shapeCache; ')",
         "com.eteks.sweethome3d.model.Polyline.getShape()");
     addAnnotation(
-        "@TypeScriptBody('if(content.indexOf('://') >= 0) { return new URLContent(content); } else { new HomeURLContent(content); }')",
+        "@Replace('if(content == null) { return null; } else if(content.indexOf('://') >= 0) { return new URLContent(content); } else { return new HomeURLContent('jar:'+this['homeUrl']+'!/'+content); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String)");
+
+    addAnnotation(
+        "@Replace('#BODY##BASEINDENT#if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure']); }')",
+        "com.eteks.sweethome3d.io.HomeXMLHandler.setHomeAttributes(..)");
+
+    // uncomment and adapt to log some method(s)
+    // addAnnotation(
+    // "@Replace('console.log('before #CLASSNAME#.#METHODNAME#:
+    // '+arguments[0]); let result = (() => { #BODY# })(); console.log('after
+    // #CLASSNAME#.#METHODNAME#'); return result;')",
+    // "com.eteks.sweethome3d.io.HomeXMLHandler.parse*(..)");
 
     // Force some interface to be mapped so functional types when possible
     addAnnotation(FunctionalInterface.class, "com.eteks.sweethome3d.model.CollectionListener",
@@ -237,6 +251,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           printMacroName(invocation.getMethodName());
           print(invocation.getTargetExpression());
           return true;
+        case "valueOf":
+          printMacroName(invocation.getMethodName());
+          print(invocation.getArgument(0));
+          return true;
         case "equals":
           printMacroName(invocation.getMethodName());
           print("(").print(invocation.getTargetExpression()).print(" == ").print(invocation.getArguments().get(0))
@@ -265,10 +283,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
   }
 
   @Override
-  public boolean substituteVariableAccess(VariableAccessElement select) {
-    switch (select.getTargetElement().toString()) {
+  public boolean substituteVariableAccess(VariableAccessElement variableAccess) {
+    switch (variableAccess.getTargetElement().toString()) {
     case "java.text.Collator":
-      switch (select.getVariableName()) {
+      switch (variableAccess.getVariableName()) {
       case "CANONICAL_DECOMPOSITION":
       case "FULL_DECOMPOSITION":
       case "IDENTICAL":
@@ -281,12 +299,12 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
       }
     }
     // Map *Property enums to strings
-    if (select.getTargetElement().getKind() == ElementKind.ENUM
-        && select.getTargetElement().toString().endsWith("Property")) {
-      print("\"" + select.getVariableName() + "\"");
+    if (variableAccess.getTargetElement().getKind() == ElementKind.ENUM
+        && variableAccess.getTargetElement().toString().endsWith("Property")) {
+      print("\"" + variableAccess.getVariableName() + "\"");
       return true;
     }
-    return super.substituteVariableAccess(select);
+    return super.substituteVariableAccess(variableAccess);
   }
 
   @Override
