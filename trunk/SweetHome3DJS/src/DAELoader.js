@@ -70,6 +70,7 @@ DAELoader.prototype.parseEntryScene = function(daeContent, daeEntryName, zip, mo
 
 /**
  * SAX handler for DAE Collada stream.
+ * @constructor
  * @private
  */
 function DAEHandler(sceneRoot, daeEntryName) {
@@ -841,7 +842,7 @@ DAEHandler.prototype.getFacesGeometry = function(name) {
     geometryInfo.setCreaseAngle(Math.PI / 2);
     geometryInfo.setGeneratedNormals(true);
   }
-  return geometryInfo.getGeometryArray();
+  return geometryInfo.getIndexedGeometryArray();
 }
 
 /**
