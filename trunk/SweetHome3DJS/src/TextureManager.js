@@ -62,12 +62,18 @@ TextureManager.prototype.clear = function() {
  * then a second notification will be given in Event Dispatch Thread once the image texture is loaded. 
  * If the texture is in cache, it will be notified immediately to the given <code>textureObserver</code>.
  * @param {URLContent} content  an object containing an image
- * @param {number} angle        the rotation angle applied to the image
+ * @param {number}  [angle]       the rotation angle applied to the image
  * @param {boolean} [synchronous] if <code>true</code>, this method will return only once image content is loaded.
  * @param textureObserver the observer that will be notified once the texture is available
  */
 TextureManager.prototype.loadTexture = function(content, angle, synchronous, textureObserver) {
-  if (textureObserver === undefined) {
+  if (synchronous === undefined) {
+    // 2 parameters (content, textureObserver)
+    textureObserver = angle;
+    angle = 0;
+    synchronous = false;
+  } else if (textureObserver === undefined) {
+    // 3 parameters (content, synchronous, textureObserver)
     textureObserver = synchronous;
     synchronous = false;
   }
