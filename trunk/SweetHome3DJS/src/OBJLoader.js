@@ -1002,8 +1002,8 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
     while (i < geometries.length) {
       var firstGeometry = geometries [i];
       var firstGeometryHasTextureCoordinateIndices = firstGeometry.textureCoordinateIndices.length > 0;
-      var firstFaceHasNormalIndices = (firstGeometry instanceof OBJFace) && firstGeometry.normalIndices.length > 0;
-      var firstFaceIsSmooth = (firstGeometry instanceof OBJFace) && firstGeometry.smooth;
+      var firstFaceHasNormalIndices = (firstGeometry instanceof OBJLoader.OBJFace) && firstGeometry.normalIndices.length > 0;
+      var firstFaceIsSmooth = (firstGeometry instanceof OBJLoader.OBJFace) && firstGeometry.smooth;
       
       var firstGeometryMaterial = firstGeometry.material;
       var appearance = OBJLoader.getAppearance(appearances, firstGeometryMaterial);
@@ -1015,9 +1015,9 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
         if ((geometry.constructor !== firstGeometry.constructor)
             || material === null && firstGeometryMaterial !== null
             || material !== null && OBJLoader.getAppearance(appearances, material) !== appearance
-            || (firstFaceIsSmooth ^ ((geometry instanceof OBJFace) && geometry.smooth))
+            || (firstFaceIsSmooth ^ ((geometry instanceof OBJLoader.OBJFace) && geometry.smooth))
             || (firstGeometryHasTextureCoordinateIndices ^ geometry.textureCoordinateIndices.length > 0)
-            || (firstFaceHasNormalIndices ^ ((geometry instanceof OBJFace) && geometry.normalIndices.length > 0))) {
+            || (firstFaceHasNormalIndices ^ ((geometry instanceof OBJLoader.OBJFace) && geometry.normalIndices.length > 0))) {
           break;
         }
       }
@@ -1048,7 +1048,7 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
       }
       
       var geometryArray;
-      if (firstGeometry instanceof OBJFace) {
+      if (firstGeometry instanceof OBJLoader.OBJFace) {
         var normalIndices = [];
         if (firstFaceHasNormalIndices) {
           for (var j = 0; j < geometryCount; j++) {
@@ -1069,7 +1069,7 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
           geometryInfo.setCreaseAngle(firstFaceIsSmooth  ? Math.PI / 2  : 0);
           geometryInfo.setGeneratedNormals(true);
         }
-        geometryArray = geometryInfo.getGeometryArray();                  
+        geometryArray = geometryInfo.getIndexedGeometryArray();                  
       } else { // Line
         var lineCoordinatesIndices = [];
         var lineTextureCoordinateIndices = [];
@@ -1151,7 +1151,7 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
   var vertices = [];
   var textureCoordinates = [];
   var normals = [];
-  var defaultGroup = new OBJGroup("default");
+  var defaultGroup = new OBJLoader.OBJGroup("default");
   var groups = {"default" : defaultGroup};
   var materialGroupsWithNormals = {};
   var currentObjects = {group: defaultGroup,
@@ -1270,7 +1270,7 @@ OBJLoader.prototype.parseObjectLine = function(objContent, startOfLine, vertices
       var name = strings [1];
       currentObjects.group = groups [name];
       if (currentObjects.group === undefined) {
-        currentObjects.group = new OBJGroup(name);
+        currentObjects.group = new OBJLoader.OBJGroup(name);
         groups [name] = currentObjects.group;
       }        
     } else {
@@ -1320,7 +1320,7 @@ OBJLoader.prototype.parseLine = function(strings, material) {
     // Ignore unconsistent texture coordinate 
     textureCoordinateIndices = [];
   }
-  return new OBJLine(vertexIndices, textureCoordinateIndices, material);
+  return new OBJLoader.OBJLine(vertexIndices, textureCoordinateIndices, material);
 }
 
 /**
@@ -1369,7 +1369,7 @@ OBJLoader.prototype.parseFace = function(strings, smooth, material) {
     // Ignore unconsistent normals
     normalIndices = [];
   }
-  return new OBJFace(vertexIndices, textureCoordinateIndices, normalIndices, smooth, material);
+  return new OBJLoader.OBJFace(vertexIndices, textureCoordinateIndices, normalIndices, smooth, material);
 }
 
 /**
@@ -1485,12 +1485,12 @@ OBJLoader.parseMaterial = function(mtlContent, appearances, objEntryName, zip) {
  * @constructor
  * @private
  */
-function OBJGroup(name) {
+OBJLoader.OBJGroup = function(name) {
   this.name = name;
   this.geometries = [];
 }
 
-OBJGroup.prototype.addGeometry = function(geometry) {
+OBJLoader.OBJGroup.prototype.addGeometry = function(geometry) {
   this.geometries.push(geometry);
 };
 
@@ -1499,7 +1499,7 @@ OBJGroup.prototype.addGeometry = function(geometry) {
  * @constructor
  * @private
  */
-function OBJLine(vertexIndices, textureCoordinateIndices, material) {
+OBJLoader.OBJLine = function(vertexIndices, textureCoordinateIndices, material) {
   this.vertexIndices = vertexIndices;
   this.textureCoordinateIndices = textureCoordinateIndices;
   this.material = material;
@@ -1510,7 +1510,7 @@ function OBJLine(vertexIndices, textureCoordinateIndices, material) {
  * @constructor
  * @private
  */
-function OBJFace(vertexIndices, textureCoordinateIndices, normalIndices, smooth, material) {
+OBJLoader.OBJFace = function(vertexIndices, textureCoordinateIndices, normalIndices, smooth, material) {
   this.vertexIndices = vertexIndices;
   this.textureCoordinateIndices = textureCoordinateIndices;
   this.normalIndices = normalIndices;

@@ -222,7 +222,7 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
         }
         
         // Add vertex index to the list of shared vertices 
-        var sharedVertex = new Mesh3DSSharedVertex(i, normal);
+        var sharedVertex = new Max3DSLoader.Mesh3DSSharedVertex(i, normal);
         sharedVertex.nextVertex = sharedVertices [vertexIndex];
         sharedVertices [vertexIndex] = sharedVertex;
         defaultNormals [k] = normal;
@@ -371,7 +371,7 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
         geometryInfo.setTextureCoordinates(textureCoordinates);
         geometryInfo.setTextureCoordinateIndices(coordinateIndices);
       }
-      geometryArray = geometryInfo.getGeometryArray();
+      geometryArray = geometryInfo.getIndexedGeometryArray();
 
       if (shape === null || material !== firstMaterial) {
         material = firstMaterial;
@@ -416,12 +416,12 @@ Max3DSLoader.prototype.parseEntryScene = function(max3dsContent, max3dsEntryName
   
   if (onmodelloaded === null) {
     onprogression(Node3D.PARSING_MODEL, max3dsEntryName, 0);
-    masterScale = this.parse3DSStream(new ChunksInputStream(max3dsContent), max3dsEntryName, zip, meshes, meshesGroups, materials, root);
+    masterScale = this.parse3DSStream(new Max3DSLoader.ChunksInputStream(max3dsContent), max3dsEntryName, zip, meshes, meshesGroups, materials, root);
     onprogression(Node3D.PARSING_MODEL, max3dsEntryName, 1);
     return this.createScene(meshes, meshesGroups, materials, root, masterScale, null, onprogression);
   } else {
     var loader = this;
-    masterScale = this.parse3DSStream(new ChunksInputStream(max3dsContent), max3dsEntryName, zip, meshes, meshesGroups, materials, root);
+    masterScale = this.parse3DSStream(new Max3DSLoader.ChunksInputStream(max3dsContent), max3dsEntryName, zip, meshes, meshesGroups, materials, root);
     var max3dsEntryParser = function() {
         // Parsing is finished
         setTimeout(
@@ -440,10 +440,10 @@ Max3DSLoader.prototype.parseEntryScene = function(max3dsContent, max3dsEntryName
 
 /**
  * Returns the scene with data read from the given 3DS stream.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {string} max3dsEntryName
  * @param {JSZip}  zip 
- * @param {Mesh3DS []} meshes 
+ * @param {Max3DSLoader.Mesh3DS []} meshes 
  * @param {Object} meshesGroups
  * @param {Object} materials
  * @param {TransformGroup3D} root
@@ -499,10 +499,10 @@ Max3DSLoader.prototype.parse3DSStream = function(input, max3dsEntryName, zip, me
 
 /**
  * Parses 3DS data in the current chunk.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {string} max3dsEntryName
  * @param {JSZip}  zip 
- * @param {Mesh3DS []} meshes
+ * @param {Max3DSLoader.Mesh3DS []} meshes
  * @param {Object} materials
  * @returns {number} master scale
  * @private
@@ -535,8 +535,8 @@ Max3DSLoader.prototype.parseEditorData = function(input, max3dsEntryName, zip, m
 
 /**
  * Parses named objects like mesh in the current chunk.
- * @param {ChunksInputStream} input
- * @param {Mesh3DS []} meshes 
+ * @param {Max3DSLoader.ChunksInputStream} input
+ * @param {Max3DSLoader.Mesh3DS []} meshes 
  * @param {Object} materials
  * @private
  */
@@ -557,7 +557,7 @@ Max3DSLoader.prototype.parseNamedObject = function(input, meshes, materials) {
 
 /**
  * Returns the mesh read from the current chunk.  
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {string} name
  * @param {Object} materials
  * @private
@@ -628,12 +628,12 @@ Max3DSLoader.prototype.parseMeshData = function(input, name, materials) {
     }
     input.releaseChunk();
   } 
-  return new Mesh3DS(name, vertices, textureCoordinates, faces, color, transform);
+  return new Max3DSLoader.Mesh3DS(name, vertices, textureCoordinates, faces, color, transform);
 }
 
 /**
  * Parses key framer data.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {Object} meshesGroups
  * @param {TransformGroup3D} root
  * @private
@@ -745,7 +745,7 @@ Max3DSLoader.prototype.parseKeyFramerData = function(input, meshesGroups, root) 
 
 /**
  * Parses the start of a key framer track.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @private
  */
 Max3DSLoader.prototype.parseKeyFramerTrackStart = function(input) {
@@ -774,13 +774,13 @@ Max3DSLoader.prototype.parseKeyFramerTrackStart = function(input) {
 
 /**
  * Returns the mesh faces read from the current chunk. 
- * @return {Face3DS} 
+ * @return {Max3DSLoader.Face3DS} 
  * @private
  */
 Max3DSLoader.prototype.parseFacesData = function(input) {
   var faces = new Array(input.readLittleEndianUnsignedShort());
   for (var i = 0; i < faces.length; i++) {
-    faces [i] = new Face3DS(
+    faces [i] = new Max3DSLoader.Face3DS(
       i, 
       input.readLittleEndianUnsignedShort(), 
       input.readLittleEndianUnsignedShort(),
@@ -792,10 +792,10 @@ Max3DSLoader.prototype.parseFacesData = function(input) {
 
 /**
  * Returns the 3DS material read from the current chunk.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {string} max3dsEntryName
  * @param {JSZip}  zip 
- * @returns {Material3DS}  
+ * @returns {Max3DSLoader.Material3DS}  
  * @private
  */
 Max3DSLoader.prototype.parseMaterial = function(input, max3dsEntryName, zip) {
@@ -840,13 +840,13 @@ Max3DSLoader.prototype.parseMaterial = function(input, max3dsEntryName, zip) {
     }
     input.releaseChunk();
   } 
-  return new Material3DS(name, ambientColor, diffuseColor, specularColor, 
+  return new Max3DSLoader.Material3DS(name, ambientColor, diffuseColor, specularColor, 
       shininess, transparency, texture, twoSided);
 }
 
 /**
  * Returns the color read from the current chunk.  
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @returns {vec3}
  * @private
  */
@@ -895,7 +895,7 @@ Max3DSLoader.prototype.parseColor = function(input) {
 
 /**
  * Returns the percentage read from the current chunk.  
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @returns {number}
  * @private
  */
@@ -921,7 +921,7 @@ Max3DSLoader.prototype.parsePercentage = function(input) {
 
 /**
  * Returns the texture entry name read from the current chunk.    
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @param {string} max3dsEntryName
  * @param {JSZip}  zip 
  * @returns {string}
@@ -975,7 +975,7 @@ Max3DSLoader.prototype.getEntryNameIgnoreCase = function(zip, searchedEntryName)
 
 /**
  * Returns the matrix read from the current chunk.  
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @returns {mat4}
  * @private
  */
@@ -999,7 +999,7 @@ Max3DSLoader.prototype.parseMatrix = function(input) {
 
 /**
  * Returns the vector read from the current chunk.
- * @param {ChunksInputStream} input
+ * @param {Max3DSLoader.ChunksInputStream} input
  * @returns {vec3}
  * @private
  */
@@ -1012,9 +1012,10 @@ Max3DSLoader.prototype.parseVector = function(input) {
  * Creates a chunk with its ID and length.
  * @param {number} id
  * @param {number} length
+ * @constructor
  * @private
  */
-function Chunk3DS(id, length) {
+Max3DSLoader.Chunk3DS = function(id, length) {
   if (length < 6) {
     throw new IncorrectFormat3DException("Invalid chunk " + id + " length " + length);
   }
@@ -1023,30 +1024,31 @@ function Chunk3DS(id, length) {
   this.readLength = 6;
 }
   
-Chunk3DS.prototype.incrementReadLength = function(readBytes) {
+Max3DSLoader.Chunk3DS.prototype.incrementReadLength = function(readBytes) {
   this.readLength += readBytes;
 }
 
-Chunk3DS.prototype.toString = function() {
+Max3DSLoader.Chunk3DS.prototype.toString = function() {
   return this.id + " " + this.length;
 }
 
 /**
  * Creates an input stream storing chunks hierarchy and other data required during parsing.
  * @param {Uint8Array} input
+ * @constructor
  * @private
  */
-function ChunksInputStream(input) {
-    this.input = input;
-    this.index = 0;
-    this.stack = []; // Chunk3DS [] 
-  }
+Max3DSLoader.ChunksInputStream = function(input) {
+  this.input = input;
+  this.index = 0;
+  this.stack = []; // Chunk3DS [] 
+}
 
 /**
  * Returns the next value in input stream or -1 if end is reached.
  * @private
  */
-ChunksInputStream.prototype.read = function() {
+Max3DSLoader.ChunksInputStream.prototype.read = function() {
   if (this.index >= this.input.length) {
     return -1;
   } else {
@@ -1057,12 +1059,12 @@ ChunksInputStream.prototype.read = function() {
 /**
  * Reads the next chunk id and length, pushes it in the stack and returns it.
  * <code>null</code> will be returned if the end of the stream is reached.
- * @returns {Chunk3DS}
+ * @returns {Max3DSLoader.Chunk3DS}
  * @private
  */
-ChunksInputStream.prototype.readChunkHeader = function() {
+Max3DSLoader.ChunksInputStream.prototype.readChunkHeader = function() {
   var chunkId = this.readLittleEndianUnsignedShort(false);
-  var chunk = new Chunk3DS(chunkId, this.readLittleEndianUnsignedInt(false));
+  var chunk = new Max3DSLoader.Chunk3DS(chunkId, this.readLittleEndianUnsignedInt(false));
   this.stack.push(chunk);
   return chunk;
 }
@@ -1071,7 +1073,7 @@ ChunksInputStream.prototype.readChunkHeader = function() {
  * Pops the chunk at the top of stack and checks it was entirely read. 
  * @private
  */
-ChunksInputStream.prototype.releaseChunk = function() {      
+Max3DSLoader.ChunksInputStream.prototype.releaseChunk = function() {      
   var chunk = this.stack.pop();
   if (chunk.length !== chunk.readLength) {
     throw new IncorrectFormat3DException("Chunk " + chunk.id + " invalid length. " 
@@ -1087,7 +1089,7 @@ ChunksInputStream.prototype.releaseChunk = function() {
  * @returns {boolean}
  * @private
  */
-ChunksInputStream.prototype.isChunckEndReached = function() {
+Max3DSLoader.ChunksInputStream.prototype.isChunckEndReached = function() {
   var chunk = this.stack [this.stack.length - 1];
   return chunk.length === chunk.readLength;
 }
@@ -1096,7 +1098,7 @@ ChunksInputStream.prototype.isChunckEndReached = function() {
  * Reads the stream until the end of the current chunk.
  * @private
  */
-ChunksInputStream.prototype.readUntilChunkEnd = function() {
+Max3DSLoader.ChunksInputStream.prototype.readUntilChunkEnd = function() {
   var chunk = this.stack [this.stack.length - 1];
   var remainingLength = chunk.length - chunk.readLength;
   for (var length = remainingLength; length > 0; length--) {
@@ -1111,7 +1113,7 @@ ChunksInputStream.prototype.readUntilChunkEnd = function() {
  * Returns the unsigned byte read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readUnsignedByte = function() {
+Max3DSLoader.ChunksInputStream.prototype.readUnsignedByte = function() {
   var b = this.read();
   if (b === -1) {
     throw new IncorrectFormat3DException ("Unexpected EOF");
@@ -1125,7 +1127,7 @@ ChunksInputStream.prototype.readUnsignedByte = function() {
  * Returns the unsigned short read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readLittleEndianUnsignedShort = function(incrementReadLength) {
+Max3DSLoader.ChunksInputStream.prototype.readLittleEndianUnsignedShort = function(incrementReadLength) {
   if (incrementReadLength === undefined) {
     incrementReadLength = true;
   }
@@ -1147,7 +1149,7 @@ ChunksInputStream.prototype.readLittleEndianUnsignedShort = function(incrementRe
  * Returns the short read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readLittleEndianShort = function(incrementReadLength) {
+Max3DSLoader.ChunksInputStream.prototype.readLittleEndianShort = function(incrementReadLength) {
   var s = this.readLittleEndianUnsignedShort(incrementReadLength);
   if (s & 0x8000) {
     s = (-1 & ~0x7FFF) | s; // Extend sign bit
@@ -1156,24 +1158,24 @@ ChunksInputStream.prototype.readLittleEndianShort = function(incrementReadLength
 }
 
 // Create buffers to convert 4 bytes to a float
-ChunksInputStream.converter = new Int8Array(4);
-ChunksInputStream.int32Converter = new Int32Array(ChunksInputStream.converter.buffer, 0, 1);
-ChunksInputStream.float32Converter = new Float32Array(ChunksInputStream.converter.buffer, 0, 1);
+Max3DSLoader.ChunksInputStream.converter = new Int8Array(4);
+Max3DSLoader.ChunksInputStream.int32Converter = new Int32Array(Max3DSLoader.ChunksInputStream.converter.buffer, 0, 1);
+Max3DSLoader.ChunksInputStream.float32Converter = new Float32Array(Max3DSLoader.ChunksInputStream.converter.buffer, 0, 1);
 
 /**
  * Returns the float read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readLittleEndianFloat = function() {
-  ChunksInputStream.int32Converter [0] = this.readLittleEndianUnsignedInt(true);
-  return ChunksInputStream.float32Converter [0]; // Float.intBitsToFloat
+Max3DSLoader.ChunksInputStream.prototype.readLittleEndianFloat = function() {
+  Max3DSLoader.ChunksInputStream.int32Converter [0] = this.readLittleEndianUnsignedInt(true);
+  return Max3DSLoader.ChunksInputStream.float32Converter [0]; // Float.intBitsToFloat
 }
   
 /**
  * Returns the unsigned integer read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readLittleEndianUnsignedInt = function(incrementReadLength) {
+Max3DSLoader.ChunksInputStream.prototype.readLittleEndianUnsignedInt = function(incrementReadLength) {
   if (incrementReadLength === undefined) {
     incrementReadLength = true;
   }
@@ -1197,7 +1199,7 @@ ChunksInputStream.prototype.readLittleEndianUnsignedInt = function(incrementRead
  * Returns the integer read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readLittleEndianInt = function(incrementReadLength) {
+Max3DSLoader.ChunksInputStream.prototype.readLittleEndianInt = function(incrementReadLength) {
   var i = this.readLittleEndianUnsignedInt(incrementReadLength);
   if (i & 0x80000000) {
     i = (-1 & ~0x7FFFFFFF) | i; // Extend sign bit
@@ -1209,7 +1211,7 @@ ChunksInputStream.prototype.readLittleEndianInt = function(incrementReadLength) 
  * Returns the string read from this stream.
  * @private
  */
-ChunksInputStream.prototype.readString = function() {
+Max3DSLoader.ChunksInputStream.prototype.readString = function() {
   var string = "";
   var b;
   // Read characters until terminal 0
@@ -1228,13 +1230,13 @@ ChunksInputStream.prototype.readString = function() {
  * @param {string} name, 
  * @param {Point3f []} vertices
  * @param {TexCoord2f []} textureCoordinates
- * @param {Face3DS []} faces
+ * @param {Max3DSLoader.Face3DS []} faces
  * @param {number} color
  * @param {mat4} transform
  * @constructor
  * @private
  */
-function Mesh3DS(name, vertices, textureCoordinates, faces, color, transform) {
+Max3DSLoader.Mesh3DS = function(name, vertices, textureCoordinates, faces, color, transform) {
   this.name = name;
   this.vertices = vertices;
   this.textureCoordinates = textureCoordinates;
@@ -1250,9 +1252,10 @@ function Mesh3DS(name, vertices, textureCoordinates, faces, color, transform) {
  * @param {number} vertexBIndex
  * @param {number} vertexCIndex
  * @param {number} flags
+ * @constructor
  * @private
  */
-function Face3DS(index, vertexAIndex, vertexBIndex, vertexCIndex, flags) {
+Max3DSLoader.Face3DS = function(index, vertexAIndex, vertexBIndex, vertexCIndex, flags) {
   this.index = index;
   this.vertexIndices = [vertexAIndex, vertexBIndex, vertexCIndex];
   this.normalIndices = null;  // number []
@@ -1270,9 +1273,10 @@ function Face3DS(index, vertexAIndex, vertexBIndex, vertexCIndex, flags) {
  * @param {number}  transparency
  * @param {Image}   texture
  * @param {boolean} twoSided
+ * @constructor
  * @private
  */
-function Material3DS(name, ambientColor, diffuseColor, specularColor,
+Max3DSLoader.Material3DS = function(name, ambientColor, diffuseColor, specularColor,
                      shininess, transparency, texture, twoSided) {
   this.name = name;
   this.ambientColor = ambientColor;
@@ -1288,9 +1292,10 @@ function Material3DS(name, ambientColor, diffuseColor, specularColor,
  * Creates a vertex shared between faces in a mesh.
  * @param {number} faceIndex
  * @param {vec3} normal
+ * @constructor
  * @private
  */
-function Mesh3DSSharedVertex(faceIndex, normal) {
+Max3DSLoader.Mesh3DSSharedVertex = function(faceIndex, normal) {
   this.faceIndex = faceIndex;
   this.normal = normal;
   this.nextVertex = null; // Mesh3DSSharedVertex 
