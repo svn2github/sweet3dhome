@@ -134,14 +134,20 @@ Node3D.prototype.clone = function() {
 
 /**
  * Creates a 3D shape.
- * @param {IndexedGeometryArray3D} geometry
- * @param {Appearance3D} appearance
+ * @param {IndexedGeometryArray3D} [geometry]
+ * @param {Appearance3D} [appearance]
  * @constructor
  * @extends Node3D
  * @author Emmanuel Puybaret
  */
 function Shape3D(geometry, appearance) {
   Node3D.call(this);
+  if (geometry === undefined) {
+    geometry = null;
+    appearance = null;
+  } else if (appearance === undefined) {
+    appearance = null;
+  } 
   this.appearance = appearance;
   this.bounds = null; 
   this.geometries = [];
@@ -165,6 +171,26 @@ Shape3D.prototype.addGeometry = function(geometry3D) {
     var vertex = geometry3D.vertices [geometry3D.vertexIndices [index]];
     vec3.min(lower, lower, vertex);
     vec3.max(upper, upper, vertex);
+  }
+  this.bounds = new BoundingBox3D(lower, upper);
+}
+
+Shape3D.prototype.removeGeometry = function(index) {
+  this.geometries.splice(index, 1);
+  // Recompute bounds
+  var lower = vec3.fromValues(Infinity, Infinity, Infinity);
+  var upper = vec3.fromValues(-Infinity, -Infinity, -Infinity);
+  if (this.bounds !== null) {
+    this.bounds.getLower(lower);
+    this.bounds.getUpper(upper);
+  }
+  for (var i = 0; i < this.geometries.length; i++) {
+    var geometry3D = this.geometries[i];
+    for (var index = 0; index < geometry3D.vertexIndices.length; index++) {
+      var vertex = geometry3D.vertices [geometry3D.vertexIndices [index]];
+      vec3.min(lower, lower, vertex);
+      vec3.max(upper, upper, vertex);
+    }
   }
   this.bounds = new BoundingBox3D(lower, upper);
 }
@@ -1449,7 +1475,25 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
  * Returns an instance of {@link IndexedTriangleArray3D} configured from 
  * the geometry data.
  */
-GeometryInfo.prototype.getGeometryArray = function() {
+GeometryInfo.prototype.getIndexedGeometryArray = function() {
+  if (this.vertices && !this.coordinatesIndices) {
+    this.coordinatesIndices = new Array(this.vertices.length);
+    for (var i = 0; i < this.coordinatesIndices.length; i++) {
+      this.coordinatesIndices [i] = i; 
+    }
+  }
+  if (this.textureCoordinates && !this.textureCoordinateIndices) {
+    this.textureCoordinateIndices = new Array(this.textureCoordinates.length);
+    for (var i = 0; i < this.textureCoordinateIndices.length; i++) {
+      this.textureCoordinateIndices [i] = i; 
+    }
+  }
+  if (this.normals && !this.normalIndices && !this.generatedNormals) {
+    this.normalIndices = new Array(this.normals.length);
+    for (var i = 0; i < this.normalIndices.length; i++) {
+      this.normalIndices [i] = i; 
+    }
+  }
   var triangleCoordinatesIndices;
   var triangleTextureCoordinateIndices;
   var triangleNormalIndices;
@@ -1466,28 +1510,28 @@ GeometryInfo.prototype.getGeometryArray = function() {
     triangleCoordinatesIndices = [];
     triangleTextureCoordinateIndices = [];
     triangleNormalIndices = [];
-    for (var i = 0; i < this.coordinatesIndices; i += 4) {
+    for (var i = 0; i < this.coordinatesIndices.length; i += 4) {
       triangleCoordinatesIndices.push(this.coordinatesIndices [i]);
       triangleCoordinatesIndices.push(this.coordinatesIndices [i + 1]);
       triangleCoordinatesIndices.push(this.coordinatesIndices [i + 2]);
       triangleCoordinatesIndices.push(this.coordinatesIndices [i + 2]);
-      triangleCoordinatesIndices.push(this.coordinatesIndices [i + 1]);
       triangleCoordinatesIndices.push(this.coordinatesIndices [i + 3]);
-      if (this.textureCoordinateIndices.length > 0) {
+      triangleCoordinatesIndices.push(this.coordinatesIndices [i]);
+      if (this.textureCoordinateIndices) {
         triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i]);
         triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 1]);
         triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 2]);
         triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 2]);
-        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 1]);
         triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i + 3]);
+        triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [i]);
       }
-      if (this.normalIndices.length > 0) {
+      if (this.normalIndices) {
         triangleNormalIndices.push(this.normalIndices [i]);
         triangleNormalIndices.push(this.normalIndices [i + 1]);
         triangleNormalIndices.push(this.normalIndices [i + 2]);
         triangleNormalIndices.push(this.normalIndices [i + 2]);
-        triangleNormalIndices.push(this.normalIndices [i + 1]);
         triangleNormalIndices.push(this.normalIndices [i + 3]);
+        triangleNormalIndices.push(this.normalIndices [i]);
       }
     }
   } else if (this.type === GeometryInfo.TRIANGLE_STRIP_ARRAY) {
@@ -1502,12 +1546,12 @@ GeometryInfo.prototype.getGeometryArray = function() {
         triangleCoordinatesIndices.push(this.coordinatesIndices [index + k]);
         triangleCoordinatesIndices.push(this.coordinatesIndices [nextVertexIndex]);
         triangleCoordinatesIndices.push(this.coordinatesIndices [nextNextVertexIndex]);
-        if (this.textureCoordinateIndices.length > 0) {
+        if (this.textureCoordinateIndices) {
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k]);
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [nextVertexIndex]);
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [nextNextVertexIndex]);
         }
-        if (this.normalIndices.length > 0) {
+        if (this.normalIndices) {
           triangleNormalIndices.push(this.normalIndices [index + k]);
           triangleNormalIndices.push(this.normalIndices [nextVertexIndex]);
           triangleNormalIndices.push(this.normalIndices [nextNextVertexIndex]);
@@ -1525,12 +1569,12 @@ GeometryInfo.prototype.getGeometryArray = function() {
         triangleCoordinatesIndices.push(this.coordinatesIndices [index]);
         triangleCoordinatesIndices.push(this.coordinatesIndices [index + k + 1]);
         triangleCoordinatesIndices.push(this.coordinatesIndices [index + k + 2]);
-        if (textureCoordinateIndices.length > 0) {
+        if (this.textureCoordinateIndices) {
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index]);
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k + 1]);
           triangleTextureCoordinateIndices.push(this.textureCoordinateIndices [index + k + 2]);
         }
-        if (normalIndices.length > 0) {
+        if (this.normalIndices) {
           triangleNormalIndices.push(this.normalIndices [index]);
           triangleNormalIndices.push(this.normalIndices [index + k + 1]);
           triangleNormalIndices.push(this.normalIndices [index + k + 2]);
