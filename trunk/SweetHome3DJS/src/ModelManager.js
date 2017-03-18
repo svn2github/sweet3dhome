@@ -33,6 +33,7 @@
 function ModelManager() {
   this.loadedModelNodes = {};
   this.loadingModelObservers = {};
+  this.parsedShapes = {};
 }
 
 /**
@@ -411,9 +412,9 @@ ModelManager.prototype.disposeGeometries = function(node) {
     // Not a problem to dispose more than once geometries of a shared group
     this.disposeGeometries(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
-    var nodeGeometries = node.getGeometries();
-    for (var i = 0; i < nodeGeometries.length; i++) {
-      nodeGeometries [i].disposeCoordinates(); 
+    var geometries = node.getGeometries();
+    for (var i = 0; i < geometries.length; i++) {
+      geometries [i].disposeCoordinates(); 
     }
   }
 }
@@ -494,3 +495,445 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
   }
 }
 
+/**
+ * Returns the shape matching the given cut out shape if not <code>null</code> 
+ * or the 2D area of the 3D shapes children of the <code>node</code> 
+ * projected on its front side. The returned area is normalized in a 1 unit square
+ * centered at the origin.
+ */
+ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
+  var frontArea; 
+  if (cutOutShape != null) {
+    frontArea = new Area(this.getShape(cutOutShape));
+    frontArea.transform(AffineTransform.getScaleInstance(1, -1));
+    frontArea.transform(AffineTransform.getTranslateInstance(-0.5, 0.5));
+  } else {
+    var vertexCount = this.getVertexCount(node);
+    if (vertexCount < 1000000) {
+      var frontAreaWithHoles = new Area();
+      this.computeBottomOrFrontArea(node, frontAreaWithHoles, mat4.create(), false, false);
+      frontArea = new Area();
+      var currentPathPoints = ([]);
+      var previousRoomPoint = null;
+      for (var it = frontAreaWithHoles.getPathIterator(null, 1); !it.isDone(); it.next()) {
+        var areaPoint = [0, 0];
+        switch ((it.currentSegment(areaPoint))) {
+          case PathIterator.SEG_MOVETO:
+          case PathIterator.SEG_LINETO:
+            if (previousRoomPoint === null 
+                || areaPoint[0] !== previousRoomPoint[0] 
+                || areaPoint[1] !== previousRoomPoint[1]) {
+              currentPathPoints.push(areaPoint);
+            }
+            previousRoomPoint = areaPoint;
+            break;
+          case PathIterator.SEG_CLOSE:
+            if (currentPathPoints[0][0] === previousRoomPoint[0] 
+                && currentPathPoints[0][1] === previousRoomPoint[1]) {
+              currentPathPoints.splice(currentPathPoints.length - 1, 1);
+            }
+            if (currentPathPoints.length > 2) {
+              var pathPoints = currentPathPoints.slice(0);
+              var subRoom = new Room(pathPoints);
+              if (subRoom.getArea() > 0) {
+                if (!subRoom.isClockwise()) {
+                  var currentPath = new GeneralPath();
+                  currentPath.moveTo(pathPoints[0][0], pathPoints[0][1]);
+                  for (var i = 1; i < pathPoints.length; i++) {
+                    currentPath.lineTo(pathPoints[i][0], pathPoints[i][1]);
+                  }
+                  currentPath.closePath();
+                  frontArea.add(new Area(currentPath));
+                }
+              }
+            }
+            currentPathPoints.length = 0;
+            previousRoomPoint = null;
+            break;
+        }
+      }
+      var bounds = frontAreaWithHoles.getBounds2D();
+      frontArea.transform(AffineTransform.getTranslateInstance(-bounds.getCenterX(), -bounds.getCenterY()));
+      frontArea.transform(AffineTransform.getScaleInstance(1 / bounds.getWidth(), 1 / bounds.getHeight()));
+    }
+    else {
+      frontArea = new Area(new Rectangle2D.Float(-0.5, -0.5, 1, 1));
+    }
+  }
+  return frontArea;
+}
+
+/**
+ * Returns the 2D area of the 3D shapes children of the given scene 3D <code>node</code>
+ * projected on the floor (plan y = 0), or of the given staircase if <code>node</code> is an
+ * instance of <code>HomePieceOfFurniture</code>.
+ * @param {Node3D|HomePieceOfFurniture} node
+ * @return {Area}
+ */
+ModelManager.prototype.getAreaOnFloor = function(node) {
+  if (node instanceof Node3D) {
+    var modelAreaOnFloor;
+    var vertexCount = this.getVertexCount(node);
+    if (vertexCount < 10000) {
+      modelAreaOnFloor = new Area();
+      this.computeBottomOrFrontArea(node, modelAreaOnFloor, mat4.create(), true, true);
+    } else {
+      var vertices = [];
+      this.computeVerticesOnFloor(node, vertices, mat4.create());
+      var surroundingPolygon = this.getSurroundingPolygon(vertices.slice(0));
+      var generalPath = new GeneralPath(Path2D.WIND_NON_ZERO, surroundingPolygon.length);
+      generalPath.moveTo(surroundingPolygon[0][0], surroundingPolygon[0][1]);
+      for (var i = 0; i < surroundingPolygon.length; i++) {
+        generalPath.lineTo(surroundingPolygon[i][0], surroundingPolygon[i][1]);
+      }
+      generalPath.closePath();
+      modelAreaOnFloor = new Area(generalPath);
+    }
+    return modelAreaOnFloor;
+  } else {
+    if (staircase.getStaircaseCutOutShape() === null) {
+      throw new IllegalArgumentException("No cut out shape associated to piece");
+    }
+    var shape = this.getShape(staircase.getStaircaseCutOutShape());
+    var staircaseArea = new Area(shape);
+    if (staircase.isModelMirrored()) {
+      staircaseArea = this.getMirroredArea(staircaseArea);
+    }
+    var staircaseTransform = AffineTransform.getTranslateInstance(
+            staircase.getX() - staircase.getWidth() / 2, 
+            staircase.getY() - staircase.getDepth() / 2);
+    staircaseTransform.concatenate(AffineTransform.getRotateInstance(staircase.getAngle(), 
+            staircase.getWidth() / 2, staircase.getDepth() / 2));
+    staircaseTransform.concatenate(AffineTransform.getScaleInstance(staircase.getWidth(), staircase.getDepth()));
+    staircaseArea.transform(staircaseTransform);
+    return staircaseArea;
+  }
+}
+
+/**
+ * Returns the total count of vertices in all geometries.
+ * @param {Node3D} node
+ * @return {number}
+ * @private
+ */
+ModelManager.prototype.getVertexCount = function(node) {
+  var count = 0;
+  if (node instanceof Group3D) {
+    var children = node.getChildren();
+    for (var i = 0; i < children.length; i++) {
+      count += this.getVertexCount(children [i]);
+    }
+  } else if (node instanceof Link3D) {
+    count = this.getVertexCount(node.getSharedGroup());
+  } else if (node instanceof Shape3D) {
+    var appearance = node.getAppearance();
+    if (appearance.isVisible()) {
+      var geometries = node.getGeometries(); 
+      for (var i = 0, n = geometries.length; i < n; i++) {
+        var geometry = geometries[i];
+        count += geometry.vertices.length;
+      }
+    }
+  }
+  return count;
+}
+
+/**
+ * Computes the 2D area on floor or on front side of the 3D shapes children of <code>node</code>.
+ * @param {Node3D} node
+ * @param {Area} nodeArea
+ * @param {mat4} parentTransformations
+ * @param {boolean} ignoreTransparentShapes
+ * @param {boolean} bottom
+ * @private
+ */
+ModelManager.prototype.computeBottomOrFrontArea = function(node, nodeArea, parentTransformations, ignoreTransparentShapes, bottom) {
+  if (node instanceof Group3D) {
+    if (node instanceof TransformGroup3D) {
+      parentTransformations = mat4.create();
+      var transform = mat4.create();
+      node.getTransform(transform);
+      mat4.mul(parentTransformations, parentTransformations, transform);
+    }
+    var children = node.getChildren();
+    for (var i = 0; i < children.length; i++) {
+      this.computeBottomOrFrontArea(children [i], nodeArea, parentTransformations, ignoreTransparentShapes, bottom);
+    }
+  } else if (node instanceof Link3D) {
+    this.computeBottomOrFrontArea(node.getSharedGroup(), nodeArea, parentTransformations, ignoreTransparentShapes, bottom);
+  } else if (node instanceof Shape3D) {
+    var appearance = node.getAppearance();
+    if (appearance.isVisible() && (!ignoreTransparentShapes || appearance.getTransparency() < 1)) {
+      var geometries = node.getGeometries(); 
+      for (var i = 0, n = geometries.length; i < n; i++) {
+        var geometry = geometries[i];
+        this.computeBottomOrFrontGeometryArea(geometry, nodeArea, parentTransformations, bottom);
+      }
+    }
+  }
+}
+
+/**
+ * Computes the bottom area of a 3D geometry if <code>bottom</code> is <code>true</code>,
+ * and the front area if not.
+ * @param {IndexedGeometryArray3D} geometryArray
+ * @param {Area} nodeArea
+ * @param {mat4} parentTransformations
+ * @param {boolean} bottom
+ * @private
+ */
+ModelManager.prototype.computeBottomOrFrontGeometryArea = function(geometryArray, nodeArea, parentTransformations, bottom) {
+  var vertexCount = geometryArray.vertices.length;
+  var vertices = new Array(vertexCount * 2);
+  var vertex = vec3.create();
+  for (var index = 0, i = 0; index < vertices.length; i++) {
+    vec3.copy(vertex, geometryArray.vertices[i]);
+    vec3.transformMat4(vertex, vertex, parentTransformations);
+    vertices[index++] = vertex[0];
+    if (bottom) {
+      vertices[index++] = vertex[2];
+    } else {
+      vertices[index++] = vertex[1];
+    }
+  }
+
+  geometryPath = new GeneralPath(Path2D.WIND_NON_ZERO, 1000);
+  for (var i = 0, triangleIndex = 0, n = geometryArray.vertexIndices.length; i < n; i += 3) {
+    this.addTriangleToPath(geometryArray, geometryArray.vertexIndices [i], geometryArray.vertexIndices [i + 1], geometryArray.vertexIndices [i + 2], vertices, geometryPath, triangleIndex, nodeArea);
+  }
+  nodeArea.add(new Area(geometryPath));
+}
+
+/**
+ * Adds to <code>nodePath</code> the triangle joining vertices at
+ * vertexIndex1, vertexIndex2, vertexIndex3 indices,
+ * only if the triangle has a positive orientation.
+ * @param {javax.media.j3d.GeometryArray} geometryArray
+ * @param {number} vertexIndex1
+ * @param {number} vertexIndex2
+ * @param {number} vertexIndex3
+ * @param {Array} vertices
+ * @param {GeneralPath} geometryPath
+ * @param {number} triangleIndex
+ * @param {Area} nodeArea
+ * @private
+ */
+ModelManager.prototype.addTriangleToPath = function(geometryArray, vertexIndex1, vertexIndex2, vertexIndex3, vertices, geometryPath, triangleIndex, nodeArea) {
+  var xVertex1 = vertices[2 * vertexIndex1];
+  var yVertex1 = vertices[2 * vertexIndex1 + 1];
+  var xVertex2 = vertices[2 * vertexIndex2];
+  var yVertex2 = vertices[2 * vertexIndex2 + 1];
+  var xVertex3 = vertices[2 * vertexIndex3];
+  var yVertex3 = vertices[2 * vertexIndex3 + 1];
+  if ((xVertex2 - xVertex1) * (yVertex3 - yVertex2) - (yVertex2 - yVertex1) * (xVertex3 - xVertex2) > 0) {
+    if (triangleIndex > 0 && triangleIndex % 1000 === 0) {
+      nodeArea.add(new Area(geometryPath));
+      geometryPath.reset();
+    }
+    geometryPath.moveTo(xVertex1, yVertex1);
+    geometryPath.lineTo(xVertex2, yVertex2);
+    geometryPath.lineTo(xVertex3, yVertex3);
+    geometryPath.closePath();
+  }
+}
+
+/**
+ * Computes the vertices coordinates projected on floor of the 3D shapes children of <code>node</code>.
+ * @param {Node3D} node
+ * @param {Array} vertices
+ * @param {mat4} parentTransformations
+ * @private
+ */
+ModelManager.prototype.computeVerticesOnFloor = function (node, vertices, parentTransformations) {
+  if (node instanceof Group3D) {
+    if (node instanceof TransformGroup3D) {
+      parentTransformations = mat4.create();
+      var transform = mat4.create();
+      node.getTransform(transform);
+      mat4.mul(parentTransformations, parentTransformations, transform);
+    }
+    var children = node.getChildren();
+    for (var i = 0; i < children.length; i++) {
+      this.computeVerticesOnFloor(children [i], vertices, parentTransformations);
+    }
+  } else if (node instanceof Link3D) {
+    this.computeVerticesOnFloor(node.getSharedGroup(), vertices, parentTransformations);
+  } else if (node instanceof Shape3D) {
+    var appearance = node.getAppearance();
+    if (appearance.isVisible() && (!ignoreTransparentShapes || appearance.getTransparency() < 1)) {
+      var geometries = node.getGeometries(); 
+      for (var i = 0, n = geometries.length; i < n; i++) {
+        var geometryArray = geometries[i];
+        var vertexCount = geometryArray.vertices.length;
+        var vertices = new Array(vertexCount * 2);
+        var vertex = vec3.create();
+        for (var index = 0, j = 0; index < vertexCount; j++, index++) {
+          vec3.copy(vertex, geometryArray.vertices[j]);
+          vec3.transformMat4(vertex, vertex, parentTransformations);
+          vertices.push([vertex[0], vertex[2]]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Returns the convex polygon that surrounds the given <code>vertices</code>.
+ * From Andrew's monotone chain 2D convex hull algorithm described at
+ * http://softsurfer.com/Archive/algorithm%5F0109/algorithm%5F0109.htm
+ * @param {Array} vertices
+ * @return {Array}
+ * @private
+ */
+ModelManager.prototype.getSurroundingPolygon = function (vertices) {
+  vertices.sort(function (vertex1, vertex2) {
+      var testedValue;
+      if (vertex1[0] === vertex2[0]) {
+        testedValue = vertex2[1] - vertex1[1];
+      } else {
+        testedValue = vertex2[0] - vertex1[0];
+      }
+      if (testedValue > 0) {
+        return 1;
+      } else if (testedValue < 0) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
+  var polygon = new Array(vertices.length);
+  var bottom = 0;
+  var top = -1;
+  var i;
+  
+  var minMin = 0;
+  var minMax;
+  var xmin = vertices[0][0];
+  for (i = 1; i < vertices.length; i++) {
+    if (vertices[i][0] !== xmin) {
+      break;
+    }
+  }
+  minMax = i - 1;
+  if (minMax === vertices.length - 1) {
+    polygon[++top] = vertices[minMin];
+    if (vertices[minMax][1] !== vertices[minMin][1]) {
+      polygon[++top] = vertices[minMax];
+    }
+    polygon[++top] = vertices[minMin];
+    var surroundingPolygon = new Array(top + 1);
+    System.arraycopy(polygon, 0, surroundingPolygon, 0, surroundingPolygon_1.length);
+    return surroundingPolygon;
+  }
+  
+  var maxMin;
+  var maxMax = vertices.length - 1;
+  var xMax = vertices[vertices.length - 1][0];
+  for (i = vertices.length - 2; i >= 0; i--) {
+    if (vertices[i][0] !== xMax) {
+      break;
+    }
+  }
+  maxMin = i + 1;
+  
+  polygon[++top] = vertices[minMin];
+  i = minMax;
+  while ((++i <= maxMin)) {
+    if (this.isLeft(vertices[minMin], vertices[maxMin], vertices[i]) >= 0 && i < maxMin) {
+      continue;
+    }
+    while ((top > 0)) {
+      if (this.isLeft(polygon[top - 1], polygon[top], vertices[i]) > 0)
+        break;
+      else
+        top--;
+    }
+    polygon[++top] = vertices[i];
+  }
+
+  if (maxMax !== maxMin) {
+    polygon[++top] = vertices[maxMax];
+  }
+  bottom = top;
+  i = maxMin;
+  while ((--i >= minMax)) {
+    if (this.isLeft(vertices[maxMax], vertices[minMax], vertices[i]) >= 0 && i > minMax) {
+      continue;
+    }
+    while ((top > bottom)) {
+      if (this.isLeft(polygon[top - 1], polygon[top], vertices[i]) > 0) {
+        break;
+      }
+      else {
+        top--;
+      }
+    }
+    polygon[++top] = vertices[i];
+  }
+  if (minMax !== minMin) {
+    polygon[++top] = vertices[minMin];
+  }
+  var surroundingPolygon = new Array(top + 1);
+  System.arraycopy(polygon, 0, surroundingPolygon, 0, surroundingPolygon.length);
+  return surroundingPolygon;
+}
+
+ModelManager.prototype.isLeft = function(vertex0, vertex1, vertex2) {
+  return (vertex1[0] - vertex0[0]) * (vertex2[1] - vertex0[1]) - (vertex2[0] - vertex0[0]) * (vertex1[1] - vertex0[1]);
+}
+
+/**
+ * Returns the mirror area of the given <code>area</code>.
+ * @param {Area} area
+ * @return {Area}
+ * @private
+ */
+ModelManager.prototype.getMirroredArea = function (area) {
+  var mirrorPath = new GeneralPath();
+  var point = [0, 0, 0, 0, 0, 0];
+  for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
+    switch ((it.currentSegment(point))) {
+    case PathIterator.SEG_MOVETO:
+      mirrorPath.moveTo(1 - point[0], point[1]);
+      break;
+    case PathIterator.SEG_LINETO:
+      mirrorPath.lineTo(1 - point[0], point[1]);
+      break;
+    case PathIterator.SEG_QUADTO:
+      mirrorPath.quadTo(1 - point[0], point[1], 1 - point[2], point[3]);
+      break;
+    case PathIterator.SEG_CUBICTO:
+      mirrorPath.curveTo(1 - point[0], point[1], 1 - point[2], point[3], 1 - point[4], point[5]);
+      break;
+    case PathIterator.SEG_CLOSE:
+      mirrorPath.closePath();
+      break;
+    }
+  }
+  return new Area(mirrorPath);
+}
+
+/**
+ * Returns the shape matching the given <a href="http://www.w3.org/TR/SVG/paths.html">SVG path shape</a>.
+ * @param {string} svgPathShape
+ * @return {Shape}
+ */
+ModelManager.prototype.getShape = function(svgPathShape) {
+  var shape2D = this.parsedShapes [svgPathShape];
+  if (!shape2D) {
+    shape2D = new Rectangle2D.Float(0, 0, 1, 1);
+    if (typeof AWTPathProducer !== "undefined") {
+      try {
+        var pathProducer = new AWTPathProducer();
+        var pathParser = new PathParser();
+        pathParser.setPathHandler(pathProducer);
+        pathParser.parse(svgPathShape);
+        shape2D = pathProducer.getShape();
+      } catch (ex) {
+        // Keep default value
+      }
+    }
+    this.parsedShapes[svgPathShape] = shape2D;
+  }
+  return shape2D;
+}
