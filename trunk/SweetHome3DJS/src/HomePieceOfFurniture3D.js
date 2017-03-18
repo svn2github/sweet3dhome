@@ -301,9 +301,7 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
           this.restoreDefaultAppearance(appearance, null);
         } else {
           appearance.setTextureCoordinatesGeneration(this.getTextureCoordinates(appearance, texture, pieceSize, modelBounds));
-          var transform = mat3.create();
-          mat3.rotate(transform, transform, texture.getAngle());
-          appearance.setTextureTransform(transform);
+          this.updateTextureTransform(appearance, texture, true);
           this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, materialShininess);
           TextureManager.getInstance().loadTexture(texture.getImage(), 0, 
               waitTextureLoadingEnd, this.getTextureObserver(appearance));
@@ -336,14 +334,14 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
               }
               appearance.setTextureImage(null);
             } else if (color === null && material.getTexture() !== null) {
+              var materialTexture = material.getTexture();
               if (this.isTexturesCoordinatesDefined(shape)) {
                 this.restoreDefaultTextureCoordinatesGeneration(appearance);
+                this.updateTextureTransform(appearance, materialTexture);
               } else {
                 appearance.setTextureCoordinatesGeneration(this.getTextureCoordinates(appearance, material.getTexture(), pieceSize, modelBounds));
+                this.updateTextureTransform(appearance, materialTexture, true);
               }
-              var transform = mat3.create();
-              mat3.rotate(transform, transform, material.getTexture().getAngle());
-              appearance.setTextureTransform(transform);
               this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, materialShininess);
               var materialTexture = material.getTexture();
               TextureManager.getInstance().loadTexture(materialTexture.getImage(), 0, 
@@ -405,13 +403,10 @@ HomePieceOfFurniture3D.prototype.getTextureCoordinates = function(appearance, te
   var upper = vec3.create();
   modelBounds.getUpper(upper);
   var minimumSize = ModelManager.getInstance().getMinimumSize();
-  var textureManager = TextureManager.getInstance();
-  var textureWidth = textureManager.getRotatedTextureWidth(texture);
-  var textureHeight = textureManager.getRotatedTextureHeight(texture);
-  var sx = pieceSize [0] / Math.max(upper [0] - lower [0], minimumSize) / textureWidth;
+  var sx = pieceSize [0] / Math.max(upper [0] - lower [0], minimumSize);
   var sw = -lower [0] * sx;
-  var ty = pieceSize [1] / Math.max(upper [1] - lower [1], minimumSize) / textureHeight;
-  var tz = pieceSize [2] / Math.max(upper [2] - lower [2], minimumSize) / textureHeight;
+  var ty = pieceSize [1] / Math.max(upper [1] - lower [1], minimumSize);
+  var tz = pieceSize [2] / Math.max(upper [2] - lower [2], minimumSize);
   var tw = -lower [1] * ty + upper [2] * tz;
   return {"planeS": vec4.fromValues(sx, 0, 0, sw), "planeT": vec4.fromValues(0, ty, -tz, tw)};
 }
