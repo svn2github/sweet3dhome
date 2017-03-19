@@ -591,6 +591,7 @@ ModelManager.prototype.getAreaOnFloor = function(node) {
     }
     return modelAreaOnFloor;
   } else {
+    var staircase = node;
     if (staircase.getStaircaseCutOutShape() === null) {
       throw new IllegalArgumentException("No cut out shape associated to piece");
     }
