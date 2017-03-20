@@ -330,11 +330,11 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
         // As model loaders are reentrant, use the same loaders for multiple loading
         this.modelLoaders = [new OBJLoader()];
         // Optional loaders
-        if (typeof Max3DSLoader !== "undefined") {
-          this.modelLoaders.push(new Max3DSLoader());
-        }
         if (typeof DAELoader !== "undefined") {
           this.modelLoaders.push(new DAELoader());
+        }
+        if (typeof Max3DSLoader !== "undefined") {
+          this.modelLoaders.push(new Max3DSLoader());
         }
       }
       var modelManager = this;
