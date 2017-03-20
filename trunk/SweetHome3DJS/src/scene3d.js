@@ -1394,14 +1394,14 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
   if (creaseAngle > 0) {
     var sharedVertices = [];
     for (var i = 0; i < coordinatesIndices.length; i += 3) {
+      var vertex = vertices [coordinatesIndices [i + 1]];
+      vec3.sub(vector1, vertices [coordinatesIndices [i + 2]], vertex);
+      vec3.sub(vector2, vertices [coordinatesIndices [i]], vertex);
+      var normal = vec3.cross(vec3.create(), vector1, vector2);
       for (var j = 0; j < 3; j++) {
-        var vertexIndex = coordinatesIndices [i + j];
-        var vertex = vertices [vertexIndex];
-        vec3.sub(vector1, vertices [coordinatesIndices [i + (j < 2 ? j + 1 : 0)]], vertex);
-        vec3.sub(vector2, vertices [coordinatesIndices [i + (j > 0 ? j - 1 : 2)]], vertex);
-        var normal = vec3.cross(vec3.create(), vector1, vector2);
         // Add vertex index to the list of shared vertices 
         var sharedVertex = {"normal" : normal};
+        var vertexIndex = coordinatesIndices [i + j];
         sharedVertex.nextVertex = sharedVertices [vertexIndex];
         sharedVertices [vertexIndex] = sharedVertex;
         // Add normal to normals set
@@ -1478,8 +1478,24 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
 GeometryInfo.prototype.getIndexedGeometryArray = function() {
   if (this.vertices && !this.coordinatesIndices) {
     this.coordinatesIndices = new Array(this.vertices.length);
-    for (var i = 0; i < this.coordinatesIndices.length; i++) {
-      this.coordinatesIndices [i] = i; 
+    if (this.generatedNormals 
+        && (this.creaseAngle === undefined 
+           || this.creaseAngle > 0)) {
+      // Ensure each coordinate indices are unique otherwise normals might not be computed correctly
+      for (var i = 0; i < this.coordinatesIndices.length; i++) {
+        for (var j = 0; j < this.vertices.length; j++) {
+          if (this.vertices[i][0] === this.vertices[j][0]
+              && this.vertices[i][1] === this.vertices[j][1]
+              && this.vertices[i][2] === this.vertices[j][2]) {
+            this.coordinatesIndices [i] = j;
+            break;
+          }
+        }
+      }
+    } else {
+      for (var i = 0; i < this.coordinatesIndices.length; i++) {
+        this.coordinatesIndices [i] = i;
+      }
     }
   }
   if (this.textureCoordinates && !this.textureCoordinateIndices) {
