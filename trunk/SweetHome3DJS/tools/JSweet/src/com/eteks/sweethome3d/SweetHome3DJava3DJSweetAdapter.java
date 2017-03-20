@@ -153,6 +153,13 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
               return true;
           }
           break;
+        case "javax.media.j3d.Shape3D":
+          switch (invocation.getMethodName()) {
+            case "numGeometries":
+              print(invocation.getTargetExpression()).print(".getGeometries().length");
+              return true;
+          }
+          break;
       }
       if (this.java3dTypeMapping.containsKey(invocation.getTargetExpression().getTypeAsElement().toString())
           && "setCapability".equals(invocation.getMethodName())
@@ -173,22 +180,22 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
   public boolean substituteVariableAccess(VariableAccessElement variableAccess) {
     if (variableAccess.getTargetExpression() != null) {
       switch (variableAccess.getTargetExpression().getTypeAsElement().toString()) {
-      case "javax.vecmath.Point3f":
-      case "javax.vecmath.TexCoord2f":
-      case "javax.vecmath.Vector3f":
-      case "javax.vecmath.Vector3d":
-        switch (variableAccess.getVariableName()) {
-        case "x":
-          print(variableAccess.getTargetExpression()).print("[0]");
-          return true;
-        case "y":
-          print(variableAccess.getTargetExpression()).print("[1]");
-          return true;
-        case "z":
-          print(variableAccess.getTargetExpression()).print("[2]");
-          return true;
-        }
-        break;
+        case "javax.vecmath.Point3f":
+        case "javax.vecmath.TexCoord2f":
+        case "javax.vecmath.Vector3f":
+        case "javax.vecmath.Vector3d":
+          switch (variableAccess.getVariableName()) {
+            case "x":
+              print(variableAccess.getTargetExpression()).print("[0]");
+              return true;
+            case "y":
+              print(variableAccess.getTargetExpression()).print("[1]");
+              return true;
+            case "z":
+              print(variableAccess.getTargetExpression()).print("[2]");
+              return true;
+          }
+          break;
       }
     }
     return super.substituteVariableAccess(variableAccess);
