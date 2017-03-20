@@ -45,18 +45,29 @@ function HomeComponent3D(canvasId, home, preferences, object3dFactory, controlle
   this.object3dFactory = object3dFactory !== null 
       ? object3dFactory
       : new Object3DBranchFactory();
-  this.approximateHomeBoundsCache = null;
+  this.homeObjects = [];
   this.defaultLights = [];
   this.camera = null;
   this.windowSizeListener = null;
   // Listeners bound to home that updates 3D scene objects
   this.cameraChangeListener = null;
   this.homeCameraListener = null;
+  this.groundChangeListener = null;
   this.backgroundChangeListener = null;
   this.lightColorListener = null;
   this.elevationChangeListener = null;
+  this.wallsAlphaListener = null;
+  this.levelListener = null;
+  this.levelChangeListener = null;
+  this.wallListener = null;
+  this.wallChangeListener = null;  
   this.furnitureListener = null;
   this.furnitureChangeListener = null;
+  this.roomListener = null;
+  this.roomChangeListener = null;
+  this.labelListener = null;
+  this.labelChangeListener = null;
+  this.approximateHomeBoundsCache = null;
   this.createComponent3D(canvasId, preferences, controller);
 }
 
@@ -253,15 +264,28 @@ HomeComponent3D.prototype.getClosestItemAt = function(x, y) {
  */
 HomeComponent3D.prototype.removeHomeListeners = function() {
   this.home.removePropertyChangeListener("CAMERA", this.homeCameraListener);
-  this.home.getCamera().removePropertyChangeListener(this.cameraChangeListener);
   var homeEnvironment = this.home.getEnvironment();
   homeEnvironment.removePropertyChangeListener("SKY_COLOR", this.backgroundChangeListener);
   homeEnvironment.removePropertyChangeListener("SKY_TEXTURE", this.backgroundChangeListener);
   homeEnvironment.removePropertyChangeListener("GROUND_COLOR", this.backgroundChangeListener);
   homeEnvironment.removePropertyChangeListener("GROUND_TEXTURE", this.backgroundChangeListener);
+  homeEnvironment.removePropertyChangeListener("GROUND_COLOR", this.groundChangeListener);
+  homeEnvironment.removePropertyChangeListener("GROUND_TEXTURE", this.groundChangeListener);
   homeEnvironment.removePropertyChangeListener("LIGHT_COLOR", this.lightColorListener);
+  homeEnvironment.removePropertyChangeListener("WALLS_ALPHA", this.wallsAlphaListener);
+  this.home.getCamera().removePropertyChangeListener(this.cameraChangeListener);
   this.home.removePropertyChangeListener("CAMERA", this.elevationChangeListener);
   this.home.getCamera().removePropertyChangeListener(this.elevationChangeListener);
+  this.home.removeLevelsListener(this.levelListener);
+  var levels = this.home.getLevels();
+  for (var i = 0; i < levels.length; i++) {
+    levels[i].removePropertyChangeListener(this.levelChangeListener);
+  }
+  this.home.removeWallsListener(this.wallListener);
+  var walls = this.home.getWalls();
+  for (var i = 0; i < walls.length; i++) {
+    walls[i].removePropertyChangeListener(this.wallChangeListener);
+  }
   this.home.removeFurnitureListener(this.furnitureListener);
   var furniture = this.home.getFurniture();
   for (var i = 0; i < furniture.length; i++) {
@@ -273,6 +297,16 @@ HomeComponent3D.prototype.removeHomeListeners = function() {
         groupFurniture [j].removePropertyChangeListener(this.furnitureChangeListener);
       }
     }
+  }
+  this.home.removeRoomsListener(this.roomListener);
+  var rooms = this.home.getRooms();
+  for (var i = 0; i < rooms.length; i++) {
+    rooms[i].removePropertyChangeListener(this.roomChangeListener);
+  }
+  this.home.removeLabelsListener(this.labelListener);
+  var labels = this.home.getLabels();
+  for (var i = 0; i < labels.length; i++) {
+    labels[i].removePropertyChangeListener(this.labelChangeListener);
   }
 }
 
@@ -1262,6 +1296,8 @@ HomeComponent3D.prototype.createGroundNode = function(groundOriginX, groundOrigi
           progression : function() {
           }
         });
+    
+    this.groundChangeListener = function(ev) {}; // Dummy listener
     return structureGroup;
   } else {
     var ground3D = typeof Ground3D !== "undefined" 
@@ -1271,6 +1307,23 @@ HomeComponent3D.prototype.createGroundNode = function(groundOriginX, groundOrigi
     mat4.translate(translation, translation, vec3.fromValues(0, -0.2, 0));
     var transformGroup = new TransformGroup3D(translation);
     transformGroup.addChild(ground3D);
+
+    if (listenToHomeUpdates) {
+      // Add a listener on ground color and texture properties change 
+      this.groundChangeListener = function(ev) {
+          if (!this.updater) {
+            var context = this;
+            this.updater = function() {
+                ground3D.update();
+                delete context.updater;
+              };
+            setTimeout(this.updater, 0);
+          }
+        };
+      var homeEnvironment = this.home.getEnvironment();
+      homeEnvironment.addPropertyChangeListener("GROUND_COLOR", this.groundChangeListener);
+      homeEnvironment.addPropertyChangeListener("GROUND_TEXTURE", this.groundChangeListener);
+    }    
     return transformGroup;
   }
 }
@@ -1357,10 +1410,139 @@ HomeComponent3D.prototype.createHomeTree = function(listenToHomeUpdates, waitFor
     }
   }
   if (listenToHomeUpdates) {
-    // Add furniture listeners to home for further update    
+    // Add level, wall, furniture, room listeners to home for further update    
+    this.addLevelListener(homeRoot);
+    this.addWallListener(homeRoot);
     this.addFurnitureListener(homeRoot);
+    this.addRoomListener(homeRoot);
+    this.addLabelListener(homeRoot);
+    this.addEnvironmentListeners();
   }
   return homeRoot;
+}
+
+/**
+ * Adds a level listener to home levels that updates the children of the given
+ * <code>group</code>, each time a level is added, updated or deleted.
+ * @param {Group3D} group
+ * @private
+ */
+HomeComponent3D.prototype.addLevelListener = function(group) {
+  var component3D = this;
+  this.levelChangeListener = function(ev) {
+      var propertyName = ev.getPropertyName();
+      if ("ELEVATION" == propertyName
+          || "VISIBLE" == propertyName
+          || "VIEWABLE" == propertyName) {
+        component3D.updateObjects(component3D.homeObjects.slice(0));          
+        component3D.groundChangeListener(null);
+      } else if ("FLOOR_THICKNESS" == propertyName) {
+        component3D.updateObjects(component3D.home.getWalls());          
+        component3D.updateObjects(component3D.home.getRooms());
+      } else if ("HEIGHT" == propertyName) {
+        component3D.updateObjects(component3D.home.getRooms());
+      }  
+    };
+  var levels = this.home.getLevels();
+  for (var i = 0; i < levels.length; i++) {
+    levels[i].addPropertyChangeListener(this.levelChangeListener);
+  }
+
+  this.levelListener = function (ev) {
+      var level = ev.getItem();
+      switch ((ev.getType())) {
+        case CollectionEvent.Type.ADD:
+          level.addPropertyChangeListener(component3D.levelChangeListener);
+          break;
+        case CollectionEvent.Type.DELETE:
+          level.removePropertyChangeListener(component3D.levelChangeListener);
+          break;
+        }
+      component3D.updateObjects(component3D.home.getRooms());
+    };
+  this.home.addLevelsListener(this.levelListener);
+}
+
+/**
+ * Returns <code>true</code> if the given <code>piece</code> is or contains a door or window.
+ * @param {HomePieceOfFurniture} piece
+ * @return {boolean}
+ * @private
+ */
+HomeComponent3D.prototype.containsDoorsAndWindows = function(piece) {
+  if (piece instanceof HomeFurnitureGroup) {
+    var furniture = piece.getFurniture();
+    for (var i = 0; i < furniture.length; i++) {
+      if (this.containsDoorsAndWindows(furniture[i])) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    return piece.isDoorOrWindow();
+  }
+}
+
+/**
+ * Returns <code>true</code> if the given <code>piece</code> is or contains a staircase
+ * with a top cut out shape.
+ * @param {HomePieceOfFurniture} piece
+ * @return {boolean}
+ * @private
+ */
+HomeComponent3D.prototype.containsStaircases = function (piece) {
+  if (piece instanceof HomeFurnitureGroup) {
+    var furniture = piece.getFurniture();
+    for (var i = 0; i < furniture.length; i++) {
+      if (this.containsStaircases(furniture[i])) {
+        return true;
+      }
+    }
+    return false;
+  } else {
+    return piece.getStaircaseCutOutShape() !== null;
+  }
+}
+
+/**
+ * Adds a wall listener to home walls that updates the children of the given
+ * <code>group</code>, each time a wall is added, updated or deleted.
+ * @param {Group3D} group
+ * @private
+ */
+HomeComponent3D.prototype.addWallListener = function(group) {
+  var component3D = this;
+  this.wallChangeListener = function(ev) {
+      var propertyName = ev.getPropertyName();
+      if ("PATTERN" != propertyName) {
+        var updatedWall = ev.getSource();
+        component3D.updateWall(updatedWall);          
+        component3D.updateObjects(component3D.home.getRooms());
+        if (updatedWall.getLevel() != null && updatedWall.getLevel().getElevation() < 0) {
+          component3D.groundChangeListener(null);
+        }
+      }
+    };
+  var walls = this.home.getWalls();
+  for (var i = 0; i < walls.length; i++) {
+    walls[i].addPropertyChangeListener(this.wallChangeListener);
+  }
+  this.wallListener = function (ev) {
+      var wall = ev.getItem();
+      switch ((ev.getType())) {
+        case CollectionEvent.Type.ADD:
+          component3D.addObject(group, wall, true, false);
+          wall.addPropertyChangeListener(component3D.wallChangeListener);
+          break;
+        case CollectionEvent.Type.DELETE:
+          component3D.deleteObject(wall);
+          wall.removePropertyChangeListener(component3D.wallChangeListener);
+          break;
+      }
+      component3D.updateObjects(component3D.home.getRooms());
+      component3D.groundChangeListener(null);
+    };
+  this.home.addWallsListener(this.wallListener);
 }
 
 /**
@@ -1370,6 +1552,17 @@ HomeComponent3D.prototype.createHomeTree = function(listenToHomeUpdates, waitFor
  */
 HomeComponent3D.prototype.addFurnitureListener = function(group) {
   var component3D = this;
+  var updatePieceOfFurnitureGeometry = function(piece) {
+      component3D.updateObjects([piece]);
+      if (component3D.containsDoorsAndWindows(piece)) {
+        component3D.updateObjects(component3D.home.getWalls());
+      } else if (component3D.containsStaircases(piece)) {
+        component3D.updateObjects(component3D.home.getRooms());
+      }
+      if (piece.getLevel() !== null && piece.getLevel().getElevation() < 0) {
+        component3D.groundChangeListener(null);
+      }
+    };  
   this.furnitureChangeListener = function(ev) {
       var updatedPiece = ev.getSource();
       var propertyName = ev.getPropertyName();
@@ -1378,13 +1571,13 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
           || "ANGLE" == propertyName
           || "WIDTH" == propertyName
           || "DEPTH" == propertyName) {
-        component3D.updateObjects([updatedPiece]);
+        updatePieceOfFurnitureGeometry(updatedPiece);
       } else if ("HEIGHT" == propertyName
           || "ELEVATION" == propertyName
           || "MODEL_MIRRORED" == propertyName
           || "VISIBLE" == propertyName
           || "LEVEL" == propertyName) {
-        component3D.updateObjects([updatedPiece]);
+        updatePieceOfFurnitureGeometry(updatedPiece);
       } else if ("COLOR" == propertyName
           || "TEXTURE" == propertyName
           || "MODEL_MATERIALS" == propertyName
@@ -1441,8 +1634,157 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
           }
           break;
       }
+      // If piece is or contains a door or a window, update walls that intersect with piece
+      if (component3D.containsDoorsAndWindows(piece)) {
+        component3D.updateObjects(component3D.home.getWalls());
+      } else if (component3D.containsStaircases(piece)) {
+        component3D.updateObjects(component3D.home.getRooms());
+      }
+      component3D.groundChangeListener(null);
     };
   this.home.addFurnitureListener(this.furnitureListener);
+}
+
+/**
+ * Adds a room listener to home rooms that updates the children of the given
+ * <code>group</code>, each time a room is added, updated or deleted.
+ * @param {Group3D} group
+ * @private
+ */
+HomeComponent3D.prototype.addRoomListener = function (group) {
+  var component3D = this;
+  this.roomChangeListener = function(ev) {
+      var updatedRoom = ev.getSource();
+      var propertyName = ev.getPropertyName();
+      if ("FLOOR_COLOR" == propertyName
+          || "FLOOR_TEXTURE" == propertyName
+          || "FLOOR_SHININESS" == propertyName
+          || "CEILING_COLOR" == propertyName
+          || "CEILING_TEXTURE" == propertyName
+          || "CEILING_SHININESS" == propertyName) {
+        component3D.updateObjects([updatedRoom]);
+      } else if ("FLOOR_VISIBLE" == propertyName
+          || "CEILING_VISIBLE" == propertyName
+          || "LEVEL" == propertyName) {   
+        component3D.updateObjects(component3D.home.getRooms());
+        component3D.groundChangeListener(null);
+      } else if ("POINTS" == propertyName) {   
+        if (component3D.homeObjectsToUpdate != null) {
+          // Don't try to optimize if more than one room to update
+          component3D.updateObjects(component3D.home.getRooms());
+        } else {
+          component3D.updateObjects([updatedRoom]);
+          // Search the rooms that overlap the updated one
+          var oldArea = new Area(component3D.getShape(ev.getOldValue()));
+          var newArea = new Area(component3D.getShape(ev.getNewValue()));
+          var updatedRoomLevel = updatedRoom.getLevel(); 
+          var rooms = component3D.home.getRooms();
+          for (var i = 0; i < rooms.length; i++) {
+            var room = rooms[i];
+            var roomLevel = room.getLevel();
+            if (room != updatedRoom
+                && (roomLevel == null
+                    || Math.abs(updatedRoomLevel.getElevation() + updatedRoomLevel.getHeight() - (roomLevel.getElevation() + roomLevel.getHeight())) < 1E-5
+                    || Math.abs(updatedRoomLevel.getElevation() + updatedRoomLevel.getHeight() - (roomLevel.getElevation() - roomLevel.getFloorThickness())) < 1E-5)) {
+              var roomAreaIntersectionWithOldArea = new Area(component3D.getShape(room.getPoints()));
+              var roomAreaIntersectionWithNewArea = new Area(roomAreaIntersectionWithOldArea);
+              roomAreaIntersectionWithNewArea.intersect(newArea);                  
+              if (!roomAreaIntersectionWithNewArea.isEmpty()) {
+                updateObjects([room]);
+              } else {
+                roomAreaIntersectionWithOldArea.intersect(oldArea);
+                if (!roomAreaIntersectionWithOldArea.isEmpty()) {
+                  updateObjects([room]);
+                }
+              }
+            }
+          }              
+        }
+        component3D.groundChangeListener(null);
+      }            
+    };
+  var rooms = this.home.getRooms();
+  for (var i = 0; i < rooms.length; i++) {
+    rooms[i].addPropertyChangeListener(this.roomChangeListener);
+  }
+  this.roomListener = function (ev) {
+      var room = ev.getItem();
+      switch ((ev.getType())) {
+        case CollectionEvent.Type.ADD:
+          component3D.addObject(group, room, ev.getIndex(), true, false);
+          room.addPropertyChangeListener(component3D.roomChangeListener);
+          break;
+        case CollectionEvent.Type.DELETE:
+          component3D.deleteObject(room);
+          room.removePropertyChangeListener(component3D.roomChangeListener);
+          break;
+      }
+      component3D.updateObjects(component3D.home.getRooms());
+      component3D.groundChangeListener(null);
+    };
+  this.home.addRoomsListener(this.roomListener);
+}
+
+/**
+ * Returns the path matching points.
+ * @param {Array} points
+ * @return {GeneralPath}
+ * @private
+ */
+HomeComponent3D.prototype.getShape = function (points) {
+  var path = new GeneralPath();
+  path.moveTo(points[0][0], points[0][1]);
+  for (var i = 1; i < points.length; i++) {
+    path.lineTo(points[i][0], points[i][1]);
+  }
+  path.closePath();
+  return path;
+}
+
+/**
+ * Adds a label listener to home labels that updates the children of the given
+ * <code>group</code>, each time a label is added, updated or deleted.
+ * @param {Group3D} group
+ * @private
+ */
+HomeComponent3D.prototype.addLabelListener = function (group) {
+  var component3D = this;
+  this.labelChangeListener = function(ev) {
+      var label = ev.getSource();
+      component3D.updateObjects([label]);
+    };
+  var labels = this.home.getLabels();
+  for (var i = 0; i < labels.length; i++) {
+    labels[i].addPropertyChangeListener(this.labelChangeListener);
+  }
+  this.labelListener = function (ev) {
+      var label = ev.getItem();
+      switch ((ev.getType())) {
+        case CollectionEvent.Type.ADD:
+          component3D.addObject(group, label, true, false);
+          label.addPropertyChangeListener(component3D.labelChangeListener);
+          break;
+        case CollectionEvent.Type.DELETE:
+          component3D.deleteObject(label);
+          label.removePropertyChangeListener(component3D.labelChangeListener);
+          break;
+      }
+    };
+  this.home.addLabelsListener(this.labelListener);
+}
+
+/**
+ * Adds a walls alpha change listener and drawing mode change listener to home
+ * environment that updates the home scene objects appearance.
+ * @private
+ */
+HomeComponent3D.prototype.addEnvironmentListeners = function () {
+  var component3D = this;
+  this.wallsAlphaListener = function(ev) {
+      component3D.updateObjects(component3D.home.getWalls());
+      component3D.updateObjects(component3D.home.getRooms());
+    };
+  this.home.getEnvironment().addPropertyChangeListener("WALLS_ALPHA", this.wallsAlphaListener);
 }
 
 /**
@@ -1465,6 +1807,7 @@ HomeComponent3D.prototype.addObject = function(group, homeObject, index,
   var object3D = this.object3dFactory.createObject3D(this.home, homeObject, waitForLoading);
   if (listenToHomeUpdates) {
     homeObject.object3D = object3D;
+    this.homeObjects.push(homeObject);
   }
   if (index === -1) {
     group.addChild(object3D);
@@ -1483,6 +1826,7 @@ HomeComponent3D.prototype.deleteObject = function(homeObject) {
   if (homeObject.object3D) {
     homeObject.object3D.detach();
     delete homeObject.object3D;
+    this.homeObjects.splice(this.homeObjects.indexOf(homeObject), 1);
   }
 }
 
@@ -1515,6 +1859,24 @@ HomeComponent3D.prototype.updateObjects = function(objects) {
         }, 0, this);
   }
   this.approximateHomeBoundsCache = null;
+}
+
+/**
+ * Updates <code>wall</code> geometry,
+ * and the walls at its end or start.
+ * @param {Wall} wall
+ * @private
+ */
+HomeComponent3D.prototype.updateWall = function (wall) {
+  var wallsToUpdate = [];
+  wallsToUpdate.push(wall);
+  if (wall.getWallAtStart() != null) {
+    wallsToUpdate.push(wall.getWallAtStart());
+  }
+  if (wall.getWallAtEnd() != null) {
+    wallsToUpdate.push(wall.getWallAtEnd());
+  }
+  this.updateObjects(wallsToUpdate);
 }
 
 

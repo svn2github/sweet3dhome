@@ -207,6 +207,16 @@ function testHome(geomAvailable) {
   home.deletePieceOfFurniture(piece);
   assertEquals("Wrong number of pieces", 2, home.getFurniture().length);
   assertEquals("Wrong number of pieces in group", 1, group.getFurniture().length);
+  // Add two walls
+  var wall1 = new Wall(0, 675, 0, 875, 5, 250);
+  var wall2 = new Wall(0, 875, 200, 875, 5, 250);
+  wall1.setWallAtEnd(wall2);
+  wall2.setWallAtStart(wall1);
+  home.addWall(wall1);
+  assertEquals("Wrong number of walls", 1, home.getWalls().length);
+  var room = new Room([[0, 675], [0, 875], [200, 875], [200, 675]]);
+  home.addRoom(room);
+  assertEquals("Wrong number of rooms", 1, home.getRooms().length);
   
   new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
       {
@@ -215,12 +225,18 @@ function testHome(geomAvailable) {
 	      assertEquals("Wrong furniture count", 117, home.getFurniture().length);
           var preferences = new DefaultUserPreferences();
 	      displayHome(home, preferences);
-		  // Add a piece to home and make it blink	      
-	      home.addPieceOfFurniture(piece);
+		  // Add objects to home and make them blink	  
+		  home.addPieceOfFurniture(piece);
 	      piece.setY(750);
+	      home.addWall(wall1);
+	      home.addWall(wall2);
+	      home.addRoom(room);
 	      setInterval(function() {
 	          // Make piece blink
 	          piece.setVisible(!piece.isVisible());
+	  	      wall1.setLeftSideColor(wall1.getLeftSideColor() == 0xFF ? 0xFFFFFF : 0xFF);
+	  	      wall2.setRightSideColor(wall2.getRightSideColor() == 0xFF00 ? 0xFFFFFF : 0xFF00);
+	  	      room.setFloorColor(room.getFloorColor() == 0x77 ? 0x777777 : 0x77);
 	        }, 500);
 	      
 	      // View a clone of the home in the second canvas
