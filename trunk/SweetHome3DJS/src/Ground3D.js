@@ -86,23 +86,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
   }
   
   var areaRemovedFromGround = new Area();
-  var mapGet = function(level) { 
-      for (var i = 0; i < this.length; i++) { 
-        if (this[i].level === level) { 
-          return this[i].area; 
-        } 
-      } 
-      return null; 
-    }; 
-  var mapPut = function(level, area) { 
-      this.push({level: level, area: area}); 
-    }; 
-  var undergroundAreas = [];
-  undergroundAreas.put = mapPut;
-  undergroundAreas.get = mapGet;
-  var roomAreas = [];
-  roomAreas.put = mapPut;
-  roomAreas.get = mapGet;
+  var undergroundLevelAreas = [];
   var rooms = home.getRooms();
   for (var i = 0; i < rooms.length; i++) {
     var room = rooms[i];
@@ -111,102 +95,104 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
         && room.isFloorVisible()) {
       var roomPoints = room.getPoints();
       if (roomPoints.length > 2) {
-        var roomArea = null;
+        var roomArea = new Area(this.getShape(roomPoints));
+        var levelAreas = roomLevel !== null && roomLevel.getElevation() < 0 
+            ? this.getUndergroundAreas(undergroundLevelAreas, roomLevel) 
+            : null;
         if (roomLevel === null 
             || (roomLevel.getElevation() <= 0 
                 && roomLevel.isViewableAndVisible())) {
-          roomArea = new Area(this.getShape(roomPoints));
           areaRemovedFromGround.add(roomArea);
-          this.updateUndergroundAreas(roomAreas, room.getLevel(), roomPoints, roomArea);
+          if (levelAreas !== null) {
+            levelAreas.roomArea.add(roomArea);
+          }
         }
-        this.updateUndergroundAreas(undergroundAreas, room.getLevel(), roomPoints, roomArea);
+        if (levelAreas !== null) {
+          levelAreas.undergroundArea.add(roomArea);
+        }
       }
     }
   }
   var furniture = home.getFurniture();
   for (var i = 0; i < furniture.length; i++) {
     var piece = furniture[i];
+    var pieceLevel = piece.getLevel();
     if (piece.getGroundElevation() < 0 
-        && (piece.getLevel() === null || piece.getLevel().isViewable())) {
+        && pieceLevel !== null 
+        && pieceLevel.isViewable() 
+        && pieceLevel.getElevation() < 0) {
+      var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, pieceLevel);
       if (piece.getStaircaseCutOutShape() === null) {
-        this.updateUndergroundAreas(undergroundAreas, piece.getLevel(), piece.getPoints(), null);
+        levelAreas.undergroundArea.add(new Area(this.getShape(piece.getPoints())));
       } else {
-        this.updateUndergroundAreas(undergroundAreas, piece.getLevel(), null, ModelManager.getInstance().getAreaOnFloor(piece));
+        levelAreas.undergroundArea.add(ModelManager.getInstance().getAreaOnFloor(piece));
       }
     }
   }
-  var wallAreas = []; 
-  wallAreas.put = mapPut;
-  wallAreas.get = mapGet;
   var walls = home.getWalls();
   for (var i = 0; i < walls.length; i++) {
     var wall = walls[i];
-    if (wall.getLevel() === null || wall.getLevel().isViewable()) {
-      this.updateUndergroundAreas(wallAreas, wall.getLevel(), wall.getPoints(), null);
+    var wallLevel = wall.getLevel();
+    if (wallLevel !== null 
+        && wallLevel.isViewable() 
+        && wallLevel.getElevation() < 0) {
+      var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, wallLevel);
+      levelAreas.wallArea.add(new Area(this.getShape(wall.getPoints())));
     }
   }
-  for (var i = 0; i < wallAreas.length; i++) {
-    var wallAreaEntry = wallAreas[i];
-    var areaPoints = this.getGroundAreaPoints(wallAreaEntry.area);
+  var undergroundAreas = undergroundLevelAreas;
+  for (var i = 0; i < undergroundAreas.length; i++) {
+    var levelAreas = undergroundAreas[i];
+    var areaPoints = this.getPoints(levelAreas.wallArea);
     for (var j = 0; j < areaPoints.length; j++) {
       var points = areaPoints[j];
       if (!new Room(points).isClockwise()) {
-        this.updateUndergroundAreas(undergroundAreas, wallAreaEntry.level, points, null);
+        levelAreas.undergroundArea.add(new Area(this.getShape(points)));
       }
     }
   }
-
-  var undergroundSideAreas = [];
-  undergroundSideAreas.put = mapPut;
-  undergroundSideAreas.get = mapGet;
-  var upperLevelAreas = [];
-  upperLevelAreas.put = mapPut;
-  upperLevelAreas.get = mapGet;
-  var levelComparator = function (entry1, entry2) {
-      return -(entry1.level.getElevation() - entry2.level.getElevation());
-    };
-  undergroundAreas.sort(levelComparator);
+  
+  undergroundAreas.sort(function (levelAreas1, levelAreas2) {
+      return -(levelAreas1.level.getElevation() - levelAreas2.level.getElevation());
+    });
   for (var i = 0; i < undergroundAreas.length; i++) {
-    var undergroundAreaEntry = undergroundAreas[i];
-    var level = undergroundAreaEntry.level;
-    var area = undergroundAreaEntry.area;
+    var levelAreas = undergroundAreas[i];
+    var level = levelAreas.level;
+    var area = levelAreas.undergroundArea;
     var areaAtStart = area.clone();
-    undergroundSideAreas.put(level, area.clone());
-    upperLevelAreas.put(level, new Area());
+    levelAreas.undergroundSideArea.add(area.clone());
     for (var j = 0; j < undergroundAreas.length; j++) {
-      var otherUndergroundAreaEntry = undergroundAreas[j];
-      if (otherUndergroundAreaEntry.level.getElevation() < level.getElevation()) {
-        var areaPoints = this.getGroundAreaPoints(otherUndergroundAreaEntry.area);
+      var otherLevelAreas = undergroundAreas[j];
+      if (otherLevelAreas.level.getElevation() < level.getElevation()) {
+        var areaPoints = this.getPoints(otherLevelAreas.undergroundArea);
         for (var k = 0; k < areaPoints.length; k++) {
           var points = areaPoints[k];
           if (!new Room(points).isClockwise()) {
             var pointsArea = new Area(this.getShape(points));
             area.subtract(pointsArea);
-            undergroundSideAreas.get(level).add(pointsArea);
+            levelAreas.undergroundSideArea.add(pointsArea);
           }
         }
       }
     }
-    var areaPoints = this.getGroundAreaPoints(area);
+    var areaPoints = this.getPoints(area);
     for (var j = 0; j < areaPoints.length; j++) {
       var points = areaPoints[j];
       if (new Room(points).isClockwise()) {
         var coveredHole = new Area(this.getShape(points));
         coveredHole.exclusiveOr(areaAtStart);
         coveredHole.subtract(areaAtStart);
-        upperLevelAreas.get(level).add(coveredHole);
+        levelAreas.upperLevelArea.add(coveredHole);
       } else {
         areaRemovedFromGround.add(new Area(this.getShape(points)));
       }
     }
   }
   for (var i = 0; i < undergroundAreas.length; i++) {
-    var undergroundAreaEntry = undergroundAreas[i];
-    var level = undergroundAreaEntry.level;
-    var area = undergroundAreaEntry.area;
-    var roomArea = roomAreas.get(level);
-    if (roomArea !== null) {
-      area.subtract(roomArea);
+    var levelAreas = undergroundAreas[i];
+    var roomArea = levelAreas.roomArea;
+    if (roomArea != null) {
+      levelAreas.undergroundArea.subtract(roomArea);
     }
   }
   
@@ -232,29 +218,20 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     outsideGroundArea.subtract(groundArea);
     this.addAreaGeometry(groundShape, groundTexture, outsideGroundArea, 0);
   }
-  groundArea.subtract(areaRemovedFromGround);  
-  // Remove level at elevation 0 if it exists as put should do
-  for (var i = 0; i < undergroundAreas.length; i++) { 
-    if (undergroundAreas[i].level.getElevation() === 0) { 
-      undergroundAreas.splice(i, 1); 
-      break;
-    } 
-  } 
-  undergroundAreas.put(new Level("Ground", 0, 0, 0), groundArea);
-  undergroundAreas.sort(levelComparator); // Sort undergroundAreas only when needed
+  groundArea.subtract(areaRemovedFromGround);
+  undergroundAreas.splice(0, 0, new Ground3D.LevelAreas(new Level("Ground", 0, 0, 0), groundArea));
   var previousLevelElevation = 0;
-  for (var index = 0; index < undergroundAreas.length; index++) {
-    var undergroundAreaEntry = undergroundAreas[index];
-    var level = undergroundAreaEntry.level;
-    var elevation = level.getElevation();
-    this.addAreaGeometry(groundShape, groundTexture, undergroundAreaEntry.area, elevation);
+  for (var i = 0; i < undergroundAreas.length; i++) {
+    var levelAreas = undergroundAreas[i];
+    var elevation = levelAreas.level.getElevation();
+    this.addAreaGeometry(groundShape, groundTexture, levelAreas.undergroundArea, elevation);
     if (previousLevelElevation - elevation > 0) {
-      var areaPoints = this.getGroundAreaPoints(undergroundSideAreas.get(level));
-      for (var i = 0; i < areaPoints.length; i++) {
-        var points = areaPoints[i];
+      var areaPoints = this.getPoints(levelAreas.undergroundSideArea);
+      for (var j = 0; j < areaPoints.length; j++) {
+        var points = areaPoints[j];
         this.addAreaSidesGeometry(groundShape, groundTexture, points, elevation, previousLevelElevation - elevation);
       }
-      this.addAreaGeometry(groundShape, groundTexture, upperLevelAreas.get(level), previousLevelElevation);
+      this.addAreaGeometry(groundShape, groundTexture, levelAreas.upperLevelArea, previousLevelElevation);
     }
     previousLevelElevation = elevation;
   }
@@ -270,7 +247,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
  * @return {Array}
  * @private
  */
-Ground3D.prototype.getGroundAreaPoints = function(area) {
+Ground3D.prototype.getPoints = function(area) {
   var areaPoints = [];
   var areaPartPoints = [];
   var previousRoomPoint = null;
@@ -299,25 +276,25 @@ Ground3D.prototype.getGroundAreaPoints = function(area) {
 }
 
 /**
- * Adds the given area to the underground areas for level below zero.
+ * Returns the {@link LevelAreas} instance matching the given level.
  * @param {Object} undergroundAreas
  * @param {Level} level
- * @param {Array} points
- * @param {Area} area
+ * @return {Ground3D.LevelAreas}
  * @private
  */
-Ground3D.prototype.updateUndergroundAreas = function(undergroundAreas, level, points, area) {
-  if (level !== null && level.getElevation() < 0) {
-    var itemsArea = undergroundAreas.get(level);
-    if (itemsArea === null) {
-      itemsArea = new Area();
-      undergroundAreas.put(level, itemsArea);
-    }
-    itemsArea.add(area !== null 
-        ? area 
-        : new Area(this.getShape(points)));
+Ground3D.prototype.getUndergroundAreas = function(undergroundAreas, level) {
+  var levelAreas = null;
+  for (var i = 0; i < undergroundAreas.length; i++) { 
+    if (undergroundAreas[i].level === level) { 
+      levelAreas = undergroundAreas[i]; 
+      break;
+    } 
+  } 
+  if (levelAreas === null) {
+    undergroundAreas.push(levelAreas = new Ground3D.LevelAreas(level));
   }
-}
+  return levelAreas;
+};
 
 /**
  * Adds to ground shape the geometry matching the given area.
@@ -403,4 +380,21 @@ Ground3D.prototype.addAreaSidesGeometry = function(groundShape, groundTexture, a
   geometryInfo.setCreaseAngle(0);
   geometryInfo.setGeneratedNormals(true);
   groundShape.addGeometry(geometryInfo.getIndexedGeometryArray());
+}
+
+/**
+ * Areas of underground levels.
+ * @constructor
+ * @private
+ */
+Ground3D.LevelAreas = function(level, undergroundArea) {
+  if (undergroundArea === undefined) {
+    undergroundArea = new Area();
+  }
+  this.level = level;
+  this.undergroundArea = undergroundArea;
+  this.roomArea = new Area();
+  this.wallArea = new Area();
+  this.undergroundSideArea = new Area();
+  this.upperLevelArea = new Area();
 }
