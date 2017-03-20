@@ -1533,11 +1533,11 @@ function Object3DBranchFactory() {
 Object3DBranchFactory.prototype.createObject3D = function(home, item, waitForLoading) {
   if (item instanceof HomePieceOfFurniture) {
     return new HomePieceOfFurniture3D(item, home, waitForLoading);
-  // TODO Implement Wall3D, Room3D and Label3D 
-  // } else if (item instanceof Wall) {
-  //   return new Wall3D(item, home, true, waitForLoading);
-  // } else if (item instanceof Room) {
-  //   return new Room3D(item, home, false, waitForLoading);
+  } else if (item instanceof Wall) {
+    return new Wall3D(item, home, true, waitForLoading);
+  } else if (item instanceof Room) {
+    return new Room3D(item, home, false, waitForLoading);
+  // TODO Implement Label3D 
   // } else if (item instanceof Label) {
   //   return new Label3D(item, home, waitForLoading);
   } else {
