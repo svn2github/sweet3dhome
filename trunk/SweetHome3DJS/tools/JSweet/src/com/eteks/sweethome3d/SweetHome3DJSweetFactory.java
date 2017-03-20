@@ -31,9 +31,6 @@ import org.jsweet.transpiler.extension.PrinterAdapter;
  */
 public class SweetHome3DJSweetFactory extends JSweetFactory {
 
-  public SweetHome3DJSweetFactory() {
-  }
-
   public PrinterAdapter createAdapter(JSweetContext context) {
     return new SAXParserJSweetAdapter( //
         new SweetHome3DJava3DJSweetAdapter( //
