@@ -709,12 +709,12 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
             secondHorizontalTextureCoords = Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
                 points[nextIndex][0], points[nextIndex][1]);
           } else {
-            if (pointUCoordinates[index] === null) {
+            if (pointUCoordinates[index] === undefined) {
               var pointAngle = Math.atan2(points[index][1] - arcCircleCenter[1], points[index][0] - arcCircleCenter[0]);
               pointAngle = this.adjustAngleOnReferencePointAngle(pointAngle, referencePointAngle, arcExtent);
               pointUCoordinates[index] = (pointAngle - referencePointAngle) * arcCircleRadius;
             }
-            if (pointUCoordinates[nextIndex] === null) {
+            if (pointUCoordinates[nextIndex] === undefined) {
               var pointAngle = Math.atan2(points[nextIndex][1] - arcCircleCenter[1], points[nextIndex][0] - arcCircleCenter[0]);
               pointAngle = this.adjustAngleOnReferencePointAngle(pointAngle, referencePointAngle, arcExtent);
               pointUCoordinates[nextIndex] = (pointAngle - referencePointAngle) * arcCircleRadius;
