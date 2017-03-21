@@ -26,7 +26,7 @@
 
 /**
  * Creates the 3D wall matching the given home <code>piece</code>.
- * @param {{Wall} wall
+ * @param {Wall} wall
  * @param {Home} home
  * @param {boolean} waitModelAndTextureLoadingEnd
  * @constructor
