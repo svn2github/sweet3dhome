@@ -141,6 +141,7 @@
     <copy file="lib/big.min.js" todir="dist" />
     <copy file="lib/gl-matrix-min.js" todir="dist" />
     <copy file="lib/jszip.min.js" todir="dist" />
+  	<copy file="lib/jsXmlSaxParser.min.js" todir="dist" />
     <copy file="src/close.png" todir="dist" />
     <copy file="src/navigationPanel.png" todir="dist" />
 
