@@ -152,11 +152,13 @@ function Shape3D(geometry, appearance) {
   this.bounds = null; 
   this.geometries = [];
   if (geometry !== null) {
-    this.addGeometry(geometry);
+    this.geometries.push(geometry);
   }
 }
 Shape3D.prototype = Object.create(Node3D.prototype);
 Shape3D.prototype.constructor = Shape3D;
+
+Shape3D.ALLOW_GEOMETRY_WRITE = 2;
 
 Shape3D.prototype.addGeometry = function(geometry3D) {
   this.geometries.push(geometry3D);
@@ -173,30 +175,45 @@ Shape3D.prototype.addGeometry = function(geometry3D) {
     vec3.max(upper, upper, vertex);
   }
   this.bounds = new BoundingBox3D(lower, upper);
+  if (this.propertyChangeSupport !== undefined) {
+    this.propertyChangeSupport.firePropertyChange("GEOMETRY", null, geometry3D);
+  }
 }
 
 Shape3D.prototype.removeGeometry = function(index) {
+  var removedGeometry3D = this.geometries [index];
   this.geometries.splice(index, 1);
-  // Recompute bounds
-  var lower = vec3.fromValues(Infinity, Infinity, Infinity);
-  var upper = vec3.fromValues(-Infinity, -Infinity, -Infinity);
-  if (this.bounds !== null) {
-    this.bounds.getLower(lower);
-    this.bounds.getUpper(upper);
+  // Clear bounds cache
+  this.bounds = null;
+  if (this.propertyChangeSupport !== undefined) {
+    this.propertyChangeSupport.firePropertyChange("GEOMETRY", removedGeometry3D, null);
   }
-  for (var i = 0; i < this.geometries.length; i++) {
-    var geometry3D = this.geometries[i];
-    for (var index = 0; index < geometry3D.vertexIndices.length; index++) {
-      var vertex = geometry3D.vertices [geometry3D.vertexIndices [index]];
-      vec3.min(lower, lower, vertex);
-      vec3.max(upper, upper, vertex);
-    }
-  }
-  this.bounds = new BoundingBox3D(lower, upper);
 }
 
 Shape3D.prototype.getBounds = function() {
-  return this.bounds.clone();
+  if (this.geometries.length > 0
+      && this.bounds === null) {
+    // Recompute bounds
+    var lower = vec3.fromValues(Infinity, Infinity, Infinity);
+    var upper = vec3.fromValues(-Infinity, -Infinity, -Infinity);
+    for (var i = 0; i < this.geometries.length; i++) {
+      var geometry3D = this.geometries[i];
+      if (geometry3D.vertexIndices) {
+        for (var index = 0; index < geometry3D.vertexIndices.length; index++) {
+          var vertex = geometry3D.vertices [geometry3D.vertexIndices [index]];
+          vec3.min(lower, lower, vertex);
+          vec3.max(upper, upper, vertex);
+        }
+      }
+    }
+    this.bounds = new BoundingBox3D(lower, upper);
+  }
+
+  if (this.bounds !== null) {
+    return this.bounds.clone();
+  } else {
+    return null;
+  }
 }
 
 Shape3D.prototype.getGeometries = function() {
@@ -552,7 +569,7 @@ function TransformGroup3D(transform) {
 TransformGroup3D.prototype = Object.create(Group3D.prototype);
 TransformGroup3D.prototype.constructor = TransformGroup3D;
 
-TransformGroup3D.ALLOW_TRANSFORM_WRITE = 2;
+TransformGroup3D.ALLOW_TRANSFORM_WRITE = 3;
 
 TransformGroup3D.prototype.getTransform = function(transform) {
   mat4.copy(transform, this.transform);
@@ -782,6 +799,28 @@ Appearance3D.prototype.setTextureImage = function(textureImage) {
  */
 Appearance3D.prototype.getTextureImage = function() {
   return this.textureImage;
+}
+
+/** 
+ * Returns true if x is a power of 2.
+ * @param {number} x
+ * @return {boolean}
+ */
+Appearance3D.isPowerOfTwo = function(x) {
+  return (x & (x - 1)) == 0;
+}
+
+/**
+ * Returns the closest higher number that is a power of 2.
+ * @param {number} x
+ * @return {number}
+ */
+Appearance3D.getNextHighestPowerOfTwo = function (x) {
+  --x;
+  for (var i = 1; i < 32; i <<= 1) {
+      x = x | x >> i;
+  }
+  return (x + 1);
 }
 
 Appearance3D.prototype.setTextureCoordinatesGeneration = function(textureCoordinatesGeneration) {

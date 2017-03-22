@@ -65,6 +65,7 @@ Room3D.CEILING_PART = 1;
  */
 Room3D.prototype.createRoomPartShape = function() {
   var roomShape = new Shape3D();
+  roomShape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
   var roomAppearance = new Appearance3D();
   roomShape.setAppearance(roomAppearance);
   this.updateAppearanceMaterial(roomAppearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, 0);

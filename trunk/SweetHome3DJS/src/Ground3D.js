@@ -45,6 +45,7 @@ function Ground3D(home, originX, originY, width, depth, waitTextureLoadingEnd) {
 
   var groundAppearance = new Appearance3D();
   var groundShape = new Shape3D();
+  groundShape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
   groundShape.setAppearance(groundAppearance);
 
   this.addChild(groundShape);

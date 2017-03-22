@@ -304,7 +304,7 @@ HTMLCanvas3D.prototype.getScene = function() {
 
 /**
  * Returns the count of geometries in all the shapes children of the given node.
- * @param [Node3D] node
+ * @param {Node3D} node
  * @private
  */
 HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
@@ -328,14 +328,14 @@ HTMLCanvas3D.DEFAULT_APPEARANCE = new Appearance3D();
 
 /**
  * Prepares the scene to be rendered, creating the required buffers and textures in WebGL.  
- * @param [Node3D]  node
- * @param [Array]   displayedGeometries
- * @param [boolean] background
+ * @param {Node3D}  node
+ * @param {Array}   displayedGeometries
+ * @param {boolean} background
  * @param [Link3D]  parentLinks
  * @param [Array]   lights
- * @param parentTransformations
+ * @param {mat4}    parentTransformations
  * @param onprogression
- * @param [number]  displayedGeometryCount
+ * @param {number}  displayedGeometryCount
  * @private
  */
 HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, background, parentLinks, lights, parentTransformations, 
@@ -397,86 +397,44 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
     }
     var texture = null;
     if (nodeAppearance.getTextureImage()) {
-      texture = canvas3D.prepareTexture(nodeAppearance.getTextureImage());
+      texture = this.prepareTexture(nodeAppearance.getTextureImage());
     }
-    var ambientColor = nodeAppearance.getAmbientColor();
-    var diffuseColor;
-    if (nodeAppearance.getDiffuseColor() !== undefined) {
-      diffuseColor = nodeAppearance.getDiffuseColor();
-    } else {
-      diffuseColor = new Float32Array([1., 1., 1.]);
-    }
-    var specularColor = nodeAppearance.getSpecularColor();
-    var shininess = nodeAppearance.getShininess();
     
     var nodeGeometries = node.getGeometries();
     for (var i = 0; i < nodeGeometries.length; i++) {
-      var nodeGeometry = nodeGeometries [i];
-      var displayedGeometry = null;
-      // Search if node geometry is already used
-      for (var j = 0; j < displayedGeometries.length; j++) {
-        if (displayedGeometries [j].nodeGeometry === nodeGeometry) {
-          displayedGeometry = {"node" : node,
-                               "background"   : background,
-                               "nodeGeometry" : nodeGeometry,
-                               "vertexCount"  : displayedGeometries [j].vertexCount, 
-                               "vertexBuffer" : displayedGeometries [j].vertexBuffer, 
-                               "textureCoordinatesBuffer" : displayedGeometries [j].textureCoordinatesBuffer,
-                               "normalBuffer" : displayedGeometries [j].normalBuffer,
-                               "mode" : displayedGeometries [j].mode};
-          break;
-        }
-      }
-      
-      if (displayedGeometry === null) {
-        displayedGeometry = {"node" : node,
-                             "background"   : background,
-                             "nodeGeometry" : nodeGeometry,
-                             "vertexCount"  : nodeGeometry.vertexIndices.length};
-        displayedGeometry.vertexBuffer = canvas3D.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
-        displayedGeometry.textureCoordinatesBuffer = canvas3D.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
-        if (nodeGeometry instanceof IndexedTriangleArray3D) {
-          displayedGeometry.mode = canvas3D.gl.TRIANGLES;
-          displayedGeometry.normalBuffer = canvas3D.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
-        } else {
-          displayedGeometry.mode = canvas3D.gl.LINES;
-        } 
-      } 
-      // Set parameters not shared
-      displayedGeometry.transformation = parentTransformations;
-      if (parentLinks.length > 0) {
-        displayedGeometry.parentLinks = parentLinks;
-      }
-      if (ambientColor !== undefined) {
-        displayedGeometry.ambientColor = ambientColor;
-      }
-      if (diffuseColor !== undefined) {
-        displayedGeometry.diffuseColor = diffuseColor;
-      }
-      if (specularColor !== undefined) {
-        displayedGeometry.specularColor = specularColor;
-      }
-      if (shininess !== undefined) {
-        displayedGeometry.shininess = shininess;
-      }
-      if (texture !== null) {
-        displayedGeometry.textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
-        displayedGeometry.textureTransform = nodeAppearance.getTextureTransform();
-        displayedGeometry.texture = texture;
-      }
-      displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
-      if (nodeAppearance.getCullFace() !== undefined) {
-        displayedGeometry.cullFace = nodeAppearance.getCullFace();
-      }
-      var illumination = nodeAppearance.getIllumination();
-      displayedGeometry.lightingEnabled =  
-             (illumination === undefined || illumination >= 1)
-          && displayedGeometry.normalBuffer !== null;
-      displayedGeometry.transparency = nodeAppearance.getTransparency() !== undefined 
-          ? 1 - nodeAppearance.getTransparency()
-          : 1;
-      displayedGeometry.visible = nodeAppearance.isVisible();
-      displayedGeometries.push(displayedGeometry);
+      this.prepareGeometry(nodeGeometries [i], nodeAppearance, texture, 
+          node, displayedGeometries, background, parentLinks, parentTransformations);
+    }
+    if (node.getCapability(Shape3D.ALLOW_GEOMETRY_WRITE)) {
+      node.addPropertyChangeListener(
+          function(ev) {
+            if ("GEOMETRY" == ev.getPropertyName()) {
+              if (ev.getOldValue()) {
+                removedGeometry = ev.getOldValue();
+                for (var i = 0; i < displayedGeometries.length; i++) {
+                  var displayedGeometry = displayedGeometries [i];
+                  if (displayedGeometry.nodeGeometry === removedGeometry) {
+                    // Free geometry buffers
+                    canvas3D.gl.deleteBuffer(displayedGeometry.vertexBuffer);
+                    if (displayedGeometry.textureCoordinatesBuffer !== null
+                        && displayedGeometry.texture !== undefined) {
+                      canvas3D.gl.deleteBuffer(displayedGeometry.textureCoordinatesBuffer);
+                    }
+                    if (displayedGeometry.normalBuffer !== undefined) {
+                      canvas3D.gl.deleteBuffer(displayedGeometry.normalBuffer);
+                    }
+                    displayedGeometries.splice(i, 1);
+                    break;
+                  }
+                }
+              }
+              if (ev.getNewValue()) {
+                addedGeometry = ev.getNewValue();
+                canvas3D.prepareGeometry(addedGeometry, nodeAppearance, texture, 
+                    node, displayedGeometries, background, parentLinks, parentTransformations);
+              }
+            }
+          });
     }
 
     if (nodeAppearance !== HTMLCanvas3D.DEFAULT_APPEARANCE) {
@@ -509,6 +467,13 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                         && displayedGeometry.mode === canvas3D.gl.TRIANGLES;
                     break;
                   case "TEXTURE_IMAGE" : 
+                    if (displayedGeometry.texture
+                        && displayedGeometry.texture.url === undefined) {
+                      // Free generated textures
+                      var index = canvas3D.textures.indexOf(displayedGeometry.texture);
+                      canvas3D.gl.deleteTexture(displayedGeometry.texture);
+                      canvas3D.textures.splice(index, 1);
+                    }
                     displayedGeometry.texture = newValue !== null
                         ? canvas3D.prepareTexture(newValue)
                         : undefined;
@@ -567,12 +532,100 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
 }
 
 /**
+ * Prepares the geometry to be rendered.  
+ * @param {IndexedGeometryArray3D} nodeGeometry
+ * @param {Appearance3D} nodeAppearance
+ * @param {WebGLTexture} texture
+ * @param {Node3D}  node
+ * @param {Array}   displayedGeometries
+ * @param {boolean} background
+ * @param [Link3D]  parentLinks
+ * @param {mat4}    transformation
+ * @private
+ */
+HTMLCanvas3D.prototype.prepareGeometry = function(nodeGeometry, nodeAppearance, texture, 
+                                                  node, displayedGeometries, background, 
+                                                  parentLinks, transformation) {
+  var displayedGeometry = null;
+  if (!node.getCapability(Shape3D.ALLOW_GEOMETRY_WRITE)) {
+    // Search if node geometry is already used
+    for (var i = 0; i < displayedGeometries.length; i++) {
+      if (displayedGeometries [i].nodeGeometry === nodeGeometry) {
+        displayedGeometry = {"node" : node,
+                             "background"   : background,
+                             "nodeGeometry" : nodeGeometry,
+                             "vertexCount"  : displayedGeometries [i].vertexCount, 
+                             "vertexBuffer" : displayedGeometries [i].vertexBuffer, 
+                             "textureCoordinatesBuffer" : displayedGeometries [i].textureCoordinatesBuffer,
+                             "normalBuffer" : displayedGeometries [i].normalBuffer,
+                             "mode" : displayedGeometries [i].mode};
+        break;
+      }
+    }
+  }
+  
+  if (displayedGeometry === null) {
+    displayedGeometry = {"node" : node,
+                         "background"   : background,
+                         "nodeGeometry" : nodeGeometry,
+                         "vertexCount"  : nodeGeometry.vertexIndices.length};
+    displayedGeometry.vertexBuffer = this.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
+    displayedGeometry.textureCoordinatesBuffer = this.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
+    if (nodeGeometry instanceof IndexedTriangleArray3D) {
+      displayedGeometry.mode = this.gl.TRIANGLES;
+      displayedGeometry.normalBuffer = this.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
+    } else {
+      displayedGeometry.mode = this.gl.LINES;
+    } 
+  } 
+  // Set parameters not shared
+  displayedGeometry.transformation = transformation;
+  if (parentLinks.length > 0) {
+    displayedGeometry.parentLinks = parentLinks;
+  }
+  var ambientColor = nodeAppearance.getAmbientColor();
+  if (ambientColor !== undefined) {
+    displayedGeometry.ambientColor = ambientColor;
+  }
+  var diffuseColor = nodeAppearance.getDiffuseColor();
+  if (diffuseColor !== undefined) {
+    displayedGeometry.diffuseColor = diffuseColor;
+  }
+  var specularColor = nodeAppearance.getSpecularColor();
+  if (specularColor !== undefined) {
+    displayedGeometry.specularColor = specularColor;
+  }
+  var shininess = nodeAppearance.getShininess();
+  if (shininess !== undefined) {
+    displayedGeometry.shininess = shininess;
+  }
+  if (texture !== null) {
+    displayedGeometry.textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
+    displayedGeometry.textureTransform = nodeAppearance.getTextureTransform();
+    displayedGeometry.texture = texture;
+  }
+  displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
+  if (nodeAppearance.getCullFace() !== undefined) {
+    displayedGeometry.cullFace = nodeAppearance.getCullFace();
+  }
+  var illumination = nodeAppearance.getIllumination();
+  displayedGeometry.lightingEnabled =  
+         (illumination === undefined || illumination >= 1)
+      && displayedGeometry.normalBuffer !== null;
+  displayedGeometry.transparency = nodeAppearance.getTransparency() !== undefined 
+      ? 1 - nodeAppearance.getTransparency()
+      : 1;
+  displayedGeometry.visible = nodeAppearance.isVisible();
+  displayedGeometries.push(displayedGeometry);
+}
+
+/**
  * Updates the transformation applied to the children of the given node.
- * @param [Node3D]  node
+ * @param {Node3D}  node
  * @param [Array]   displayedGeometries
  * @param [Link3D]  parentLinks
- * @param [Array]   lights
- * @param parentTransformations
+ * @param {Array}   lights
+ * @param {mat4}    parentTransformations
  * @private  
  */
 HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGeometries, parentLinks, lights, parentTransformations) {
@@ -625,9 +678,9 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
 
 /**
  * Removes the tree with the given root node.  
- * @param [Node3D]  node
- * @param [Array]   displayedGeometries
- * @param [Array]   lights
+ * @param {Node3D}  node
+ * @param {Array}   displayedGeometries
+ * @param {Array}   lights
  * @private  
  */
 HTMLCanvas3D.prototype.removeDisplayedItems = function(node, displayedGeometries, lights) {
@@ -663,10 +716,12 @@ HTMLCanvas3D.prototype.removeDisplayedItems = function(node, displayedGeometries
  * @private
  */
 HTMLCanvas3D.prototype.prepareTexture = function(textureImage) {
-  // Search whether texture already exists
-  for (var i = 0; i < this.textures.length; i++) {
-    if (this.textures [i].image.url == textureImage.url) {
-      return this.textures [i];
+  if (textureImage.url !== undefined) {
+    // Search whether texture already exists
+    for (var i = 0; i < this.textures.length; i++) {
+      if (this.textures [i].image.url == textureImage.url) {
+        return this.textures [i];
+      }
     }
   }
   // Create texture
@@ -698,13 +753,13 @@ HTMLCanvas3D.resizeTransparentTextures = true;
 HTMLCanvas3D.prototype.bindTexture = function(texture) {
   this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
   this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-  if ((!this.isPowerOfTwo(texture.image.width) || !this.isPowerOfTwo(texture.image.height)) 
+  if ((!Appearance3D.isPowerOfTwo(texture.image.width) || !Appearance3D.isPowerOfTwo(texture.image.height)) 
       && (!texture.image.transparent || HTMLCanvas3D.resizeTransparentTextures)) {
     // From https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences#Non-Power_of_Two_Texture_Support
     // Scale up the texture image to the next highest power of two dimensions
     var canvas = document.createElement("canvas");
-    canvas.width = this.getNextHighestPowerOfTwo(texture.image.width);
-    canvas.height = this.getNextHighestPowerOfTwo(texture.image.height);
+    canvas.width = Appearance3D.getNextHighestPowerOfTwo(texture.image.width);
+    canvas.height = Appearance3D.getNextHighestPowerOfTwo(texture.image.height);
     var context = canvas.getContext("2d");
     context.drawImage(texture.image, 0, 0, texture.image.width, texture.image.height, 0, 0, canvas.width, canvas.height);
     canvas.transparent = texture.image.transparent; 
@@ -712,7 +767,7 @@ HTMLCanvas3D.prototype.bindTexture = function(texture) {
   }
   this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, texture.image);
   this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);
-  if (this.isPowerOfTwo(texture.image.width) && this.isPowerOfTwo(texture.image.height)) {
+  if (Appearance3D.isPowerOfTwo(texture.image.width) && Appearance3D.isPowerOfTwo(texture.image.height)) {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);
     this.gl.generateMipmap(this.gl.TEXTURE_2D);
   } else {
@@ -723,30 +778,6 @@ HTMLCanvas3D.prototype.bindTexture = function(texture) {
   this.gl.bindTexture(this.gl.TEXTURE_2D, null);
   // Free image data
   delete texture.image.src;
-}
-
-/** 
- * Returns true if x is a power of 2.
- * @param {number} x
- * @return {boolean}
- * @private
- */
-HTMLCanvas3D.prototype.isPowerOfTwo = function(x) {
-  return (x & (x - 1)) == 0;
-}
-
-/**
- * Returns the closest higher number that is a power of 2.
- * @param {number} x
- * @return {number}
- * @private
- */
-HTMLCanvas3D.prototype.getNextHighestPowerOfTwo = function (x) {
-  --x;
-  for (var i = 1; i < 32; i <<= 1) {
-      x = x | x >> i;
-  }
-  return (x + 1);
 }
 
 /**
@@ -901,7 +932,7 @@ HTMLCanvas3D.prototype.isGeometryTransparent = function(displayedGeometry) {
  */
 HTMLCanvas3D.prototype.isTextureTransparent = function(displayedGeometry) {
   return displayedGeometry.texture !== undefined
-         && displayedGeometry.texture.image.transparent;
+      && displayedGeometry.texture.image.transparent;
 }
 
 /**
@@ -1084,12 +1115,12 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
   if (this.pickingFrameBuffer === undefined) {
     this.pickingFrameBuffer = this.gl.createFramebuffer();
     this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.pickingFrameBuffer);
-    this.pickingFrameBuffer.width = this.isPowerOfTwo(this.canvas.width) 
+    this.pickingFrameBuffer.width = Appearance3D.isPowerOfTwo(this.canvas.width) 
         ? this.canvas.width 
-        : this.getNextHighestPowerOfTwo(this.canvas.width) / 2;
-    this.pickingFrameBuffer.height = this.isPowerOfTwo(this.canvas.height) 
+        : Appearance3D.getNextHighestPowerOfTwo(this.canvas.width) / 2;
+    this.pickingFrameBuffer.height = Appearance3D.isPowerOfTwo(this.canvas.height) 
         ? this.canvas.height 
-        : this.getNextHighestPowerOfTwo(this.canvas.height) / 2;
+        : Appearance3D.getNextHighestPowerOfTwo(this.canvas.height) / 2;
     this.pickingFrameBuffer.colorMap = new Uint8Array(this.pickingFrameBuffer.width * this.pickingFrameBuffer.height * 4);
 
     var renderedTexture = this.gl.createTexture();
@@ -1131,7 +1162,9 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
                            ((i >>> 8) & 0xFF) / 255.,
                                    (i & 0xFF) / 255.);
         this.drawGeometry(displayedGeometry, this.viewPlatformTransform, null, false, false, false);
-        displayedGeometry.diffuseColor = defaultColor;
+        if (defaultColor !== undefined) {
+          displayedGeometry.diffuseColor = defaultColor;
+        }
       }
     }
     

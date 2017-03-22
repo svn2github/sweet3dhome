@@ -405,7 +405,10 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
     this.getUserPreferences().setNavigationPanelVisible(params.navigationPanelVisible);
   }
   var home = this.getHome();
-  home.getEnvironment().setAllLevelsVisible(true);
+  if (home.structure) {
+    // Make always all levels visible if walls and rooms structure can be modified
+    home.getEnvironment().setAllLevelsVisible(true);
+  }
   home.getEnvironment().setObserverCameraElevationAdjusted(true);
   
   this.trackFurnitureModels(onprogression, roundsPerMinute);
@@ -470,7 +473,7 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
     home.addPropertyChangeListener("CAMERA", 
         function() {
           cameraTypeButtonsUpdater();
-          if (params && params.levelsAndCamerasListId) {
+          if (home.structure && params && params.levelsAndCamerasListId) {
             document.getElementById(params.levelsAndCamerasListId).disabled = home.getCamera() === home.getTopCamera();
           }
         });
@@ -478,7 +481,7 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
 
   if (params && params.levelsAndCamerasListId) {
     var levelsAndCamerasList = document.getElementById(params.levelsAndCamerasListId);
-    levelsAndCamerasList.disabled = home.getCamera() === home.getTopCamera();
+    levelsAndCamerasList.disabled = !home.structure || (home.getCamera() === home.getTopCamera());
     var levels = home.getLevels();
     if (levels.length > 0) {
       for (var i = 0; i < levels.length; i++) {
