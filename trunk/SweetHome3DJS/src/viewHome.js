@@ -481,7 +481,7 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
 
   if (params && params.levelsAndCamerasListId) {
     var levelsAndCamerasList = document.getElementById(params.levelsAndCamerasListId);
-    levelsAndCamerasList.disabled = !home.structure || (home.getCamera() === home.getTopCamera());
+    levelsAndCamerasList.disabled = home.structure !== undefined && home.getCamera() === home.getTopCamera();
     var levels = home.getLevels();
     if (levels.length > 0) {
       for (var i = 0; i < levels.length; i++) {
