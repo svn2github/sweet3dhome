@@ -45,6 +45,7 @@
 <script type="text/javascript" src="src/Room3D.js"></script>
 <script type="text/javascript" src="src/Wall3D.js"></script>
 <script type="text/javascript" src="src/Ground3D.js"></script>
+<script type="text/javascript" src="src/Label3D.js"></script>
 <script type="text/javascript" src="src/HomeController3D.js"></script>
 <script type="text/javascript" src="src/TextureManager.js"></script>
 <script type="text/javascript" src="src/UserPreferences.js"></script>
@@ -217,6 +218,12 @@ function testHome(geomAvailable) {
   var room = new Room([[0, 675], [0, 875], [200, 875], [200, 675]]);
   home.addRoom(room);
   assertEquals("Wrong number of rooms", 1, home.getRooms().length);
+  var label = new Label("Date", 110, 900);
+  label.setPitch(Math.PI / 3);
+  label.setStyle(new TextStyle("Verdana", 50, true, false));
+  label.setElevation(10);
+  home.addLabel(label);
+  assertEquals("Wrong number of labels", 1, home.getLabels().length);
   
   new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
       {
@@ -231,13 +238,34 @@ function testHome(geomAvailable) {
 	      home.addWall(wall1);
 	      home.addWall(wall2);
 	      home.addRoom(room);
+	      home.addLabel(label);
+	      var thicknessDelta = 0.5;
+	      var lengthDelta = -5;
+	      var elevationDelta = -5;
 	      setInterval(function() {
 	          // Make piece blink
 	          piece.setVisible(!piece.isVisible());
-	  	      wall1.setLeftSideColor(wall1.getLeftSideColor() == 0xFF ? 0xFFFFFF : 0xFF);
+	          // Change wall and room color
 	  	      wall2.setRightSideColor(wall2.getRightSideColor() == 0xFF00 ? 0xFFFFFF : 0xFF00);
 	  	      room.setFloorColor(room.getFloorColor() == 0x77 ? 0x777777 : 0x77);
+	  	      // Update label with current time
+	  	      label.setText(new Date().toLocaleTimeString({hour: "numeric", minute: "numeric", second: "numeric"}))
 	        }, 500);
+	      setInterval(function() {
+	          // Change objects location
+	  	      wall1.setThickness(wall1.getThickness() + thicknessDelta);
+	  	      if (wall1.getThickness() > 10 || wall1.getThickness() < 1) {
+	  	        thicknessDelta = -thicknessDelta;
+	  	      }
+	  	      wall2.setXEnd(wall2.getXEnd() + lengthDelta);
+	  	      if (wall2.getXEnd() >= 200 || wall2.getXEnd() < -50) {
+	  	        lengthDelta = -lengthDelta;
+	  	      }
+	  	      label.setElevation(label.getElevation() + elevationDelta);
+	  	      if (label.getElevation() >= 200 || label.getElevation() < 10) {
+	  	        elevationDelta = -elevationDelta;
+	  	      }
+	        }, 100);
 	      
 	      // View a clone of the home in the second canvas
 	      visitHome(home.clone(), preferences);
