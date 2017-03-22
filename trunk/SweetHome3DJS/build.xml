@@ -30,12 +30,18 @@
     <concat destfile="dist/build/viewhome.min.js" encoding="UTF-8">
       <fileset dir="lib/generated" includes="SweetHome3DModel.js" />
       <filelist dir="src">
+        <file name="DAELoader.js" />
+        <file name="Max3DSLoader.js" />
         <file name="LengthUnit.js" />
         <file name="UserPreferences.js" />
         <file name="HomeRecorder.js" />
         <file name="Object3DBranch.js" />
         <file name="HomeComponent3D.js" />
         <file name="HomePieceOfFurniture3D.js" />
+        <file name="Wall3D.js" />
+        <file name="Room3D.js" />
+        <file name="Ground3D.js" />
+        <file name="Label3D.js" />
         <file name="TextureManager.js" />
         <file name="HomeController3D.js" />
         <file name="viewHome.js" />
