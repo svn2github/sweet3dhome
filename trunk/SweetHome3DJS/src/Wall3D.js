@@ -25,7 +25,7 @@
 
 
 /**
- * Creates the 3D wall matching the given home <code>piece</code>.
+ * Creates the 3D wall matching the given home <code>wall</code>.
  * @param {Wall} wall
  * @param {Home} home
  * @param {boolean} waitModelAndTextureLoadingEnd
@@ -65,6 +65,7 @@ Wall3D.rotatedModelsFrontAreas = [];
  */
 Wall3D.prototype.createWallPartShape = function() {
   var wallShape = new Shape3D();
+  wallShape.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
   var wallAppearance = new Appearance3D();
   wallShape.setAppearance(wallAppearance);
   this.updateAppearanceMaterial(wallAppearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, 0);
