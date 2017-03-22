@@ -164,7 +164,8 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
       if (this.java3dTypeMapping.containsKey(invocation.getTargetExpression().getTypeAsElement().toString())
           && "setCapability".equals(invocation.getMethodName())
           && !invocation.getArguments().get(0).toString().endsWith("ALLOW_CHILDREN_EXTEND")
-          && !invocation.getArguments().get(0).toString().endsWith("ALLOW_TRANSFORM_WRITE")) {
+          && !invocation.getArguments().get(0).toString().endsWith("ALLOW_TRANSFORM_WRITE")
+          && !invocation.getArguments().get(0).toString().endsWith("ALLOW_GEOMETRY_WRITE")) {
         // Ignore other calls to setCapability
         return true;
       }
@@ -184,6 +185,7 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
         case "javax.vecmath.TexCoord2f":
         case "javax.vecmath.Vector3f":
         case "javax.vecmath.Vector3d":
+        case "javax.vecmath.Vector4f":
           switch (variableAccess.getVariableName()) {
             case "x":
               print(variableAccess.getTargetExpression()).print("[0]");
@@ -193,6 +195,9 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
               return true;
             case "z":
               print(variableAccess.getTargetExpression()).print("[2]");
+              return true;
+            case "w":
+              print(variableAccess.getTargetExpression()).print("[3]");
               return true;
           }
           break;
@@ -205,6 +210,9 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
   public boolean substituteNewClass(NewClassElement newClass) {
     String className = newClass.getTypeAsElement().toString();
     switch (className) {
+      case "javax.vecmath.Vector4f":
+        print("vec4.fromValues(").printArgList(newClass.getArguments()).print(")");
+        return true;
       case "javax.vecmath.Point3f":
       case "javax.vecmath.Vector3f":
       case "javax.vecmath.Vector3d":
