@@ -733,7 +733,7 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
       touchEnded : function(ev) {
         userActionsListener.buttonPressed = -1;
       },
-      copyPointerToTargetTouches : function (ev) {
+      copyPointerToTargetTouches : function(ev) {
         // Copy the IE and Edge pointer location to ev.targetTouches
         userActionsListener.pointerTouches [ev.pointerId] = {pageX: ev.clientX, pageY: ev.clientY};
         ev.targetTouches = [];
@@ -1130,7 +1130,7 @@ HomeComponent3D.prototype.createBackgroundNode = function(listenToHomeUpdates, w
   if (listenToHomeUpdates) {
     // Add a listener on home properties change 
     var component3D = this;
-    this.backgroundChangeListener = function (ev) {
+    this.backgroundChangeListener = function(ev) {
         component3D.updateBackgroundColorAndTexture(skyBackgroundAppearance, groundBackgroundAppearance, 
             component3D.home, waitForLoading);
       };
@@ -1139,7 +1139,7 @@ HomeComponent3D.prototype.createBackgroundNode = function(listenToHomeUpdates, w
     component3D.home.getEnvironment().addPropertyChangeListener("GROUND_COLOR", this.backgroundChangeListener);
     component3D.home.getEnvironment().addPropertyChangeListener("GROUND_TEXTURE", this.backgroundChangeListener);
     // Make groundBackground invisible if camera is below the ground
-    this.elevationChangeListener = function (ev) {
+    this.elevationChangeListener = function(ev) {
         if (ev.getSource() === component3D.home) {
           ev.getOldValue().removePropertyChangeListener(component3D.elevationChangeListener);
           component3D.home.getCamera().addPropertyChangeListener(component3D.elevationChangeListener);
@@ -1348,7 +1348,7 @@ HomeComponent3D.prototype.createLights = function(listenToHomeUpdates) {
   if (listenToHomeUpdates) {
     // Add a listener on light color property change to home
     var component3D = this;
-    this.lightColorListener = function (ev) {
+    this.lightColorListener = function(ev) {
         for (var i = 0; i < lights.length - 1; i++) {
           component3D.updateLightColor(lights [i]);
         }
@@ -1448,7 +1448,7 @@ HomeComponent3D.prototype.addLevelListener = function(group) {
     levels[i].addPropertyChangeListener(this.levelChangeListener);
   }
 
-  this.levelListener = function (ev) {
+  this.levelListener = function(ev) {
       var level = ev.getItem();
       switch ((ev.getType())) {
         case CollectionEvent.Type.ADD:
@@ -1490,7 +1490,7 @@ HomeComponent3D.prototype.containsDoorsAndWindows = function(piece) {
  * @return {boolean}
  * @private
  */
-HomeComponent3D.prototype.containsStaircases = function (piece) {
+HomeComponent3D.prototype.containsStaircases = function(piece) {
   if (piece instanceof HomeFurnitureGroup) {
     var furniture = piece.getFurniture();
     for (var i = 0; i < furniture.length; i++) {
@@ -1527,7 +1527,7 @@ HomeComponent3D.prototype.addWallListener = function(group) {
   for (var i = 0; i < walls.length; i++) {
     walls[i].addPropertyChangeListener(this.wallChangeListener);
   }
-  this.wallListener = function (ev) {
+  this.wallListener = function(ev) {
       var wall = ev.getItem();
       switch ((ev.getType())) {
         case CollectionEvent.Type.ADD:
@@ -1651,7 +1651,7 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
  * @param {Group3D} group
  * @private
  */
-HomeComponent3D.prototype.addRoomListener = function (group) {
+HomeComponent3D.prototype.addRoomListener = function(group) {
   var component3D = this;
   this.roomChangeListener = function(ev) {
       var updatedRoom = ev.getSource();
@@ -1707,7 +1707,7 @@ HomeComponent3D.prototype.addRoomListener = function (group) {
   for (var i = 0; i < rooms.length; i++) {
     rooms[i].addPropertyChangeListener(this.roomChangeListener);
   }
-  this.roomListener = function (ev) {
+  this.roomListener = function(ev) {
       var room = ev.getItem();
       switch ((ev.getType())) {
         case CollectionEvent.Type.ADD:
@@ -1731,7 +1731,7 @@ HomeComponent3D.prototype.addRoomListener = function (group) {
  * @return {GeneralPath}
  * @private
  */
-HomeComponent3D.prototype.getShape = function (points) {
+HomeComponent3D.prototype.getShape = function(points) {
   var path = new GeneralPath();
   path.moveTo(points[0][0], points[0][1]);
   for (var i = 1; i < points.length; i++) {
@@ -1747,7 +1747,7 @@ HomeComponent3D.prototype.getShape = function (points) {
  * @param {Group3D} group
  * @private
  */
-HomeComponent3D.prototype.addLabelListener = function (group) {
+HomeComponent3D.prototype.addLabelListener = function(group) {
   var component3D = this;
   this.labelChangeListener = function(ev) {
       var label = ev.getSource();
@@ -1757,7 +1757,7 @@ HomeComponent3D.prototype.addLabelListener = function (group) {
   for (var i = 0; i < labels.length; i++) {
     labels[i].addPropertyChangeListener(this.labelChangeListener);
   }
-  this.labelListener = function (ev) {
+  this.labelListener = function(ev) {
       var label = ev.getItem();
       switch ((ev.getType())) {
         case CollectionEvent.Type.ADD:
@@ -1778,7 +1778,7 @@ HomeComponent3D.prototype.addLabelListener = function (group) {
  * environment that updates the home scene objects appearance.
  * @private
  */
-HomeComponent3D.prototype.addEnvironmentListeners = function () {
+HomeComponent3D.prototype.addEnvironmentListeners = function() {
   var component3D = this;
   this.wallsAlphaListener = function(ev) {
       component3D.updateObjects(component3D.home.getWalls());
@@ -1867,7 +1867,7 @@ HomeComponent3D.prototype.updateObjects = function(objects) {
  * @param {Wall} wall
  * @private
  */
-HomeComponent3D.prototype.updateWall = function (wall) {
+HomeComponent3D.prototype.updateWall = function(wall) {
   var wallsToUpdate = [];
   wallsToUpdate.push(wall);
   if (wall.getWallAtStart() != null) {
@@ -1899,9 +1899,8 @@ Object3DBranchFactory.prototype.createObject3D = function(home, item, waitForLoa
     return new Wall3D(item, home, true, waitForLoading);
   } else if (item instanceof Room) {
     return new Room3D(item, home, false, waitForLoading);
-  // TODO Implement Label3D 
-  // } else if (item instanceof Label) {
-  //   return new Label3D(item, home, waitForLoading);
+   } else if (item instanceof Label) {
+     return new Label3D(item, home, waitForLoading);
   } else {
     return new Group3D();
   }  
