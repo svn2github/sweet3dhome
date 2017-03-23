@@ -371,7 +371,7 @@ HomePieceOfFurniture3D.prototype.setColorAndTexture = function(node, color, text
  */
 HomePieceOfFurniture3D.prototype.getTextureObserver = function(appearance) {
   return {
-      textureUpdated: function(textureImage) {
+      textureUpdated : function(textureImage) {
         if (TextureManager.getInstance().isTextureTransparent(textureImage)) {
           appearance.setCullFace(Appearance3D.CULL_NONE);
         } else {
@@ -385,10 +385,10 @@ HomePieceOfFurniture3D.prototype.getTextureObserver = function(appearance) {
           appearance.setTextureImage(textureImage);
         }
       },
-      textureError: function(error) {
+      textureError : function(error) {
         return this.textureUpdated(TextureManager.getInstance().getErrorImage());
       },
-      progression: function(part, info, percentage) {
+      progression : function(part, info, percentage) {
       }
     };
 }
@@ -408,7 +408,8 @@ HomePieceOfFurniture3D.prototype.getTextureCoordinates = function(appearance, te
   var ty = pieceSize [1] / Math.max(upper [1] - lower [1], minimumSize);
   var tz = pieceSize [2] / Math.max(upper [2] - lower [2], minimumSize);
   var tw = -lower [1] * ty + upper [2] * tz;
-  return {"planeS": vec4.fromValues(sx, 0, 0, sw), "planeT": vec4.fromValues(0, ty, -tz, tw)};
+  return {planeS : vec4.fromValues(sx, 0, 0, sw), 
+          planeT : vec4.fromValues(0, ty, -tz, tw)};
 }
 
 /**

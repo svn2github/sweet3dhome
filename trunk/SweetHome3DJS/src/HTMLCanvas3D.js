@@ -370,11 +370,11 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
       // Add listener to group to update the scene when children change
       node.addChildrenListener(
           {  
-            childAdded: function(ev) {
+            childAdded : function(ev) {
               canvas3D.prepareScene(ev.child, displayedGeometries, background, parentLinks, lights, parentTransformations);
               canvas3D.repaint();
             },
-            childRemoved: function(ev) {
+            childRemoved : function(ev) {
               canvas3D.removeDisplayedItems(ev.child, displayedGeometries, lights);
               // TODO Should remove listeners on deleted item
               canvas3D.repaint();
@@ -504,8 +504,8 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
   } else if (node instanceof Background3D) {
     this.prepareScene(node.getGeometry(), displayedGeometries, true, parentLinks, lights, parentTransformations);
   } else if (node instanceof Light3D) {
-    var light = {"node" : node,
-                 "color" : node.getColor()};
+    var light = {node  : node,
+                 color : node.getColor()};
     if (node instanceof DirectionalLight3D) {
       light.direction = node.getDirection();
       light.transformation = parentTransformations;
@@ -551,24 +551,24 @@ HTMLCanvas3D.prototype.prepareGeometry = function(nodeGeometry, nodeAppearance, 
     // Search if node geometry is already used
     for (var i = 0; i < displayedGeometries.length; i++) {
       if (displayedGeometries [i].nodeGeometry === nodeGeometry) {
-        displayedGeometry = {"node" : node,
-                             "background"   : background,
-                             "nodeGeometry" : nodeGeometry,
-                             "vertexCount"  : displayedGeometries [i].vertexCount, 
-                             "vertexBuffer" : displayedGeometries [i].vertexBuffer, 
-                             "textureCoordinatesBuffer" : displayedGeometries [i].textureCoordinatesBuffer,
-                             "normalBuffer" : displayedGeometries [i].normalBuffer,
-                             "mode" : displayedGeometries [i].mode};
+        displayedGeometry = {node : node,
+                             background   : background,
+                             nodeGeometry : nodeGeometry,
+                             vertexCount  : displayedGeometries [i].vertexCount, 
+                             vertexBuffer : displayedGeometries [i].vertexBuffer, 
+                             textureCoordinatesBuffer : displayedGeometries [i].textureCoordinatesBuffer,
+                             normalBuffer : displayedGeometries [i].normalBuffer,
+                             mode : displayedGeometries [i].mode};
         break;
       }
     }
   }
   
   if (displayedGeometry === null) {
-    displayedGeometry = {"node" : node,
-                         "background"   : background,
-                         "nodeGeometry" : nodeGeometry,
-                         "vertexCount"  : nodeGeometry.vertexIndices.length};
+    displayedGeometry = {node : node,
+                         background   : background,
+                         nodeGeometry : nodeGeometry,
+                         vertexCount  : nodeGeometry.vertexIndices.length};
     displayedGeometry.vertexBuffer = this.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
     displayedGeometry.textureCoordinatesBuffer = this.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
     if (nodeGeometry instanceof IndexedTriangleArray3D) {

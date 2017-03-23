@@ -537,7 +537,7 @@ HomeComponent3D.prototype.updateViewPlatformTransform = function(camera, updateW
  */
 HomeComponent3D.prototype.moveCameraWithAnimation = function(finalCamera) {
   if (this.cameraInterpolator === undefined) {
-    this.cameraInterpolator = {initialCamera: null, finalCamera: null, alpha: null};
+    this.cameraInterpolator = {initialCamera : null, finalCamera : null, alpha : null};
   }
   if (this.cameraInterpolator.finalCamera === null
       || this.cameraInterpolator.finalCamera.getX() !== finalCamera.getX()
@@ -735,7 +735,7 @@ HomeComponent3D.prototype.addMouseListeners = function(controller, canvas3D) {
       },
       copyPointerToTargetTouches : function(ev) {
         // Copy the IE and Edge pointer location to ev.targetTouches
-        userActionsListener.pointerTouches [ev.pointerId] = {pageX: ev.clientX, pageY: ev.clientY};
+        userActionsListener.pointerTouches [ev.pointerId] = {pageX : ev.clientX, pageY : ev.clientY};
         ev.targetTouches = [];
         for (var attribute in userActionsListener.pointerTouches) {
           if (userActionsListener.pointerTouches.hasOwnProperty(attribute)) {
@@ -1233,13 +1233,13 @@ HomeComponent3D.prototype.updateBackgroundColorAndTexture = function(skyBackgrou
   if (skyTexture !== null) {
     TextureManager.getInstance().loadTexture(skyTexture.getImage(), 0, waitForLoading,
         {
-          textureUpdated: function(textureImage) {
+          textureUpdated : function(textureImage) {
             skyBackgroundAppearance.setTextureImage(textureImage);
           },
-          textureError: function(error) {
+          textureError : function(error) {
             return this.textureUpdated(TextureManager.getInstance().getErrorImage());
           },
-          progression: function(part, info, percentage) {
+          progression : function(part, info, percentage) {
           } 
         });
   } else {
@@ -1256,16 +1256,17 @@ HomeComponent3D.prototype.updateBackgroundColorAndTexture = function(skyBackgrou
   if (groundTexture !== null) {
     TextureManager.getInstance().loadTexture(groundTexture.getImage(), 0, waitForLoading,
         {
-          textureUpdated: function(textureImage) {
+          textureUpdated : function(textureImage) {
             // Display texture very small to get an average color at the horizon 
             groundBackgroundAppearance.setTextureImage(textureImage);
             groundBackgroundAppearance.setTextureCoordinatesGeneration(
-                {"planeS": vec4.fromValues(1E5, 0, 0, 0), "planeT": vec4.fromValues(0, 0, 1E5, 0)});
+                {planeS : vec4.fromValues(1E5, 0, 0, 0), 
+                 planeT : vec4.fromValues(0, 0, 1E5, 0)});
           },
-          textureError: function(error) {
+          textureError : function(error) {
             return this.textureUpdated(TextureManager.getInstance().getErrorImage());
           },
-          progression: function(part, info, percentage) {
+          progression : function(part, info, percentage) {
           }
         });
   } else {
@@ -1284,7 +1285,7 @@ HomeComponent3D.prototype.createGroundNode = function(groundOriginX, groundOrigi
     structureGroup.setCapability(Group3D.ALLOW_CHILDREN_EXTEND);
     ModelManager.getInstance().loadModel(this.home.structure, waitForLoading,
         { 
-          modelUpdated: function(structureNode) {
+          modelUpdated : function(structureNode) {
             structureGroup.addChild(structureNode);
           },
           modelError : function(ex) {
@@ -1451,10 +1452,10 @@ HomeComponent3D.prototype.addLevelListener = function(group) {
   this.levelListener = function(ev) {
       var level = ev.getItem();
       switch ((ev.getType())) {
-        case CollectionEvent.Type.ADD:
+        case CollectionEvent.Type.ADD :
           level.addPropertyChangeListener(component3D.levelChangeListener);
           break;
-        case CollectionEvent.Type.DELETE:
+        case CollectionEvent.Type.DELETE :
           level.removePropertyChangeListener(component3D.levelChangeListener);
           break;
         }
@@ -1530,11 +1531,11 @@ HomeComponent3D.prototype.addWallListener = function(group) {
   this.wallListener = function(ev) {
       var wall = ev.getItem();
       switch ((ev.getType())) {
-        case CollectionEvent.Type.ADD:
+        case CollectionEvent.Type.ADD :
           component3D.addObject(group, wall, true, false);
           wall.addPropertyChangeListener(component3D.wallChangeListener);
           break;
-        case CollectionEvent.Type.DELETE:
+        case CollectionEvent.Type.DELETE :
           component3D.deleteObject(wall);
           wall.removePropertyChangeListener(component3D.wallChangeListener);
           break;
@@ -1710,11 +1711,11 @@ HomeComponent3D.prototype.addRoomListener = function(group) {
   this.roomListener = function(ev) {
       var room = ev.getItem();
       switch ((ev.getType())) {
-        case CollectionEvent.Type.ADD:
+        case CollectionEvent.Type.ADD :
           component3D.addObject(group, room, ev.getIndex(), true, false);
           room.addPropertyChangeListener(component3D.roomChangeListener);
           break;
-        case CollectionEvent.Type.DELETE:
+        case CollectionEvent.Type.DELETE :
           component3D.deleteObject(room);
           room.removePropertyChangeListener(component3D.roomChangeListener);
           break;
@@ -1760,11 +1761,11 @@ HomeComponent3D.prototype.addLabelListener = function(group) {
   this.labelListener = function(ev) {
       var label = ev.getItem();
       switch ((ev.getType())) {
-        case CollectionEvent.Type.ADD:
+        case CollectionEvent.Type.ADD :
           component3D.addObject(group, label, true, false);
           label.addPropertyChangeListener(component3D.labelChangeListener);
           break;
-        case CollectionEvent.Type.DELETE:
+        case CollectionEvent.Type.DELETE :
           component3D.deleteObject(label);
           label.removePropertyChangeListener(component3D.labelChangeListener);
           break;

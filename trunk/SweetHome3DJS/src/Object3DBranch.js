@@ -121,18 +121,18 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
   for (var it = area.getPathIterator(null, flatness); !it.isDone(); it.next()) {
     var point = [0, 0];
     switch ((it.currentSegment(point))) {
-      case PathIterator.SEG_MOVETO:
+      case PathIterator.SEG_MOVETO :
         currentPathPoints = [];
         currentPathPoints.push(point);
         previousPoint = point;
         break;
-      case PathIterator.SEG_LINETO:
+      case PathIterator.SEG_LINETO :
         if (point[0] !== previousPoint[0] || point[1] !== previousPoint[1]) {
           currentPathPoints.push(point);
         }
         previousPoint = point;
         break;
-      case PathIterator.SEG_CLOSE:
+      case PathIterator.SEG_CLOSE :
         var firstPoint = currentPathPoints[0];
         if (firstPoint[0] === previousPoint[0]
             && firstPoint[1] === previousPoint[1]) {
@@ -196,7 +196,7 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
             }
             if (subArea == null) {
               subArea = new Area(this.getShape(testedAreaPoints.slice(0)));
-              subAreas.push({key: testedAreaPoints, value: subArea});
+              subAreas.push({key : testedAreaPoints, value : subArea});
             }
             if (subArea.contains(testedArea[0][0], testedArea[0][1])) {
               break;

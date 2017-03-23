@@ -143,7 +143,7 @@ function ModelPreviewComponent(canvasId, pitchAndScaleChangeSupported) {
         },
         copyPointerToTargetTouches : function (ev) {
           // Copy the IE and Edge pointer location to ev.targetTouches
-          userActionsListener.pointerTouches [ev.pointerId] = {pageX: ev.clientX, pageY: ev.clientY};
+          userActionsListener.pointerTouches [ev.pointerId] = {pageX : ev.clientX, pageY : ev.clientY};
           ev.targetTouches = [];
           for (var attribute in userActionsListener.pointerTouches) {
             if (userActionsListener.pointerTouches.hasOwnProperty(attribute)) {
@@ -236,7 +236,7 @@ ModelPreviewComponent.prototype.setModel = function(content, modelRotation, oner
   var previewComponent = this;
   ModelManager.getInstance().loadModel(content,
       {
-        modelUpdated: function(model) {
+        modelUpdated : function(model) {
           if (content === previewComponent.content) {
             // Place model at origin in a box as wide as the canvas
             var modelManager = ModelManager.getInstance();
@@ -265,13 +265,13 @@ ModelPreviewComponent.prototype.setModel = function(content, modelRotation, oner
             previewComponent.canvas3D.updateViewportSize();
           }
         },
-        modelError: function(err) {
+        modelError : function(err) {
           if (content === previewComponent.content
               && onerror !== undefined) {
             onerror(err);
           }
         },
-        progression: function(part, info, percentage) {
+        progression : function(part, info, percentage) {
           if (content === previewComponent.content
               && onprogression !== undefined) {
             onprogression(part, info, percentage);

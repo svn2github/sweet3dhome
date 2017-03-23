@@ -44,7 +44,7 @@ HomeRecorder.prototype.readHome = function(url, observer) {
   var recorder = this;
   ZIPTools.getZIP(url,
       {
-        zipReady: function(zip) {
+        zipReady : function(zip) {
           try {
             var homeXmlEntry = zip.file("Home.xml");
             if (homeXmlEntry !== null) {
@@ -56,12 +56,12 @@ HomeRecorder.prototype.readHome = function(url, observer) {
             this.zipError(ex);
           }
         },
-        zipError: function(error) {
+        zipError : function(error) {
           if (observer.homeError !== undefined) {
             observer.homeError(error);
           }
         },
-        progression: function(part, info, percentage) {
+        progression : function(part, info, percentage) {
           if (observer.progression !== undefined) {
             observer.progression(HomeRecorder.READING_HOME, url, percentage);
           }

@@ -93,7 +93,7 @@ TextureManager.prototype.loadTexture = function(content, angle, synchronous, tex
       var textureManager = this;
       this.load(contentUrl, synchronous,
           {
-            textureLoaded: function(textureImage) {
+            textureLoaded : function(textureImage) {
               var observers = textureManager.loadingTextureObservers [contentUrl];
               if (observers) {
                 delete textureManager.loadingTextureObservers [contentUrl];
@@ -104,7 +104,7 @@ TextureManager.prototype.loadTexture = function(content, angle, synchronous, tex
                 }
               }
             },
-            textureError: function(err) {
+            textureError : function(err) {
               var observers = textureManager.loadingTextureObservers [contentUrl];
               if (observers) {
                 delete textureManager.loadingTextureObservers [contentUrl];
@@ -113,7 +113,7 @@ TextureManager.prototype.loadTexture = function(content, angle, synchronous, tex
                 }
               }
             },
-            progression: function(part, info, percentage) {
+            progression : function(part, info, percentage) {
               var observers = textureManager.loadingTextureObservers [contentUrl];
               if (observers) {
                 for (var i = 0; i < observers.length; i++) {
@@ -150,7 +150,7 @@ TextureManager.prototype.load = function(url, synchronous, textureObserver) {
     var jarUrl = url.substring(4, entrySeparatorIndex);
     ZIPTools.getZIP(jarUrl, synchronous,
         {
-          zipReady: function(zip) {
+          zipReady : function(zip) {
             try {
               textureImage.addEventListener("load", imageLoadingListener);
               textureImage.addEventListener("error", imageErrorListener);
@@ -171,12 +171,12 @@ TextureManager.prototype.load = function(url, synchronous, textureObserver) {
               this.zipError(ex);
             }
           },
-          zipError: function(error) {
+          zipError : function(error) {
             if (textureObserver.textureError !== undefined) {
               textureObserver.textureError("Can't load " + jarUrl); 
             }
           },
-          progression: function(part, info, percentage) {
+          progression : function(part, info, percentage) {
             if (textureObserver.progression !== undefined) {
               textureObserver.progression(part, info, percentage);
             }

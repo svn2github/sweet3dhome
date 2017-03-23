@@ -339,8 +339,8 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
       }
       var modelManager = this;
       var modelObserver = {
-          modelLoaderIndex: 0,
-          modelLoaded: function(model) {
+          modelLoaderIndex : 0,
+          modelLoaded : function(model) {
             var bounds = modelManager.getBounds(model);
             var lower = vec3.create();
             bounds.getLower(lower);
@@ -360,7 +360,7 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
               this.modelError("Unsupported 3D format");
             }
           },
-          modelError: function(err) {
+          modelError : function(err) {
             var observers = modelManager.loadingModelObservers [contentUrl];
             if (observers) {
               delete modelManager.loadingModelObservers [contentUrl];
@@ -369,7 +369,7 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
               }
             }
           },
-          progression: function(part, info, percentage) {
+          progression : function(part, info, percentage) {
             var observers = modelManager.loadingModelObservers [contentUrl];
             if (observers) {
               for (var i = 0; i < observers.length; i++) {
@@ -449,8 +449,8 @@ ModelManager.prototype.cloneNode = function(node, clonedSharedGroups) {
         }
         if (clonedSharedGroup === null) {
           clonedSharedGroup = this.cloneNode(sharedGroup, clonedSharedGroups);
-          clonedSharedGroups.push({sharedGroup: sharedGroup, 
-                                   clonedSharedGroup: clonedSharedGroup});          
+          clonedSharedGroups.push({sharedGroup : sharedGroup, 
+                                   clonedSharedGroup : clonedSharedGroup});          
         }
         clonedLink.setSharedGroup(clonedSharedGroup);
       }
@@ -518,8 +518,8 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
       for (var it = frontAreaWithHoles.getPathIterator(null, 1); !it.isDone(); it.next()) {
         var areaPoint = [0, 0];
         switch ((it.currentSegment(areaPoint))) {
-          case PathIterator.SEG_MOVETO:
-          case PathIterator.SEG_LINETO:
+          case PathIterator.SEG_MOVETO :
+          case PathIterator.SEG_LINETO :
             if (previousRoomPoint === null 
                 || areaPoint[0] !== previousRoomPoint[0] 
                 || areaPoint[1] !== previousRoomPoint[1]) {
@@ -527,7 +527,7 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
             }
             previousRoomPoint = areaPoint;
             break;
-          case PathIterator.SEG_CLOSE:
+          case PathIterator.SEG_CLOSE :
             if (currentPathPoints[0][0] === previousRoomPoint[0] 
                 && currentPathPoints[0][1] === previousRoomPoint[1]) {
               currentPathPoints.splice(currentPathPoints.length - 1, 1);
@@ -894,19 +894,19 @@ ModelManager.prototype.getMirroredArea = function (area) {
   var point = [0, 0, 0, 0, 0, 0];
   for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
     switch ((it.currentSegment(point))) {
-    case PathIterator.SEG_MOVETO:
+    case PathIterator.SEG_MOVETO :
       mirrorPath.moveTo(1 - point[0], point[1]);
       break;
-    case PathIterator.SEG_LINETO:
+    case PathIterator.SEG_LINETO :
       mirrorPath.lineTo(1 - point[0], point[1]);
       break;
-    case PathIterator.SEG_QUADTO:
+    case PathIterator.SEG_QUADTO :
       mirrorPath.quadTo(1 - point[0], point[1], 1 - point[2], point[3]);
       break;
-    case PathIterator.SEG_CUBICTO:
+    case PathIterator.SEG_CUBICTO :
       mirrorPath.curveTo(1 - point[0], point[1], 1 - point[2], point[3], 1 - point[4], point[5]);
       break;
-    case PathIterator.SEG_CLOSE:
+    case PathIterator.SEG_CLOSE :
       mirrorPath.closePath();
       break;
     }

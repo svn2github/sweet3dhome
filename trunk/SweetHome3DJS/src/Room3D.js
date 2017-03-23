@@ -675,13 +675,13 @@ Room3D.prototype.updateRoomPartAppearance = function(roomPartAppearance, roomPar
     this.updateAppearanceMaterial(roomPartAppearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, shininess);
     this.updateTextureTransform(roomPartAppearance, roomPartTexture, true);
     TextureManager.getInstance().loadTexture(roomPartTexture.getImage(), waitTextureLoadingEnd, {
-        textureUpdated: function(texture) {
+        textureUpdated : function(texture) {
           roomPartAppearance.setTextureImage(texture);
         },
-        textureError: function(error) {
+        textureError : function(error) {
           return this.textureUpdated(TextureManager.getInstance().getErrorImage());
         },
-        progression: function(part, info, percentage) {
+        progression : function(part, info, percentage) {
         }
       });
   }

@@ -247,17 +247,17 @@ function viewHomeInOverlay(homeUrl, params) {
     if (params.aerialViewButtonText && params.virtualVisitButtonText) {
       canvas.homePreviewComponent = new homePreviewComponentContructor(
           "viewerCanvas", homeUrl, onerror, onprogression, 
-          {roundsPerMinute: params.roundsPerMinute, 
-           navigationPanel: params.navigationPanel,
-           aerialViewButtonId: "aerialView", 
-           virtualVisitButtonId: "virtualVisit", 
-           levelsAndCamerasListId: "levelsAndCameras", 
-           selectableLevels: params.selectableLevels});
+          {roundsPerMinute : params.roundsPerMinute, 
+           navigationPanel : params.navigationPanel,
+           aerialViewButtonId : "aerialView", 
+           virtualVisitButtonId : "virtualVisit", 
+           levelsAndCamerasListId : "levelsAndCameras", 
+           selectableLevels : params.selectableLevels});
     } else {
       canvas.homePreviewComponent = new homePreviewComponentContructor(
           "viewerCanvas", homeUrl, onerror, onprogression, 
-          {roundsPerMinute: params.roundsPerMinute,
-           navigationPanel: params.navigationPanel});
+          {roundsPerMinute : params.roundsPerMinute,
+           navigationPanel : params.navigationPanel});
     }
   } else {
     canvas.homePreviewComponent = new homePreviewComponentContructor("viewerCanvas", homeUrl, onerror, onprogression);
@@ -307,7 +307,7 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
     var previewComponent = this;
     this.createHomeRecorder().readHome(homeUrl,
         {
-          homeLoaded: function(home) {
+          homeLoaded : function(home) {
             try {
               var canvas = document.getElementById(canvasId);
               if (canvas) {
@@ -340,22 +340,22 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
                 previewComponent.component3D = previewComponent.createComponent3D(
                     canvasId, home, previewComponent.preferences, previewComponent.controller);
                 previewComponent.prepareComponent(canvasId, onprogression,
-                    params ? {roundsPerMinute: params.roundsPerMinute, 
-                              navigationPanelVisible: params.navigationPanel && params.navigationPanel != "none",
-                              aerialViewButtonId: params.aerialViewButtonId, 
-                              virtualVisitButtonId: params.virtualVisitButtonId, 
-                              levelsAndCamerasListId: params.levelsAndCamerasListId, 
-                              selectableLevels: params.selectableLevels}
+                    params ? {roundsPerMinute : params.roundsPerMinute, 
+                              navigationPanelVisible : params.navigationPanel && params.navigationPanel != "none",
+                              aerialViewButtonId : params.aerialViewButtonId, 
+                              virtualVisitButtonId : params.virtualVisitButtonId, 
+                              levelsAndCamerasListId : params.levelsAndCamerasListId, 
+                              selectableLevels : params.selectableLevels}
                            : undefined);
               }
             } catch (ex) {
               onerror(ex);
             }
           },
-          homeError: function(err) {
+          homeError : function(err) {
             onerror(err);
           },
-          progression: onprogression
+          progression : onprogression
         });
   } else {
     onerror("No canvas with id equal to " + canvasId);

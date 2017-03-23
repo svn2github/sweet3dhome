@@ -220,7 +220,7 @@ DAEHandler.prototype.startElement = function(uri, localName, name, attributes) {
         var stride = attributes.getValue("stride");
         stride = stride !== null ? parseInt(stride) : 1;
         this.sourceAccessorStrides.push(
-            {floatArray: this.floatArrays [floatArrayAnchor], stride: stride});
+            {floatArray : this.floatArrays [floatArrayAnchor], stride : stride});
       } 
     } else if (this.verticesId !== null && "input" == name) {
       var sourceAnchor = attributes.getValue("source").substring(1);

@@ -134,7 +134,8 @@ Label3D.prototype.update = function() {
         this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, 0);
         appearance.setCullFace(Appearance3D.CULL_NONE);
         appearance.setTextureCoordinatesGeneration(
-            {"planeS": vec4.fromValues(1, 0, 0, 0.5), "planeT": vec4.fromValues(0, 1, -1, 0.5)});
+            {planeS : vec4.fromValues(1, 0, 0, 0.5), 
+             planeT : vec4.fromValues(0, 1, -1, 0.5)});
         var shape = new Shape3D( 
             new IndexedTriangleArray3D(
                [vec3.fromValues(-0.5, 0, -0.5),

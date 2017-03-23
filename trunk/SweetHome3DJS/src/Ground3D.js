@@ -75,13 +75,13 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     this.updateAppearanceMaterial(groundAppearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_COLOR, 0);
     this.updateTextureTransform(groundAppearance, groundTexture, true);
     TextureManager.getInstance().loadTexture(groundTexture.getImage(), waitTextureLoadingEnd, {
-        textureUpdated: function(texture) {
+        textureUpdated : function(texture) {
           groundAppearance.setTextureImage(texture);
         },
-        textureError: function(error) {
+        textureError : function(error) {
           return this.textureUpdated(TextureManager.getInstance().getErrorImage());
         },
-        progression: function(part, info, percentage) {
+        progression : function(part, info, percentage) {
         }
       });
   }

@@ -60,7 +60,7 @@ ModelLoader.prototype.load = function(url, synchronous, modelObserver) {
   modelObserver.progression(Node3D.READING_MODEL, url, 0);
   var loader = this;
   var zipObserver = {
-      zipReady: function(zip) {
+      zipReady : function(zip) {
         try {
           if (modelEntryName === null) {
             // Search an entry ending with the given extension
@@ -86,12 +86,12 @@ ModelLoader.prototype.load = function(url, synchronous, modelObserver) {
           zipObserver.zipError(ex);
         }
       },
-      zipError: function(error) {
+      zipError : function(error) {
         if (modelObserver.modelError !== undefined) {
           modelObserver.modelError(error);
         }
       },
-      progression: function(part, info, percentage) {
+      progression : function(part, info, percentage) {
         if (modelObserver.progression !== undefined) {
           modelObserver.progression(Node3D.READING_MODEL, info, percentage);
         }
@@ -121,10 +121,10 @@ ModelLoader.prototype.parseModelEntry = function(modelEntry, zip, zipUrl, synchr
     this.loadTextureImages(scene, {}, zip, zipUrl, synchronous);
     modelObserver.modelLoaded(scene);
   } else {
-    var parsedEntry = {"modelEntry": modelEntry, 
-                       "zip": zip, 
-                       "zipUrl": zipUrl, 
-                       "modelObserver": modelObserver};
+    var parsedEntry = {modelEntry : modelEntry, 
+                       zip : zip, 
+                       zipUrl : zipUrl, 
+                       modelObserver : modelObserver};
     this.waitingParsedEntries.push(parsedEntry);
     this.parseNextWaitingEntry();
   }
@@ -202,8 +202,8 @@ ModelLoader.prototype.loadTextureImages = function(node, images, zip, zipUrl, sy
               var base64Image = btoa(imageData);
               var extension = imageEntryName.substring(imageEntryName.lastIndexOf('.') + 1).toLowerCase();
               var mimeType = extension == "jpg"
-                ? "image/jpeg" 
-                    : ("image/" + extension);
+                  ? "image/jpeg" 
+                  : ("image/" + extension);
               // Detect quickly if a PNG image use transparency
               image.transparent = ZIPTools.isTranparentImage(imageData);
               image.src = "data:" + mimeType + ";base64," + base64Image;

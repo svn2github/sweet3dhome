@@ -421,9 +421,9 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
                 rotation.addChild(modelRoot);
                 frontArea = modelManager.getFrontArea(this.doorOrWindow.getCutOutShape(), rotation);
                 Wall3D.rotatedModelsFrontAreas.push({
-                    model: this.doorOrWindow.getModel(),
-                    modelRotation: this.doorOrWindow.getModelRotation(),
-                    frontArea: frontArea});
+                    model : this.doorOrWindow.getModel(),
+                    modelRotation : this.doorOrWindow.getModelRotation(),
+                    frontArea : frontArea});
               }
               
               var angleDifference = Math.abs(wallYawAngle - doorOrWindow.getAngle()) % (2 * Math.PI);
@@ -445,9 +445,9 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
             modelError : function(ex) {
               if (getRotatedModelFrontArea(this.doorOrWindow) === null) {
                 Wall3D.rotatedModelsFrontAreas.push({
-                    model: this.doorOrWindow.getModel(),
-                    modelRotation: this.doorOrWindow.getModelRotation(),
-                    frontArea: Wall3D.FULL_FACE_CUT_OUT_AREA});
+                    model : this.doorOrWindow.getModel(),
+                    modelRotation : this.doorOrWindow.getModelRotation(),
+                    frontArea : Wall3D.FULL_FACE_CUT_OUT_AREA});
               }
               if (!waitDoorOrWindowModelsLoadingEnd) {
                 missingModels.splice(missingModels.indexOf(this.doorOrWindow), 1);
@@ -1229,13 +1229,13 @@ Wall3D.prototype.updateFilledWallSideAppearance = function(wallSideAppearance, w
     this.updateTextureTransform(wallSideAppearance, wallSideTexture, true);
     var wall3d = this;
     TextureManager.getInstance().loadTexture(wallSideTexture.getImage(), waitTextureLoadingEnd, {
-        textureUpdated: function(texture) {
+        textureUpdated : function(texture) {
           wallSideAppearance.setTextureImage(texture);
         },
-        textureError: function(error) {
+        textureError : function(error) {
           return this.textureUpdated(TextureManager.getInstance().getErrorImage());
         },
-        progression: function(part, info, percentage) {
+        progression : function(part, info, percentage) {
         }
       });
   }

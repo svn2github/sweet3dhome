@@ -388,7 +388,7 @@ Group3D.prototype.insertChild = function(child, index) {
   this.children.splice(index, 0, child);
   child.parent = this; 
   if (this.childrenListeners !== undefined) {
-    var event = {source: this, child: child, index: index};
+    var event = {source : this, child : child, index : index};
     var listeners = this.childrenListeners.slice(0);
     for (var i = 0; i < listeners.length; i++) {
       listeners [i].childAdded(event);
@@ -415,7 +415,7 @@ Group3D.prototype.removeChild = function(index) {
   this.children.splice(index, 1);
   delete child.parent; 
   if (this.childrenListeners !== undefined) {
-    var event = {source: this, child: child, index: index};
+    var event = {source : this, child : child, index : index};
     var listeners = this.childrenListeners.slice(0);
     for (var i = 0; i < listeners.length; i++) {
       listeners [i].childRemoved(event);
@@ -1439,7 +1439,7 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
       var normal = vec3.cross(vec3.create(), vector1, vector2);
       for (var j = 0; j < 3; j++) {
         // Add vertex index to the list of shared vertices 
-        var sharedVertex = {"normal" : normal};
+        var sharedVertex = {normal : normal};
         var vertexIndex = coordinatesIndices [i + j];
         sharedVertex.nextVertex = sharedVertices [vertexIndex];
         sharedVertices [vertexIndex] = sharedVertex;

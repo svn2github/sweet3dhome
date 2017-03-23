@@ -1154,9 +1154,9 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
   var defaultGroup = new OBJLoader.OBJGroup("default");
   var groups = {"default" : defaultGroup};
   var materialGroupsWithNormals = {};
-  var currentObjects = {group: defaultGroup,
-                        material: "default", 
-                        smooth: false}; 
+  var currentObjects = {group : defaultGroup,
+                        material : "default", 
+                        smooth : false}; 
   
   try {
     if (onmodelloaded === null) {
