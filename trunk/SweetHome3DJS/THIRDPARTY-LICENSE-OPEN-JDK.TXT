@@ -1,9 +1,9 @@
-The following additional provisions apply to core.js and geom.js 
+The following additional provisions apply to src/core.js and lib/generated/geom.js 
 
 core.js contains various classes translated from OpenJDK 8
 geom.js contains classes translated from java.awt.geom package ones in OpenJDK 8
 
-It was developed on the base of OpenJDK classes available at: 
+core.js and geom.js were developed on the base of OpenJDK classes available at: 
 http://openjdk.java.net/projects/jdk8/
 
 
