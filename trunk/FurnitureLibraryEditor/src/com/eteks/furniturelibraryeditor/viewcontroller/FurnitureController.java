@@ -1293,6 +1293,7 @@ public class FurnitureController implements Controller {
             ? ((CatalogDoorOrWindow)piece).getCutOutShape()
             : null;
         String pieceStaircaseCutOutShape = piece.getStaircaseCutOutShape();
+        boolean pieceBackFaceShown = piece.isBackFaceShown();
         String pieceCreator = piece.getCreator();
         boolean pieceResizable = piece.isResizable();
         boolean pieceDeformable = piece.isDeformable();
@@ -1435,7 +1436,7 @@ public class FurnitureController implements Controller {
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+              pieceModelRotation, pieceBackFaceShown, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
@@ -1444,7 +1445,7 @@ public class FurnitureController implements Controller {
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
-              pieceModelRotation, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+              pieceModelRotation, pieceBackFaceShown, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
@@ -1452,7 +1453,7 @@ public class FurnitureController implements Controller {
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceCreator, 
+                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceBackFaceShown, pieceCreator, 
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
@@ -1460,7 +1461,7 @@ public class FurnitureController implements Controller {
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-                pieceStaircaseCutOutShape, pieceModelRotation, pieceCreator, 
+                pieceStaircaseCutOutShape, pieceModelRotation, pieceBackFaceShown, pieceCreator,  
                 pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           }
