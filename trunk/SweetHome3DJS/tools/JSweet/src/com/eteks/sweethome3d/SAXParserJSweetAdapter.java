@@ -20,7 +20,6 @@
 package com.eteks.sweethome3d;
 
 import org.jsweet.transpiler.extension.PrinterAdapter;
-import org.jsweet.transpiler.model.MethodInvocationElement;
 import org.jsweet.transpiler.model.NewClassElement;
 
 /**
@@ -37,12 +36,7 @@ public class SAXParserJSweetAdapter extends PrinterAdapter {
     addTypeMapping("org.xml.sax.helpers.DefaultHandler", "DefaultHandler");
     addTypeMapping("org.xml.sax.SAXException", "SAXException");
     addTypeMapping("org.xml.sax.Attributes", "Attributes");
-
-  }
-
-  @Override
-  public boolean substituteMethodInvocation(MethodInvocationElement invocation) {
-    return super.substituteMethodInvocation(invocation);
+    
   }
 
   @Override
@@ -54,5 +48,5 @@ public class SAXParserJSweetAdapter extends PrinterAdapter {
     }
     return super.substituteNewClass(newClass);
   }
-
+  
 }

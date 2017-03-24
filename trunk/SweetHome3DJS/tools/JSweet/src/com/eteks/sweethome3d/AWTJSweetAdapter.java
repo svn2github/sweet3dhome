@@ -1,5 +1,5 @@
 /*
- * SweetHome3DJSweetFactory.java 
+ * SweetHome3DJava3DJSweetAdapter.java 
  *
  * Sweet Home 3D, Copyright (c) 2017 Emmanuel PUYBARET / eTeks <info@eteks.com>
  *
@@ -19,24 +19,31 @@
  */
 package com.eteks.sweethome3d;
 
-import org.jsweet.transpiler.JSweetContext;
-import org.jsweet.transpiler.JSweetFactory;
 import org.jsweet.transpiler.extension.PrinterAdapter;
+import org.jsweet.transpiler.model.MethodInvocationElement;
 
 /**
- * JSweet extension to generate JavaScript code from the SweetHome3D Java code
- * base.
+ * This adapter tunes the JavaScript generation for Java AWT specifics.
  * 
  * @author Renaud Pawlak
  */
-public class SweetHome3DJSweetFactory extends JSweetFactory {
+public class AWTJSweetAdapter extends PrinterAdapter {
 
-  public PrinterAdapter createAdapter(JSweetContext context) {
-    return new AWTJSweetAdapter( //
-        new SAXParserJSweetAdapter( //
-            new SweetHome3DJava3DJSweetAdapter( //
-                new SweetHome3DJSweetAdapter( //
-                    super.createAdapter(context)))));
+  public AWTJSweetAdapter(PrinterAdapter parent) {
+    super(parent);
   }
+
+
+  @Override
+  public boolean substituteMethodInvocation(MethodInvocationElement invocation) {
+    if (invocation.getMethodName().equals("invokeLater")) {
+      if ("java.awt.EventQueue".equals(invocation.getTargetExpression().getTypeAsElement().toString())) {
+        print("setTimeout(").print(invocation.getArgument(0)).print(", 0)");
+        return true;
+      }
+    }
+    return super.substituteMethodInvocation(invocation);
+  }
+
 
 }
