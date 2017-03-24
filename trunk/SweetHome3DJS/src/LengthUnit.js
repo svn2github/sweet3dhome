@@ -27,6 +27,7 @@ var LengthUnit = {};
 
 /**
  * Returns the value close to the given length under magnetism for meter units.
+ * @private
  */
 LengthUnit.getMagnetizedMeterLength = function(length, maxDelta) {
   // Use a maximum precision of 1 mm depending on maxDelta
@@ -53,6 +54,7 @@ LengthUnit.getMagnetizedMeterLength = function(length, maxDelta) {
 
 /**
  * Returns the value close to the given length under magnetism for inch units.
+ * @private
  */
 LengthUnit.getMagnetizedInchLength = function(length, maxDelta) {
   // Use a maximum precision of 1/8 inch depending on maxDelta
@@ -109,7 +111,7 @@ LengthUnit.footToCentimeter = function(length) {
 /**
  * Millimeter unit.
  */
-LengthUnit.MILLIMETER = {"formatLocale" : null};
+LengthUnit.MILLIMETER = {formatLocale : null};
   
 LengthUnit.MILLIMETER.getFormatWithUnit = function() {
   this.checkLocaleChange();
@@ -175,7 +177,7 @@ LengthUnit.MILLIMETER.unitToCentimeter = function(length) {
 /**
  * Centimeter unit.
  */
-LengthUnit.CENTIMETER = {"formatLocale" : null};
+LengthUnit.CENTIMETER = {formatLocale : null};
   
 LengthUnit.CENTIMETER.getFormatWithUnit = function() {
   this.checkLocaleChange();
@@ -240,7 +242,7 @@ LengthUnit.CENTIMETER.unitToCentimeter = function(length) {
 /**
  * Meter unit.
  */
-LengthUnit.METER = {"formatLocale" : null};
+LengthUnit.METER = {formatLocale : null};
   
 LengthUnit.METER.getFormatWithUnit = function() {
   this.checkLocaleChange();
@@ -306,7 +308,7 @@ LengthUnit.METER.unitToCentimeter = function(length) {
 /**
  * Foot/Inch unit followed by fractions.
  */
-LengthUnit.INCH = {"formatLocale" : null};
+LengthUnit.INCH = {formatLocale : null};
 
 LengthUnit.INCH.getFormatWithUnit = function() {
   this.checkLocaleChange();
@@ -338,35 +340,35 @@ LengthUnit.INCH.checkLocaleChange = function() {
     this.name = resource.getString("inchUnit");
     
     // Create format for feet and inches
-//    final MessageFormat positiveFootFormat = new MessageFormat(resource.getString("footFormat"));
-//    final MessageFormat positiveFootInchFormat = new MessageFormat(resource.getString("footInchFormat"));
-//    final MessageFormat positiveFootInchEighthFormat = new MessageFormat(resource.getString("footInchEighthFormat"));
-//    final MessageFormat negativeFootFormat = new MessageFormat("-" + resource.getString("footFormat"));
-//    final MessageFormat negativeFootInchFormat = new MessageFormat("-" + resource.getString("footInchFormat"));
-//    final MessageFormat negativeFootInchEighthFormat = new MessageFormat("-" + resource.getString("footInchEighthFormat"));
-//    final String        footInchSeparator = resource.getString("footInchSeparator");
+//    final MessageFormat positiveFootFormat = new MessageFormat("{0,number,integer}''");
+//    final MessageFormat positiveFootInchFormat = new MessageFormat("{0,number,integer}''{1,number}\"");
+//    final MessageFormat positiveFootInchEighthFormat = new MessageFormat("{0,number,integer}''{1,number,integer}{2}\"");
+//    final MessageFormat negativeFootFormat = new MessageFormat("-{0,number,integer}''");
+//    final MessageFormat negativeFootInchFormat = new MessageFormat("-{0,number,integer}''{1,number}\"");
+//    final MessageFormat negativeFootInchEighthFormat = new MessageFormat("-{0,number,integer}''{1,number,integer}{2}\"");
+//    final String        footInchSeparator = "";
 //    final NumberFormat  footNumberFormat = NumberFormat.getIntegerInstance();
 //    final NumberFormat  inchNumberFormat = NumberFormat.getNumberInstance();
-//    final char [] inchFractionCharacters = {'\u215b',   // 1/8
-//                                            '\u00bc',   // 1/4  
-//                                            '\u215c',   // 3/8
-//                                            '\u00bd',   // 1/2
-//                                            '\u215d',   // 5/8
-//                                            '\u00be',   // 3/4
-//                                            '\u215e'};  // 7/8        
-//    final String [] inchFractionStrings  = {"1/8",
-//                                            "1/4",  
-//                                            "3/8",
-//                                            "1/2",
-//                                            "5/8",
-//                                            "3/4",
-//                                            "7/8"};         
+    var inchFractionCharacters = ['\u215b',   // 1/8
+                                  '\u00bc',   // 1/4  
+                                  '\u215c',   // 3/8
+                                  '\u00bd',   // 1/2
+                                  '\u215d',   // 5/8
+                                  '\u00be',   // 3/4
+                                  '\u215e'];  // 7/8        
+    var inchFractionStrings  = ["1/8",
+                                "1/4",  
+                                "3/8",
+                                "1/2",
+                                "5/8",
+                                "3/4",
+                                "7/8"];         
 //    this.lengthFormat = new DecimalFormat("0.000\"") {
 //        public StringBuffer format(double number, StringBuffer result,
 //                                   FieldPosition fieldPosition) {
 //          var absoluteValue = Math.abs((float)number);
-//          double feet = Math.floor(centimeterToFoot(absoluteValue));              
-//          var remainingInches = centimeterToInch((float)absoluteValue - footToCentimeter((float)feet));
+//          double feet = Math.floor(LengthUnit.centimeterToFoot(absoluteValue));              
+//          var remainingInches = LengthUnit.centimeterToInch((float)absoluteValue - LengthUnit.footToCentimeter((float)feet));
 //          if (remainingInches >= 11.9375f) {
 //            feet++;
 //            remainingInches -= 12;
@@ -411,7 +413,7 @@ LengthUnit.INCH.checkLocaleChange = function() {
 //              parsePosition.setErrorIndex(numberPosition.getIndex());
 //              return null;
 //            }
-//            value = footToCentimeter(feet.intValue());                
+//            value = LengthUnit.footToCentimeter(feet.intValue());                
 //            numberPosition = new ParsePosition(quoteIndex + 1);
 //            skipWhiteSpaces(text, numberPosition);
 //            // Test optional foot inch separator
@@ -529,7 +531,7 @@ LengthUnit.INCH.unitToCentimeter = function(length) {
 /**
  * Inch unit with decimals.
  */
-LengthUnit.INCH_DECIMALS = {"formatLocale" : null};
+LengthUnit.INCH_DECIMALS = {formatLocale : null};
 
 LengthUnit.INCH_DECIMALS.getFormatWithUnit = function() {
   this.checkLocaleChange();
