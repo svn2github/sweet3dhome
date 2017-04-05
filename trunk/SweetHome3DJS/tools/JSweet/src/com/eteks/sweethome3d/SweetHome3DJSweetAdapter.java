@@ -34,6 +34,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 
 import org.jsweet.JSweetConfig;
+import org.jsweet.transpiler.Java2TypeScriptTranslator;
 import org.jsweet.transpiler.extension.AnnotationManager;
 import org.jsweet.transpiler.extension.PrinterAdapter;
 import org.jsweet.transpiler.extension.RemoveJavaDependenciesAdapter;
@@ -104,8 +105,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         // "com.eteks.sweethome3d.j3d.*", //
         // "!com.eteks.sweethome3d.j3d.Wall3D", //
         // TODO Transpile HomeController3D
-        // "!com.eteks.sweethome3d.viewcontroller.HomeController3D", //
-        //  "com.eteks.sweethome3d.viewcontroller.HomeController3D.modifyAttributes(**)",
+        "!com.eteks.sweethome3d.viewcontroller.HomeController3D", //
+        "!com.eteks.sweethome3d.viewcontroller.Controller", //
+        "!com.eteks.sweethome3d.viewcontroller.View", //
+        "com.eteks.sweethome3d.viewcontroller.HomeController3D.modifyAttributes(**)",
         "!com.eteks.sweethome3d.io.HomeXMLHandler", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)");
@@ -125,28 +128,30 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
             return Action.ADD;
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
-            // Only keep 2 public constructors of CatalogPieceOfFurniture (and the private one)
+            // Only keep 2 public constructors of CatalogPieceOfFurniture (and
+            // the private one)
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
               if (c.getParameters().size() != 14 && c.getParameters().size() != 26) {
                 return Action.ADD;
               }
             }
-            // TODO Keep less constructors in CatalogLight and CatalogDoorOrWindow
-      //  } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
-      //      .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogLight")) {
-      //    // Only keep 1 public constructor of CatalogLight
-      //    ExecutableElement c = (ExecutableElement) element;
-      //    if (c.getParameters().size() != 27) {
-      //      return Action.ADD;
-      //    }
-      //  } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
-      //      .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogDoorOrWindow")) {
-      //    // Only keep 2 public constructors of CatalogDoorOrWindow 
-      //    ExecutableElement c = (ExecutableElement) element;
-      //    if (c.getParameters().size() != 28 && c.getParameters().size() != 16) {
-      //      return Action.ADD;
-      //    }
+            // TODO Keep less constructors in CatalogLight and
+            // CatalogDoorOrWindow
+          } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
+              .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogLight")) {
+            // Only keep 1 public constructor of CatalogLight
+            ExecutableElement c = (ExecutableElement) element;
+            if (c.getParameters().size() != 27) {
+              return Action.ADD;
+            }
+          } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
+              .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogDoorOrWindow")) {
+            // Only keep 2 public constructors of CatalogDoorOrWindow
+            ExecutableElement c = (ExecutableElement) element;
+            if (c.getParameters().size() != 29 && c.getParameters().size() != 16) {
+              return Action.ADD;
+            }
           }
         }
         return Action.VOID;
@@ -156,8 +161,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
 
     // We erase some packages: all the elements in these packages will be top
     // level in JS
-    addAnnotation("@Root", "java.awt.geom", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io", "com.eteks.sweethome3d.viewcontroller",
-        "com.eteks.sweethome3d.j3d");
+    addAnnotation("@Root", "java.awt.geom", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io",
+        "com.eteks.sweethome3d.viewcontroller", "com.eteks.sweethome3d.j3d");
 
     // Replace some Java implementations with some JS-specific implementations
     addAnnotation(
@@ -222,6 +227,12 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     if (invocation.getTargetExpression() != null) {
       Element targetType = invocation.getTargetExpression().getTypeAsElement();
       switch (targetType.toString()) {
+      // override invocations to LengthUnit so that it is not handled as a
+      // complex enum and use the JS implementation instead
+      case "com.eteks.sweethome3d.model.LengthUnit":
+        print(invocation.getTargetExpression()).print(".").print(invocation.getMethodName()).print("(")
+            .printArgList(invocation.getArguments()).print(")");
+        return true;
       case "java.text.Collator":
         switch (invocation.getMethodName()) {
         case "setStrength":

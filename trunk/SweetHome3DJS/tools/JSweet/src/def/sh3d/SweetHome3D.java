@@ -1,5 +1,7 @@
 package def.sh3d;
 
+import jsweet.lang.Interface;
+
 class UserPreferences {
 
 }
@@ -12,4 +14,9 @@ class URLContent {
 class HomeURLContent {
   public HomeURLContent(String content) {
   }
+}
+
+@Interface
+class LengthUnit {
+  
 }
