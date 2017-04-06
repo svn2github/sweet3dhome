@@ -21,7 +21,7 @@
 // Requires jszip.min.js
 //          URLContent.js
 //          big.js
-//          SweetHome3DModel.js          
+//          SweetHome3D.js          
 
 /**
  * Creates a home recorder able to read homes from URLs.

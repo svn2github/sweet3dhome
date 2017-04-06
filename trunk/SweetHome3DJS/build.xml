@@ -28,7 +28,7 @@
       </filelist>
     </concat>
     <concat destfile="dist/build/viewhome.min.js" encoding="UTF-8">
-      <fileset dir="lib/generated" includes="SweetHome3DModel.js" />
+      <fileset dir="lib/generated" includes="SweetHome3D.js" />
       <filelist dir="src">
         <file name="DAELoader.js" />
         <file name="Max3DSLoader.js" />
@@ -205,7 +205,7 @@
            classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-1.2.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
     <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
       <fileset dir="src" includes="*.js" excludes="scene3d.js, HTMLCanvas3D.js, Triangulator.js" />
-      <fileset dir="lib/generated" includes="SweetHome3DModel.js" />
+      <fileset dir="lib/generated" includes="SweetHome3D.js" />
     </jsdoctoolkit>
     <zip destfile="SweetHome3DJS-${version}-jsdoc.zip" basedir="tools/jsdoc" includes="SweetHome3DJS-${version}-jsdoc/**" />
     <!-- Clean jsdoc directory -->
@@ -240,7 +240,7 @@
   </target>
 
   <target name="jsBundle" depends="SweetHome3DJSweetExtension"
-          description="Builds dist/generated/SweetHome3DModel.js">
+          description="Builds dist/generated/SweetHome3D.js">
     <mkdir dir="build/jsBundle/ts" />
     <mkdir dir="build/jsBundle/js" />
     <java classname="org.jsweet.JSweetCommandLineLauncher" fork="true" failonerror="true">
@@ -279,7 +279,7 @@
     </java>
     
     <mkdir dir="lib/generated" />
-    <move file="build/jsBundle/js/bundle.js" tofile="lib/generated/SweetHome3DModel.js"/>
+    <move file="build/jsBundle/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
     <move file="build/jsBundle/js/j4ts-awtgeom-0.0.0-SNAPSHOT/bundle.js" tofile="lib/generated/geom.js"/>
 
     <!-- Clean build -->
