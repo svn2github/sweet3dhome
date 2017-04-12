@@ -76,7 +76,7 @@
       <label class="viewerComponent" for="virtualVisit" style="visibility: hidden;">Virtual visit</label>
     <select id="levelsAndCameras" class="viewerComponent" style="visibility: hidden;"></select>
     <button id="changeColorButton" style="visibility: hidden;"
-            onclick="var furniture = homeComponent.getHome().getFurniture(); furniture [Math.floor(Math.random() * furniture.length)].setColor(Math.floor(0xFFFFFF * Math.random()));">Set randomly color of a piece</button>
+            onclick="var furniture = homeComponent.getHome().getFurniture(); var piece = furniture [Math.floor(Math.random() * furniture.length)]; if (piece.isTexturable()) piece.setColor(Math.floor(0xFFFFFF * Math.random()));">Set randomly color of a piece</button>
     <label id="info"></label>
   </div>
 </div>
