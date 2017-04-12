@@ -1,5 +1,5 @@
 <!--
-   viewHomeInOverlay.html  version 
+   viewHomeInOverlay.html 
    
    Sweet Home 3D, Copyright (c) 2016 Emmanuel PUYBARET / eTeks <info@eteks.com>
    
@@ -25,6 +25,7 @@
 <script type="text/javascript" src="lib/big.min.js"></script>
 <script type="text/javascript" src="lib/gl-matrix-min.js"></script>
 <script type="text/javascript" src="lib/jszip.min.js"></script>
+<script type="text/javascript" src="lib/jsXmlSaxParser.min.js"></script>
 
 <script type="text/javascript" src="src/core.js"></script>
 <script type="text/javascript" src="src/URLContent.js"></script>
@@ -70,7 +71,7 @@
        You may also switch between aerial view and virtual visit with the space bar -->
   <button onclick='
        viewerCanvasId = "viewerCanvas";
-       viewHomeInOverlay("test/resources/SweetHome3DExample3.zip", 
+       viewHomeInOverlay("test/resources/SweetHome3DExample6.sh3d", 
               {roundsPerMinute:    2,                        /* Rotation speed of the animation launched once home is loaded in rounds per minute, no animation if missing */ 
                widthByHeightRatio: 3/2,                      /* Size ratio of the displayed canvas */
                navigationPanel:                              /* Displayed navigation arrows, "none" or "default" for default one or an HTML string containing elements with data-simulated-key 
