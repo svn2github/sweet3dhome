@@ -104,7 +104,6 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.j3d", //
         // "com.eteks.sweethome3d.j3d.*", //
         // "!com.eteks.sweethome3d.j3d.Wall3D", //
-        // TODO Transpile HomeController3D
         "!com.eteks.sweethome3d.viewcontroller.HomeController3D", //
         "!com.eteks.sweethome3d.viewcontroller.Controller", //
         "!com.eteks.sweethome3d.viewcontroller.View", //
@@ -136,8 +135,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
                 return Action.ADD;
               }
             }
-            // TODO Keep less constructors in CatalogLight and
-            // CatalogDoorOrWindow
+            // Keep less constructors in CatalogLight and CatalogDoorOrWindow
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogLight")) {
             // Only keep 1 public constructor of CatalogLight
