@@ -195,7 +195,8 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
   for (var i = 0; i < visibleDoorsAndWindows.length; i++) {
     var piece = visibleDoorsAndWindows[i];
     var pieceElevation = piece.getGroundElevation();
-    if (pieceElevation + piece.getHeight() > wallElevation && pieceElevation < maxTopElevation) {
+    if (pieceElevation + piece.getHeight() > wallElevation 
+        && pieceElevation < maxTopElevation) {
       var pieceArea = new Area(this.getShape(piece.getPoints()));
       var intersectionArea = new Area(wallShape);
       intersectionArea.intersect(pieceArea);
@@ -266,10 +267,9 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
       }
       points.length = 0;
       previousPoint = null;
-    }
-    else if (previousPoint === null 
-             || wallPoint[0] !== previousPoint[0]
-             || wallPoint[1] !== previousPoint[1]) {
+    } else if (previousPoint === null 
+               || wallPoint[0] !== previousPoint[0]
+               || wallPoint[1] !== previousPoint[1]) {
       points.push(wallPoint);
       previousPoint = wallPoint;
     }
