@@ -467,13 +467,6 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                         && displayedGeometry.mode === canvas3D.gl.TRIANGLES;
                     break;
                   case "TEXTURE_IMAGE" : 
-                    if (displayedGeometry.texture
-                        && displayedGeometry.texture.url === undefined) {
-                      // Free generated textures
-                      var index = canvas3D.textures.indexOf(displayedGeometry.texture);
-                      canvas3D.gl.deleteTexture(displayedGeometry.texture);
-                      canvas3D.textures.splice(index, 1);
-                    }
                     displayedGeometry.texture = newValue !== null
                         ? canvas3D.prepareTexture(newValue)
                         : undefined;
@@ -495,7 +488,6 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                     displayedGeometry.backFaceNormalFlip = newValue === true;
                     break;
                 }
-                break;
               }
             }
             canvas3D.repaint();
@@ -599,9 +591,15 @@ HTMLCanvas3D.prototype.prepareGeometry = function(nodeGeometry, nodeAppearance, 
   if (shininess !== undefined) {
     displayedGeometry.shininess = shininess;
   }
+  var textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
+  if (textureCoordinatesGeneration !== undefined) {
+    displayedGeometry.textureCoordinatesGeneration = textureCoordinatesGeneration;
+  }
+  var textureTransform = nodeAppearance.getTextureTransform();
+  if (textureTransform !== undefined) {
+    displayedGeometry.textureTransform = textureTransform;
+  }
   if (texture !== null) {
-    displayedGeometry.textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
-    displayedGeometry.textureTransform = nodeAppearance.getTextureTransform();
     displayedGeometry.texture = texture;
   }
   displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
