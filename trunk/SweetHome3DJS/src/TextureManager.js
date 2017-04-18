@@ -162,10 +162,7 @@ TextureManager.prototype.load = function(url, synchronous, textureObserver) {
               textureImage.src = "data:image;base64," + base64Image;
               if (textureImage.width !== 0) {
                 // Image is already here
-                textureImage.removeEventListener("load", imageLoadingListener);
-                textureImage.removeEventListener("error", imageErrorListener);
-                textureObserver.progression(TextureManager.READING_TEXTURE, url, 1);
-                textureObserver.textureLoaded(textureImage);
+                imageLoadingListener();
               }
             } catch (ex) {
               this.zipError(ex);
