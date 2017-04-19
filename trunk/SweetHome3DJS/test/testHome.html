@@ -125,7 +125,7 @@ function testGeom() {
   var rectangle = area.getBounds2D();
   
   // Create an area made of two overlapping rectangles 
-  var area = new Area();
+  area = new Area();
   area.add(new Area(new Rectangle2D.Float(0, 0, 200, 100)));
   area.add(new Area(new Rectangle2D.Float(50, -50, 300, 100)));
   // Check area bounds
@@ -172,6 +172,51 @@ function testGeom() {
     }
   }
 
+  // Test Area substract
+  var path = new GeneralPath();
+  path.moveTo(494.6751772225669, 670.1);
+  path.lineTo(5.901708600000002, 670.1);
+  path.lineTo(5.9017086, 657.6);
+  path.lineTo(505.9017600000001, 657.6);
+  path.closePath();
+  area = new Area(path);
+  
+  var path2 = new GeneralPath();
+  path2.moveTo(232.060999211009, 670.1004180630736);
+  path2.lineTo(100.06099921100918, 670.1004119369262);
+  path2.lineTo(100.06100078899101, 636.0996619369263);
+  path2.lineTo(232.06100078899087, 636.0996680630736);
+  path2.closePath();
+  area.subtract(new Area(path2));
+  
+  var getAreaPoints = function(area) {
+    var points = [];
+    for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
+      var point = [0, 0];
+      if (it.currentSegment(point) !== PathIterator.SEG_CLOSE) {
+        points.push(point);
+      }
+    }
+    return points;
+  };
+
+  var points = getAreaPoints(area);
+  assertTrue("Wrong distance between points", Math.abs(points[2][0] - points[0][0]) < 100);
+  
+  // Test Area substract with slightly different values
+  path = new GeneralPath();
+  path.moveTo(494.6751772225669, 670.1000000000004);
+  path.lineTo(5.901708600000002, 670.1);
+  path.lineTo(5.9017086, 657.6);
+  path.lineTo(505.9017600000001, 657.600000000000);
+  path.closePath();
+  var area2 = new Area(path);
+  area2.subtract(new Area(path2));
+  
+  points = getAreaPoints(area2);
+  // TODO Check why points list is wrong
+  assertTrue("Wrong distance between points", Math.abs(points[2][0] - points[0][0]) < 100);
+  
   console.log("End of testGeom");	      
 }
 
