@@ -426,7 +426,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
                     frontArea : frontArea});
               }
               
-              var angleDifference = Math.abs(wallYawAngle - doorOrWindow.getAngle()) % (2 * Math.PI);
+              var angleDifference = Math.abs(wallYawAngle - this.doorOrWindow.getAngle()) % (2 * Math.PI);
               var frontOrBackSide = Math.abs(angleDifference - Math.PI) < epsilon ? 1 : -1;
               if (waitDoorOrWindowModelsLoadingEnd) {
                 wall3d.createGeometriesSurroundingDoorOrWindow(this.doorOrWindow, frontArea, frontOrBackSide, 
@@ -456,7 +456,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
             progression : function() {
             }
           };
-        modelManager.loadModel(doorOrWindow.getModel(), waitDoorOrWindowModelsLoadingEnd, modelObserver); 
+        modelManager.loadModel(missingModels[i].getModel(), waitDoorOrWindowModelsLoadingEnd, modelObserver); 
       }
     }
   }
