@@ -430,6 +430,15 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
               }
               if (ev.getNewValue()) {
                 addedGeometry = ev.getNewValue();
+                // Retrieve possibly updated appearance and texture
+                var nodeAppearance = node.getAppearance();
+                if (!nodeAppearance) {
+                  nodeAppearance = HTMLCanvas3D.DEFAULT_APPEARANCE;
+                }
+                var texture = null;
+                if (nodeAppearance.getTextureImage()) {
+                  texture = canvas3D.prepareTexture(nodeAppearance.getTextureImage());
+                }
                 canvas3D.prepareGeometry(addedGeometry, nodeAppearance, texture, 
                     node, displayedGeometries, background, parentLinks, parentTransformations);
               }
