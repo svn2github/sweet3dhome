@@ -84,6 +84,8 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   handler.homeUrl = zipUrl;
   var saxParser = new SAXParser(handler, handler, handler, handler, handler);
   try {
+    // Replace ' by " because SAXParser converts &apos; entities to ' in attributes value too early
+    xmlContent = xmlContent.replace(/\'/g, '"');
     saxParser.parseString(xmlContent);
     observer.homeLoaded(handler.getHome());
   } catch (ex) {
