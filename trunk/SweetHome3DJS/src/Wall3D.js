@@ -434,7 +434,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
                     texture, textureReferencePoint, wallSide);
               } else {
                 missingModels.splice(missingModels.indexOf(this.doorOrWindow), 1);
-                if (this.missingModels.length === 0 
+                if (missingModels.length === 0 
                     && this.baseboard == null) {
                   setTimeout(function() {
                       wall3d.updateWallSideGeometry(wallSide, waitDoorOrWindowModelsLoadingEnd);
