@@ -205,16 +205,15 @@ function testGeom() {
   
   // Test Area substract with slightly different values
   path = new GeneralPath();
-  path.moveTo(494.6751772225669, 670.1000000000004);
-  path.lineTo(5.901708600000002, 670.1);
-  path.lineTo(5.9017086, 657.6);
-  path.lineTo(505.9017600000001, 657.600000000000);
+  path.moveTo(Object3DBranch.fround(494.6751772225669), Object3DBranch.fround(670.1000000000004));
+  path.lineTo(Object3DBranch.fround(5.901708600000002), Object3DBranch.fround(670.1));
+  path.lineTo(Object3DBranch.fround(5.9017086), Object3DBranch.fround(657.6));
+  path.lineTo(Object3DBranch.fround(505.9017600000001), Object3DBranch.fround(657.600000000000));
   path.closePath();
   var area2 = new Area(path);
   area2.subtract(new Area(path2));
   
   points = getAreaPoints(area2);
-  // TODO Check why points list is wrong
   assertTrue("Wrong distance between points", Math.abs(points[2][0] - points[0][0]) < 100);
   
   console.log("End of testGeom");	      

@@ -923,16 +923,14 @@ ModelManager.prototype.getShape = function(svgPathShape) {
   var shape2D = this.parsedShapes [svgPathShape];
   if (!shape2D) {
     shape2D = new Rectangle2D.Float(0, 0, 1, 1);
-    if (typeof AWTPathProducer !== "undefined") {
-      try {
-        var pathProducer = new AWTPathProducer();
-        var pathParser = new PathParser();
-        pathParser.setPathHandler(pathProducer);
-        pathParser.parse(svgPathShape);
-        shape2D = pathProducer.getShape();
-      } catch (ex) {
-        // Keep default value
-      }
+    try {
+      var pathProducer = new org.apache.batik.parser.AWTPathProducer();
+      var pathParser = new org.apache.batik.parser.PathParser();
+      pathParser.setPathHandler(pathProducer);
+      pathParser.parse(svgPathShape);
+      shape2D = pathProducer.getShape();
+    } catch (ex) {
+      // Keep default value if Batik is not available or if the path is incorrect
     }
     this.parsedShapes[svgPathShape] = shape2D;
   }

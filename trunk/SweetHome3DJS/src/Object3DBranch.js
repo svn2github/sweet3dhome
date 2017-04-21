@@ -36,6 +36,17 @@ Object3DBranch.prototype.constructor = Object3DBranch;
 Object3DBranch.DEFAULT_COLOR         = 0xFFFFFF;
 Object3DBranch.DEFAULT_AMBIENT_COLOR = 0x333333;
 
+Object3DBranch.doubleToFloatConverter = new Float32Array(1);
+
+/**
+ * Returns a double number converted to float precision.
+ * @ignore
+ */
+Object3DBranch.fround = function(x) {
+  Object3DBranch.doubleToFloatConverter [0] = x;
+  return Object3DBranch.doubleToFloatConverter [0];
+};
+
 /**
  * Returns the shape matching the coordinates in <code>points</code> array.
  * @param {Array} points
@@ -45,9 +56,9 @@ Object3DBranch.DEFAULT_AMBIENT_COLOR = 0x333333;
  */
 Object3DBranch.prototype.getShape = function(points) {
   var path = new GeneralPath();
-  path.moveTo(points[0][0], points[0][1]);
+  path.moveTo(Object3DBranch.fround(points[0][0]), Object3DBranch.fround(points[0][1]));
   for (var i = 1; i < points.length; i++) {
-    path.lineTo(points[i][0], points[i][1]);
+    path.lineTo(Object3DBranch.fround(points[i][0]), Object3DBranch.fround(points[i][1]));
   }
   path.closePath();
   return path;
