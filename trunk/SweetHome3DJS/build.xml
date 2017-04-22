@@ -83,6 +83,11 @@
       <arg value="dist/build/geom.min.js" />
     </java>
     <java jar="${yuicompressor.jar}" fork="true">
+      <arg value="lib/generated/batik-svgpathparser.js" />
+      <arg value="-o" />
+      <arg value="dist/build/batik-svgpathparser.min.js" />
+    </java>  	
+    <java jar="${yuicompressor.jar}" fork="true">
       <arg value="src/Triangulator.js" />
       <arg value="-o" />
       <arg value="dist/build/triangulator.min.js" />
@@ -127,6 +132,15 @@
     </concat>
     <concat destfile="dist/geom.min.js" encoding="UTF-8" append="true">
       <file name="dist/build/geom.min.js" />
+    </concat>
+    <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8">
+      <file name="lib/generated/batik-svgpathparser.js" />
+      <filterchain>
+        <headfilter lines="1" skip="5" />
+      </filterchain>
+    </concat>
+    <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8" append="true">
+      <file name="dist/build/batik-svgpathparser.min.js" />
     </concat>
     <concat destfile="dist/triangulator.min.js" encoding="UTF-8">
       <header file="src/Triangulator.js" />
@@ -281,7 +295,7 @@
     <mkdir dir="lib/generated" />
     <move file="build/jsBundle/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
     <move file="build/jsBundle/js/j4ts-awtgeom-0.0.0-SNAPSHOT/bundle.js" tofile="lib/generated/geom.js"/>
-
+    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-0.0.0-SNAPSHOT/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
     <!-- Clean build -->
     <delete dir="build" />
   </target>
