@@ -86,7 +86,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
       });
   }
   
-  var areaRemovedFromGround = new Area();
+  var areaRemovedFromGround = new java.awt.geom.Area();
   var undergroundLevelAreas = [];
   var rooms = home.getRooms();
   for (var i = 0; i < rooms.length; i++) {
@@ -96,7 +96,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
         && room.isFloorVisible()) {
       var roomPoints = room.getPoints();
       if (roomPoints.length > 2) {
-        var roomArea = new Area(this.getShape(roomPoints));
+        var roomArea = new java.awt.geom.Area(this.getShape(roomPoints));
         var levelAreas = roomLevel !== null && roomLevel.getElevation() < 0 
             ? this.getUndergroundAreas(undergroundLevelAreas, roomLevel) 
             : null;
@@ -124,7 +124,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
         && pieceLevel.getElevation() < 0) {
       var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, pieceLevel);
       if (piece.getStaircaseCutOutShape() === null) {
-        levelAreas.undergroundArea.add(new Area(this.getShape(piece.getPoints())));
+        levelAreas.undergroundArea.add(new java.awt.geom.Area(this.getShape(piece.getPoints())));
       } else {
         levelAreas.undergroundArea.add(ModelManager.getInstance().getAreaOnFloor(piece));
       }
@@ -138,7 +138,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
         && wallLevel.isViewable() 
         && wallLevel.getElevation() < 0) {
       var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, wallLevel);
-      levelAreas.wallArea.add(new Area(this.getShape(wall.getPoints())));
+      levelAreas.wallArea.add(new java.awt.geom.Area(this.getShape(wall.getPoints())));
     }
   }
   var undergroundAreas = undergroundLevelAreas;
@@ -148,7 +148,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     for (var j = 0; j < areaPoints.length; j++) {
       var points = areaPoints[j];
       if (!new Room(points).isClockwise()) {
-        levelAreas.undergroundArea.add(new Area(this.getShape(points)));
+        levelAreas.undergroundArea.add(new java.awt.geom.Area(this.getShape(points)));
       }
     }
   }
@@ -169,7 +169,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
         for (var k = 0; k < areaPoints.length; k++) {
           var points = areaPoints[k];
           if (!new Room(points).isClockwise()) {
-            var pointsArea = new Area(this.getShape(points));
+            var pointsArea = new java.awt.geom.Area(this.getShape(points));
             area.subtract(pointsArea);
             levelAreas.undergroundSideArea.add(pointsArea);
           }
@@ -180,12 +180,12 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     for (var j = 0; j < areaPoints.length; j++) {
       var points = areaPoints[j];
       if (new Room(points).isClockwise()) {
-        var coveredHole = new Area(this.getShape(points));
+        var coveredHole = new java.awt.geom.Area(this.getShape(points));
         coveredHole.exclusiveOr(areaAtStart);
         coveredHole.subtract(areaAtStart);
         levelAreas.upperLevelArea.add(coveredHole);
       } else {
-        areaRemovedFromGround.add(new Area(this.getShape(points)));
+        areaRemovedFromGround.add(new java.awt.geom.Area(this.getShape(points)));
       }
     }
   }
@@ -197,7 +197,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     }
   }
   
-  var groundArea = new Area(this.getShape(
+  var groundArea = new java.awt.geom.Area(this.getShape(
       [[this.originX, this.originY], 
        [this.originX, this.originY + this.depth], 
        [this.originX + this.width, this.originY + this.depth], 
@@ -206,7 +206,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
   if (!groundArea.getBounds2D().equals(removedAreaBounds)) {
     var outsideGroundArea = groundArea;
     if (areaRemovedFromGround.isEmpty()) {
-      removedAreaBounds = new Rectangle2D.Float(Math.max(-5000.0, this.originX), Math.max(-5000.0, this.originY), 0, 0);
+      removedAreaBounds = new java.awt.geom.Rectangle2D.Float(Math.max(-5000.0, this.originX), Math.max(-5000.0, this.originY), 0, 0);
       removedAreaBounds.add(Math.min(5000.0, this.originX + this.width), 
           Math.min(5000.0, this.originY + this.depth));
     } else {
@@ -215,7 +215,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
       removedAreaBounds.add(Math.min(removedAreaBounds.getMaxX() + 5000.0, this.originX + this.width), 
           Math.min(removedAreaBounds.getMaxY() + 5000.0, this.originY + this.depth));
     }
-    groundArea = new Area(removedAreaBounds);
+    groundArea = new java.awt.geom.Area(removedAreaBounds);
     outsideGroundArea.subtract(groundArea);
     this.addAreaGeometry(groundShape, groundTexture, outsideGroundArea, 0);
   }
@@ -254,7 +254,7 @@ Ground3D.prototype.getPoints = function(area) {
   var previousRoomPoint = null;
   for (var it = area.getPathIterator(null, 1); !it.isDone(); it.next()) {
     var roomPoint = [0, 0];
-    if (it.currentSegment(roomPoint) === PathIterator.SEG_CLOSE) {
+    if (it.currentSegment(roomPoint) === java.awt.geom.PathIterator.SEG_CLOSE) {
       if (areaPartPoints[0][0] === previousRoomPoint[0] 
           && areaPartPoints[0][1] === previousRoomPoint[1]) {
         areaPartPoints.splice(areaPartPoints.length - 1, 1);
@@ -365,7 +365,7 @@ Ground3D.prototype.addAreaSidesGeometry = function(groundShape, groundTexture, a
     geometryCoords[j++] = vec3.fromValues(nextPoint[0], elevation + sideHeight, nextPoint[1]);
     geometryCoords[j++] = vec3.fromValues(nextPoint[0], elevation, nextPoint[1]);
     if (groundTexture !== null) {
-      var distance = Point2D.distance(point[0], point[1], nextPoint[0], nextPoint[1]);
+      var distance = java.awt.geom.Point2D.distance(point[0], point[1], nextPoint[0], nextPoint[1]);
       geometryTextureCoords[j - 4] = vec2.fromValues(point[0], elevation);
       geometryTextureCoords[j - 3] = vec2.fromValues(point[0], elevation + sideHeight);
       geometryTextureCoords[j - 2] = vec2.fromValues(point[0] - distance, elevation + sideHeight);
@@ -390,12 +390,12 @@ Ground3D.prototype.addAreaSidesGeometry = function(groundShape, groundTexture, a
  */
 Ground3D.LevelAreas = function(level, undergroundArea) {
   if (undergroundArea === undefined) {
-    undergroundArea = new Area();
+    undergroundArea = new java.awt.geom.Area();
   }
   this.level = level;
   this.undergroundArea = undergroundArea;
-  this.roomArea = new Area();
-  this.wallArea = new Area();
-  this.undergroundSideArea = new Area();
-  this.upperLevelArea = new Area();
+  this.roomArea = new java.awt.geom.Area();
+  this.wallArea = new java.awt.geom.Area();
+  this.undergroundSideArea = new java.awt.geom.Area();
+  this.upperLevelArea = new java.awt.geom.Area();
 }

@@ -204,11 +204,11 @@ Room3D.prototype.createRoomGeometries = function(roomPart, texture) {
         || sameElevation 
             && (roomsAtSameElevation[roomsAtSameElevation.length - 1] !== room 
                 || visibleStaircases.length > 0)) {
-      roomVisibleArea = new Area(this.getShape(points));
+      roomVisibleArea = new java.awt.geom.Area(this.getShape(points));
       if ((roomsAtSameElevation.indexOf(room) >= 0)) {
         for (var i = roomsAtSameElevation.length - 1; i > 0 && roomsAtSameElevation[i] !== room; i--) {
           var otherRoom = roomsAtSameElevation[i];
-          roomVisibleArea.subtract(new Area(this.getShape(otherRoom.getPoints())));
+          roomVisibleArea.subtract(new java.awt.geom.Area(this.getShape(otherRoom.getPoints())));
         }
       }
       this.removeStaircasesFromArea(visibleStaircases, roomVisibleArea);
@@ -262,10 +262,10 @@ Room3D.prototype.createRoomGeometries = function(roomPart, texture) {
             zMax = Math.max(zMax, point[1]);
           }
           
-          var roomPartArea = new Area(this.getShape(roomPartPoints));
+          var roomPartArea = new java.awt.geom.Area(this.getShape(roomPartPoints));
           for (var xSquare = xMin; xSquare < xMax; xSquare += subpartSize) {
             for (var zSquare = zMin; zSquare < zMax; zSquare += subpartSize) {
-              var roomPartSquare = new Area(new Rectangle2D.Float(xSquare, zSquare, subpartSize, subpartSize));
+              var roomPartSquare = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(xSquare, zSquare, subpartSize, subpartSize));
               roomPartSquare.intersect(roomPartArea);
               if (!roomPartSquare.isEmpty()) {
                 var geometryPartPointsWithoutHoles = this.getAreaPoints(roomPartSquare, 1, roomPart === Room3D.CEILING_PART);
@@ -293,10 +293,10 @@ Room3D.prototype.createRoomGeometries = function(roomPart, texture) {
       var floorBottomPointsWithoutHoles;
       if (roomVisibleArea != null 
           || ceilingsAtSameFloorBottomElevation.length > 0) {
-        var floorBottomVisibleArea = roomVisibleArea != null ? roomVisibleArea : new Area(this.getShape(points));
+        var floorBottomVisibleArea = roomVisibleArea != null ? roomVisibleArea : new java.awt.geom.Area(this.getShape(points));
         for (var i = 0; i < ceilingsAtSameFloorBottomElevation.length; i++) {
           var otherRoom = ceilingsAtSameFloorBottomElevation[i];
-          floorBottomVisibleArea.subtract(new Area(this.getShape(otherRoom.getPoints())));
+          floorBottomVisibleArea.subtract(new java.awt.geom.Area(this.getShape(otherRoom.getPoints())));
         }
         floorBottomPointsWithoutHoles = this.getAreaPoints(floorBottomVisibleArea, 1, true);
       } else {
@@ -319,10 +319,10 @@ Room3D.prototype.createRoomGeometries = function(roomPart, texture) {
               zMax = Math.max(zMax, point[1]);
             }
             
-            var floorBottomPartArea = new Area(this.getShape(floorBottomPartPoints));
+            var floorBottomPartArea = new java.awt.geom.Area(this.getShape(floorBottomPartPoints));
             for (var xSquare = xMin; xSquare < xMax; xSquare += subpartSize) {
               for (var zSquare = zMin; zSquare < zMax; zSquare += subpartSize) {
-                var floorBottomPartSquare = new Area(new Rectangle2D.Float(xSquare, zSquare, subpartSize, subpartSize));
+                var floorBottomPartSquare = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(xSquare, zSquare, subpartSize, subpartSize));
                 floorBottomPartSquare.intersect(floorBottomPartArea);
                 if (!floorBottomPartSquare.isEmpty()) {
                   var geometryPartPointsWithoutHoles = this.getAreaPoints(floorBottomPartSquare, 1, true);
@@ -473,7 +473,7 @@ Room3D.prototype.computeRoomBorderGeometry = function(geometryRooms, geometryHol
         var nextPoint = j < geometryPoints.length - 1 
             ? j + 1 
             : 0;
-        var textureCoord = (Point2D.distance(geometryPoints[j][0], geometryPoints[j][1], geometryPoints[nextPoint][0], geometryPoints[nextPoint][1]));
+        var textureCoord = java.awt.geom.Point2D.distance(geometryPoints[j][0], geometryPoints[j][1], geometryPoints[nextPoint][0], geometryPoints[nextPoint][1]);
         textureCoords[i++] = vec2.fromValues(textureCoord, 0);
         textureCoords[i++] = vec2.fromValues(textureCoord, roomLevel.getFloorThickness());
       }
@@ -485,7 +485,7 @@ Room3D.prototype.computeRoomBorderGeometry = function(geometryRooms, geometryHol
         var nextPoint = j < geometryHole.length - 1 
             ? j + 1 
             : 0;
-        var textureCoord = (Point2D.distance(geometryHole[j][0], geometryHole[j][1], geometryHole[nextPoint][0], geometryHole[nextPoint][1]));
+        var textureCoord = java.awt.geom.Point2D.distance(geometryHole[j][0], geometryHole[j][1], geometryHole[nextPoint][0], geometryHole[nextPoint][1]);
         textureCoords[i++] = vec2.fromValues(textureCoord, 0);
         textureCoords[i++] = vec2.fromValues(textureCoord, roomLevel.getFloorThickness());
         textureCoords[i++] = vec2.fromValues(0, roomLevel.getFloorThickness());
@@ -579,7 +579,7 @@ Room3D.prototype.getRoomHeightAt = function (x, y) {
           && wall.isAtLevel(roomLevel)) {
         var points = wall.getPoints();
         for (var i = 0; i < points.length; i++) {
-          var distanceToWallPoint = Point2D.distanceSq(points[i][0], points[i][1], x, y);
+          var distanceToWallPoint = java.awt.geom.Point2D.distanceSq(points[i][0], points[i][1], x, y);
           if (distanceToWallPoint < smallestDistance) {
             closestWall = wall;
             closestWallPoints = points;
@@ -610,10 +610,10 @@ Room3D.prototype.getRoomHeightAt = function (x, y) {
             var yArcCircleCenter = closestWall.getYArcCircleCenter();
             var xClosestPoint = closestWallPoints[closestIndex][0];
             var yClosestPoint = closestWallPoints[closestIndex][1];
-            var centerToClosestPointDistance = Point2D.distance(xArcCircleCenter, yArcCircleCenter, xClosestPoint, yClosestPoint);
+            var centerToClosestPointDistance = java.awt.geom.Point2D.distance(xArcCircleCenter, yArcCircleCenter, xClosestPoint, yClosestPoint);
             var xStart = closestWall.getXStart();
             var yStart = closestWall.getYStart();
-            var centerToStartPointDistance = Point2D.distance(xArcCircleCenter, yArcCircleCenter, xStart, yStart);
+            var centerToStartPointDistance = java.awt.geom.Point2D.distance(xArcCircleCenter, yArcCircleCenter, xStart, yStart);
             var scalarProduct = (xClosestPoint - xArcCircleCenter) * (xStart - xArcCircleCenter) 
                 + (yClosestPoint - yArcCircleCenter) * (yStart - yArcCircleCenter);
             scalarProduct /= (centerToClosestPointDistance * centerToStartPointDistance);

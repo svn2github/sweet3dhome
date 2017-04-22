@@ -1676,8 +1676,8 @@ HomeComponent3D.prototype.addRoomListener = function(group) {
         } else {
           component3D.updateObjects([updatedRoom]);
           // Search the rooms that overlap the updated one
-          var oldArea = new Area(component3D.getShape(ev.getOldValue()));
-          var newArea = new Area(component3D.getShape(ev.getNewValue()));
+          var oldArea = new java.awt.geom.Area(component3D.getShape(ev.getOldValue()));
+          var newArea = new java.awt.geom.Area(component3D.getShape(ev.getNewValue()));
           var updatedRoomLevel = updatedRoom.getLevel(); 
           var rooms = component3D.home.getRooms();
           for (var i = 0; i < rooms.length; i++) {
@@ -1687,8 +1687,8 @@ HomeComponent3D.prototype.addRoomListener = function(group) {
                 && (roomLevel == null
                     || Math.abs(updatedRoomLevel.getElevation() + updatedRoomLevel.getHeight() - (roomLevel.getElevation() + roomLevel.getHeight())) < 1E-5
                     || Math.abs(updatedRoomLevel.getElevation() + updatedRoomLevel.getHeight() - (roomLevel.getElevation() - roomLevel.getFloorThickness())) < 1E-5)) {
-              var roomAreaIntersectionWithOldArea = new Area(component3D.getShape(room.getPoints()));
-              var roomAreaIntersectionWithNewArea = new Area(roomAreaIntersectionWithOldArea);
+              var roomAreaIntersectionWithOldArea = new java.awt.geom.Area(component3D.getShape(room.getPoints()));
+              var roomAreaIntersectionWithNewArea = new java.awt.geom.Area(roomAreaIntersectionWithOldArea);
               roomAreaIntersectionWithNewArea.intersect(newArea);                  
               if (!roomAreaIntersectionWithNewArea.isEmpty()) {
                 updateObjects([room]);
@@ -1733,7 +1733,7 @@ HomeComponent3D.prototype.addRoomListener = function(group) {
  * @private
  */
 HomeComponent3D.prototype.getShape = function(points) {
-  var path = new GeneralPath();
+  var path = new java.awt.geom.GeneralPath();
   path.moveTo(points[0][0], points[0][1]);
   for (var i = 1; i < points.length; i++) {
     path.lineTo(points[i][0], points[i][1]);

@@ -55,7 +55,7 @@ Object3DBranch.fround = function(x) {
  * @ignore
  */
 Object3DBranch.prototype.getShape = function(points) {
-  var path = new GeneralPath();
+  var path = new java.awt.geom.GeneralPath();
   path.moveTo(Object3DBranch.fround(points[0][0]), Object3DBranch.fround(points[0][1]));
   for (var i = 1; i < points.length; i++) {
     path.lineTo(Object3DBranch.fround(points[i][0]), Object3DBranch.fround(points[i][1]));
@@ -132,18 +132,18 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
   for (var it = area.getPathIterator(null, flatness); !it.isDone(); it.next()) {
     var point = [0, 0];
     switch ((it.currentSegment(point))) {
-      case PathIterator.SEG_MOVETO :
+      case java.awt.geom.PathIterator.SEG_MOVETO :
         currentPathPoints = [];
         currentPathPoints.push(point);
         previousPoint = point;
         break;
-      case PathIterator.SEG_LINETO :
+      case java.awt.geom.PathIterator.SEG_LINETO :
         if (point[0] !== previousPoint[0] || point[1] !== previousPoint[1]) {
           currentPathPoints.push(point);
         }
         previousPoint = point;
         break;
-      case PathIterator.SEG_CLOSE :
+      case java.awt.geom.PathIterator.SEG_CLOSE :
         var firstPoint = currentPathPoints[0];
         if (firstPoint[0] === previousPoint[0]
             && firstPoint[1] === previousPoint[1]) {
@@ -206,7 +206,7 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
               }
             }
             if (subArea == null) {
-              subArea = new Area(this.getShape(testedAreaPoints.slice(0)));
+              subArea = new java.awt.geom.Area(this.getShape(testedAreaPoints.slice(0)));
               subAreas.push({key : testedAreaPoints, value : subArea});
             }
             if (subArea.contains(testedArea[0][0], testedArea[0][1])) {
@@ -237,7 +237,7 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
         }
       }
       if (subArea === null) {
-        subArea = new Area(this.getShape(enclosingAreaPartPoints.slice(0)));
+        subArea = new java.awt.geom.Area(this.getShape(enclosingAreaPartPoints.slice(0)));
       }
       var holesInArea = [];
       for (var k = 0; k < areaHolesLists.length; k++) {
@@ -256,7 +256,7 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
           var holePoints = holesInArea[j];
           for (var k = 0; k < holePoints.length && minDistance > 0; k++) {
             for (var l = 0; l < enclosingAreaPartPoints.length && minDistance > 0; l++) {
-              var distance = Point2D.distanceSq(holePoints[k][0], holePoints[k][1], 
+              var distance = java.awt.geom.Point2D.distanceSq(holePoints[k][0], holePoints[k][1], 
                   enclosingAreaPartPoints[l][0], enclosingAreaPartPoints[l][1]);
               if (distance < minDistance) {
                 minDistance = distance;

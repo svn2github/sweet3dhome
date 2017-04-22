@@ -504,22 +504,22 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
 ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
   var frontArea; 
   if (cutOutShape != null) {
-    frontArea = new Area(this.getShape(cutOutShape));
+    frontArea = new java.awt.geom.Area(this.getShape(cutOutShape));
     frontArea.transform(AffineTransform.getScaleInstance(1, -1));
     frontArea.transform(AffineTransform.getTranslateInstance(-0.5, 0.5));
   } else {
     var vertexCount = this.getVertexCount(node);
     if (vertexCount < 1000000) {
-      var frontAreaWithHoles = new Area();
+      var frontAreaWithHoles = new java.awt.geom.Area();
       this.computeBottomOrFrontArea(node, frontAreaWithHoles, mat4.create(), false, false);
-      frontArea = new Area();
+      frontArea = new java.awt.geom.Area();
       var currentPathPoints = ([]);
       var previousRoomPoint = null;
       for (var it = frontAreaWithHoles.getPathIterator(null, 1); !it.isDone(); it.next()) {
         var areaPoint = [0, 0];
         switch ((it.currentSegment(areaPoint))) {
-          case PathIterator.SEG_MOVETO :
-          case PathIterator.SEG_LINETO :
+          case java.awt.geom.PathIterator.SEG_MOVETO :
+          case java.awt.geom.PathIterator.SEG_LINETO :
             if (previousRoomPoint === null 
                 || areaPoint[0] !== previousRoomPoint[0] 
                 || areaPoint[1] !== previousRoomPoint[1]) {
@@ -527,7 +527,7 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
             }
             previousRoomPoint = areaPoint;
             break;
-          case PathIterator.SEG_CLOSE :
+          case java.awt.geom.PathIterator.SEG_CLOSE :
             if (currentPathPoints[0][0] === previousRoomPoint[0] 
                 && currentPathPoints[0][1] === previousRoomPoint[1]) {
               currentPathPoints.splice(currentPathPoints.length - 1, 1);
@@ -537,13 +537,13 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
               var subRoom = new Room(pathPoints);
               if (subRoom.getArea() > 0) {
                 if (!subRoom.isClockwise()) {
-                  var currentPath = new GeneralPath();
+                  var currentPath = new java.awt.geom.GeneralPath();
                   currentPath.moveTo(pathPoints[0][0], pathPoints[0][1]);
                   for (var i = 1; i < pathPoints.length; i++) {
                     currentPath.lineTo(pathPoints[i][0], pathPoints[i][1]);
                   }
                   currentPath.closePath();
-                  frontArea.add(new Area(currentPath));
+                  frontArea.add(new java.awt.geom.Area(currentPath));
                 }
               }
             }
@@ -557,7 +557,7 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
       frontArea.transform(AffineTransform.getScaleInstance(1 / bounds.getWidth(), 1 / bounds.getHeight()));
     }
     else {
-      frontArea = new Area(new Rectangle2D.Float(-0.5, -0.5, 1, 1));
+      frontArea = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(-0.5, -0.5, 1, 1));
     }
   }
   return frontArea;
@@ -575,19 +575,19 @@ ModelManager.prototype.getAreaOnFloor = function(node) {
     var modelAreaOnFloor;
     var vertexCount = this.getVertexCount(node);
     if (vertexCount < 10000) {
-      modelAreaOnFloor = new Area();
+      modelAreaOnFloor = new java.awt.geom.Area();
       this.computeBottomOrFrontArea(node, modelAreaOnFloor, mat4.create(), true, true);
     } else {
       var vertices = [];
       this.computeVerticesOnFloor(node, vertices, mat4.create());
       var surroundingPolygon = this.getSurroundingPolygon(vertices.slice(0));
-      var generalPath = new GeneralPath(Path2D.WIND_NON_ZERO, surroundingPolygon.length);
+      var generalPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, surroundingPolygon.length);
       generalPath.moveTo(surroundingPolygon[0][0], surroundingPolygon[0][1]);
       for (var i = 0; i < surroundingPolygon.length; i++) {
         generalPath.lineTo(surroundingPolygon[i][0], surroundingPolygon[i][1]);
       }
       generalPath.closePath();
-      modelAreaOnFloor = new Area(generalPath);
+      modelAreaOnFloor = new java.awt.geom.Area(generalPath);
     }
     return modelAreaOnFloor;
   } else {
@@ -596,7 +596,7 @@ ModelManager.prototype.getAreaOnFloor = function(node) {
       throw new IllegalArgumentException("No cut out shape associated to piece");
     }
     var shape = this.getShape(staircase.getStaircaseCutOutShape());
-    var staircaseArea = new Area(shape);
+    var staircaseArea = new java.awt.geom.Area(shape);
     if (staircase.isModelMirrored()) {
       staircaseArea = this.getMirroredArea(staircaseArea);
     }
@@ -698,11 +698,11 @@ ModelManager.prototype.computeBottomOrFrontGeometryArea = function(geometryArray
     }
   }
 
-  geometryPath = new GeneralPath(Path2D.WIND_NON_ZERO, 1000);
+  geometryPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, 1000);
   for (var i = 0, triangleIndex = 0, n = geometryArray.vertexIndices.length; i < n; i += 3) {
     this.addTriangleToPath(geometryArray, geometryArray.vertexIndices [i], geometryArray.vertexIndices [i + 1], geometryArray.vertexIndices [i + 2], vertices, geometryPath, triangleIndex, nodeArea);
   }
-  nodeArea.add(new Area(geometryPath));
+  nodeArea.add(new java.awt.geom.Area(geometryPath));
 }
 
 /**
@@ -728,7 +728,7 @@ ModelManager.prototype.addTriangleToPath = function(geometryArray, vertexIndex1,
   var yVertex3 = vertices[2 * vertexIndex3 + 1];
   if ((xVertex2 - xVertex1) * (yVertex3 - yVertex2) - (yVertex2 - yVertex1) * (xVertex3 - xVertex2) > 0) {
     if (triangleIndex > 0 && triangleIndex % 1000 === 0) {
-      nodeArea.add(new Area(geometryPath));
+      nodeArea.add(new java.awt.geom.Area(geometryPath));
       geometryPath.reset();
     }
     geometryPath.moveTo(xVertex1, yVertex1);
@@ -890,28 +890,28 @@ ModelManager.prototype.isLeft = function(vertex0, vertex1, vertex2) {
  * @private
  */
 ModelManager.prototype.getMirroredArea = function (area) {
-  var mirrorPath = new GeneralPath();
+  var mirrorPath = new java.awt.geom.GeneralPath();
   var point = [0, 0, 0, 0, 0, 0];
   for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
     switch ((it.currentSegment(point))) {
-    case PathIterator.SEG_MOVETO :
+    case java.awt.geom.PathIterator.SEG_MOVETO :
       mirrorPath.moveTo(1 - point[0], point[1]);
       break;
-    case PathIterator.SEG_LINETO :
+    case java.awt.geom.PathIterator.SEG_LINETO :
       mirrorPath.lineTo(1 - point[0], point[1]);
       break;
-    case PathIterator.SEG_QUADTO :
+    case java.awt.geom.PathIterator.SEG_QUADTO :
       mirrorPath.quadTo(1 - point[0], point[1], 1 - point[2], point[3]);
       break;
-    case PathIterator.SEG_CUBICTO :
+    case java.awt.geom.PathIterator.SEG_CUBICTO :
       mirrorPath.curveTo(1 - point[0], point[1], 1 - point[2], point[3], 1 - point[4], point[5]);
       break;
-    case PathIterator.SEG_CLOSE :
+    case java.awt.geom.PathIterator.SEG_CLOSE :
       mirrorPath.closePath();
       break;
     }
   }
-  return new Area(mirrorPath);
+  return new java.awt.geom.Area(mirrorPath);
 }
 
 /**
@@ -922,7 +922,7 @@ ModelManager.prototype.getMirroredArea = function (area) {
 ModelManager.prototype.getShape = function(svgPathShape) {
   var shape2D = this.parsedShapes [svgPathShape];
   if (!shape2D) {
-    shape2D = new Rectangle2D.Float(0, 0, 1, 1);
+    shape2D = new java.awt.geom.Rectangle2D.Float(0, 0, 1, 1);
     try {
       var pathProducer = new org.apache.batik.parser.AWTPathProducer();
       var pathParser = new org.apache.batik.parser.PathParser();

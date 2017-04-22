@@ -94,12 +94,12 @@ function testGeom() {
   var perimeter = 0;
   var piecePoints = piece.getPoints();
   for (var i = piecePoints.length - 1; i >= 0; i--) {
-    perimeter += Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
+    perimeter += java.awt.geom.Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
         piecePoints [i][0], piecePoints [i][1]);
   }
   assertEquals("Wrong perimeter", 400, perimeter);
   // Check distance between center and first line
-  var distanceToCenter = Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  var distanceToCenter = java.awt.geom.Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
   assertEquals("Wrong distance", 50, distanceToCenter);
   // Rotate and move piece and check again location and distances 
   piece.setAngle(-Math.PI / 3);
@@ -112,22 +112,22 @@ function testGeom() {
   assertEquals("Wrong point", 300 - 50 / 2 * Math.sqrt(3) / 2 + 20 / 2 / 2, piecePoints [2][1]);
   perimeter = 0;
   for (var i = piecePoints.length - 1; i >= 0; i--) {
-    perimeter += Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
+    perimeter += java.awt.geom.Point2D.distance(piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][0], piecePoints [i == 0 ? piecePoints.length - 1 : i - 1][1], 
         piecePoints [i][0], piecePoints [i][1]);
   }
   assertEquals("Wrong perimeter", 50 * 2 + 20 * 2, perimeter);
-  distanceToCenter = Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  distanceToCenter = java.awt.geom.Line2D.ptLineDist(piecePoints [0][0], piecePoints [0][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
   assertEquals("Wrong distance", 10, distanceToCenter);
-  distanceToCenter = Line2D.ptLineDist(piecePoints [2][0], piecePoints [2][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
+  distanceToCenter = java.awt.geom.Line2D.ptLineDist(piecePoints [2][0], piecePoints [2][1], piecePoints [1][0], piecePoints [1][1], piece.getX(), piece.getY());
   assertEquals("Wrong distance", 25, distanceToCenter);
   
-  var area = new Area(new Rectangle2D.Double(50, -50, 300, 100));
+  var area = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Double(50, -50, 300, 100));
   var rectangle = area.getBounds2D();
   
   // Create an area made of two overlapping rectangles 
-  area = new Area();
-  area.add(new Area(new Rectangle2D.Float(0, 0, 200, 100)));
-  area.add(new Area(new Rectangle2D.Float(50, -50, 300, 100)));
+  area = new java.awt.geom.Area();
+  area.add(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(0, 0, 200, 100)));
+  area.add(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(50, -50, 300, 100)));
   // Check area bounds
   var rectangle = area.getBounds2D();
   assertEquals("Wrong rectangle", 0, rectangle.getX());
@@ -137,7 +137,7 @@ function testGeom() {
   var pointCount = 0;
   var point = [0, 0];
   for (var pathIterator = area.getPathIterator(null); !pathIterator.isDone(); pathIterator.next()) {
-    if (pathIterator.currentSegment(point) !== PathIterator.SEG_CLOSE) {
+    if (pathIterator.currentSegment(point) !== java.awt.geom.PathIterator.SEG_CLOSE) {
       // console.log(point [0] + "  " + point [1])
       pointCount++;
     }
@@ -145,10 +145,10 @@ function testGeom() {
   assertEquals("Wrong point count", 8, pointCount); 
   
   // Test circle curve
-  var polylinePath = new GeneralPath();
+  var polylinePath = new java.awt.geom.GeneralPath();
   var curvePoints = [[100, 0], [0, 100], [-100, 0], [0, -100]];
   for (var i = 0, n = curvePoints.length; i < n; i++) {
-    var curve2D = new CubicCurve2D.Float();
+    var curve2D = new java.awt.geom.CubicCurve2D.Float();
     var previousPoint = curvePoints [i == 0 ?  curvePoints.length - 1  : i - 1];
     var point         = curvePoints [i];
     var nextPoint     = curvePoints [i == curvePoints.length - 1 ?  0  : i + 1];
@@ -163,37 +163,37 @@ function testGeom() {
         nextPoint [0], nextPoint [1]);
     polylinePath.append(curve2D, true);
   }
-  area = new Area(polylinePath);
+  area = new java.awt.geom.Area(polylinePath);
   // Check all points are at the right distance from center
   for (var pathIterator = area.getPathIterator(null, 0.1); !pathIterator.isDone(); pathIterator.next()) {
-    if (pathIterator.currentSegment(point) !== PathIterator.SEG_CLOSE) {
-      var distance = Point2D.distance(point [0], point [1], area.getBounds2D().getCenterX(), area.getBounds2D().getCenterY());
+    if (pathIterator.currentSegment(point) !== java.awt.geom.PathIterator.SEG_CLOSE) {
+      var distance = java.awt.geom.Point2D.distance(point [0], point [1], area.getBounds2D().getCenterX(), area.getBounds2D().getCenterY());
       assertTrue("Wrong distance " + distance, Math.abs(distance - 100) < 0.05);
     }
   }
 
   // Test Area substract
-  var path = new GeneralPath();
+  var path = new java.awt.geom.GeneralPath();
   path.moveTo(494.6751772225669, 670.1);
   path.lineTo(5.901708600000002, 670.1);
   path.lineTo(5.9017086, 657.6);
   path.lineTo(505.9017600000001, 657.6);
   path.closePath();
-  area = new Area(path);
+  area = new java.awt.geom.Area(path);
   
-  var path2 = new GeneralPath();
+  var path2 = new java.awt.geom.GeneralPath();
   path2.moveTo(232.060999211009, 670.1004180630736);
   path2.lineTo(100.06099921100918, 670.1004119369262);
   path2.lineTo(100.06100078899101, 636.0996619369263);
   path2.lineTo(232.06100078899087, 636.0996680630736);
   path2.closePath();
-  area.subtract(new Area(path2));
+  area.subtract(new java.awt.geom.Area(path2));
   
   var getAreaPoints = function(area) {
     var points = [];
     for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
       var point = [0, 0];
-      if (it.currentSegment(point) !== PathIterator.SEG_CLOSE) {
+      if (it.currentSegment(point) !== java.awt.geom.PathIterator.SEG_CLOSE) {
         points.push(point);
       }
     }
@@ -204,14 +204,14 @@ function testGeom() {
   assertTrue("Wrong distance between points", Math.abs(points[2][0] - points[0][0]) < 100);
   
   // Test Area substract with slightly different values
-  path = new GeneralPath();
+  path = new java.awt.geom.GeneralPath();
   path.moveTo(Object3DBranch.fround(494.6751772225669), Object3DBranch.fround(670.1000000000004));
   path.lineTo(Object3DBranch.fround(5.901708600000002), Object3DBranch.fround(670.1));
   path.lineTo(Object3DBranch.fround(5.9017086), Object3DBranch.fround(657.6));
   path.lineTo(Object3DBranch.fround(505.9017600000001), Object3DBranch.fround(657.600000000000));
   path.closePath();
-  var area2 = new Area(path);
-  area2.subtract(new Area(path2));
+  var area2 = new java.awt.geom.Area(path);
+  area2.subtract(new java.awt.geom.Area(path2));
   
   points = getAreaPoints(area2);
   assertTrue("Wrong distance between points", Math.abs(points[2][0] - points[0][0]) < 100);
@@ -341,7 +341,7 @@ function visitHome(home, preferences) {
 		width="600" height="300" tabIndex="2"></canvas>
 
 <script type="text/javascript">
-var geomAvailable = typeof PathIterator !== "undefined";
+var geomAvailable = typeof java.awt.geom.PathIterator !== "undefined";
 if (geomAvailable) {
   testGeom();
 }

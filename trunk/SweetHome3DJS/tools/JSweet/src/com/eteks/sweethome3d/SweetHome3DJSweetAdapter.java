@@ -159,7 +159,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
 
     // We erase some packages: all the elements in these packages will be top
     // level in JS
-    addAnnotation("@Root", "java.awt.geom", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io",
+    addAnnotation("@Root", "com.eteks.sweethome3d.model", "com.eteks.sweethome3d.io",
         "com.eteks.sweethome3d.viewcontroller", "com.eteks.sweethome3d.j3d");
 
     // Replace some Java implementations with some JS-specific implementations

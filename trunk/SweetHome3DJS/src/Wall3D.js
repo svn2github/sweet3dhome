@@ -51,7 +51,7 @@ Wall3D.prototype = Object.create(Object3DBranch.prototype);
 Wall3D.prototype.constructor = Wall3D;
 
 Wall3D.LEVEL_ELEVATION_SHIFT = 0.1;
-Wall3D.FULL_FACE_CUT_OUT_AREA = new Area(new Rectangle2D.Float(-0.5, 0.5, 1, 1));
+Wall3D.FULL_FACE_CUT_OUT_AREA = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(-0.5, 0.5, 1, 1));
 Wall3D.WALL_LEFT_SIDE = 0;
 Wall3D.WALL_RIGHT_SIDE = 1;
 
@@ -157,7 +157,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
       ? wallSidePoints 
       : this.getWallBaseboardPoints(wallSide);
   var wallOrBaseboardShape = this.getShape(wallSideOrBaseboardPoints);
-  var wallOrBaseboardArea = new Area(wallOrBaseboardShape);
+  var wallOrBaseboardArea = new java.awt.geom.Area(wallOrBaseboardShape);
   var textureReferencePoint = wallSide === Wall3D.WALL_LEFT_SIDE 
       ? wallSideOrBaseboardPoints[0].slice(0) 
       : wallSideOrBaseboardPoints[wallSideOrBaseboardPoints.length - 1].slice(0);
@@ -197,8 +197,8 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
     var pieceElevation = piece.getGroundElevation();
     if (pieceElevation + piece.getHeight() > wallElevation 
         && pieceElevation < maxTopElevation) {
-      var pieceArea = new Area(this.getShape(piece.getPoints()));
-      var intersectionArea = new Area(wallShape);
+      var pieceArea = new java.awt.geom.Area(this.getShape(piece.getPoints()));
+      var intersectionArea = new java.awt.geom.Area(wallShape);
       intersectionArea.intersect(pieceArea);
       if (!intersectionArea.isEmpty()) {
         if (baseboard !== null) {
@@ -206,9 +206,9 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
           if (pieceWallAngle < 1.0E-5 || (Math.PI - pieceWallAngle) < 1.0E-5) {
             var deeperPiece = piece.clone();
             deeperPiece.setDepth(deeperPiece.getDepth() + 2 * baseboard.getThickness());
-            pieceArea = new Area(this.getShape(deeperPiece.getPoints()));
+            pieceArea = new java.awt.geom.Area(this.getShape(deeperPiece.getPoints()));
           }
-          intersectionArea = new Area(wallOrBaseboardShape);
+          intersectionArea = new java.awt.geom.Area(wallOrBaseboardShape);
           intersectionArea.intersect(pieceArea);
           if (intersectionArea.isEmpty()) {
             continue;
@@ -230,7 +230,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
         if (windowIntersection.getArea().isEmpty()) {
           break;
         } else if (otherWindowIndex > windowIndex) {
-          var windowsIntersectionArea = new Area(otherWindowIntersection.getArea());
+          var windowsIntersectionArea = new java.awt.geom.Area(otherWindowIntersection.getArea());
           windowsIntersectionArea.intersect(windowIntersection.getArea());
           if (!windowsIntersectionArea.isEmpty()) {
             otherWindowIntersection.getArea().subtract(windowsIntersectionArea);
@@ -249,7 +249,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
   var previousPoint = null;
   for (var it = wallOrBaseboardArea.getPathIterator(null); !it.isDone(); it.next()) {
     var wallPoint = [0, 0];
-    if (it.currentSegment(wallPoint) === PathIterator.SEG_CLOSE) {
+    if (it.currentSegment(wallPoint) === java.awt.geom.PathIterator.SEG_CLOSE) {
       if (points.length > 2) {
         if (points[0][0] === points[points.length - 1][0]
             && points[0][1] === points[points.length - 1][1]) {
@@ -282,7 +282,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
     if (!windowIntersection.getArea().isEmpty()) {
       for (var it = windowIntersection.getArea().getPathIterator(null); !it.isDone(); it.next()) {
         var wallPoint = [0, 0];
-        if (it.currentSegment(wallPoint) === PathIterator.SEG_CLOSE) {
+        if (it.currentSegment(wallPoint) === java.awt.geom.PathIterator.SEG_CLOSE) {
           if (points[0][0] === points[points.length - 1][0]
               && points[0][1] === points[points.length - 1][1]) {
             points.splice(points.length - 1, 1);
@@ -590,7 +590,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
     var pointsList = [];
     pointsList.push(points[0]);
     for (var i = 1; i < points.length; i++) {
-      var distance = Point2D.distance(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1]) - subpartSize / 2;
+      var distance = java.awt.geom.Point2D.distance(points[i - 1][0], points[i - 1][1], points[i][0], points[i][1]) - subpartSize / 2;
       var angle = Math.atan2(points[i][1] - points[i - 1][1], points[i][0] - points[i - 1][0]);
       var cosAngle = Math.cos(angle);
       var sinAngle = Math.sin(angle);
@@ -614,7 +614,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
   var referencePointAngle = 0;
   if (arcExtent !== null && arcExtent !== 0) {
     arcCircleCenter = [wall.getXArcCircleCenter(), wall.getYArcCircleCenter()];
-    arcCircleRadius = Point2D.distance(arcCircleCenter[0], arcCircleCenter[1], xStart, yStart);
+    arcCircleRadius = java.awt.geom.Point2D.distance(arcCircleCenter[0], arcCircleCenter[1], xStart, yStart);
     referencePointAngle = Math.atan2(textureReferencePoint[1] - arcCircleCenter[1], textureReferencePoint[0] - arcCircleCenter[0]);
   }
   for (var i = 0; i < points.length; i++) {
@@ -625,9 +625,9 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
   var distanceSqToWallMiddle = new Array(points.length);
   for (var i = 0; i < points.length; i++) {
     if (arcCircleCenter === null) {
-      distanceSqToWallMiddle[i] = Line2D.ptLineDistSq(xStart, yStart, xEnd, yEnd, bottom[i][0], bottom[i][2]);
+      distanceSqToWallMiddle[i] = java.awt.geom.Line2D.ptLineDistSq(xStart, yStart, xEnd, yEnd, bottom[i][0], bottom[i][2]);
     } else {
-      distanceSqToWallMiddle[i] = arcCircleRadius - Point2D.distance(arcCircleCenter[0], arcCircleCenter[1], bottom[i][0], bottom[i][2]);
+      distanceSqToWallMiddle[i] = arcCircleRadius - java.awt.geom.Point2D.distance(arcCircleCenter[0], arcCircleCenter[1], bottom[i][0], bottom[i][2]);
       distanceSqToWallMiddle[i] *= distanceSqToWallMiddle[i];
     }
   }
@@ -705,9 +705,9 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
           var firstHorizontalTextureCoords;
           var secondHorizontalTextureCoords;
           if (arcCircleCenter === null) {
-            firstHorizontalTextureCoords = Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
+            firstHorizontalTextureCoords = java.awt.geom.Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
                 points[index][0], points[index][1]);
-            secondHorizontalTextureCoords = Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
+            secondHorizontalTextureCoords = java.awt.geom.Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
                 points[nextIndex][0], points[nextIndex][1]);
           } else {
             if (pointUCoordinates[index] === undefined) {
@@ -732,7 +732,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
           textureCoords2 = vec2.fromValues(secondHorizontalTextureCoords, minElevation);
         } else {
           textureCoords1 = firstTextureCoords;
-          var horizontalTextureCoords = Point2D.distance(points[index][0], points[index][1], points[nextIndex][0], 
+          var horizontalTextureCoords = java.awt.geom.Point2D.distance(points[index][0], points[index][1], points[nextIndex][0], 
               points[nextIndex][1]);
           textureCoords2 = vec2.fromValues(horizontalTextureCoords, minElevation);
         }
@@ -885,7 +885,7 @@ Wall3D.prototype.createTopPartGeometry = function(points, cosWallYawAngle, sinWa
 Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow, doorOrWindowFrontArea, frontOrBackSide, wall, wallGeometries, wallTopGeometries, 
                                                                     wallSidePoints, wallElevation, cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta, 
                                                                     texture, textureReferencePoint, wallSide) {
-  var fullFaceArea = new Area(Wall3D.FULL_FACE_CUT_OUT_AREA);
+  var fullFaceArea = new java.awt.geom.Area(Wall3D.FULL_FACE_CUT_OUT_AREA);
   fullFaceArea.subtract(doorOrWindowFrontArea);
   if (!fullFaceArea.isEmpty()) {
     var doorOrWindowDepth = doorOrWindow.getDepth();
@@ -897,9 +897,9 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
     var wallSecondPoint = wallSide === Wall3D.WALL_LEFT_SIDE 
         ? wallSidePoints[(wallSidePoints.length / 2 | 0) - 1] 
         : wallSidePoints[(wallSidePoints.length / 2 | 0)];
-    var frontSideToWallDistance = Line2D.ptLineDist(wallFirstPoint[0], wallFirstPoint[1], wallSecondPoint[0], 
+    var frontSideToWallDistance = java.awt.geom.Line2D.ptLineDist(wallFirstPoint[0], wallFirstPoint[1], wallSecondPoint[0], 
         wallSecondPoint[1], xPieceSide, yPieceSide);
-    var position = Line2D.relativeCCW(wallFirstPoint[0], wallFirstPoint[1], 
+    var position = java.awt.geom.Line2D.relativeCCW(wallFirstPoint[0], wallFirstPoint[1], 
         wallSecondPoint[0], wallSecondPoint[1], xPieceSide, yPieceSide);
     var depthTranslation = frontOrBackSide * (0.5 - position * frontSideToWallDistance / doorOrWindowDepth);
     
@@ -910,7 +910,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
     
     var invertedFrontAreaTransform = mat4.create();
     mat4.invert(invertedFrontAreaTransform, frontAreaTransform);
-    var wallPath = new GeneralPath();
+    var wallPath = new java.awt.geom.GeneralPath();
     var wallPoint = vec3.fromValues(wallFirstPoint[0], wallElevation, wallFirstPoint[1]);
     vec3.transformMat4(wallPoint, wallPoint, invertedFrontAreaTransform);
     wallPath.moveTo(wallPoint[0], wallPoint[1]);
@@ -925,15 +925,15 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
     wallPath.lineTo(topWallPoint2[0], topWallPoint2[1]);
     wallPath.closePath();
     
-    var doorOrWindowSurroundingPath = new GeneralPath();
+    var doorOrWindowSurroundingPath = new java.awt.geom.GeneralPath();
     doorOrWindowSurroundingPath.moveTo(-0.5, -0.5);
     doorOrWindowSurroundingPath.lineTo(-0.5, 0.5);
     doorOrWindowSurroundingPath.lineTo(0.5, 0.5);
     doorOrWindowSurroundingPath.lineTo(0.5, -0.5);
     doorOrWindowSurroundingPath.closePath();
     
-    var doorOrWindowSurroundingArea = new Area(doorOrWindowSurroundingPath);
-    doorOrWindowSurroundingArea.intersect(new Area(wallPath));
+    var doorOrWindowSurroundingArea = new java.awt.geom.Area(doorOrWindowSurroundingPath);
+    doorOrWindowSurroundingArea.intersect(new java.awt.geom.Area(wallPath));
     doorOrWindowSurroundingArea.subtract(doorOrWindowFrontArea);
     var flatness = 0.5 / (Math.max(doorOrWindow.getWidth(), doorOrWindow.getHeight()));
     if (!doorOrWindowSurroundingArea.isEmpty()) {
@@ -973,13 +973,13 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
           vec3.transformMat4(point, point, frontAreaTransform);
           var textureCoord = null;
           if (texture != null) {
-            var horizontalTextureCoords = Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], point[0], point[2]);
+            var horizontalTextureCoords = java.awt.geom.Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], point[0], point[2]);
             if (wallSide === Wall3D.WALL_LEFT_SIDE && texture.isLeftToRightOriented()) {
               horizontalTextureCoords = -horizontalTextureCoords;
             }
             textureCoord = vec2.fromValues(horizontalTextureCoords, point[1]);
           }
-          var distanceToTop = Line2D.ptLineDistSq(topWallPoint1[0], topWallPoint1[1], topWallPoint2[0], topWallPoint2[1], 
+          var distanceToTop = java.awt.geom.Line2D.ptLineDistSq(topWallPoint1[0], topWallPoint1[1], topWallPoint2[0], topWallPoint2[1], 
               areaPoints[0][0], areaPoints[0][1]);
           
           for (var j = 0; j < areaPoints.length; j++, i++) {
@@ -992,7 +992,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
                 ? j + 1 
                 : 0;
             var coordsList;
-            var nextDistanceToTop = Line2D.ptLineDistSq(topWallPoint1[0], topWallPoint1[1], topWallPoint2[0], topWallPoint2[1], 
+            var nextDistanceToTop = java.awt.geom.Line2D.ptLineDistSq(topWallPoint1[0], topWallPoint1[1], topWallPoint2[0], topWallPoint2[1], 
                 areaPoints[nextPointIndex][0], areaPoints[nextPointIndex][1]);
             if (distanceToTop < 1.0E-10 && nextDistanceToTop < 1.0E-10) {
               coordsList = slopingTopCoords;
@@ -1009,7 +1009,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
             
             var nextTextureCoord = null;
             if (texture != null) {
-              var horizontalTextureCoords = Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
+              var horizontalTextureCoords = java.awt.geom.Point2D.distance(textureReferencePoint[0], textureReferencePoint[1], 
                   nextPoint[0], nextPoint[2]);
               if (wallSide === Wall3D.WALL_LEFT_SIDE && texture.isLeftToRightOriented()) {
                 horizontalTextureCoords = -horizontalTextureCoords;
