@@ -505,8 +505,8 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
   var frontArea; 
   if (cutOutShape != null) {
     frontArea = new java.awt.geom.Area(this.getShape(cutOutShape));
-    frontArea.transform(AffineTransform.getScaleInstance(1, -1));
-    frontArea.transform(AffineTransform.getTranslateInstance(-0.5, 0.5));
+    frontArea.transform(java.awt.geom.AffineTransform.getScaleInstance(1, -1));
+    frontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(-0.5, 0.5));
   } else {
     var vertexCount = this.getVertexCount(node);
     if (vertexCount < 1000000) {
@@ -553,8 +553,8 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
         }
       }
       var bounds = frontAreaWithHoles.getBounds2D();
-      frontArea.transform(AffineTransform.getTranslateInstance(-bounds.getCenterX(), -bounds.getCenterY()));
-      frontArea.transform(AffineTransform.getScaleInstance(1 / bounds.getWidth(), 1 / bounds.getHeight()));
+      frontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(-bounds.getCenterX(), -bounds.getCenterY()));
+      frontArea.transform(java.awt.geom.AffineTransform.getScaleInstance(1 / bounds.getWidth(), 1 / bounds.getHeight()));
     }
     else {
       frontArea = new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(-0.5, -0.5, 1, 1));
@@ -600,12 +600,12 @@ ModelManager.prototype.getAreaOnFloor = function(node) {
     if (staircase.isModelMirrored()) {
       staircaseArea = this.getMirroredArea(staircaseArea);
     }
-    var staircaseTransform = AffineTransform.getTranslateInstance(
+    var staircaseTransform = java.awt.geom.AffineTransform.getTranslateInstance(
             staircase.getX() - staircase.getWidth() / 2, 
             staircase.getY() - staircase.getDepth() / 2);
-    staircaseTransform.concatenate(AffineTransform.getRotateInstance(staircase.getAngle(), 
+    staircaseTransform.concatenate(java.awt.geom.AffineTransform.getRotateInstance(staircase.getAngle(), 
             staircase.getWidth() / 2, staircase.getDepth() / 2));
-    staircaseTransform.concatenate(AffineTransform.getScaleInstance(staircase.getWidth(), staircase.getDepth()));
+    staircaseTransform.concatenate(java.awt.geom.AffineTransform.getScaleInstance(staircase.getWidth(), staircase.getDepth()));
     staircaseArea.transform(staircaseTransform);
     return staircaseArea;
   }
