@@ -41,16 +41,23 @@ HomeRecorder.PARSING_HOME = "Parsing home";
  */
 HomeRecorder.prototype.readHome = function(url, observer) {
   observer.progression(HomeRecorder.READING_HOME, url, 0);
+  // XML entry where home data is stored is Home.xml, except if url starts with jar: to specify another entry name 
+  var homeEntryName = "Home.xml";
+  if (url.indexOf("jar:") === 0) {
+    var entrySeparatorIndex = url.indexOf("!/");
+    homeEntryName = url.substring(entrySeparatorIndex + 2);
+    url = url.substring(4, entrySeparatorIndex);
+  }
   var recorder = this;
   ZIPTools.getZIP(url,
       {
         zipReady : function(zip) {
           try {
-            var homeXmlEntry = zip.file("Home.xml");
+            var homeXmlEntry = zip.file(homeEntryName);
             if (homeXmlEntry !== null) {
-              recorder.parseHomeXMLEntry(zip.file("Home.xml"), zip, url, observer);
+              recorder.parseHomeXMLEntry(zip.file(homeEntryName), zip, url, observer);
             } else {
-              this.zipError("No Home.xml entry in " + url);
+              this.zipError("No " + homeEntryName + " entry in " + url);
             }
           } catch (ex) {
             this.zipError(ex);
