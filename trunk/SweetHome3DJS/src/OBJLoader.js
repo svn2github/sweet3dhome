@@ -1219,7 +1219,7 @@ OBJLoader.prototype.parseObjectLine = function(objContent, startOfLine, vertices
     // Append to line next lines if it ends by a back slash
     while (line.charAt(line.length - 1) === '\\') {
       // Remove back slash
-      line = line.substring(0, line.length - 1);
+      line = line.substring(0, line.length - 1) + " ";
       // Read next line
       startOfLine = endOfLine + 1;
       if (startOfLine < objContent.length
@@ -1245,7 +1245,11 @@ OBJLoader.prototype.parseObjectLine = function(objContent, startOfLine, vertices
   } else if (start === "vt") {
     textureCoordinates.push(OBJLoader.parseVector2f(strings));
   } else if (start === "vn") {
-    normals.push(OBJLoader.parseVector3f(strings));
+    try {
+      normals.push(OBJLoader.parseVector3f(strings));
+    } catch (e) {
+      console.log(objContent + " " + line)
+    }
   } else if (start === "l") {
     var line = this.parseLine(strings, currentObjects.material);
     if (line.vertexIndices.length > 1) {
@@ -1419,7 +1423,7 @@ OBJLoader.parseVector2f = function(strings) {
 OBJLoader.parseInteger = function(string) {
   var i = parseInt(string);
   if (isNaN(i)) {
-    throw IncorrectFormat3DException("Incorrect integer " + string);
+    throw new IncorrectFormat3DException("Incorrect integer " + string);
   }
   return i;
 }
@@ -1431,7 +1435,10 @@ OBJLoader.parseInteger = function(string) {
 OBJLoader.parseNumber = function(string) {
   var x = parseFloat(string);
   if (isNaN(x)) {
-    throw IncorrectFormat3DException("Incorrect number " + string);
+    if (string == "NaN") {
+      return NaN;
+    }
+    throw new IncorrectFormat3DException("Incorrect number " + string);
   }
   return x;
 }
