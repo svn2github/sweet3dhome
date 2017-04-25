@@ -375,9 +375,10 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
 
       if (shape === null || material !== firstMaterial) {
         material = firstMaterial;
-        var appearance = appearances [firstMaterial.name];
-        if (appearance === undefined) {
-          appearance = Max3DSLoader.DEFAULT_APPEARANCE;
+        var appearance = Max3DSLoader.DEFAULT_APPEARANCE;
+        if (firstMaterial !== null
+            && appearances [firstMaterial.name] !== undefined) {
+          appearance = appearances [firstMaterial.name];
         }
         appearance = appearance.clone();
         if (firstMaterial !== null && firstMaterial.twoSided) {
