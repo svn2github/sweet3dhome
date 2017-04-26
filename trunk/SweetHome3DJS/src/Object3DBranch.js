@@ -40,9 +40,10 @@ Object3DBranch.doubleToFloatConverter = new Float32Array(1);
 
 /**
  * Returns a double number converted to float precision.
+ * @protected
  * @ignore
  */
-Object3DBranch.fround = function(x) {
+Object3DBranch.prototype.fround = function(x) {
   Object3DBranch.doubleToFloatConverter [0] = x;
   return Object3DBranch.doubleToFloatConverter [0];
 };
@@ -56,9 +57,9 @@ Object3DBranch.fround = function(x) {
  */
 Object3DBranch.prototype.getShape = function(points) {
   var path = new java.awt.geom.GeneralPath();
-  path.moveTo(Object3DBranch.fround(points[0][0]), Object3DBranch.fround(points[0][1]));
+  path.moveTo(this.fround(points[0][0]), this.fround(points[0][1]));
   for (var i = 1; i < points.length; i++) {
-    path.lineTo(Object3DBranch.fround(points[i][0]), Object3DBranch.fround(points[i][1]));
+    path.lineTo(this.fround(points[i][0]), this.fround(points[i][1]));
   }
   path.closePath();
   return path;

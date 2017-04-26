@@ -615,7 +615,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
   if (arcExtent !== null && arcExtent !== 0) {
     arcCircleCenter = [wall.getXArcCircleCenter(), wall.getYArcCircleCenter()];
     arcCircleRadius = java.awt.geom.Point2D.distance(arcCircleCenter[0], arcCircleCenter[1], xStart, yStart);
-    referencePointAngle = Math.atan2(textureReferencePoint[1] - arcCircleCenter[1], textureReferencePoint[0] - arcCircleCenter[0]);
+    referencePointAngle = this.fround(Math.atan2(textureReferencePoint[1] - arcCircleCenter[1], textureReferencePoint[0] - arcCircleCenter[0]));
   }
   for (var i = 0; i < points.length; i++) {
     bottom[i] = vec3.fromValues(points[i][0], minElevation, points[i][1]);
@@ -654,6 +654,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
       usedRectangle [i] = true;
     }
   }
+  
   var coords = [];
   for (var index = 0; index < points.length; index++) {
     if (usedRectangle[index]) {
@@ -711,12 +712,12 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
                 points[nextIndex][0], points[nextIndex][1]);
           } else {
             if (pointUCoordinates[index] === undefined) {
-              var pointAngle = Math.atan2(points[index][1] - arcCircleCenter[1], points[index][0] - arcCircleCenter[0]);
+              var pointAngle = this.fround(Math.atan2(points[index][1] - arcCircleCenter[1], points[index][0] - arcCircleCenter[0]));
               pointAngle = this.adjustAngleOnReferencePointAngle(pointAngle, referencePointAngle, arcExtent);
               pointUCoordinates[index] = (pointAngle - referencePointAngle) * arcCircleRadius;
             }
             if (pointUCoordinates[nextIndex] === undefined) {
-              var pointAngle = Math.atan2(points[nextIndex][1] - arcCircleCenter[1], points[nextIndex][0] - arcCircleCenter[0]);
+              var pointAngle = this.fround(Math.atan2(points[nextIndex][1] - arcCircleCenter[1], points[nextIndex][0] - arcCircleCenter[0]));
               pointAngle = this.adjustAngleOnReferencePointAngle(pointAngle, referencePointAngle, arcExtent);
               pointUCoordinates[nextIndex] = (pointAngle - referencePointAngle) * arcCircleRadius;
             }
@@ -791,20 +792,18 @@ Wall3D.prototype.getWallPointElevation = function(xWallPoint, yWallPoint, cosWal
 Wall3D.prototype.adjustAngleOnReferencePointAngle = function(pointAngle, referencePointAngle, arcExtent) {
   if (arcExtent > 0) {
     if ((referencePointAngle > 0 
-        && (pointAngle < 0 
-            || referencePointAngle > pointAngle)) 
+        && (pointAngle < 0
+            || pointAngle < referencePointAngle)) 
       || (referencePointAngle < 0 
-           && pointAngle < 0 
-           && referencePointAngle > pointAngle)) {
+           && pointAngle < referencePointAngle)) {
       pointAngle += 2 * Math.PI;
     }
   } else {
     if ((referencePointAngle < 0 
-        && (pointAngle > 0 
-            || referencePointAngle < pointAngle)) 
-      || (referencePointAngle > 0 
-          && pointAngle > 0 
-          && referencePointAngle < pointAngle)) {
+          && (pointAngle > 0
+              || referencePointAngle < pointAngle)) 
+        || (referencePointAngle > 0 
+            && referencePointAngle < pointAngle)) {
       pointAngle -= 2 * Math.PI;
     }
   }
