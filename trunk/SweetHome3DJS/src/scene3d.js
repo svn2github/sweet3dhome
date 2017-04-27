@@ -843,17 +843,11 @@ Appearance3D.areTextureCoordinatesGenerationsEqual = function(textureCoordinates
     var planeS1 = textureCoordinatesGeneration1.planeS;
     var planeS2 = textureCoordinatesGeneration2.planeS;
     if (planeS1 && planeS2
-        && planeS1 [0] === planeS2 [0]
-        && planeS1 [1] === planeS2 [1]
-        && planeS1 [2] === planeS2 [2]
-        && planeS1 [3] === planeS2 [3]) {
+        && vec4.equals(planeS1, planeS2)) {
       var planeT1 = textureCoordinatesGeneration1.planeT;
       var planeT2 = textureCoordinatesGeneration2.planeT;
       return planeT1 && planeT2
-          && planeT1 [0] === planeT2 [0]
-          && planeT1 [1] === planeT2 [1]
-          && planeT1 [2] === planeT2 [2]
-          && planeT1 [3] === planeT2 [3];
+          && vec4.equals(planeT1, planeT2);
     }
     return false;
   } else {
@@ -1496,9 +1490,7 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
       vec3.normalize(normal, normal);
       var normalIndex = normals.length - 1;
       if (normals.length === 0
-          || (normals[normalIndex][0] !== normal[0]
-              || normals[normalIndex][1] !== normal[1]
-              || normals[normalIndex][2] !== normal[2])) {
+          || !vec3.exactEquals(normals[normalIndex], normal)) {
         // Add normal to normals set
         normals.push(normal);
         normalIndex++;
@@ -1523,9 +1515,7 @@ GeometryInfo.prototype.getIndexedGeometryArray = function() {
       // Ensure each coordinate indices are unique otherwise normals might not be computed correctly
       for (var i = 0; i < this.coordinatesIndices.length; i++) {
         for (var j = 0; j < this.vertices.length; j++) {
-          if (this.vertices[i][0] === this.vertices[j][0]
-              && this.vertices[i][1] === this.vertices[j][1]
-              && this.vertices[i][2] === this.vertices[j][2]) {
+          if (vec3.exactEquals(this.vertices[i], this.vertices[j])) {
             this.coordinatesIndices [i] = j;
             break;
           }

@@ -457,19 +457,11 @@ DAEHandler.prototype.endElement = function(uri, localName, name) {
           || "node" == parent && "instance_geometry" == name) {
     this.parentGroups.pop();
   } else if ("matrix" == name) {
-    var matrix = mat4.create();
-    matrix [0] = this.floats [0];
-    matrix [1] = this.floats [4];
-    matrix [2] = this.floats [8];
-    matrix [4] = this.floats [1];
-    matrix [5] = this.floats [5];
-    matrix [6] = this.floats [9];
-    matrix [8] = this.floats [2];
-    matrix [9] = this.floats [6];
-    matrix [10] = this.floats [10];
-    matrix [12] = this.floats [3];
-    matrix [13] = this.floats [7];
-    matrix [14] = this.floats [11];
+    var matrix = mat4.fromValues(
+        this.floats [0], this.floats [4], this.floats [8],  this.floats [12], 
+        this.floats [1], this.floats [5], this.floats [9],  this.floats [13],
+        this.floats [2], this.floats [6], this.floats [10], this.floats [14],
+        this.floats [3], this.floats [7], this.floats [11], this.floats [15]);
     this.mulTransformGroup(matrix); 
   } else if ("node" == parent && "rotate" == name) {
     var rotation = mat4.create(); 

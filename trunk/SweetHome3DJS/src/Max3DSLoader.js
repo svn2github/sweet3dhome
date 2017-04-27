@@ -194,7 +194,7 @@ Max3DSLoader.prototype.createScene = function(meshes, meshesGroups, materials, r
  * @private
  */
 Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, sceneRoot, mainGroup) {
-  var identity = mat4.str(mat4.create());
+  var identity = mat4.create();
   var faces = mesh.faces;
   if (faces !== null && faces.length > 0) {
     var vertices = mesh.vertices;
@@ -324,7 +324,7 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
     // Apply mesh transform
     var transform = mesh.transform;
     if (transform !== null) {
-      if (mat4.str(transform) != identity) {
+      if (!mat4.exactEquals(transform, identity)) {
         var transformGroup = new TransformGroup3D(transform);
         parentGroup.addChild(transformGroup);
         parentGroup = transformGroup;
@@ -981,21 +981,11 @@ Max3DSLoader.prototype.getEntryNameIgnoreCase = function(zip, searchedEntryName)
  * @private
  */
 Max3DSLoader.prototype.parseMatrix = function(input) {
-  var matrix = mat4.create();
-  matrix [0] = input.readLittleEndianFloat();
-  matrix [1] = input.readLittleEndianFloat();
-  matrix [2] = input.readLittleEndianFloat();
-  matrix [4] = input.readLittleEndianFloat();
-  matrix [5] = input.readLittleEndianFloat();
-  matrix [6] = input.readLittleEndianFloat();
-  matrix [8] = input.readLittleEndianFloat();
-  matrix [9] = input.readLittleEndianFloat();
-  matrix [10] = input.readLittleEndianFloat();
-
-  matrix [12] = input.readLittleEndianFloat();
-  matrix [13] = input.readLittleEndianFloat();
-  matrix [14] = input.readLittleEndianFloat();
-  return matrix;
+  return mat4.fromValues(
+      input.readLittleEndianFloat(), input.readLittleEndianFloat(), input.readLittleEndianFloat(), 0,
+      input.readLittleEndianFloat(), input.readLittleEndianFloat(), input.readLittleEndianFloat(), 0,
+      input.readLittleEndianFloat(), input.readLittleEndianFloat(), input.readLittleEndianFloat(), 0,
+      input.readLittleEndianFloat(), input.readLittleEndianFloat(), input.readLittleEndianFloat(), 1);
 }
 
 /**
