@@ -300,7 +300,7 @@ Room3D.prototype.createRoomGeometries = function(roomPart, texture) {
         }
         floorBottomPointsWithoutHoles = this.getAreaPoints(floorBottomVisibleArea, 1, true);
       } else {
-        floorBottomPointsWithoutHoles = this.getReversedArray(points).slice(0);
+        floorBottomPointsWithoutHoles = [this.getReversedArray(points)];
       }
       
       if (floorBottomPointsWithoutHoles.length !== 0) {
