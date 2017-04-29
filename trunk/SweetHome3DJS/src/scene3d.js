@@ -22,6 +22,17 @@
 //          core.js
 //          Triangulator.js
 
+
+// Supply a replacement for Math.fround if it doesn't exist 
+if (Math.fround !== undefined) {
+  doubleToFloatConverter = new Float32Array(1);
+  
+  Math.fround = function(x) {
+    doubleToFloatConverter [0] = x;
+    return doubleToFloatConverter [0];
+  };
+}
+
 // Classes used to manage a scene tree of 3D objects displayed by a HTMLCanvas3D instance 
 // inspired from Java 3D API
 

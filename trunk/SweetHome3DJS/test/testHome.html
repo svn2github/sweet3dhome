@@ -206,10 +206,10 @@ function testGeom() {
   
   // Test Area substract with slightly different values
   path = new java.awt.geom.GeneralPath();
-  path.moveTo(Object3DBranch.fround(494.6751772225669), Object3DBranch.fround(670.1000000000004));
-  path.lineTo(Object3DBranch.fround(5.901708600000002), Object3DBranch.fround(670.1));
-  path.lineTo(Object3DBranch.fround(5.9017086), Object3DBranch.fround(657.6));
-  path.lineTo(Object3DBranch.fround(505.9017600000001), Object3DBranch.fround(657.600000000000));
+  path.moveTo(Math.fround(494.6751772225669), Math.fround(670.1000000000004));
+  path.lineTo(Math.fround(5.901708600000002), Math.fround(670.1));
+  path.lineTo(Math.fround(5.9017086), Math.fround(657.6));
+  path.lineTo(Math.fround(505.9017600000001), Math.fround(657.600000000000));
   path.closePath();
   var area2 = new java.awt.geom.Area(path);
   area2.subtract(new java.awt.geom.Area(path2));

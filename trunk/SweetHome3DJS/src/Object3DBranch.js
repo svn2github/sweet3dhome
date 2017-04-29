@@ -36,18 +36,6 @@ Object3DBranch.prototype.constructor = Object3DBranch;
 Object3DBranch.DEFAULT_COLOR         = 0xFFFFFF;
 Object3DBranch.DEFAULT_AMBIENT_COLOR = 0x333333;
 
-Object3DBranch.doubleToFloatConverter = new Float32Array(1);
-
-/**
- * Returns a double number converted to float precision.
- * @protected
- * @ignore
- */
-Object3DBranch.prototype.fround = function(x) {
-  Object3DBranch.doubleToFloatConverter [0] = x;
-  return Object3DBranch.doubleToFloatConverter [0];
-};
-
 /**
  * Returns the shape matching the coordinates in <code>points</code> array.
  * @param {Array} points
@@ -57,9 +45,9 @@ Object3DBranch.prototype.fround = function(x) {
  */
 Object3DBranch.prototype.getShape = function(points) {
   var path = new java.awt.geom.GeneralPath();
-  path.moveTo(this.fround(points[0][0]), this.fround(points[0][1]));
+  path.moveTo(Math.fround(points[0][0]), Math.fround(points[0][1]));
   for (var i = 1; i < points.length; i++) {
-    path.lineTo(this.fround(points[i][0]), this.fround(points[i][1]));
+    path.lineTo(Math.fround(points[i][0]), Math.fround(points[i][1]));
   }
   path.closePath();
   return path;
