@@ -24,7 +24,7 @@
 
 
 // Supply a replacement for Math.fround if it doesn't exist 
-if (Math.fround !== undefined) {
+if (Math.fround === undefined) {
   doubleToFloatConverter = new Float32Array(1);
   
   Math.fround = function(x) {
