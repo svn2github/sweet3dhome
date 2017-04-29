@@ -1086,7 +1086,7 @@ HomeComponent3D.prototype.getInputMap = function() {
 HomeComponent3D.prototype.createSceneTree = function(listenToHomeUpdates, waitForLoading) {
   var root = new Group3D();
   // Build scene tree
-  var groundNode = this.createGroundNode(-0.5E7, -0.5E7, 1E7, 1E7, listenToHomeUpdates, waitForLoading);
+  var groundNode = this.createGroundNode(-0.5E5, -0.5E5, 1E5, 1E5, listenToHomeUpdates, waitForLoading);
   root.addChild(groundNode);
   root.addChild(this.createBackgroundNode(listenToHomeUpdates, waitForLoading));
   root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
