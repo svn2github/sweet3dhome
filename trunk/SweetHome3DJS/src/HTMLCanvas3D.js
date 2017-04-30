@@ -180,6 +180,39 @@ function HTMLCanvas3D(canvasId) {
   this.viewPlatformTransform = mat4.create();
   mat4.translate(this.viewPlatformTransform, this.viewPlatformTransform, [0.0, 0.0, -2.4]);
 
+  // Instantiate objects used in drawGeometry to avoid to GC them
+  this.geometryAmbientColor = vec3.create();
+  this.geometrySpecularColor = vec3.create();
+  this.geometryModelViewMatrix = mat4.create();
+  this.geometryNormalMatrix = mat3.create();
+  
+  // Set default shader colors, matrices and other values
+  this.shaderAmbientColor = vec3.create();
+  this.gl.uniform3fv(this.shaderProgram.ambientColor, this.shaderAmbientColor);
+  this.shaderSpecularColor = vec3.create();
+  this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, this.shaderSpecularColor);
+  this.geometryDiffuseColor = vec3.create();
+  this.shaderDiffuseColor = vec3.fromValues(1, 1, 1);
+  this.gl.uniform3fv(this.shaderProgram.vertexDiffuseColor, this.shaderDiffuseColor);
+  this.shaderModelViewMatrix = mat4.create();
+  this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, this.shaderModelViewMatrix);
+  this.shaderNormalMatrix = mat3.create();
+  this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, this.shaderNormalMatrix);
+  this.shaderTextureTransform = mat3.create();
+  this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordMatrix, false, this.shaderTextureTransform);
+  this.shaderLightingEnabled = true;
+  this.gl.uniform1i(this.shaderProgram.lightingEnabled, this.shaderLightingEnabled);
+  this.shaderShininess = 1.;
+  this.gl.uniform1f(this.shaderProgram.shininess, this.shaderShininess);
+  this.shaderBackFaceNormalFlip = false;
+  this.gl.uniform1i(this.shaderProgram.backFaceNormalFlip, this.shaderBackFaceNormalFlip);
+  this.shaderTextureCoordinatesGenerated = false;
+  this.gl.uniform1i(this.shaderProgram.textureCoordinatesGenerated, false);
+  this.shaderUseTextures = false;
+  this.gl.uniform1i(this.shaderProgram.useTextures, false);
+  this.shaderAlpha = 1;
+  this.gl.uniform1f(this.shaderProgram.alpha, this.shaderAlpha);
+
   this.canvasNeededRepaint = false;
   this.pickingFrameBufferNeededRepaint = true;
 }
@@ -820,7 +853,6 @@ HTMLCanvas3D.prototype.drawScene = function() {
   this.gl.viewport(0, 0, this.viewportWidth, this.viewportHeight);
   this.gl.clearColor(0.9, 0.9, 0.9, 1.0);
   this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-  this.resetShaderValues();
   
   // Set lights
   var ambientLightColor = vec3.create();
@@ -950,47 +982,7 @@ HTMLCanvas3D.prototype.isTextureTransparent = function(displayedGeometry) {
 }
 
 /**
- * Resets colors and matrices of shader program during the drawing of a scene.
- * CAUTION: Must be called before first call to drawGeometry.
- * @private
- */
-HTMLCanvas3D.prototype.resetShaderValues = function(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, 
-    lightingEnabled, textureEnabled, transparencyEnabled) {
-  // Reset colors, matrices and other values used in WebGL shader program
-  this.geometryAmbientColor = vec3.create();
-  this.shaderAmbientColor = vec3.create();
-  this.gl.uniform3fv(this.shaderProgram.ambientColor, this.shaderAmbientColor);
-  this.geometrySpecularColor = vec3.create();
-  this.shaderSpecularColor = vec3.create();
-  this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, this.shaderSpecularColor);
-  this.geometryDiffuseColor = vec3.create();
-  this.shaderDiffuseColor = vec3.fromValues(1, 1, 1);
-  this.gl.uniform3fv(this.shaderProgram.vertexDiffuseColor, this.shaderDiffuseColor);
-  this.geometryModelViewMatrix = mat4.create();
-  this.shaderModelViewMatrix = mat4.create();
-  this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, this.shaderModelViewMatrix);
-  this.geometryNormalMatrix = mat3.create();
-  this.shaderNormalMatrix = mat3.create();
-  this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, this.shaderNormalMatrix);
-  this.shaderTextureTransform = mat3.create();
-  this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordMatrix, false, this.shaderTextureTransform);
-  this.shaderLightingEnabled = true;
-  this.gl.uniform1i(this.shaderProgram.lightingEnabled, this.shaderLightingEnabled);
-  this.shaderShininess = 1.;
-  this.gl.uniform1f(this.shaderProgram.shininess, this.shaderShininess);
-  this.shaderBackFaceNormalFlip = false;
-  this.gl.uniform1i(this.shaderProgram.backFaceNormalFlip, this.shaderBackFaceNormalFlip);
-  this.shaderTextureCoordinatesGenerated = false;
-  this.gl.uniform1i(this.shaderProgram.textureCoordinatesGenerated, false);
-  this.shaderUseTextures = false;
-  this.gl.uniform1i(this.shaderProgram.useTextures, false);
-  this.shaderAlpha = 1;
-  this.gl.uniform1f(this.shaderProgram.alpha, this.shaderAlpha);
-}
-
-/**
  * Draws the given shape geometry.
- * CAUTION: Call resetShaderValues() at least once before calling this method.
  * @private
  */
 HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, 
@@ -1257,7 +1249,6 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
     this.gl.viewport(0, 0, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height);
     this.gl.clearColor(1., 1., 1., 1.);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-    this.resetShaderValues();
     
     // Convert horizontal field of view to vertical
     var projectionMatrix = mat4.create();
