@@ -399,7 +399,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, sceneGeometries, background
               mat4.mul(parentTransforms, parentTransforms, ev.getNewValue());
               var children = node.getChildren();
               for (var i = 0; i < children.length; i++) {
-                canvas3D.updateChildrenTransform(children [i], background ? backgroundGeometries : sceneGeometries, 
+                canvas3D.updateChildrenTransformation(children [i], background ? backgroundGeometries : sceneGeometries, 
                     parentLinks, lights, parentTransforms);
               }
               canvas3D.repaint();
