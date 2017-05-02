@@ -30,7 +30,8 @@
 function HTMLCanvas3D(canvasId) {
   this.scene = null;
   this.textures = [];
-  this.displayedGeometries = [];
+  this.sceneGeometries = [];
+  this.backgroundGeometries = [];
   this.lights = [];
   this.fieldOfView = Math.PI * 45 / 180;
   this.frontClipDistance = 0.1;
@@ -53,13 +54,13 @@ function HTMLCanvas3D(canvasId) {
       "attribute vec3 vertexPosition;" 
     + "attribute vec3 vertexNormal;"
     + "attribute vec2 vertexTextureCoord;"
-    + "uniform mat4 modelViewMatrix;"
-    + "uniform mat4 projectionMatrix;"
+    + "uniform mat4 modelViewTransform;"
+    + "uniform mat4 projectionTransform;"
     + "uniform bool textureCoordinatesGenerated;"
     + "uniform vec4 planeS;"
     + "uniform vec4 planeT;"
-    + "uniform mat3 textureCoordMatrix;"
-    + "uniform mat3 normalMatrix;"
+    + "uniform mat3 textureCoordTransform;"
+    + "uniform mat3 normalTransform;"
     + "uniform bool backFaceNormalFlip;"
     + "uniform bool lightingEnabled;"
     + "uniform bool useTextures;"
@@ -67,8 +68,8 @@ function HTMLCanvas3D(canvasId) {
     + "varying vec4 varVertexPosition;"
     + "varying vec3 varTransformedNormal;"
     + "void main(void) {"
-    + "  varVertexPosition = modelViewMatrix * vec4(vertexPosition, 1.0);"
-    + "  gl_Position = projectionMatrix * varVertexPosition;"
+    + "  varVertexPosition = modelViewTransform * vec4(vertexPosition, 1.0);"
+    + "  gl_Position = projectionTransform * varVertexPosition;"
     + "  if (useTextures) {"
     + "    if (textureCoordinatesGenerated) {"
     + "      varTextureCoord = vec2(vertexPosition.x * planeS.x + vertexPosition.y * planeS.y"
@@ -78,14 +79,14 @@ function HTMLCanvas3D(canvasId) {
     + "    } else {"
     + "      varTextureCoord = vec2(vertexTextureCoord);"
     + "    }"
-    + "    varTextureCoord = vec2(textureCoordMatrix * vec3(varTextureCoord, 1));"
+    + "    varTextureCoord = vec2(textureCoordTransform * vec3(varTextureCoord, 1));"
     + "  }"
     + "  if (lightingEnabled) {"
     + "    vec3 normal = vertexNormal;"
     + "    if (backFaceNormalFlip) {" 
     + "      normal = -normal;"
     +	"    }"
-    + "    varTransformedNormal = normalize(normalMatrix * normal);"
+    + "    varTransformedNormal = normalize(normalTransform * normal);"
     + "  }"
     + "}");
   this.gl.attachShader(this.shaderProgram, vertexShader);
@@ -156,13 +157,13 @@ function HTMLCanvas3D(canvasId) {
   this.shaderProgram.vertexPositionAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexPosition");
   this.shaderProgram.normalAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexNormal");
   this.shaderProgram.textureCoordAttribute = this.gl.getAttribLocation(this.shaderProgram, "vertexTextureCoord");
-  this.shaderProgram.projectionMatrix = this.gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
-  this.shaderProgram.modelViewMatrix = this.gl.getUniformLocation(this.shaderProgram, "modelViewMatrix");
+  this.shaderProgram.projectionTransform = this.gl.getUniformLocation(this.shaderProgram, "projectionTransform");
+  this.shaderProgram.modelViewTransform = this.gl.getUniformLocation(this.shaderProgram, "modelViewTransform");
   this.shaderProgram.textureCoordinatesGenerated = this.gl.getUniformLocation(this.shaderProgram, "textureCoordinatesGenerated");
   this.shaderProgram.planeS = this.gl.getUniformLocation(this.shaderProgram, "planeS");
   this.shaderProgram.planeT = this.gl.getUniformLocation(this.shaderProgram, "planeT");
-  this.shaderProgram.textureCoordMatrix = this.gl.getUniformLocation(this.shaderProgram, "textureCoordMatrix");
-  this.shaderProgram.normalMatrix = this.gl.getUniformLocation(this.shaderProgram, "normalMatrix");
+  this.shaderProgram.textureCoordTransform = this.gl.getUniformLocation(this.shaderProgram, "textureCoordTransform");
+  this.shaderProgram.normalTransform = this.gl.getUniformLocation(this.shaderProgram, "normalTransform");
   this.shaderProgram.backFaceNormalFlip = this.gl.getUniformLocation(this.shaderProgram, "backFaceNormalFlip");
   this.shaderProgram.ambientColor = this.gl.getUniformLocation(this.shaderProgram, "ambientColor");
   this.shaderProgram.lightingEnabled = this.gl.getUniformLocation(this.shaderProgram, "lightingEnabled");
@@ -183,8 +184,8 @@ function HTMLCanvas3D(canvasId) {
   // Instantiate objects used in drawGeometry to avoid to GC them
   this.geometryAmbientColor = vec3.create();
   this.geometrySpecularColor = vec3.create();
-  this.geometryModelViewMatrix = mat4.create();
-  this.geometryNormalMatrix = mat3.create();
+  this.geometryModelViewTransform = mat4.create();
+  this.geometryNormalTransform = mat3.create();
   
   // Set default shader colors, matrices and other values
   this.shaderAmbientColor = vec3.create();
@@ -194,12 +195,12 @@ function HTMLCanvas3D(canvasId) {
   this.geometryDiffuseColor = vec3.create();
   this.shaderDiffuseColor = vec3.fromValues(1, 1, 1);
   this.gl.uniform3fv(this.shaderProgram.vertexDiffuseColor, this.shaderDiffuseColor);
-  this.shaderModelViewMatrix = mat4.create();
-  this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, this.shaderModelViewMatrix);
-  this.shaderNormalMatrix = mat3.create();
-  this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, this.shaderNormalMatrix);
+  this.shaderModelViewTransform = mat4.create();
+  this.gl.uniformMatrix4fv(this.shaderProgram.modelViewTransform, false, this.shaderModelViewTransform);
+  this.shaderNormalTransform = mat3.create();
+  this.gl.uniformMatrix3fv(this.shaderProgram.normalTransform, false, this.shaderNormalTransform);
   this.shaderTextureTransform = mat3.create();
-  this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordMatrix, false, this.shaderTextureTransform);
+  this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordTransform, false, this.shaderTextureTransform);
   this.shaderLightingEnabled = true;
   this.gl.uniform1i(this.shaderProgram.lightingEnabled, this.shaderLightingEnabled);
   this.shaderShininess = 1.;
@@ -212,6 +213,8 @@ function HTMLCanvas3D(canvasId) {
   this.gl.uniform1i(this.shaderProgram.useTextures, false);
   this.shaderAlpha = 1;
   this.gl.uniform1f(this.shaderProgram.alpha, this.shaderAlpha);
+  this.gl.enable(this.gl.CULL_FACE);
+  this.gl.cullFace(this.gl.BACK);
 
   this.canvasNeededRepaint = false;
   this.pickingFrameBufferNeededRepaint = true;
@@ -312,10 +315,11 @@ HTMLCanvas3D.prototype.updateViewportSize = function() {
  * @param onprogression   progression call back
  */
 HTMLCanvas3D.prototype.setScene = function(scene, onprogression) {
-  var displayedGeometries = [];
+  var sceneGeometries = [];
+  var backgroundGeometries = [];
   var lights = [];
-  var displayedGeometryCount = this.countDisplayedGeometries(scene);
-  this.prepareScene(scene, displayedGeometries, false, [], lights, mat4.create(), onprogression, displayedGeometryCount);
+  var sceneGeometryCount = this.countDisplayedGeometries(scene);
+  this.prepareScene(scene, sceneGeometries, backgroundGeometries, false, [], lights, mat4.create(), onprogression, sceneGeometryCount);
   this.scene = scene;
   
   var canvas3D = this;
@@ -324,7 +328,8 @@ HTMLCanvas3D.prototype.setScene = function(scene, onprogression) {
         if (onprogression !== undefined) {
           onprogression(Node3D.BINDING_MODEL, "", 1);
         }
-        canvas3D.displayedGeometries = displayedGeometries;
+        canvas3D.sceneGeometries = sceneGeometries;
+        canvas3D.backgroundGeometries = backgroundGeometries;
         canvas3D.lights = lights;
         canvas3D.drawScene();
       }, 0);
@@ -347,12 +352,12 @@ HTMLCanvas3D.prototype.getScene = function() {
  */
 HTMLCanvas3D.prototype.countDisplayedGeometries = function(node) {
   if (node instanceof Group3D) {
-    var displayedGeometryCount = 0;
+    var sceneGeometryCount = 0;
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      displayedGeometryCount += this.countDisplayedGeometries(children [i]);
+      sceneGeometryCount += this.countDisplayedGeometries(children [i]);
     }
-    return displayedGeometryCount;
+    return sceneGeometryCount;
   } else if (node instanceof Link3D) {
     return this.countDisplayedGeometries(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
@@ -367,33 +372,35 @@ HTMLCanvas3D.DEFAULT_APPEARANCE = new Appearance3D();
 /**
  * Prepares the scene to be rendered, creating the required buffers and textures in WebGL.  
  * @param {Node3D}  node
- * @param {Array}   displayedGeometries
+ * @param {Array}   sceneGeometries
+ * @param {Array}   backgroundGeometries
  * @param {boolean} background
  * @param [Link3D]  parentLinks
  * @param [Array]   lights
- * @param {mat4}    parentTransformations
+ * @param {mat4}    parentTransforms
  * @param onprogression
- * @param {number}  displayedGeometryCount
+ * @param {number}  sceneGeometryCount
  * @private
  */
-HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, background, parentLinks, lights, parentTransformations, 
-                                               onprogression, displayedGeometryCount) {
+HTMLCanvas3D.prototype.prepareScene = function(node, sceneGeometries, backgroundGeometries, background, parentLinks, lights, parentTransforms, 
+                                               onprogression, sceneGeometryCount) {
   var canvas3D = this;
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
       var nodeTransform = mat4.create();
       node.getTransform(nodeTransform);
-      parentTransformations = mat4.mul(mat4.create(), parentTransformations, nodeTransform);
+      parentTransforms = mat4.mul(mat4.create(), parentTransforms, nodeTransform);
       if (node.getCapability(TransformGroup3D.ALLOW_TRANSFORM_WRITE)) {
         // Add listener to update the scene when transformation changes
         node.addPropertyChangeListener("TRANSFORM", 
             function(ev) {
               var oldInvert = mat4.invert(mat4.create(), ev.getOldValue());
-              mat4.mul(parentTransformations, parentTransformations, oldInvert);
-              mat4.mul(parentTransformations, parentTransformations, ev.getNewValue());
+              mat4.mul(parentTransforms, parentTransforms, oldInvert);
+              mat4.mul(parentTransforms, parentTransforms, ev.getNewValue());
               var children = node.getChildren();
               for (var i = 0; i < children.length; i++) {
-                canvas3D.updateChildrenTransformation(children [i], displayedGeometries, parentLinks, lights, parentTransformations);
+                canvas3D.updateChildrenTransform(children [i], background ? backgroundGeometries : sceneGeometries, 
+                    parentLinks, lights, parentTransforms);
               }
               canvas3D.repaint();
             });
@@ -402,18 +409,18 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
 
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      this.prepareScene(children [i], displayedGeometries, background, parentLinks, lights, parentTransformations, onprogression, displayedGeometryCount);
+      this.prepareScene(children [i], sceneGeometries, backgroundGeometries, background, parentLinks, lights, parentTransforms, onprogression, sceneGeometryCount);
     }
     if (node.getCapability(Group3D.ALLOW_CHILDREN_EXTEND)) {
       // Add listener to group to update the scene when children change
       node.addChildrenListener(
           {  
             childAdded : function(ev) {
-              canvas3D.prepareScene(ev.child, displayedGeometries, background, parentLinks, lights, parentTransformations);
+              canvas3D.prepareScene(ev.child, sceneGeometries, backgroundGeometries, background, parentLinks, lights, parentTransforms);
               canvas3D.repaint();
             },
             childRemoved : function(ev) {
-              canvas3D.removeDisplayedItems(ev.child, displayedGeometries, lights);
+              canvas3D.removeDisplayedItems(ev.child, background ? backgroundGeometries : sceneGeometries, lights);
               // TODO Should remove listeners on deleted item
               canvas3D.repaint();
             }
@@ -422,12 +429,13 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
   } else if (node instanceof Link3D) {
     parentLinks = parentLinks.slice(0);
     parentLinks.push(node);
-    this.prepareScene(node.getSharedGroup(), displayedGeometries, background, parentLinks, lights, parentTransformations, onprogression, displayedGeometryCount);
+    this.prepareScene(node.getSharedGroup(), sceneGeometries, backgroundGeometries, background, parentLinks, lights, parentTransforms, onprogression, sceneGeometryCount);
   } else if (node instanceof Shape3D) {
     // Log each time 10% more shape geometries are bound
     if (onprogression !== undefined
-        && Math.floor((displayedGeometries.length - 1) / displayedGeometryCount * 10) < Math.floor(displayedGeometries.length / displayedGeometryCount * 10)) {
-      onprogression(Node3D.BINDING_MODEL, "", displayedGeometries.length / displayedGeometryCount);
+        && !background
+        && Math.floor((sceneGeometries.length - 1) / sceneGeometryCount * 10) < Math.floor(sceneGeometries.length / sceneGeometryCount * 10)) {
+      onprogression(Node3D.BINDING_MODEL, "", sceneGeometries.length / sceneGeometryCount);
     }
     var nodeAppearance = node.getAppearance();
     if (!nodeAppearance) {
@@ -441,7 +449,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
     var nodeGeometries = node.getGeometries();
     for (var i = 0; i < nodeGeometries.length; i++) {
       this.prepareGeometry(nodeGeometries [i], nodeAppearance, texture, 
-          node, displayedGeometries, background, parentLinks, parentTransformations);
+          node, sceneGeometries, backgroundGeometries, background, parentLinks, parentTransforms);
     }
     if (node.getCapability(Shape3D.ALLOW_GEOMETRY_WRITE)) {
       node.addPropertyChangeListener(
@@ -449,19 +457,19 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
             if ("GEOMETRY" == ev.getPropertyName()) {
               if (ev.getOldValue()) {
                 removedGeometry = ev.getOldValue();
-                for (var i = 0; i < displayedGeometries.length; i++) {
-                  var displayedGeometry = displayedGeometries [i];
-                  if (displayedGeometry.nodeGeometry === removedGeometry) {
+                for (var i = 0; i < sceneGeometries.length; i++) {
+                  var geometry = sceneGeometries [i];
+                  if (geometry.nodeGeometry === removedGeometry) {
                     // Free geometry buffers
-                    canvas3D.gl.deleteBuffer(displayedGeometry.vertexBuffer);
-                    if (displayedGeometry.textureCoordinatesBuffer !== null
-                        && displayedGeometry.texture !== undefined) {
-                      canvas3D.gl.deleteBuffer(displayedGeometry.textureCoordinatesBuffer);
+                    canvas3D.gl.deleteBuffer(geometry.vertexBuffer);
+                    if (geometry.textureCoordinatesBuffer !== null
+                        && geometry.texture !== undefined) {
+                      canvas3D.gl.deleteBuffer(geometry.textureCoordinatesBuffer);
                     }
-                    if (displayedGeometry.normalBuffer !== undefined) {
-                      canvas3D.gl.deleteBuffer(displayedGeometry.normalBuffer);
+                    if (geometry.normalBuffer !== undefined) {
+                      canvas3D.gl.deleteBuffer(geometry.normalBuffer);
                     }
-                    displayedGeometries.splice(i, 1);
+                    sceneGeometries.splice(i, 1);
                     break;
                   }
                 }
@@ -478,7 +486,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
                   texture = canvas3D.prepareTexture(nodeAppearance.getTextureImage());
                 }
                 canvas3D.prepareGeometry(addedGeometry, nodeAppearance, texture, 
-                    node, displayedGeometries, background, parentLinks, parentTransformations);
+                    node, sceneGeometries, backgroundGeometries, background, parentLinks, parentTransforms);
               }
             }
           });
@@ -487,52 +495,53 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
     if (nodeAppearance !== HTMLCanvas3D.DEFAULT_APPEARANCE) {
       nodeAppearance.addPropertyChangeListener(
           function(ev) {
-            for (var i = 0; i < displayedGeometries.length; i++) {
-              var displayedGeometry = displayedGeometries [i];
-              if (displayedGeometry.node === node) {
+            var geometries = background ? backgroundGeometries : sceneGeometries;
+            for (var i = 0; i < geometries.length; i++) {
+              var geometry = geometries [i];
+              if (geometry.node === node) {
                 var newValue = ev.getNewValue();
                 switch (ev.getPropertyName()) {
                   case "AMBIENT_COLOR" : 
-                    displayedGeometry.ambientColor = newValue;
+                    geometry.ambientColor = newValue;
                     break;
                   case "DIFFUSE_COLOR" : 
-                    displayedGeometry.diffuseColor = newValue;
+                    geometry.diffuseColor = newValue;
                     break;
                   case "SPECULAR_COLOR" : 
-                    displayedGeometry.specularColor = newValue;
+                    geometry.specularColor = newValue;
                     break;
                   case "SHININESS" :
-                    displayedGeometry.shininess = newValue;
+                    geometry.shininess = newValue;
                     break;
                   case "TRANSPARENCY" : 
-                    displayedGeometry.transparency = newValue !== undefined 
+                    geometry.transparency = newValue !== undefined 
                         ? 1 - newValue
                         : 1;
                     break;
                   case "ILLUMINATION" :
-                    displayedGeometry.lightingEnabled = (newValue === undefined || newValue >= 1)
-                        && displayedGeometry.mode === canvas3D.gl.TRIANGLES;
+                    geometry.lightingEnabled = (newValue === undefined || newValue >= 1)
+                        && geometry.mode === canvas3D.gl.TRIANGLES;
                     break;
                   case "TEXTURE_IMAGE" : 
-                    displayedGeometry.texture = newValue !== null
+                    geometry.texture = newValue !== null
                         ? canvas3D.prepareTexture(newValue)
                         : undefined;
                     break;
                   case "TEXTURE_COORDINATES_GENERATION" :
                     var textureCoordinatesGeneration = newValue;
-                    displayedGeometry.textureCoordinatesGeneration = textureCoordinatesGeneration;
+                    geometry.textureCoordinatesGeneration = textureCoordinatesGeneration;
                     break;
                   case "TEXTURE_TRANSFORM" :
-                    displayedGeometry.textureTransform = newValue;
+                    geometry.textureTransform = newValue;
                     break;
                   case "VISIBLE" : 
-                    displayedGeometry.visible = newValue !== false;
+                    geometry.visible = newValue !== false;
                     break;
                   case "CULL_FACE" : 
-                    displayedGeometry.cullFace = newValue;
+                    geometry.cullFace = newValue;
                     break;
                   case "BACK_FACE_NORMAL_FLIP" : 
-                    displayedGeometry.backFaceNormalFlip = newValue === true;
+                    geometry.backFaceNormalFlip = newValue === true;
                     break;
                 }
               }
@@ -541,13 +550,13 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
           });
     }
   } else if (node instanceof Background3D) {
-    this.prepareScene(node.getGeometry(), displayedGeometries, true, parentLinks, lights, parentTransformations);
+    this.prepareScene(node.getGeometry(), sceneGeometries, backgroundGeometries, true, parentLinks, lights, parentTransforms);
   } else if (node instanceof Light3D) {
     var light = {node  : node,
                  color : node.getColor()};
     if (node instanceof DirectionalLight3D) {
       light.direction = node.getDirection();
-      light.transformation = parentTransformations;
+      light.transform = parentTransforms;
     }
     lights.push(light);
     
@@ -576,129 +585,129 @@ HTMLCanvas3D.prototype.prepareScene = function(node, displayedGeometries, backgr
  * @param {Appearance3D} nodeAppearance
  * @param {WebGLTexture} texture
  * @param {Node3D}  node
- * @param {Array}   displayedGeometries
+ * @param {Array}   sceneGeometries
+ * @param {Array}   backgroundGeometries
  * @param {boolean} background
  * @param [Link3D]  parentLinks
- * @param {mat4}    transformation
+ * @param {mat4}    transform
  * @private
  */
 HTMLCanvas3D.prototype.prepareGeometry = function(nodeGeometry, nodeAppearance, texture, 
-                                                  node, displayedGeometries, background, 
-                                                  parentLinks, transformation) {
-  var displayedGeometry = null;
+                                                  node, sceneGeometries, backgroundGeometries, background, 
+                                                  parentLinks, transform) {
+  var geometries = background ? backgroundGeometries : sceneGeometries;
+  var geometry = null;
   if (!node.getCapability(Shape3D.ALLOW_GEOMETRY_WRITE)) {
     // Search if node geometry is already used
-    for (var i = 0; i < displayedGeometries.length; i++) {
-      if (displayedGeometries [i].nodeGeometry === nodeGeometry) {
-        displayedGeometry = {node : node,
-                             background   : background,
-                             nodeGeometry : nodeGeometry,
-                             vertexCount  : displayedGeometries [i].vertexCount, 
-                             vertexBuffer : displayedGeometries [i].vertexBuffer, 
-                             textureCoordinatesBuffer : displayedGeometries [i].textureCoordinatesBuffer,
-                             normalBuffer : displayedGeometries [i].normalBuffer,
-                             mode : displayedGeometries [i].mode};
+    for (var i = 0; i < geometries.length; i++) {
+      if (geometries [i].nodeGeometry === nodeGeometry) {
+        geometry = {node : node,
+                    nodeGeometry : nodeGeometry,
+                    vertexCount  : geometries [i].vertexCount, 
+                    vertexBuffer : geometries [i].vertexBuffer, 
+                    textureCoordinatesBuffer : geometries [i].textureCoordinatesBuffer,
+                    normalBuffer : geometries [i].normalBuffer,
+                    mode : geometries [i].mode};
         break;
       }
     }
   }
   
-  if (displayedGeometry === null) {
-    displayedGeometry = {node : node,
-                         background   : background,
-                         nodeGeometry : nodeGeometry,
-                         vertexCount  : nodeGeometry.vertexIndices.length};
-    displayedGeometry.vertexBuffer = this.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
-    displayedGeometry.textureCoordinatesBuffer = this.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
+  if (geometry === null) {
+    geometry = {node : node,
+                nodeGeometry : nodeGeometry,
+                vertexCount  : nodeGeometry.vertexIndices.length};
+    geometry.vertexBuffer = this.prepareBuffer(nodeGeometry.vertices, nodeGeometry.vertexIndices);
+    geometry.textureCoordinatesBuffer = this.prepareBuffer(nodeGeometry.textureCoordinates, nodeGeometry.textureCoordinateIndices);
     if (nodeGeometry instanceof IndexedTriangleArray3D) {
-      displayedGeometry.mode = this.gl.TRIANGLES;
-      displayedGeometry.normalBuffer = this.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
+      geometry.mode = this.gl.TRIANGLES;
+      geometry.normalBuffer = this.prepareBuffer(nodeGeometry.normals, nodeGeometry.normalIndices);
     } else {
-      displayedGeometry.mode = this.gl.LINES;
+      geometry.mode = this.gl.LINES;
     } 
   } 
   // Set parameters not shared
-  displayedGeometry.transformation = transformation;
+  geometry.transform = transform;
   if (parentLinks.length > 0) {
-    displayedGeometry.parentLinks = parentLinks;
+    geometry.parentLinks = parentLinks;
   }
   var ambientColor = nodeAppearance.getAmbientColor();
   if (ambientColor !== undefined) {
-    displayedGeometry.ambientColor = ambientColor;
+    geometry.ambientColor = ambientColor;
   }
   var diffuseColor = nodeAppearance.getDiffuseColor();
   if (diffuseColor !== undefined) {
-    displayedGeometry.diffuseColor = diffuseColor;
+    geometry.diffuseColor = diffuseColor;
   }
   var specularColor = nodeAppearance.getSpecularColor();
   if (specularColor !== undefined) {
-    displayedGeometry.specularColor = specularColor;
+    geometry.specularColor = specularColor;
   }
   var shininess = nodeAppearance.getShininess();
   if (shininess !== undefined) {
-    displayedGeometry.shininess = shininess;
+    geometry.shininess = shininess;
   }
   var textureCoordinatesGeneration = nodeAppearance.getTextureCoordinatesGeneration();
   if (textureCoordinatesGeneration !== undefined) {
-    displayedGeometry.textureCoordinatesGeneration = textureCoordinatesGeneration;
+    geometry.textureCoordinatesGeneration = textureCoordinatesGeneration;
   }
   var textureTransform = nodeAppearance.getTextureTransform();
   if (textureTransform !== undefined) {
-    displayedGeometry.textureTransform = textureTransform;
+    geometry.textureTransform = textureTransform;
   }
   if (texture !== null) {
-    displayedGeometry.texture = texture;
+    geometry.texture = texture;
   }
-  displayedGeometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
+  geometry.backFaceNormalFlip = nodeAppearance.isBackFaceNormalFlip();
   if (nodeAppearance.getCullFace() !== undefined) {
-    displayedGeometry.cullFace = nodeAppearance.getCullFace();
+    geometry.cullFace = nodeAppearance.getCullFace();
   }
   var illumination = nodeAppearance.getIllumination();
-  displayedGeometry.lightingEnabled =  
+  geometry.lightingEnabled =  
          (illumination === undefined || illumination >= 1)
-      && displayedGeometry.normalBuffer !== null;
-  displayedGeometry.transparency = nodeAppearance.getTransparency() !== undefined 
+      && geometry.normalBuffer !== null;
+  geometry.transparency = nodeAppearance.getTransparency() !== undefined 
       ? 1 - nodeAppearance.getTransparency()
       : 1;
-  displayedGeometry.visible = nodeAppearance.isVisible();
-  displayedGeometries.push(displayedGeometry);
+      geometry.visible = nodeAppearance.isVisible();
+  geometries.push(geometry);
 }
 
 /**
  * Updates the transformation applied to the children of the given node.
  * @param {Node3D}  node
- * @param [Array]   displayedGeometries
+ * @param [Array]   geometries
  * @param [Link3D]  parentLinks
  * @param {Array}   lights
- * @param {mat4}    parentTransformations
+ * @param {mat4}    parentTransforms
  * @private  
  */
-HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGeometries, parentLinks, lights, parentTransformations) {
+HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, geometries, parentLinks, lights, parentTransforms) {
   var canvas3D = this;
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
       var nodeTransform = mat4.create();
       node.getTransform(nodeTransform);
-      parentTransformations = mat4.mul(mat4.create(), parentTransformations, nodeTransform);
+      parentTransforms = mat4.mul(mat4.create(), parentTransforms, nodeTransform);
     }
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      this.updateChildrenTransformation(children [i], displayedGeometries, parentLinks, lights, parentTransformations);
+      this.updateChildrenTransformation(children [i], geometries, parentLinks, lights, parentTransforms);
     }
   } else if (node instanceof Link3D) {
     parentLinks = parentLinks.slice(0);
     parentLinks.push(node);
-    this.updateChildrenTransformation(node.getSharedGroup(), displayedGeometries, parentLinks, lights, parentTransformations);
+    this.updateChildrenTransformation(node.getSharedGroup(), geometries, parentLinks, lights, parentTransforms);
   } else if (node instanceof Shape3D) {
-    for (var i = 0; i < displayedGeometries.length; i++) {
-      if (displayedGeometries [i].node === node) {
-        var updateNode = displayedGeometries [i].parentLinks === undefined; 
+    for (var i = 0; i < geometries.length; i++) {
+      if (geometries [i].node === node) {
+        var updateNode = geometries [i].parentLinks === undefined; 
         if (!updateNode) {
-          // Check the node of the displayed geometry references the same parent links
-          if (displayedGeometries [i].parentLinks.length === parentLinks.length) {
+          // Check if the node of the geometry references the same parent links
+          if (geometries [i].parentLinks.length === parentLinks.length) {
             var j;
             for (j = 0; j < parentLinks.length; j++) {
-              if (displayedGeometries [i].parentLinks [j] !== parentLinks [j]) {
+              if (geometries [i].parentLinks [j] !== parentLinks [j]) {
                 break;
               }
             }
@@ -706,7 +715,7 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
           } 
         }
         if (updateNode) {
-          displayedGeometries [i].transformation = parentTransformations;
+          geometries [i].transform = parentTransforms;
           break;
         }
       }
@@ -714,7 +723,7 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
   } else if (node instanceof Light3D) {
     for (var i = 0; i < lights.length; i++) {
       if (lights [i].node === node) {
-        lights [i].transformation = parentTransformations;
+        lights [i].transform = parentTransforms;
         break;
       }
     }
@@ -724,23 +733,23 @@ HTMLCanvas3D.prototype.updateChildrenTransformation = function(node, displayedGe
 /**
  * Removes the tree with the given root node.  
  * @param {Node3D}  node
- * @param {Array}   displayedGeometries
+ * @param {Array}   geometries
  * @param {Array}   lights
  * @private  
  */
-HTMLCanvas3D.prototype.removeDisplayedItems = function(node, displayedGeometries, lights) {
+HTMLCanvas3D.prototype.removeDisplayedItems = function(node, geometries, lights) {
   var canvas3D = this;
   if (node instanceof Group3D) {
     var children = node.getChildren();
     for (var i = 0; i < children.length; i++) {
-      this.removeDisplayedItems(children [i], displayedGeometries, lights);
+      this.removeDisplayedItems(children [i], geometries, lights);
     }
   } else if (node instanceof Link3D) {
-    this.removeDisplayedItems(node.getSharedGroup(), displayedGeometries, lights);
+    this.removeDisplayedItems(node.getSharedGroup(), geometries, lights);
   } else if (node instanceof Shape3D) {
-    for (var i = 0; i < displayedGeometries.length; i++) {
-      if (displayedGeometries [i].node === node) {
-        displayedGeometries.splice(i, 1);
+    for (var i = 0; i < geometries.length; i++) {
+      if (geometries [i].node === node) {
+        geometries.splice(i, 1);
         break;
       }
     }
@@ -866,7 +875,7 @@ HTMLCanvas3D.prototype.drawScene = function() {
     if (light.direction !== undefined) {
       // Adjust direction (if lights should be a fixed place, use an identity transform instead of viewPlatformTransform)
       var lightDirection = vec3.transformMat3(vec3.create(), light.direction, 
-          mat3.fromMat4(mat3.create(), mat4.mul(transform, viewPlatformInvertedTransform, light.transformation)));
+          mat3.fromMat4(mat3.create(), mat4.mul(transform, viewPlatformInvertedTransform, light.transform)));
       vec3.normalize(lightDirection, lightDirection);
       vec3.negate(lightDirection, lightDirection);
       directionalLightColors.push.apply(directionalLightColors, light.color);
@@ -889,55 +898,54 @@ HTMLCanvas3D.prototype.drawScene = function() {
   // Convert horizontal field of view to vertical
   var verticalFieldOfView = 2 * Math.atan(this.viewportHeight / this.viewportWidth * Math.tan(this.fieldOfView / 2));
   // First draw background geometries (contained in a unit sphere)
-  var projectionMatrix = mat4.create();
-  mat4.perspective(projectionMatrix, verticalFieldOfView, this.viewportWidth / this.viewportHeight, 
+  var projectionTransform = mat4.create();
+  mat4.perspective(projectionTransform, verticalFieldOfView, this.viewportWidth / this.viewportHeight, 
                    0.001, 1.0);
-  this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
+  this.gl.uniformMatrix4fv(this.shaderProgram.projectionTransform, false, projectionTransform);
   // Translate to center
   var backgroundTransform = mat4.clone(this.viewPlatformTransform);
   backgroundTransform[12] = 0.
   backgroundTransform[13] = 0;
   backgroundTransform[14] = 0;
   var backgroundInvertedTransform = mat4.invert(mat4.create(), backgroundTransform);
-  for (var i = 0; i < this.displayedGeometries.length; i++) {
-    var displayedGeometry = this.displayedGeometries [i];
-    if (displayedGeometry.background) {
-      this.drawGeometry(displayedGeometry, backgroundInvertedTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
-    }
+  for (var i = 0; i < this.backgroundGeometries.length; i++) {
+    var backgroundGeometry = this.backgroundGeometries [i];
+    this.drawGeometry(backgroundGeometry, backgroundInvertedTransform, ambientLightColor, backgroundGeometry.lightingEnabled, true, true);
   }
 
   // Reset depth buffer to draw the scene above background
   this.gl.clear(this.gl.DEPTH_BUFFER_BIT);
-  mat4.perspective(projectionMatrix, verticalFieldOfView, this.viewportWidth / this.viewportHeight,  
+  mat4.perspective(projectionTransform, verticalFieldOfView, this.viewportWidth / this.viewportHeight,  
                    this.frontClipDistance, this.backClipDistance); 
-  this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
+  this.gl.uniformMatrix4fv(this.shaderProgram.projectionTransform, false, projectionTransform);
 
   // Second draw opaque geometries
   this.gl.enable(this.gl.DEPTH_TEST);
-  for (var i = 0; i < this.displayedGeometries.length; i++) {
-    var displayedGeometry = this.displayedGeometries [i];
-    if (!displayedGeometry.background
-        && !this.isTextureTransparent(displayedGeometry)
-        && !this.isGeometryTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
+  for (var i = 0; i < this.sceneGeometries.length; i++) {
+    var geometry = this.sceneGeometries [i];
+    if (geometry.transparency === 1 
+        && (geometry.texture === undefined
+            || !geometry.texture.image.transparent)) {
+      this.drawGeometry(geometry, viewPlatformInvertedTransform, ambientLightColor, geometry.lightingEnabled, true, true);
     }
   }
-  // Then draw transparent geometries
+  // Then draw geometries which use a transparent texture 
   this.gl.enable(this.gl.BLEND);
   this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
-  for (var i = 0; i < this.displayedGeometries.length; i++) {
-    var displayedGeometry = this.displayedGeometries [i];
-    if (!displayedGeometry.background
-        && this.isTextureTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
+  for (var i = 0; i < this.sceneGeometries.length; i++) {
+    var geometry = this.sceneGeometries [i];
+    if (geometry.texture !== undefined
+        && geometry.texture.image.transparent) {
+      this.drawGeometry(geometry, viewPlatformInvertedTransform, ambientLightColor, geometry.lightingEnabled, true, true);
     }
   }
-  for (var i = 0; i < this.displayedGeometries.length; i++) {
-    var displayedGeometry = this.displayedGeometries [i];
-    if (!displayedGeometry.background
-        && !this.isTextureTransparent(displayedGeometry)
-        && this.isGeometryTransparent(displayedGeometry)) {
-      this.drawGeometry(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, displayedGeometry.lightingEnabled, true, true);
+  // And other geometries which are transparent 
+  for (var i = 0; i < this.sceneGeometries.length; i++) {
+    var geometry = this.sceneGeometries [i];
+    if (geometry.transparency < 1 
+        && (geometry.texture === undefined
+            || !geometry.texture.image.transparent)) {
+      this.drawGeometry(geometry, viewPlatformInvertedTransform, ambientLightColor, geometry.lightingEnabled, true, true);
     }
   }
   
@@ -957,58 +965,37 @@ HTMLCanvas3D.prototype.drawScene = function() {
 }
 
 /**
- * Returns the last measured number of frames drawn by second by this component.
- * @return {number}
- */
-HTMLCanvas3D.prototype.getFramesPerSecond = function() {
-  return this.framesPerSecond;
-}
-
-/**
- * Returns true if the given geometry is possibly transparent.
- * @private
- */
-HTMLCanvas3D.prototype.isGeometryTransparent = function(displayedGeometry) {
-  return displayedGeometry.transparency < 1;
-}
-
-/**
- * Returns true if the given geometry uses a transparent texture.
- * @private
- */
-HTMLCanvas3D.prototype.isTextureTransparent = function(displayedGeometry) {
-  return displayedGeometry.texture !== undefined
-      && displayedGeometry.texture.image.transparent;
-}
-
-/**
  * Draws the given shape geometry.
  * @private
  */
-HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformInvertedTransform, ambientLightColor, 
+HTMLCanvas3D.prototype.drawGeometry = function(geometry, viewPlatformInvertedTransform, ambientLightColor, 
                                                lightingEnabled, textureEnabled, transparencyEnabled) {
-  if (displayedGeometry.visible
-      && (displayedGeometry.transparency === undefined 
-          || displayedGeometry.transparency > 0)) {
-    if (displayedGeometry.cullFace !== undefined) {
-      if (displayedGeometry.cullFace === Appearance3D.CULL_NONE) {
-        this.gl.disable(this.gl.CULL_FACE);
+  if (geometry.visible
+      && (geometry.transparency === undefined 
+          || geometry.transparency > 0)) {
+    // Call face management methods only if cullFace changed from previous geometry  
+    if (geometry.cullFace !== this.shaderCullFace) {
+      this.shaderCullFace = geometry.cullFace;
+      if (this.shaderCullFace !== undefined) {
+        if (this.shaderCullFace === Appearance3D.CULL_NONE) {
+          this.gl.disable(this.gl.CULL_FACE);
+        } else {
+          this.gl.enable(this.gl.CULL_FACE);
+          this.gl.cullFace(this.shaderCullFace === Appearance3D.CULL_BACK
+              ? this.gl.BACK : this.gl.FRONT);
+        }
       } else {
         this.gl.enable(this.gl.CULL_FACE);
-        this.gl.cullFace(displayedGeometry.cullFace === Appearance3D.CULL_BACK
-            ? this.gl.BACK : this.gl.FRONT);
+        this.gl.cullFace(this.gl.BACK);
       }
-    } else {
-      this.gl.enable(this.gl.CULL_FACE);
-      this.gl.cullFace(this.gl.BACK);
     }
 
-    mat4.copy(this.geometryModelViewMatrix, viewPlatformInvertedTransform);
-    mat4.mul(this.geometryModelViewMatrix, this.geometryModelViewMatrix, displayedGeometry.transformation);
-    // Call uniformMatrix4fv only if geometryModelViewMatrix changed from previous geometry
-    if (!mat4.exactEquals(this.shaderModelViewMatrix, this.geometryModelViewMatrix)) {
-      mat4.copy(this.shaderModelViewMatrix, this.geometryModelViewMatrix);
-      this.gl.uniformMatrix4fv(this.shaderProgram.modelViewMatrix, false, this.shaderModelViewMatrix);
+    mat4.copy(this.geometryModelViewTransform, viewPlatformInvertedTransform);
+    mat4.mul(this.geometryModelViewTransform, this.geometryModelViewTransform, geometry.transform);
+    // Call uniformMatrix4fv only if geometryModelViewTransform changed from previous geometry
+    if (!mat4.exactEquals(this.shaderModelViewTransform, this.geometryModelViewTransform)) {
+      mat4.copy(this.shaderModelViewTransform, this.geometryModelViewTransform);
+      this.gl.uniformMatrix4fv(this.shaderProgram.modelViewTransform, false, this.shaderModelViewTransform);
     }
 
     // Call uniform1i only if lightingEnabled changed from previous geometry
@@ -1017,9 +1004,9 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
       this.gl.uniform1i(this.shaderProgram.lightingEnabled, this.shaderLightingEnabled);
     }
     if (lightingEnabled) {
-      if (displayedGeometry.ambientColor !== undefined
-          && displayedGeometry.texture === undefined) {
-        vec3.multiply(this.geometryAmbientColor, displayedGeometry.ambientColor, ambientLightColor);
+      if (geometry.ambientColor !== undefined
+          && geometry.texture === undefined) {
+        vec3.mul(this.geometryAmbientColor, geometry.ambientColor, ambientLightColor);
       } else {
         vec3.set(this.geometryAmbientColor, 0, 0, 0);
       }
@@ -1030,14 +1017,14 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
       }
 
       if (!this.ignoreShininess
-          && displayedGeometry.specularColor !== undefined 
-          && displayedGeometry.shininess !== undefined) {
+          && geometry.specularColor !== undefined 
+          && geometry.shininess !== undefined) {
         // Call uniform1f only if shininess changed from previous geometry
-        if (this.shaderShininess !== displayedGeometry.shininess) {
-          this.shaderShininess = displayedGeometry.shininess;
+        if (this.shaderShininess !== geometry.shininess) {
+          this.shaderShininess = geometry.shininess;
           this.gl.uniform1f(this.shaderProgram.shininess, this.shaderShininess);
         }
-        vec3.copy(this.geometrySpecularColor, displayedGeometry.specularColor);
+        vec3.copy(this.geometrySpecularColor, geometry.specularColor);
       } else {
         vec3.set(this.geometrySpecularColor, 0, 0, 0);
       }
@@ -1047,32 +1034,32 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
         this.gl.uniform3fv(this.shaderProgram.vertexSpecularColor, this.shaderSpecularColor);
       }
 
-      mat3.fromMat4(this.geometryNormalMatrix, this.geometryModelViewMatrix);
-      // Call uniformMatrix3fv only if geometryNormalMatrix changed from previous geometry
-      if (!mat3.exactEquals(this.shaderNormalMatrix, this.geometryNormalMatrix)) {
-        mat3.copy(this.shaderNormalMatrix, this.geometryNormalMatrix);
-        this.gl.uniformMatrix3fv(this.shaderProgram.normalMatrix, false, this.shaderNormalMatrix);
+      mat3.fromMat4(this.geometryNormalTransform, this.geometryModelViewTransform);
+      // Call uniformMatrix3fv only if geometryNormalTransform changed from previous geometry
+      if (!mat3.exactEquals(this.shaderNormalTransform, this.geometryNormalTransform)) {
+        mat3.copy(this.shaderNormalTransform, this.geometryNormalTransform);
+        this.gl.uniformMatrix3fv(this.shaderProgram.normalTransform, false, this.shaderNormalTransform);
       }
       // Call uniform1i only if backFaceNormalFlip changed from previous geometry
-      if (this.shaderBackFaceNormalFlip !== displayedGeometry.backFaceNormalFlip) {
-        this.shaderBackFaceNormalFlip = displayedGeometry.backFaceNormalFlip;
+      if (this.shaderBackFaceNormalFlip !== geometry.backFaceNormalFlip) {
+        this.shaderBackFaceNormalFlip = geometry.backFaceNormalFlip;
         this.gl.uniform1i(this.shaderProgram.backFaceNormalFlip, this.shaderBackFaceNormalFlip);
       }
     } 
     
     vec3.set(this.geometryDiffuseColor, 1, 1, 1);
     if (textureEnabled 
-        && displayedGeometry.texture !== undefined) {
+        && geometry.texture !== undefined) {
       this.gl.activeTexture(this.gl.TEXTURE0);
-      if (displayedGeometry.textureCoordinatesGeneration) {
-        this.gl.uniform4fv(this.shaderProgram.planeS, displayedGeometry.textureCoordinatesGeneration.planeS);
-        this.gl.uniform4fv(this.shaderProgram.planeT, displayedGeometry.textureCoordinatesGeneration.planeT);
+      if (geometry.textureCoordinatesGeneration) {
+        this.gl.uniform4fv(this.shaderProgram.planeS, geometry.textureCoordinatesGeneration.planeS);
+        this.gl.uniform4fv(this.shaderProgram.planeT, geometry.textureCoordinatesGeneration.planeT);
         // Call uniform1i only if textureCoordinatesGenerated changed from previous geometry
         if (!this.shaderTextureCoordinatesGenerated) {
           this.shaderTextureCoordinatesGenerated = true;
           this.gl.uniform1i(this.shaderProgram.textureCoordinatesGenerated, true);
         }
-      } else if (displayedGeometry.textureCoordinatesBuffer === null) {
+      } else if (geometry.textureCoordinatesBuffer === null) {
         // Default way to generate missing texture coordinates
         this.gl.uniform4fv(this.shaderProgram.planeS, HTMLCanvas3D.VEC4_DEFAULT_PLANE_S);
         this.gl.uniform4fv(this.shaderProgram.planeT, HTMLCanvas3D.VEC4_DEFAULT_PLANE_T);
@@ -1088,15 +1075,15 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
           this.gl.uniform1i(this.shaderProgram.textureCoordinatesGenerated, false);
         }
       }
-      var geometryTextureTransform = displayedGeometry.textureTransform !== undefined 
-          ? displayedGeometry.textureTransform 
+      var geometryTextureTransform = geometry.textureTransform !== undefined 
+          ? geometry.textureTransform 
           : HTMLCanvas3D.MAT3_IDENTITY;
       // Call uniformMatrix3fv only if geometryTextureTransform changed from previous geometry
       if (!mat3.exactEquals(this.shaderTextureTransform, geometryTextureTransform)) {
         mat3.copy(this.shaderTextureTransform, geometryTextureTransform);
-        this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordMatrix, false, this.shaderTextureTransform);
+        this.gl.uniformMatrix3fv(this.shaderProgram.textureCoordTransform, false, this.shaderTextureTransform);
       }
-      this.gl.bindTexture(this.gl.TEXTURE_2D, displayedGeometry.texture);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, geometry.texture);
       // Call uniform1i only if useTextures changed from previous geometry
       if (!this.shaderUseTextures) {
         this.shaderUseTextures = true;
@@ -1113,8 +1100,8 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
         this.shaderUseTextures = false;
         this.gl.uniform1i(this.shaderProgram.useTextures, false);
       }
-      if (displayedGeometry.diffuseColor !== undefined) {
-        vec3.copy(this.geometryDiffuseColor, displayedGeometry.diffuseColor);
+      if (geometry.diffuseColor !== undefined) {
+        vec3.copy(this.geometryDiffuseColor, geometry.diffuseColor);
       }
     }
     // Call uniform3fv only if geometryDiffuseColor changed from previous geometry
@@ -1124,36 +1111,44 @@ HTMLCanvas3D.prototype.drawGeometry = function(displayedGeometry, viewPlatformIn
     }
     
     this.gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.vertexBuffer);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, geometry.vertexBuffer);
     this.gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, 3, this.gl.FLOAT, false, 0, 0);
     if (lightingEnabled 
-        && displayedGeometry.mode === this.gl.TRIANGLES) {
+        && geometry.mode === this.gl.TRIANGLES) {
       this.gl.enableVertexAttribArray(this.shaderProgram.normalAttribute);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.normalBuffer);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, geometry.normalBuffer);
       this.gl.vertexAttribPointer(this.shaderProgram.normalAttribute, 3, this.gl.FLOAT, false, 0, 0);
     } else {
       this.gl.disableVertexAttribArray(this.shaderProgram.normalAttribute);
     }
     if (textureEnabled
-        && displayedGeometry.textureCoordinatesBuffer !== null
-        && displayedGeometry.texture !== undefined) {
+        && geometry.textureCoordinatesBuffer !== null
+        && geometry.texture !== undefined) {
       this.gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
-      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, displayedGeometry.textureCoordinatesBuffer);
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, geometry.textureCoordinatesBuffer);
       this.gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, 2, this.gl.FLOAT, false, 0, 0);
     } else {
       this.gl.disableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
     }
   
     // Manage transparency
-    var alpha = displayedGeometry.transparency && transparencyEnabled  ? displayedGeometry.transparency  : 1;
+    var alpha = geometry.transparency && transparencyEnabled  ? geometry.transparency  : 1;
     // Call uniform1f only if alpha changed from previous geometry
     if (this.shaderAlpha !== alpha) {
       this.shaderAlpha = alpha;
       this.gl.uniform1f(this.shaderProgram.alpha, this.shaderAlpha);
     }
     
-    this.gl.drawArrays(displayedGeometry.mode, 0, displayedGeometry.vertexCount);
+    this.gl.drawArrays(geometry.mode, 0, geometry.vertexCount);
   }
+}
+
+/**
+ * Returns the last measured number of frames drawn by second by this component.
+ * @return {number}
+ */
+HTMLCanvas3D.prototype.getFramesPerSecond = function() {
+  return this.framesPerSecond;
 }
 
 /**
@@ -1184,18 +1179,9 @@ HTMLCanvas3D.prototype.clear = function() {
   }
   this.textures = [];
   
-  for (var i = 0; i < this.displayedGeometries.length; i++) {
-    var displayedGeometry = this.displayedGeometries [i];
-    this.gl.deleteBuffer(displayedGeometry.vertexBuffer);
-    if (displayedGeometry.textureCoordinatesBuffer !== null
-        && displayedGeometry.texture !== undefined) {
-      this.gl.deleteBuffer(displayedGeometry.textureCoordinatesBuffer);
-    }
-    if (displayedGeometry.normalBuffer !== undefined) {
-      this.gl.deleteBuffer(displayedGeometry.normalBuffer);
-    }
-  }
-  this.displayedGeometries = [];
+  this.clearGeometries(this.sceneGeometries);
+  this.clearGeometries(this.backgroundGeometries);
+  
   this.lights = [];
   if (this.pickingFrameBuffer !== undefined) {
     this.gl.deleteFramebuffer(this.pickingFrameBuffer);
@@ -1204,6 +1190,25 @@ HTMLCanvas3D.prototype.clear = function() {
   this.repaint();
 }
 
+/**
+ * Frees buffers used by the given geometries.
+ * @private
+ */
+HTMLCanvas3D.prototype.clearGeometries = function(geometries) {
+  for (var i = 0; i < geometries.length; i++) {
+    var geometry = geometries [i];
+    this.gl.deleteBuffer(geometry.vertexBuffer);
+    if (geometry.textureCoordinatesBuffer !== null
+        && geometry.texture !== undefined) {
+      this.gl.deleteBuffer(geometry.textureCoordinatesBuffer);
+    }
+    if (geometry.normalBuffer !== undefined) {
+      this.gl.deleteBuffer(geometry.normalBuffer);
+    }
+  }
+  geometries.length = 0;
+}
+  
 /**
  * Sets whether shininess should be taken into account by the shader or not.
  */
@@ -1251,30 +1256,29 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     
     // Convert horizontal field of view to vertical
-    var projectionMatrix = mat4.create();
+    var projectionTransform = mat4.create();
     var verticalFieldOfView = 2 * Math.atan(this.canvas.height / this.canvas.width * Math.tan(this.fieldOfView / 2));
-    mat4.perspective(projectionMatrix, verticalFieldOfView, this.canvas.width / this.canvas.height,  
+    mat4.perspective(projectionTransform, verticalFieldOfView, this.canvas.width / this.canvas.height,  
         this.frontClipDistance, this.backClipDistance); 
-    this.gl.uniformMatrix4fv(this.shaderProgram.projectionMatrix, false, projectionMatrix);
+    this.gl.uniformMatrix4fv(this.shaderProgram.projectionTransform, false, projectionTransform);
     
     // Draw not background and opaque geometries without light and textures
     this.gl.enable(this.gl.DEPTH_TEST);
     var viewPlatformInvertedTransform = mat4.invert(mat4.create(), this.viewPlatformTransform);
     var geometryColor = vec3.create();
-    for (var i = 0; i < this.displayedGeometries.length; i++) {
-      var displayedGeometry = this.displayedGeometries [i];
-      if (!displayedGeometry.background
-          && displayedGeometry.node.isPickable()) {
-        var defaultColor = displayedGeometry.diffuseColor;
+    for (var i = 0; i < this.sceneGeometries.length; i++) {
+      var geometry = this.sceneGeometries [i];
+      if (geometry.node.isPickable()) {
+        var defaultColor = geometry.diffuseColor;
         // Change diffuse color by geometry index
         vec3.set(geometryColor, 
             ((i >>> 16) & 0xFF) / 255.,
             ((i >>> 8) & 0xFF) / 255.,
             (i & 0xFF) / 255.);
-        displayedGeometry.diffuseColor = geometryColor;
-        this.drawGeometry(displayedGeometry, viewPlatformInvertedTransform, null, false, false, false);
+        geometry.diffuseColor = geometryColor;
+        this.drawGeometry(geometry, viewPlatformInvertedTransform, null, false, false, false);
         if (defaultColor !== undefined) {
-          displayedGeometry.diffuseColor = defaultColor;
+          geometry.diffuseColor = defaultColor;
         }
       }
     }
@@ -1298,7 +1302,7 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
       + this.pickingFrameBuffer.colorMap[pixelIndex + 1] * 256
       + this.pickingFrameBuffer.colorMap[pixelIndex + 2];
     if (geometryIndex != 0xFFFFFF) {
-      return this.displayedGeometries [geometryIndex].node;
+      return this.sceneGeometries [geometryIndex].node;
     }
   }
   
