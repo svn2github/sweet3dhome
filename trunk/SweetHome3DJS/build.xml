@@ -216,7 +216,7 @@
     <!-- Generate JSDoc -->
     <mkdir dir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc" />
     <taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" 
-           classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-1.2.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
+           classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-2.0.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
     <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
       <fileset dir="src" includes="*.js" excludes="scene3d.js, HTMLCanvas3D.js, Triangulator.js" />
       <fileset dir="lib/generated" includes="SweetHome3D.js" />
