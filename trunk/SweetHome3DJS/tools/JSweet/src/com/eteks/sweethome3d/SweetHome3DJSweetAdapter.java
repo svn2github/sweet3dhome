@@ -34,7 +34,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
 
 import org.jsweet.JSweetConfig;
-import org.jsweet.transpiler.Java2TypeScriptTranslator;
 import org.jsweet.transpiler.extension.AnnotationManager;
 import org.jsweet.transpiler.extension.PrinterAdapter;
 import org.jsweet.transpiler.extension.RemoveJavaDependenciesAdapter;
@@ -50,8 +49,7 @@ import org.jsweet.transpiler.model.VariableAccessElement;
  * This adapter tunes the JavaScript generation for some SweetHome3D
  * specificities.
  * 
- * <p>
- * It is a subclass of {@link RemoveJavaDependenciesAdapter} since we always
+ * <p>It is a subclass of {@link RemoveJavaDependenciesAdapter} since we always
  * want the Java APIs to be removed form the generated code and use no runtime.
  * 
  * @author Renaud Pawlak
