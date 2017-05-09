@@ -43,7 +43,6 @@
         <file name="Ground3D.js" />
         <file name="Label3D.js" />
         <file name="TextureManager.js" />
-        <file name="HomeController3D.js" />
         <file name="viewHome.js" />
       </filelist>
     </concat>
