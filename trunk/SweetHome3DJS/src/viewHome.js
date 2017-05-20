@@ -408,6 +408,13 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
   if (home.structure) {
     // Make always all levels visible if walls and rooms structure can be modified
     home.getEnvironment().setAllLevelsVisible(true);
+  } else {
+    // Make all levels always visible when observer camera is used
+    var setAllLevelsVisibleWhenObserverCamera = function() {
+        home.getEnvironment().setAllLevelsVisible(home.getCamera() instanceof ObserverCamera);
+      };
+    setAllLevelsVisibleWhenObserverCamera();
+    home.addPropertyChangeListener(Home.CAMERA, setAllLevelsVisibleWhenObserverCamera);
   }
   home.getEnvironment().setObserverCameraElevationAdjusted(true);
   
