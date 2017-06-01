@@ -285,7 +285,7 @@
       <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
       <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
       <classpath>
-        <fileset dir="tools/JSweet/lib" />
+        <fileset dir="tools/JSweet/lib" excludes="generated/" />
         <pathelement location="build/SweetHome3DJSweetExtension.jar"/>
         <pathelement location="../SweetHome3D/libtest/jnlp.jar"/>
         <pathelement location="../SweetHome3D/libtest/AppleJavaExtensions.jar"/>
@@ -302,7 +302,9 @@
     <mkdir dir="build/jsweetCandy/resources/META-INF/resources/typings" />
     <move file="build/jsBundle/js/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/viewhome.d.ts"  />
     <move file="build/jsBundle/ts/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/defs.d.ts" />
+    <copy file="tools/JSweet/candy-metadata.json" tofile="build/jsweetCandy/resources/META-INF/candy-metadata.json" />
 
+    <mkdir dir="tools/JSweet/lib/generated" />
     <jar destfile="tools/JSweet/lib/generated/SweetHome3DJS.jar">
       <fileset dir="build/jsweetCandy/classes" />
       <fileset dir="build/jsweetCandy/resources" />
