@@ -62,8 +62,8 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
     this.java3dTypeMapping.put("javax.vecmath.Vector3f", "vec3");
     this.java3dTypeMapping.put("javax.vecmath.Vector3d", "vec3");
     this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.Box", "Box3D");
-    this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.GeometryInfo", "GeometryInfo");
-    this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.NormalGenerator", "GeometryInfo");
+    this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.GeometryInfo", "GeometryInfo3D");
+    this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.NormalGenerator", "GeometryInfo3D");
     
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.Wall3D", "Wall3D");
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.Ground3D", "Ground3D");

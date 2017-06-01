@@ -331,7 +331,7 @@ Ground3D.prototype.addAreaGeometry = function(groundShape, groundTexture, area, 
       }
     }
       
-    var geometryInfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+    var geometryInfo = new GeometryInfo3D(GeometryInfo3D.POLYGON_ARRAY);
     geometryInfo.setCoordinates(geometryCoords);
     if (groundTexture !== null) {
       geometryInfo.setTextureCoordinates(geometryTextureCoords);
@@ -373,7 +373,7 @@ Ground3D.prototype.addAreaSidesGeometry = function(groundShape, groundTexture, a
     }
   }
   
-  var geometryInfo = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.QUAD_ARRAY);
   geometryInfo.setCoordinates(geometryCoords);
   if (groundTexture !== null) {
     geometryInfo.setTextureCoordinates(geometryTextureCoords);

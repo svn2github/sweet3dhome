@@ -679,7 +679,7 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
     }
   }
   
-  var geometryInfo = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.QUAD_ARRAY);
   geometryInfo.setCoordinates(coords.slice(0));
   
   if (texture !== null) {
@@ -824,7 +824,7 @@ Wall3D.prototype.createHorizontalPartGeometry = function(points, y, reverseOrder
   for (var i = 0; i < points.length; i++) {
     coords[i] = vec3.fromValues(points[i][0], y, points[i][1]);
   }
-  var geometryInfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.POLYGON_ARRAY);
   geometryInfo.setCoordinates(reverseOrder ? coords.reverse() : coords);
   geometryInfo.setStripCounts([coords.length]);
   if (roundWall) {
@@ -852,7 +852,7 @@ Wall3D.prototype.createTopPartGeometry = function(points, cosWallYawAngle, sinWa
     var topY = (topLineAlpha * xTopPointWithZeroYaw + topLineBeta);
     coords[i] = vec3.fromValues(points[i][0], topY, points[i][1]);
   }
-  var geometryInfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.POLYGON_ARRAY);
   geometryInfo.setCoordinates(coords);
   geometryInfo.setStripCounts([coords.length]);
   if (roundWall) {
@@ -1034,7 +1034,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
           i++;
         }
         
-        var geometryInfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+        var geometryInfo = new GeometryInfo3D(GeometryInfo3D.POLYGON_ARRAY);
         geometryInfo.setStripCounts(stripCounts);
         geometryInfo.setCoordinates(coords);
         if (texture !== null) {
@@ -1044,7 +1044,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
         wallGeometries.push(geometryInfo.getIndexedGeometryArray());
         
         if (borderCoords.length > 0) {
-          geometryInfo = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+          geometryInfo = new GeometryInfo3D(GeometryInfo3D.QUAD_ARRAY);
           geometryInfo.setCoordinates(borderCoords.slice(0));
           if (texture !== null) {
             geometryInfo.setTextureCoordinates(borderTextureCoords.slice(0));
@@ -1055,7 +1055,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
         }
         
         if (slopingTopCoords.length > 0) {
-          geometryInfo = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+          geometryInfo = new GeometryInfo3D(GeometryInfo3D.QUAD_ARRAY);
           geometryInfo.setCoordinates(slopingTopCoords.slice(0));
           geometryInfo.setGeneratedNormals(true);
           wallTopGeometries.push(geometryInfo.getIndexedGeometryArray());

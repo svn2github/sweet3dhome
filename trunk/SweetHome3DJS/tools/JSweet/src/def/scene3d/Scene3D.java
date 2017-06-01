@@ -34,6 +34,12 @@ class vec3 {
 }
 
 /**
+ * Data of a vector storing 4 values.
+ */
+class vec4 {
+}
+
+/**
  * Data of a matrix storing 4x4 values.
  */
 class mat4 {
@@ -348,14 +354,14 @@ class Box3D extends Shape3D {
  * Creates data used to build the geometry of a shape.
  * @author Emmanuel Puybaret
  */
-class GeometryInfo {
+class GeometryInfo3D {
   public static final int TRIANGLE_ARRAY = 0;
   public static final int TRIANGLE_STRIP_ARRAY = 1;
   public static final int TRIANGLE_FAN_ARRAY = 2;
   public static final int QUAD_ARRAY = 10;
   public static final int POLYGON_ARRAY = 20;
   
-  public GeometryInfo(int type) {
+  public GeometryInfo3D(int type) {
   }
   
   public native void setCoordinates(vec3 [] vertices);

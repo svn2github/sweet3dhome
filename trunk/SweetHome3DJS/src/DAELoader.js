@@ -754,16 +754,16 @@ DAEHandler.prototype.handleGeometryElementsEnd = function(name, parent) {
 DAEHandler.prototype.getFacesGeometry = function(name) {
   var primitiveType;
   if ("triangles" == name) {
-    primitiveType = GeometryInfo.TRIANGLE_ARRAY;
+    primitiveType = GeometryInfo3D.TRIANGLE_ARRAY;
   } else if ("trifans" == name) {
-    primitiveType = GeometryInfo.TRIANGLE_FAN_ARRAY;
+    primitiveType = GeometryInfo3D.TRIANGLE_FAN_ARRAY;
   } else if ("tristrips" == name) {
-    primitiveType = GeometryInfo.TRIANGLE_STRIP_ARRAY;
+    primitiveType = GeometryInfo3D.TRIANGLE_STRIP_ARRAY;
   } else {
-    primitiveType = GeometryInfo.POLYGON_ARRAY;
+    primitiveType = GeometryInfo3D.POLYGON_ARRAY;
   }
   
-  var geometryInfo = new GeometryInfo(primitiveType);
+  var geometryInfo = new GeometryInfo3D(primitiveType);
   geometryInfo.setCoordinates(this.geometryVertices);
   geometryInfo.setCoordinateIndices(this.getIndices(this.geometryVertexOffset));
   if (this.geometryNormals) {

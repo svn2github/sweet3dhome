@@ -388,7 +388,7 @@ Room3D.prototype.computeRoomPartGeometry = function(geometryPoints, roomPointEle
     }
   }
   
-  var geometryInfo = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.POLYGON_ARRAY);
   geometryInfo.setCoordinates(coords);
   geometryInfo.setStripCounts(stripCounts);
   
@@ -459,7 +459,7 @@ Room3D.prototype.computeRoomBorderGeometry = function(geometryRooms, geometryHol
     }
   }
   
-  var geometryInfo = new GeometryInfo(GeometryInfo.QUAD_ARRAY);
+  var geometryInfo = new GeometryInfo3D(GeometryInfo3D.QUAD_ARRAY);
   geometryInfo.setCoordinates(coords);
   
   if (texture != null) {

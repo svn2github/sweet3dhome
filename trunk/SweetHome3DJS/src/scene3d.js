@@ -1330,21 +1330,21 @@ Box3D.prototype.constructor = Box3D;
  * @constructor
  * @author Emmanuel Puybaret
  */
-function GeometryInfo(type) {
+function GeometryInfo3D(type) {
   this.type = type;
 }
 
-GeometryInfo.TRIANGLE_ARRAY = 0;
-GeometryInfo.TRIANGLE_STRIP_ARRAY = 1;
-GeometryInfo.TRIANGLE_FAN_ARRAY = 2;
-GeometryInfo.QUAD_ARRAY = 10;
-GeometryInfo.POLYGON_ARRAY = 20;
+GeometryInfo3D.TRIANGLE_ARRAY = 0;
+GeometryInfo3D.TRIANGLE_STRIP_ARRAY = 1;
+GeometryInfo3D.TRIANGLE_FAN_ARRAY = 2;
+GeometryInfo3D.QUAD_ARRAY = 10;
+GeometryInfo3D.POLYGON_ARRAY = 20;
 
 /**
  * Sets the coordinates of the vertices of the geometry.
  * @param {vec3 []} vertices
  */
-GeometryInfo.prototype.setCoordinates = function(vertices) {
+GeometryInfo3D.prototype.setCoordinates = function(vertices) {
   this.vertices = vertices;
 }
 
@@ -1352,7 +1352,7 @@ GeometryInfo.prototype.setCoordinates = function(vertices) {
  * Sets the indices of each vertex of the geometry.
  * @param {vec3 []} coordinatesIndices
  */
-GeometryInfo.prototype.setCoordinateIndices = function(coordinatesIndices) {
+GeometryInfo3D.prototype.setCoordinateIndices = function(coordinatesIndices) {
   this.coordinatesIndices = coordinatesIndices;
 }
 
@@ -1360,7 +1360,7 @@ GeometryInfo.prototype.setCoordinateIndices = function(coordinatesIndices) {
  * Sets the coordinates of the normals of the geometry.
  * @param {vec3 []} normals
  */
-GeometryInfo.prototype.setNormals = function(normals) {
+GeometryInfo3D.prototype.setNormals = function(normals) {
   this.normals = normals;
 }
 
@@ -1368,7 +1368,7 @@ GeometryInfo.prototype.setNormals = function(normals) {
  * Sets the indices of each normal of the geometry.
  * @param {vec3 []} normalIndices
  */
-GeometryInfo.prototype.setNormalIndices = function(normalIndices) {
+GeometryInfo3D.prototype.setNormalIndices = function(normalIndices) {
   this.normalIndices = normalIndices;
 }
 
@@ -1376,7 +1376,7 @@ GeometryInfo.prototype.setNormalIndices = function(normalIndices) {
  * Sets the texture coordinates of the vertices of the geometry.
  * @param {vec2 []} textureCoordinates
  */
-GeometryInfo.prototype.setTextureCoordinates = function(textureCoordinates) {
+GeometryInfo3D.prototype.setTextureCoordinates = function(textureCoordinates) {
   this.textureCoordinates = textureCoordinates;
 }
 
@@ -1384,7 +1384,7 @@ GeometryInfo.prototype.setTextureCoordinates = function(textureCoordinates) {
  * Sets the indices of texture coordinates of the geometry.
  * @param {vec2 []} textureCoordinateIndices
  */
-GeometryInfo.prototype.setTextureCoordinateIndices = function(textureCoordinateIndices) {
+GeometryInfo3D.prototype.setTextureCoordinateIndices = function(textureCoordinateIndices) {
   this.textureCoordinateIndices = textureCoordinateIndices;
 }
 
@@ -1392,7 +1392,7 @@ GeometryInfo.prototype.setTextureCoordinateIndices = function(textureCoordinateI
  * Sets the strip counts of a polygon geometry.
  * @param {number []} stripCounts
  */
-GeometryInfo.prototype.setStripCounts = function(stripCounts) {
+GeometryInfo3D.prototype.setStripCounts = function(stripCounts) {
   this.stripCounts = stripCounts;
 }
 
@@ -1401,7 +1401,7 @@ GeometryInfo.prototype.setStripCounts = function(stripCounts) {
  * @param {number []} contourCounts
  * @private
  */
-GeometryInfo.prototype.setContourCounts = function(contourCounts) {
+GeometryInfo3D.prototype.setContourCounts = function(contourCounts) {
   this.contourCounts = contourCounts; // TODO implement countours
 }
 
@@ -1409,7 +1409,7 @@ GeometryInfo.prototype.setContourCounts = function(contourCounts) {
  * Generates the crease angle used to generate the normals of a geometry.
  * @param {number} creaseAngle
  */
-GeometryInfo.prototype.setCreaseAngle = function(creaseAngle) {
+GeometryInfo3D.prototype.setCreaseAngle = function(creaseAngle) {
   this.creaseAngle = creaseAngle; 
 }
 
@@ -1417,7 +1417,7 @@ GeometryInfo.prototype.setCreaseAngle = function(creaseAngle) {
  * Sets whether the normals of the geometry should be generated or not.
  * @param {boolean} generatedNormals
  */
-GeometryInfo.prototype.setGeneratedNormals = function(generatedNormals) {
+GeometryInfo3D.prototype.setGeneratedNormals = function(generatedNormals) {
   this.generatedNormals = generatedNormals;
 }
 
@@ -1425,7 +1425,7 @@ GeometryInfo.prototype.setGeneratedNormals = function(generatedNormals) {
  * Generates the normals and their indices for the shape defined by the given vertices and their indices.
  * @private
  */
-GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, normals, normalIndices) {
+GeometryInfo3D.prototype.computeNormals = function(vertices, coordinatesIndices, normals, normalIndices) {
   var creaseAngle;
   if (this.creaseAngle === undefined) {
     creaseAngle = 44. * Math.PI / 180.;
@@ -1517,7 +1517,7 @@ GeometryInfo.prototype.computeNormals = function(vertices, coordinatesIndices, n
  * Returns an instance of {@link IndexedTriangleArray3D} configured from 
  * the geometry data.
  */
-GeometryInfo.prototype.getIndexedGeometryArray = function() {
+GeometryInfo3D.prototype.getIndexedGeometryArray = function() {
   if (this.vertices && !this.coordinatesIndices) {
     this.coordinatesIndices = new Array(this.vertices.length);
     if (this.generatedNormals 
@@ -1553,7 +1553,7 @@ GeometryInfo.prototype.getIndexedGeometryArray = function() {
   var triangleCoordinatesIndices;
   var triangleTextureCoordinateIndices;
   var triangleNormalIndices;
-  if (this.type === GeometryInfo.POLYGON_ARRAY) {
+  if (this.type === GeometryInfo3D.POLYGON_ARRAY) {
     triangleCoordinatesIndices = [];
     triangleTextureCoordinateIndices = [];
     triangleNormalIndices = [];
@@ -1562,7 +1562,7 @@ GeometryInfo.prototype.getIndexedGeometryArray = function() {
         this.normals  ? this.normalIndices  : [], 
         this.stripCounts, 
         triangleCoordinatesIndices, triangleTextureCoordinateIndices, triangleNormalIndices);
-  } else if (this.type === GeometryInfo.QUAD_ARRAY) {
+  } else if (this.type === GeometryInfo3D.QUAD_ARRAY) {
     triangleCoordinatesIndices = [];
     triangleTextureCoordinateIndices = [];
     triangleNormalIndices = [];
@@ -1590,7 +1590,7 @@ GeometryInfo.prototype.getIndexedGeometryArray = function() {
         triangleNormalIndices.push(this.normalIndices [i]);
       }
     }
-  } else if (this.type === GeometryInfo.TRIANGLE_STRIP_ARRAY) {
+  } else if (this.type === GeometryInfo3D.TRIANGLE_STRIP_ARRAY) {
     triangleCoordinatesIndices = [];
     triangleTextureCoordinateIndices = [];
     triangleNormalIndices = [];
@@ -1615,7 +1615,7 @@ GeometryInfo.prototype.getIndexedGeometryArray = function() {
       }
       index += stripCount;
     }
-  } else if (this.type === GeometryInfo.TRIANGLE_FAN_ARRAY) {
+  } else if (this.type === GeometryInfo3D.TRIANGLE_FAN_ARRAY) {
     triangleCoordinatesIndices = [];
     triangleTextureCoordinateIndices = [];
     triangleNormalIndices = [];

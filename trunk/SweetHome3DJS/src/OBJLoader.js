@@ -1055,9 +1055,9 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
             normalIndices.push.apply(normalIndices, geometries [i + j].normalIndices);
           }
         }
-        var geometryInfo = new GeometryInfo(onlyTriangles  
-            ? GeometryInfo.TRIANGLE_ARRAY  
-            : GeometryInfo.POLYGON_ARRAY);
+        var geometryInfo = new GeometryInfo3D(onlyTriangles  
+            ? GeometryInfo3D.TRIANGLE_ARRAY  
+            : GeometryInfo3D.POLYGON_ARRAY);
         geometryInfo.setCoordinates(vertices);
         geometryInfo.setCoordinateIndices(coordinatesIndices);
         geometryInfo.setNormals(normals);

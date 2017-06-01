@@ -362,7 +362,7 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
       }
       
       // Generate geometry 
-      var geometryInfo = new GeometryInfo(GeometryInfo.TRIANGLE_ARRAY);
+      var geometryInfo = new GeometryInfo3D(GeometryInfo3D.TRIANGLE_ARRAY);
       geometryInfo.setCoordinates(vertices);
       geometryInfo.setCoordinateIndices(coordinateIndices);
       geometryInfo.setNormals(normals);
