@@ -169,7 +169,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String)");
 
     addAnnotation(
-        "@Replace('#BODY##BASEINDENT#if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure']); }')",
+        "@Replace('{{ body }}{{ baseIndent }}if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure']); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.setHomeAttributes(..)");
 
     // uncomment and adapt to log some method(s)
