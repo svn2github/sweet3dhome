@@ -154,18 +154,18 @@ Max3DSLoader.prototype.createScene = function(meshes, meshesGroups, materials, r
   }
   
   if (onmodelcreated === null) {
-    onprogression(Node3D.BUILDING_MODEL, "", 0);
+    onprogression(ModelLoader.BUILDING_MODEL, "", 0);
     for (var i = 0; i < meshes.length; i++) {
       this.createShapes(meshes [i], meshesGroups, appearances, sceneRoot, mainGroup);
     }
-    onprogression(Node3D.BUILDING_MODEL, "", 1);
+    onprogression(ModelLoader.BUILDING_MODEL, "", 1);
     return sceneRoot;
   } else {
     var meshesCount = meshes.length;
     var builtGeometryCount = 0;
     var loader = this;
     var sceneBuilder = function() {
-        onprogression(Node3D.BUILDING_MODEL, "", meshesCount !== 0 ? builtGeometryCount / meshesCount : 0);
+        onprogression(ModelLoader.BUILDING_MODEL, "", meshesCount !== 0 ? builtGeometryCount / meshesCount : 0);
         var start = Date.now();
         while (meshes.length > 0) {
           loader.createShapes(meshes [0], meshesGroups, appearances, sceneRoot, mainGroup);
@@ -181,7 +181,7 @@ Max3DSLoader.prototype.createScene = function(meshes, meshesGroups, materials, r
         // All shapes are created
         setTimeout(
             function() {
-              onprogression(Node3D.BUILDING_MODEL, "", 1);
+              onprogression(ModelLoader.BUILDING_MODEL, "", 1);
               onmodelcreated(sceneRoot);
             }, 0);
       };
@@ -416,9 +416,9 @@ Max3DSLoader.prototype.parseEntryScene = function(max3dsContent, max3dsEntryName
   var root = new TransformGroup3D();
   
   if (onmodelloaded === null) {
-    onprogression(Node3D.PARSING_MODEL, max3dsEntryName, 0);
+    onprogression(ModelLoader.PARSING_MODEL, max3dsEntryName, 0);
     masterScale = this.parse3DSStream(new Max3DSLoader.ChunksInputStream(max3dsContent), max3dsEntryName, zip, meshes, meshesGroups, materials, root);
-    onprogression(Node3D.PARSING_MODEL, max3dsEntryName, 1);
+    onprogression(ModelLoader.PARSING_MODEL, max3dsEntryName, 1);
     return this.createScene(meshes, meshesGroups, materials, root, masterScale, null, onprogression);
   } else {
     var loader = this;
@@ -427,7 +427,7 @@ Max3DSLoader.prototype.parseEntryScene = function(max3dsContent, max3dsEntryName
         // Parsing is finished
         setTimeout(
             function() {
-              onprogression(Node3D.PARSING_MODEL, max3dsEntryName, 1);
+              onprogression(ModelLoader.PARSING_MODEL, max3dsEntryName, 1);
               loader.createScene(meshes, meshesGroups, materials, root, masterScale, 
                   function(scene) { 
                     onmodelloaded(scene); 

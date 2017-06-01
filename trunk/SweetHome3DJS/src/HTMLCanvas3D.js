@@ -326,7 +326,7 @@ HTMLCanvas3D.prototype.setScene = function(scene, onprogression) {
   setTimeout(
       function() {
         if (onprogression !== undefined) {
-          onprogression(Node3D.BINDING_MODEL, "", 1);
+          onprogression(ModelLoader.BINDING_MODEL, "", 1);
         }
         canvas3D.sceneGeometries = sceneGeometries;
         canvas3D.backgroundGeometries = backgroundGeometries;
@@ -435,7 +435,7 @@ HTMLCanvas3D.prototype.prepareScene = function(node, sceneGeometries, background
     if (onprogression !== undefined
         && !background
         && Math.floor((sceneGeometries.length - 1) / sceneGeometryCount * 10) < Math.floor(sceneGeometries.length / sceneGeometryCount * 10)) {
-      onprogression(Node3D.BINDING_MODEL, "", sceneGeometries.length / sceneGeometryCount);
+      onprogression(ModelLoader.BINDING_MODEL, "", sceneGeometries.length / sceneGeometryCount);
     }
     var nodeAppearance = node.getAppearance();
     if (!nodeAppearance) {

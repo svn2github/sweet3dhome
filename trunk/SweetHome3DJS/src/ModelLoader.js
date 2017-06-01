@@ -35,6 +35,12 @@ function ModelLoader(modelExtension) {
   this.waitingParsedEntries = [];
 }
 
+// Constants used to follow model loading progression (moved from Node3D)
+ModelLoader.READING_MODEL = Node3D.READING_MODEL;
+ModelLoader.PARSING_MODEL = Node3D.PARSING_MODEL;
+ModelLoader.BUILDING_MODEL = Node3D.BUILDING_MODEL;
+ModelLoader.BINDING_MODEL = Node3D.BINDING_MODEL;
+
 /**
  * Loads the 3D model from the given URL. This method is reentrant when run asynchronously.
  * @param {string} url The URL of a zip file containing an entry with the extension given in constructor 
@@ -57,7 +63,7 @@ ModelLoader.prototype.load = function(url, synchronous, modelObserver) {
     url = url.substring(4, entrySeparatorIndex);
   }
   
-  modelObserver.progression(Node3D.READING_MODEL, url, 0);
+  modelObserver.progression(ModelLoader.READING_MODEL, url, 0);
   var loader = this;
   var zipObserver = {
       zipReady : function(zip) {
@@ -93,7 +99,7 @@ ModelLoader.prototype.load = function(url, synchronous, modelObserver) {
       },
       progression : function(part, info, percentage) {
         if (modelObserver.progression !== undefined) {
-          modelObserver.progression(Node3D.READING_MODEL, info, percentage);
+          modelObserver.progression(ModelLoader.READING_MODEL, info, percentage);
         }
       }
     };
@@ -114,7 +120,7 @@ ModelLoader.prototype.clear = function() {
 ModelLoader.prototype.parseModelEntry = function(modelEntry, zip, zipUrl, synchronous, modelObserver) {
   if (synchronous) { 
     var modelContent = this.getModelContent(modelEntry);
-    modelObserver.progression(Node3D.READING_MODEL, modelEntry.name, 1);
+    modelObserver.progression(ModelLoader.READING_MODEL, modelEntry.name, 1);
     var modelContext = {};
     this.parseDependencies(modelContent, modelEntry.name, zip, modelContext);
     var scene = this.parseEntryScene(modelContent, modelEntry.name, zip, modelContext, null, modelObserver.progression);
@@ -143,7 +149,7 @@ ModelLoader.prototype.parseNextWaitingEntry = function() {
         var modelEntryName = parsedEntry.modelEntry.name;
         // Get model content to parse
         var modelContent = this.getModelContent(parsedEntry.modelEntry);
-        parsedEntry.modelObserver.progression(Node3D.READING_MODEL, modelEntryName, 1);
+        parsedEntry.modelObserver.progression(ModelLoader.READING_MODEL, modelEntryName, 1);
         var modelContext = {};
         this.parseDependencies(modelContent, modelEntryName, parsedEntry.zip, modelContext);
         var loader = this;

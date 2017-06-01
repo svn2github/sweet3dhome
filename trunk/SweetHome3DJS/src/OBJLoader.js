@@ -953,11 +953,11 @@ OBJLoader.defaultAppearances = null;
 OBJLoader.prototype.createScene = function(vertices, textureCoordinates, normals, groups, appearances, onmodelcreated, onprogression) {
   var sceneRoot = new Group3D();
   if (onmodelcreated === null) {
-    onprogression(Node3D.BUILDING_MODEL, "", 0);
+    onprogression(ModelLoader.BUILDING_MODEL, "", 0);
     for (var key in groups) {
       this.createGroupShapes(vertices, textureCoordinates, normals, groups [key], appearances, sceneRoot);
     }
-    onprogression(Node3D.BUILDING_MODEL, "", 1);
+    onprogression(ModelLoader.BUILDING_MODEL, "", 1);
     return sceneRoot;
   } else {
     var groupsGeometryCount = 0;
@@ -967,7 +967,7 @@ OBJLoader.prototype.createScene = function(vertices, textureCoordinates, normals
     var builtGeometryCount = 0;
     var loader = this;
     var sceneBuilder = function() {
-        onprogression(Node3D.BUILDING_MODEL, "", groupsGeometryCount !== 0 ? builtGeometryCount / groupsGeometryCount : 0);
+        onprogression(ModelLoader.BUILDING_MODEL, "", groupsGeometryCount !== 0 ? builtGeometryCount / groupsGeometryCount : 0);
         var start = Date.now();
         for (var key in groups) {
           loader.createGroupShapes(vertices, textureCoordinates, normals, groups [key], appearances, sceneRoot);
@@ -983,7 +983,7 @@ OBJLoader.prototype.createScene = function(vertices, textureCoordinates, normals
         // All shapes are created
         setTimeout(
             function() {
-              onprogression(Node3D.BUILDING_MODEL, "", 1);
+              onprogression(ModelLoader.BUILDING_MODEL, "", 1);
               onmodelcreated(sceneRoot);
             }, 0);
       };
@@ -1160,18 +1160,18 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
   
   try {
     if (onmodelloaded === null) {
-      onprogression(Node3D.PARSING_MODEL, objEntryName, 0);
+      onprogression(ModelLoader.PARSING_MODEL, objEntryName, 0);
       for (var startOfLine = 0; startOfLine <= objContent.length; ) {
         startOfLine = this.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
             materialGroupsWithNormals, currentObjects);
       } 
-      onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
+      onprogression(ModelLoader.PARSING_MODEL, objEntryName, 1);
       return this.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, null, onprogression);
     } else {
       var startOfLine = 0;
       var loader = this;
       var objEntryParser = function() {
-          onprogression(Node3D.PARSING_MODEL, objEntryName, startOfLine / objContent.length);
+          onprogression(ModelLoader.PARSING_MODEL, objEntryName, startOfLine / objContent.length);
           var minimumIndexBeforeTimeout = startOfLine + 200000; 
           var start = Date.now();
           while (startOfLine <= objContent.length) {
@@ -1188,7 +1188,7 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
           // Parsing is finished
           setTimeout(
               function() {
-                onprogression(Node3D.PARSING_MODEL, objEntryName, 1);
+                onprogression(ModelLoader.PARSING_MODEL, objEntryName, 1);
                 loader.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, 
                     function(scene) { 
                       onmodelloaded(scene); 

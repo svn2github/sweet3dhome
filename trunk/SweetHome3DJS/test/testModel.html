@@ -48,7 +48,7 @@ function testModel() {
         alert(err); 
       },
       function(part, info, percentage) {
-        if (part === Node3D.BINDING_MODEL && percentage === 1) {
+        if (part === ModelLoader.BINDING_MODEL && percentage === 1) {
           modelPreviewComponent.startRotationAnimation();
         }
       });

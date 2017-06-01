@@ -95,26 +95,26 @@ function viewModelInOverlay(modelUrl, modelRotation) {
           },
           function(part, info, percentage) {
             var progress = document.getElementById("modelViewerProgress");
-            if (part === Node3D.READING_MODEL) {
+            if (part === ModelLoader.READING_MODEL) {
               progress.value = percentage * 100;
               info = info.substring(info.lastIndexOf('/') + 1);
-            } else if (part === Node3D.PARSING_MODEL) {
+            } else if (part === ModelLoader.PARSING_MODEL) {
               progress.value = 210 + percentage * 100;
-            } else if (part === Node3D.BUILDING_MODEL) {
+            } else if (part === ModelLoader.BUILDING_MODEL) {
               progress.value = 310 + percentage * 100;
-            } else if (part === Node3D.BINDING_MODEL) {
+            } else if (part === ModelLoader.BINDING_MODEL) {
               progress.value = 410 + percentage * 50;
             }
             
             var progressLabel = document.getElementById("modelViewerProgressLabel");
-            if (part === Node3D.BUILDING_MODEL && percentage === 1) {
+            if (part === ModelLoader.BUILDING_MODEL && percentage === 1) {
               progressLabel.innerHTML = "Preparing display...";
             } else {
               progressLabel.innerHTML = (percentage ? Math.floor(percentage * 100) + "% " : "") 
                   + part + " " + info;
             }
             
-            if (part === Node3D.BINDING_MODEL && percentage === 1) {
+            if (part === ModelLoader.BINDING_MODEL && percentage === 1) {
               document.getElementById("modelViewerProgressDiv").style.visibility = "hidden";
               modelPreviewComponent.startRotationAnimation();
             }

@@ -50,19 +50,19 @@ DAELoader.prototype.parseEntryScene = function(daeContent, daeEntryName, zip, mo
   var sceneRoot = new Group3D();
   var handler = new DAEHandler(sceneRoot, daeEntryName);
   var saxParser = new SAXParser(handler, handler, handler, handler, handler);
-  onprogression(Node3D.PARSING_MODEL, daeEntryName, 0);
+  onprogression(ModelLoader.PARSING_MODEL, daeEntryName, 0);
   try {
     saxParser.parseString(daeContent);
   } catch (ex) {
     sceneRoot.removeAllChildren();
   }
   if (onmodelloaded === null) {
-    onprogression(Node3D.PARSING_MODEL, daeEntryName, 1);
+    onprogression(ModelLoader.PARSING_MODEL, daeEntryName, 1);
     return sceneRoot;
   } else {
     setTimeout(
         function() {
-          onprogression(Node3D.PARSING_MODEL, daeEntryName, 1);
+          onprogression(ModelLoader.PARSING_MODEL, daeEntryName, 1);
           onmodelloaded(sceneRoot);
         }, 0);
   }

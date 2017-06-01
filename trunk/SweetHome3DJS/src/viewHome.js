@@ -222,7 +222,7 @@ function viewHomeInOverlay(homeUrl, params) {
           info = info.substring(info.lastIndexOf('/') + 1);
           text = params && params.readingHomeText
               ? params.readingHomeText : part;
-        } else if (part === Node3D.READING_MODEL) {
+        } else if (part === ModelLoader.READING_MODEL) {
           progress.value = 100 + percentage * 100;
           if (percentage === 1) {
             document.getElementById("viewerProgressDiv").style.visibility = "hidden";
@@ -632,7 +632,7 @@ HomePreviewComponent.prototype.trackFurnitureModels = function(onprogression, ro
   }
 
   if (loadedFurniture.length === 0) {
-    onprogression(Node3D.READING_MODEL, undefined, 1);
+    onprogression(ModelLoader.READING_MODEL, undefined, 1);
   } else {
     // Add an observer that will close ZIP files and free geometries once all models are loaded
     var modelsCount = 0;
@@ -654,7 +654,7 @@ HomePreviewComponent.prototype.trackFurnitureModels = function(onprogression, ro
               ModelManager.getInstance().unloadModel(model);
               delete loadedModels [modelUrl];
             }
-            onprogression(Node3D.READING_MODEL, piece.getName(), ++modelsCount / loadedFurniture.length);
+            onprogression(ModelLoader.READING_MODEL, piece.getName(), ++modelsCount / loadedFurniture.length);
             if (modelsCount === loadedFurniture.length) {
               // Home and its models fully loaded
               // Free all other geometries (background, structure...)  

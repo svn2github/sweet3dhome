@@ -44,9 +44,21 @@ if (Math.fround === undefined) {
 function Node3D() {
 }
 
+/**
+ * @deprecated Replaced by ModelLoader.READING_MODEL
+ */
 Node3D.READING_MODEL = "Reading model";
+/**
+ * @deprecated Replaced by ModelLoader.PARSING_MODEL
+ */
 Node3D.PARSING_MODEL = "Parsing model";
+/**
+ * @deprecated Replaced by ModelLoader.BUILDING_MODEL
+ */
 Node3D.BUILDING_MODEL = "Building model";
+/**
+ * @deprecated Replaced by ModelLoader.BINDING_MODEL
+ */
 Node3D.BINDING_MODEL = "Binding model";
 
 Node3D.prototype.setCapability = function(capability) {

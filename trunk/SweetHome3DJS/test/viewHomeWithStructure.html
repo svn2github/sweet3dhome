@@ -98,7 +98,7 @@
         // Home loading is finished 
         progress.value = percentage * 100;
         info = info.substring(info.lastIndexOf('/') + 1);
-      } else if (part === Node3D.READING_MODEL) {
+      } else if (part === ModelLoader.READING_MODEL) {
         // Models loading is finished 
         progress.value = 100 + percentage * 100;
         if (percentage === 1) {

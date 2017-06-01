@@ -50,11 +50,6 @@ class mat4 {
  * @author Emmanuel Puybaret
  */
 abstract class Node3D {
-  public static final String READING_MODEL = "Reading model";
-  public static final String PARSING_MODEL = "Parsing model";
-  public static final String BUILDING_MODEL = "Building model";
-  public static final String BINDING_MODEL = "Binding model";
- 
   public native void setCapability(int capability);
   
   public native boolean getCapability(int capability);
