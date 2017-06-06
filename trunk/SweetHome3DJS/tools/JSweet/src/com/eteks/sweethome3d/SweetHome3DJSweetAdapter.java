@@ -108,7 +108,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.viewcontroller.HomeController3D.modifyAttributes(**)",
         "!com.eteks.sweethome3d.io.HomeXMLHandler", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
-        "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)");
+        "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)",
+        "com.eteks.sweethome3d.io.HomeXMLHandler.isSameContent(**)");
 
     // We now ignore some Java elements with a programmatic adapter
     addAnnotationManager(new AnnotationManager() {
@@ -165,7 +166,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "@Replace('if (this.shapeCache == null) { this.shapeCache = this.getPolylinePath(); } return this.shapeCache; ')",
         "com.eteks.sweethome3d.model.Polyline.getShape()");
     addAnnotation(
-        "@Replace('if(content == null) { return null; } else if(content.indexOf('://') >= 0) { return new URLContent(content); } else { return new HomeURLContent('jar:'+this['homeUrl']+'!/'+content); }')",
+        "@Replace('if (contentFile == null) { return null; } else if (contentFile.indexOf('://') >= 0) { return new URLContent(contentFile); } else { return new HomeURLContent('jar:' + this['homeUrl'] + '!/' + contentFile); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String)");
 
     addAnnotation(
