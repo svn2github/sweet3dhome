@@ -60,7 +60,7 @@ public class FurnitureController implements Controller {
   public enum Property {ID, NAME, DESCRIPTION, INFORMATION, TAGS, GRADE, CREATION_DATE, CATEGORY, MODEL, ICON, 
       WIDTH, DEPTH,  HEIGHT, ELEVATION, MOVABLE, RESIZABLE, DEFORMABLE, TEXTURABLE, 
       DOOR_OR_WINDOW, DOOR_OR_WINDOW_CUT_OUT_SHAPE, STAIRCASE, STAIRCASE_CUT_OUT_SHAPE, 
-      MODEL_ROTATION, CREATOR, PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
+      MODEL_ROTATION, MODEL_SIZE, CREATOR, PROPORTIONAL, BACK_FACE_SHOWN, PRICE, VALUE_ADDED_TAX_PERCENTAGE}
   
   private static final Map<String, Property> PROPERTIES_MAP = new HashMap<String, Property>();
   
@@ -127,6 +127,7 @@ public class FurnitureController implements Controller {
   private Boolean           staircase;
   private String            staircaseCutOutShape;
   private Boolean           backFaceShown;
+  private Long              modelSize;
   private Boolean           resizable;
   private Boolean           deformable;
   private Boolean           texturable;
@@ -318,10 +319,12 @@ public class FurnitureController implements Controller {
       if (this.modifiedFurniture.size() == 1) {
         setIcon(firstPiece.getIcon());
         setModel(firstPiece.getModel());
+        setModelSize(firstPiece.getModelSize());
         this.editableProperties.add(Property.BACK_FACE_SHOWN);
       } else {
         setIcon(null);
         setModel((Content)null);
+        setModelSize(null);
         this.editableProperties.remove(Property.BACK_FACE_SHOWN);
       }
       
@@ -830,6 +833,24 @@ public class FurnitureController implements Controller {
   }
 
   /**
+   * Sets the size of the edited model.
+   */
+  private void setModelSize(Long modelSize) {
+    if (modelSize != this.modelSize) {
+      Long oldModelSize = this.modelSize;
+      this.modelSize = modelSize;
+      this.propertyChangeSupport.firePropertyChange(Property.MODEL_SIZE.name(), oldModelSize, modelSize);
+    }
+  }
+  
+  /**
+   * Returns the model size of the edited piece of furniture.
+   */
+  public Long getModelSize() {
+    return this.modelSize;
+  }
+
+  /**
    * Reads the 3D model from the given parameter and updates the model if it's valid.
    */
   public void setModel(String modelName) {
@@ -841,6 +862,7 @@ public class FurnitureController implements Controller {
             CatalogPieceOfFurniture piece = furniture.get(0);
             setModel(piece.getModel());
             setModelRotation(piece.getModelRotation());
+            setModelSize(piece.getModelSize());
             // Reset object size 
             boolean proportional = isProportional();
             setProportional(false);
@@ -1261,6 +1283,7 @@ public class FurnitureController implements Controller {
       Boolean staircase = getStaircase();
       String staircaseCutOutShape = getStaircaseCutOutShape();
       float [][] modelRotation = getModelRotation();
+      Long modelSize = getModelSize();
       String creator = getCreator();
       BigDecimal price = getPrice();
       BigDecimal valueAddedTaxPercentage = getValueAddedTaxPercentage();
@@ -1294,6 +1317,7 @@ public class FurnitureController implements Controller {
             : null;
         String pieceStaircaseCutOutShape = piece.getStaircaseCutOutShape();
         boolean pieceBackFaceShown = piece.isBackFaceShown();
+        Long pieceModelSize = piece.getModelSize();
         String pieceCreator = piece.getCreator();
         boolean pieceResizable = piece.isResizable();
         boolean pieceDeformable = piece.isDeformable();
@@ -1364,6 +1388,9 @@ public class FurnitureController implements Controller {
           }
         } else if (staircaseCutOutShape != null && pieceStaircaseCutOutShape != null) {
           pieceStaircaseCutOutShape = staircaseCutOutShape;
+        }
+        if (modelSize != null || piecesCount == 1) {
+          pieceModelSize = modelSize;
         }
         if (creator != null || piecesCount == 1) {
           pieceCreator = creator;
@@ -1436,7 +1463,8 @@ public class FurnitureController implements Controller {
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
-              pieceModelRotation, pieceBackFaceShown, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+              pieceModelRotation, pieceBackFaceShown, pieceModelSize,
+              pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
@@ -1445,7 +1473,8 @@ public class FurnitureController implements Controller {
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
-              pieceModelRotation, pieceBackFaceShown, pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+              pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
+              pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
@@ -1453,16 +1482,16 @@ public class FurnitureController implements Controller {
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceBackFaceShown, pieceCreator, 
-                pieceResizable, pieceDeformable, pieceTexturable, 
+                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceBackFaceShown, pieceModelSize,
+                pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
             updatedPiece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-                pieceStaircaseCutOutShape, pieceModelRotation, pieceBackFaceShown, pieceCreator,  
-                pieceResizable, pieceDeformable, pieceTexturable, 
+                pieceStaircaseCutOutShape, pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
+                pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           }
         }

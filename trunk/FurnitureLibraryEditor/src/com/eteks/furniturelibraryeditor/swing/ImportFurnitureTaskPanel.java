@@ -112,7 +112,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       
       latch.await();
       
-      Content pieceModel = null;
+      URLContent pieceModel = null;
       Content previewModel = null;
       if (modelNode.get() != null) {
         // Copy model to a temporary OBJ content with materials and textures
@@ -255,8 +255,9 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
         }
       }
       CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
-          pieceName, null, iconContent.get(), null, pieceModel, 
-          size.x, size.z, size.y, 0f, true, null, this.preferences.getDefaultCreator(), true, null, null);
+          pieceName, null, null, new String [0], null, null, iconContent.get(), null, pieceModel, 
+          size.x, size.z, size.y, 0f, 1f, true, null, null, false, pieceModel.getSize(), 
+          this.preferences.getDefaultCreator(), true, true, true, null, null, null);
       FurnitureCategory defaultCategory = new FurnitureCategory(
           this.preferences.getLocalizedString(ImportFurnitureTaskPanel.class, "defaultCategory"));
       new FurnitureCatalog().add(defaultCategory , piece);
@@ -276,7 +277,7 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
   /**
    * Returns a copy of a given <code>model</code> as a zip content at OBJ format.
    */
-  static Content copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
+  static URLContent copyToTemporaryOBJContent(BranchGroup model, Content modelContent) throws IOException {
     String objFile;
     if (modelContent instanceof URLContent) {
       objFile = ((URLContent)modelContent).getURL().getFile();

@@ -563,6 +563,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (piece.getStaircaseCutOutShape() != null) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.STAIRCASE_CUT_OUT_SHAPE, i, piece.getStaircaseCutOutShape());
       }
+      if (piece.getModelSize() != null) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.MODEL_SIZE, i, piece.getModelSize());
+      }
       if (!piece.isResizable()) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.RESIZABLE, i, piece.isResizable());
       }
