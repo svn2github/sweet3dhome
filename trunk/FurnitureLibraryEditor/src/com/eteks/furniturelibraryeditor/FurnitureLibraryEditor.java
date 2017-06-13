@@ -214,8 +214,8 @@ public class FurnitureLibraryEditor {
    */
   private void initLookAndFeel() {
     try {
-      // Apply current system look and feel
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      // Apply current system look and feel if swing.defaultlaf isn't defined
+      UIManager.setLookAndFeel(System.getProperty("swing.defaultlaf", UIManager.getSystemLookAndFeelClassName()));
       // Change default titled borders under Mac OS X 10.5
       if (OperatingSystem.isMacOSXLeopardOrSuperior()) {
         UIManager.put("TitledBorder.border", 
