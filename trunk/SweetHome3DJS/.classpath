@@ -8,8 +8,5 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="tools/JSweet/lib/jsweet-core-5-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="tools/JSweet/lib/jsweet-transpiler-2.0.0-SNAPSHOT-jar-with-dependencies.jar"/>
-	<classpathentry kind="lib" path="tools/JSweet/lib/j4ts-awtgeom-0.0.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="tools/JSweet/lib/j4ts-batik-svgpathparser-0.0.0-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="tools/JSweet/lib/j4ts-swingundo-0.0.0-SNAPSHOT.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="tools/JSweet/classes"/>
 </classpath>
