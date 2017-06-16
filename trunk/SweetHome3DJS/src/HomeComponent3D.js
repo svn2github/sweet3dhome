@@ -46,7 +46,7 @@ function HomeComponent3D(canvasId, home, preferences, object3dFactory, controlle
       ? object3dFactory
       : new Object3DBranchFactory();
   this.homeObjects = [];
-  this.defaultLights = [];
+  this.sceneLights = [];
   this.camera = null;
   this.windowSizeListener = null;
   // Listeners bound to home that updates 3D scene objects
@@ -394,7 +394,7 @@ HomeComponent3D.prototype.updateView = function(camera, topCamera) {
   var frontClipDistance;
   var backClipDistance;
   if (topCamera) {
-    var approximateHomeBounds = this.getApproximateHomeBoundsCache();
+    var approximateHomeBounds = this.getApproximateHomeBounds();
     if (approximateHomeBounds === null) {
       frontClipDistance = 5;
     } else {
@@ -417,7 +417,7 @@ HomeComponent3D.prototype.updateView = function(camera, topCamera) {
     var minElevation = 125;
     if (camera.getZ() > minElevation) {
       var intermediateGrowFactor = 1 / 250;
-      var approximateHomeBounds = this.getApproximateHomeBoundsCache();
+      var approximateHomeBounds = this.getApproximateHomeBounds();
       var highestPoint = 0; 
       if (approximateHomeBounds !== null) {
         var upper = vec3.create();
@@ -449,7 +449,7 @@ HomeComponent3D.prototype.updateView = function(camera, topCamera) {
  * Returns quickly computed bounds of the objects in home.
  * @private 
  */
-HomeComponent3D.prototype.getApproximateHomeBoundsCache = function() {
+HomeComponent3D.prototype.getApproximateHomeBounds = function() {
   if (this.approximateHomeBoundsCache === null) {
     var approximateHomeBounds = null;
     var furniture = this.home.getFurniture();
@@ -1086,13 +1086,14 @@ HomeComponent3D.prototype.getInputMap = function() {
 HomeComponent3D.prototype.createSceneTree = function(listenToHomeUpdates, waitForLoading) {
   var root = new Group3D();
   // Build scene tree
+  root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
+  root.addChild(this.createBackgroundNode(listenToHomeUpdates, waitForLoading));
   var groundNode = this.createGroundNode(-0.5E5, -0.5E5, 1E5, 1E5, listenToHomeUpdates, waitForLoading);
   root.addChild(groundNode);
-  root.addChild(this.createBackgroundNode(listenToHomeUpdates, waitForLoading));
-  root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
-  this.defaultLights = this.createLights(listenToHomeUpdates);
-  for (var i = 0; i < this.defaultLights.length; i++) {
-    root.addChild(this.defaultLights [i]);
+  
+  this.sceneLights = this.createLights(listenToHomeUpdates);
+  for (var i = 0; i < this.sceneLights.length; i++) {
+    root.addChild(this.sceneLights [i]);
   }
   
   return root;
@@ -1104,10 +1105,10 @@ HomeComponent3D.prototype.createSceneTree = function(listenToHomeUpdates, waitFo
  */
 HomeComponent3D.prototype.createBackgroundNode = function(listenToHomeUpdates, waitForLoading) {
   var skyBackgroundAppearance = new Appearance3D();
-  var halfSphereGeometry = this.createHalfSphereGeometry(true);   
-  var halfSphere = new Shape3D(halfSphereGeometry, skyBackgroundAppearance);
+  var topHalfSphereGeometry = this.createHalfSphereGeometry(true);   
+  var topHalfSphere = new Shape3D(topHalfSphereGeometry, skyBackgroundAppearance);
   var backgroundGroup = new BranchGroup3D();
-  backgroundGroup.addChild(halfSphere);
+  backgroundGroup.addChild(topHalfSphere);
   backgroundGroup.addChild(new Shape3D(this.createHalfSphereGeometry(false)));
 
   // Add a plane at ground level to complete landscape at the horizon when camera is above horizon 
@@ -1122,6 +1123,8 @@ HomeComponent3D.prototype.createBackgroundNode = function(listenToHomeUpdates, w
                                  [vec3.fromValues(0., 1., 0.)], [0, 0, 0, 0, 0, 0]),
       groundBackgroundAppearance);
   backgroundGroup.addChild(groundBackground);
+  
+  // No need of different lights for background because scene lights will have an effect on background too
   
   var background = new Background3D(backgroundGroup);
   this.updateBackgroundColorAndTexture(skyBackgroundAppearance, groundBackgroundAppearance, this.home, waitForLoading);
@@ -1141,11 +1144,12 @@ HomeComponent3D.prototype.createBackgroundNode = function(listenToHomeUpdates, w
     // Make groundBackground invisible if camera is below the ground
     this.elevationChangeListener = function(ev) {
         if (ev.getSource() === component3D.home) {
+          // Move listener to the new camera
           ev.getOldValue().removePropertyChangeListener(component3D.elevationChangeListener);
           component3D.home.getCamera().addPropertyChangeListener(component3D.elevationChangeListener);
-          groundBackgroundAppearance.setVisible(component3D.home.getCamera().getZ() >= 0);
-        } else if (ev.getPropertyName() === "Z") {
-          // Camera elevation change
+        } 
+        if (ev.getSource() === component3D.home
+            || ev.getPropertyName() === "Z") {
           groundBackgroundAppearance.setVisible(component3D.home.getCamera().getZ() >= 0);
         }
       };
