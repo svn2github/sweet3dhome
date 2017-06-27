@@ -87,7 +87,7 @@ Object3DBranch.prototype.updateTextureTransform = function(appearance, texture, 
   var rotation = mat3.create();
   mat3.rotate(rotation, rotation, texture.getAngle());
   var transform = mat3.create();
-  if (scaled) {
+  if (scaled && (texture.getWidth() !== -1 || texture.getHeight() !== -1)) {
     mat3.scale(transform, transform, vec3.fromValues(1.0 / texture.getWidth(), 1.0 / texture.getHeight(), 1));
   }
   mat3.mul(transform, transform, rotation);
