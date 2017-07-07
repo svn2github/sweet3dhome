@@ -265,6 +265,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           printMacroName(invocation.getMethodName());
           print(invocation.getTargetExpression()).print(".cmp(").print(invocation.getArguments().get(0)).print(")");
           return true;
+        case "equals":
+          printMacroName(invocation.getMethodName());
+          print(invocation.getTargetExpression()).print(".eq(").print(invocation.getArguments().get(0)).print(")");
+          return true;
         }
         break;
 
