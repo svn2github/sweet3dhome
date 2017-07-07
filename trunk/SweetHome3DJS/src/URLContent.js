@@ -93,6 +93,7 @@ URLContent.prototype.equals = function(obj) {
  * An URL content read from a home stream.
  * @param {string} url  the URL from which this content will be read
  * @constructor
+ * @ignore
  * @author Emmanuel Puybaret
  */
 function HomeURLContent(url) {
