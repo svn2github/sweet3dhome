@@ -49,7 +49,8 @@ import org.jsweet.transpiler.model.VariableAccessElement;
  * This adapter tunes the JavaScript generation for some SweetHome3D
  * specificities.
  * 
- * <p>It is a subclass of {@link RemoveJavaDependenciesAdapter} since we always
+ * <p>
+ * It is a subclass of {@link RemoveJavaDependenciesAdapter} since we always
  * want the Java APIs to be removed form the generated code and use no runtime.
  * 
  * @author Renaud Pawlak
@@ -356,6 +357,24 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
       return true;
     }
     return super.substituteCaseStatementPattern(caseStatement, pattern);
+  }
+
+  @Override
+  public String adaptDocComment(Element element, String commentText) {
+    String comment = super.adaptDocComment(element, commentText);
+    if (comment == null) {
+      return comment;
+    }
+    String[] lines = comment.split("\n");
+    StringBuffer newComment = new StringBuffer();
+    for (String line : lines) {
+      if (!line.contains("@since")) {
+        newComment.append(line);
+        newComment.append("\n");
+      }
+    }
+    newComment.deleteCharAt(newComment.length() - 1);
+    return newComment.toString();
   }
 
 }
