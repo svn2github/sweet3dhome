@@ -483,6 +483,14 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
           writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW_WALL_DISTANCE, i, 
               doorOrWindow.getWallDistance() * doorOrWindow.getDepth());
         }
+        if (!doorOrWindow.isWallCutOutOnBothSides()) {
+          writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW_WALL_CUT_OUT_ON_BOTH_SIDES, i, 
+              doorOrWindow.isWallCutOutOnBothSides());
+        }
+        if (!doorOrWindow.isWidthDepthDeformable()) {
+          writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.DOOR_OR_WINDOW_WIDTH_DEPTH_DEFORMABLE, i, 
+              doorOrWindow.isWidthDepthDeformable());
+        }
         Sash [] sashes = doorOrWindow.getSashes();
         if (sashes.length > 0) {
           String sashXAxis = "";

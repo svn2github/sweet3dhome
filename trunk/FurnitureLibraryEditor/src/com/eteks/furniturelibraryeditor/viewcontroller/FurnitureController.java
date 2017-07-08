@@ -1462,7 +1462,8 @@ public class FurnitureController implements Controller {
               pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
               pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-              pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), opening.getSashes(),
+              pieceDoorOrWindowCutOutShape, opening.getWallThickness(), opening.getWallDistance(), 
+              opening.isWallCutOutOnBothSides(), opening.isWidthDepthDeformable(), opening.getSashes(),
               pieceModelRotation, pieceBackFaceShown, pieceModelSize,
               pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
@@ -1482,7 +1483,8 @@ public class FurnitureController implements Controller {
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade,
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
-                pieceDoorOrWindowCutOutShape, 1, 0, new Sash [0], pieceModelRotation, pieceBackFaceShown, pieceModelSize,
+                pieceDoorOrWindowCutOutShape, 1, 0, true, true, new Sash [0], 
+                pieceModelRotation, pieceBackFaceShown, pieceModelSize,
                 pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           } else {
