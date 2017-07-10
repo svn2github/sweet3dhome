@@ -110,7 +110,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "!com.eteks.sweethome3d.io.HomeXMLHandler", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)",
-        "com.eteks.sweethome3d.io.HomeXMLHandler.isSameContent(**)");
+        "com.eteks.sweethome3d.io.HomeXMLHandler.isSameContent(**)", //
+        "com.eteks.sweethome3d.model.HomeRecorder", //
+        "com.eteks.sweethome3d.model.HomeApplication" //
+    );
 
     // We now ignore some Java elements with a programmatic adapter
     addAnnotationManager(new AnnotationManager() {
