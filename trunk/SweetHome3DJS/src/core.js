@@ -110,24 +110,37 @@ System.arraycopy = function(srcPts, srcOff, dstPts, dstOff, size) {
 
 
 /**
- * Creates a PropertyChangeEvent instance.
- * Adapted from java.beans.PropertyChangeEvent
+ * Creates an EventObject instance.
+ * Adapted from java.util.EventObject
  * @constructor
  */
-function PropertyChangeEvent(source, propertyName, oldValue, newValue) {
+function EventObject(source) {
   this.source = source;
-  this.propertyName = propertyName;
-  this.newValue = newValue;
-  this.oldValue = oldValue;
 }
 
 /**
  * Returns the source of this event.
  * @return {Object}
  */
-PropertyChangeEvent.prototype.getSource = function() {
+EventObject.prototype.getSource = function() {
   return this.source;
 }
+
+
+/**
+ * Creates a PropertyChangeEvent instance.
+ * Adapted from java.beans.PropertyChangeEvent
+ * @constructor
+ */
+function PropertyChangeEvent(source, propertyName, oldValue, newValue) {
+  EventObject.call(this);
+  this.source = source;
+  this.propertyName = propertyName;
+  this.newValue = newValue;
+  this.oldValue = oldValue;
+}
+PropertyChangeEvent.prototype = Object.create(PropertyChangeEvent.prototype);
+PropertyChangeEvent.prototype.constructor = EventObject;
 
 /**
  * Returns the name of the modified property.
