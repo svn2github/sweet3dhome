@@ -29,6 +29,9 @@ import def.js.Error;
 @SuppressWarnings("serial")
 public class UnsupportedOperationException extends Error {
 
+  public UnsupportedOperationException() {
+  }
+  
   public UnsupportedOperationException(String message) {
   }
   

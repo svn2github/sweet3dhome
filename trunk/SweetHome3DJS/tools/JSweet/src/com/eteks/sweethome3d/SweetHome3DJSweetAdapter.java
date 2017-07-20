@@ -23,6 +23,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -32,6 +34,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.QualifiedNameable;
+import javax.lang.model.element.TypeElement;
 
 import org.jsweet.JSweetConfig;
 import org.jsweet.transpiler.extension.AnnotationManager;
@@ -70,6 +73,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     sh3dTypeMapping.put(NullPointerException.class.getName(), "NullPointerException");
     sh3dTypeMapping.put(UnsupportedOperationException.class.getName(), "UnsupportedOperationException");
     sh3dTypeMapping.put(PropertyChangeEvent.class.getName(), "PropertyChangeEvent");
+    sh3dTypeMapping.put(EventObject.class.getName(), "EventObject");
     sh3dTypeMapping.put(PropertyChangeListener.class.getName(), "PropertyChangeListener");
     sh3dTypeMapping.put(PropertyChangeSupport.class.getName(), "PropertyChangeSupport");
     // We assume we have the big.js lib and we map BigDecimal to Big
@@ -79,6 +83,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     // We don't have a specific implementation for ResourceURLContent in JS...
     // Use the default one
     addTypeMapping("com.eteks.sweethome3d.tools.ResourceURLContent", "URLContent");
+    addTypeMapping(URL.class.getName(), "string");
     // All enums that are named *Property will be translated to string in JS
     addTypeMapping(
         (typeTree, name) -> typeTree.getTypeAsElement().getKind() == ElementKind.ENUM && name.endsWith("Property")
@@ -102,13 +107,27 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.mobile", //
         "com.eteks.sweethome3d.io.*", //
         "com.eteks.sweethome3d.tools", //
-        "com.eteks.sweethome3d.viewcontroller.*", //
+        // "com.eteks.sweethome3d.viewcontroller.*", //
+        "com.eteks.sweethome3d.viewcontroller.ThreadedTaskController", //
+        "com.eteks.sweethome3d.viewcontroller.HomeController", //
+        "com.eteks.sweethome3d.viewcontroller.HelpController", //
+        "com.eteks.sweethome3d.viewcontroller.PrintPreviewController", //
+        "com.eteks.sweethome3d.viewcontroller.HomeView", //
+        "com.eteks.sweethome3d.viewcontroller.ViewFactoryAdapter", //
+        "com.eteks.sweethome3d.viewcontroller.ViewFactory.createHelpView(..)", //
+        "com.eteks.sweethome3d.viewcontroller.ViewFactory.createHomeView(..)", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.homeController", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.homeController", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.UserPreferencesController(*,*,*,*)", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.checkUpdates()", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.mayImportLanguageLibrary()", //
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.importLanguageLibrary()", //
         "com.eteks.sweethome3d.j3d", //
         // "com.eteks.sweethome3d.j3d.*", //
         // "!com.eteks.sweethome3d.j3d.Wall3D", //
-        "!com.eteks.sweethome3d.viewcontroller.HomeController3D", //
-        "!com.eteks.sweethome3d.viewcontroller.Controller", //
-        "!com.eteks.sweethome3d.viewcontroller.View", //
+        // "!com.eteks.sweethome3d.viewcontroller.HomeController3D", //
+        // "!com.eteks.sweethome3d.viewcontroller.Controller", //
+        // "!com.eteks.sweethome3d.viewcontroller.View", //
         "com.eteks.sweethome3d.viewcontroller.HomeController3D.modifyAttributes(**)",
         "!com.eteks.sweethome3d.io.HomeXMLHandler", //
         "com.eteks.sweethome3d.io.HomeXMLHandler.contentContext", //
@@ -172,10 +191,15 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     addAnnotation(
         "@Replace('if (content == null) { return null; } else if (content.indexOf('://') >= 0) { return new URLContent(content); } else { return new HomeURLContent('jar:' + this['homeUrl'] + '!/' + content); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String)");
-
     addAnnotation(
         "@Replace('{{ body }}{{ baseIndent }}if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure']); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.setHomeAttributes(..)");
+    // WARNING: this constructor delegates to an erased constructor, so we need
+    // to
+    // replace its implementation
+    addAnnotation(
+        "@Replace('this.preferences = preferences; this.viewFactory = viewFactory; this.propertyChangeSupport = new PropertyChangeSupport(this); this.updateProperties();')",
+        "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.UserPreferencesController(*,*,*)");
 
     // uncomment and adapt to log some method(s)
     // addAnnotation(
@@ -243,6 +267,17 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           return true;
         }
         break;
+      case "java.util.Arrays":
+        switch (invocation.getMethodName()) {
+        // WARNING: we assume that this method will be used to log arrays so we
+        // just pass the array as is to the log function... this may fail if a
+        // string is actually expected
+        case "deepToString":
+          printMacroName(invocation.getMethodName());
+          print(invocation.getArgument(0));
+          return true;
+        }
+        break;
       case "java.math.BigDecimal":
         // Support for Java big decimal (method are mapped to their Big.js
         // equivalent)
@@ -275,8 +310,16 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           return true;
         }
         break;
-
+      case "java.lang.Class":
+        switch (invocation.getMethodName()) {
+        case "getResource":
+          printMacroName(invocation.getMethodName());
+          print(invocation.getArgument(0));
+          return true;
+        }
+        break;
       }
+
       // SH3D maps Property enums to strings
       if (targetType.getKind() == ElementKind.ENUM && targetType.toString().endsWith("Property")) {
         switch (invocation.getMethodName()) {
@@ -377,7 +420,24 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
       }
     }
     newComment.deleteCharAt(newComment.length() - 1);
-    return newComment.toString();
+    if (element instanceof TypeElement) {
+      TypeElement type = (TypeElement) element;
+      if (types().isSubtype(type.asType(), util().getType(Throwable.class))) {
+        newComment.append("\n");
+        newComment.append("@ignore");
+      }
+    }
+
+    return newComment.toString().replace("{*}", "{Object}");
+  }
+
+  @Override
+  public boolean eraseSuperClass(TypeElement type, TypeElement superClass) {
+    String name = superClass.getQualifiedName().toString();
+    if (EventObject.class.getName().equals(name)) {
+      return false;
+    }
+    return super.eraseSuperClass(type, superClass);
   }
 
 }

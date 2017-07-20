@@ -24,9 +24,10 @@ package def.corejs;
  * 
  * @author Renaud Pawlak
  */
-public class PropertyChangeEvent {
+public class PropertyChangeEvent extends EventObject {
 
   public PropertyChangeEvent(Object source, String propertyName, Object oldValue, Object newValue) {
+    super(source);
   }
   
   public native Object getSource();
