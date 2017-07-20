@@ -133,14 +133,13 @@ EventObject.prototype.getSource = function() {
  * @constructor
  */
 function PropertyChangeEvent(source, propertyName, oldValue, newValue) {
-  EventObject.call(this);
-  this.source = source;
+  EventObject.call(this, source);
   this.propertyName = propertyName;
   this.newValue = newValue;
   this.oldValue = oldValue;
 }
-PropertyChangeEvent.prototype = Object.create(PropertyChangeEvent.prototype);
-PropertyChangeEvent.prototype.constructor = EventObject;
+PropertyChangeEvent.prototype = Object.create(EventObject.prototype);
+PropertyChangeEvent.prototype.constructor = PropertyChangeEvent;
 
 /**
  * Returns the name of the modified property.
