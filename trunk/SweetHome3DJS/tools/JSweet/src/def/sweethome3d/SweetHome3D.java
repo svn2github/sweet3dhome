@@ -1,4 +1,4 @@
-package def.sh3d;
+package def.sweethome3d;
 
 import java.text.Format;
 
