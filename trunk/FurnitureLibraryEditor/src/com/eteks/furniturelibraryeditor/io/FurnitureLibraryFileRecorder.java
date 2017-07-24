@@ -583,6 +583,9 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       if (!piece.isTexturable()) {
         writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.TEXTURABLE, i, piece.isTexturable());
       }
+      if (!piece.isHorizontallyRotatable()) {
+        writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.HORIZONTALLY_ROTATABLE, i, piece.isHorizontallyRotatable());
+      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PRICE, i, piece.getPrice());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.VALUE_ADDED_TAX_PERCENTAGE, i, piece.getValueAddedTaxPercentage());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CURRENCY, i, piece.getCurrency());

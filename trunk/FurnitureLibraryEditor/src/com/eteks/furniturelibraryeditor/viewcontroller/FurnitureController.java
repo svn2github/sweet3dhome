@@ -1475,7 +1475,7 @@ public class FurnitureController implements Controller {
               pieceElevation, pieceDropOnTopElevation, pieceMovable, 
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
-              pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+              pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, piece.isHorizontallyRotatable(),  
               piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
@@ -1493,7 +1493,7 @@ public class FurnitureController implements Controller {
                 pieceIcon, piecePlanIcon, pieceModel, pieceWidth, pieceDepth, pieceHeight, 
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
-                pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
+                pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, piece.isHorizontallyRotatable(), 
                 piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
           }
         }
