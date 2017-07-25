@@ -7,6 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="tools/JSweet/lib/jsweet-core-5-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="tools/JSweet/lib/jsweet-transpiler-2.0.0-SNAPSHOT-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc1-jar-with-dependencies.jar"/>
 	<classpathentry kind="output" path="tools/JSweet/classes"/>
 </classpath>
