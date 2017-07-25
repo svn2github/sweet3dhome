@@ -25,11 +25,8 @@ import org.jsweet.transpiler.extension.PrinterAdapter;
 import org.jsweet.transpiler.model.MethodInvocationElement;
 
 /**
- * This adapter tunes the JavaScript generation to use the sprintf JavaScript
- * library for String.format.
- * 
- * <p>
- * It requires that https://github.com/alexei/sprintf.js is available.
+ * This adapter tunes the JavaScript generation to provide a partial default
+ * simple implementation for String.format.
  * 
  * @author Renaud Pawlak
  */
@@ -44,7 +41,9 @@ public class TextJSweetAdapter extends PrinterAdapter {
   public boolean substituteMethodInvocation(MethodInvocationElement invocation) {
     if (invocation.getMethodName().equals("format")
         && String.class.getName().equals(invocation.getTargetExpression().getTypeAsElement().toString())) {
-      print("window['sprintf'](").printArgList(invocation.getArguments()).print(")");
+      print(
+          "((s, r) => { let result = s; result = s.replace(/%s/g, r); result = s.replace(/%d/g, r); result = s.replace(/%%/, '%'); return result; })(")
+              .print(invocation.getArgument(0)).print(",''+").print(invocation.getArgument(1)).print(")");
       return true;
     }
     return super.substituteMethodInvocation(invocation);
