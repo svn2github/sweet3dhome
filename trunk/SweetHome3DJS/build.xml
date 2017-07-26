@@ -297,7 +297,7 @@
     
     <!-- Create JSweet Candy for sub-projects --> 
     <mkdir dir="build/jsweetCandy/classes" />
-    <javac srcdir="tools/JSweet/src" destdir="build/jsweetCandy/classes" classpath="tools/JSweet/lib/jsweet-core-5-SNAPSHOT.jar" source="1.8" encoding="ISO-8859-1" includes="def/**" />
+    <javac srcdir="tools/JSweet/src" destdir="build/jsweetCandy/classes" classpath="tools/JSweet/lib/jsweet-core-5-20170726.jar" source="1.8" encoding="ISO-8859-1" includes="def/**" />
 
     <mkdir dir="build/jsweetCandy/resources/META-INF/resources/typings" />
     <move file="build/jsBundle/js/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/viewhome.d.ts"  />
@@ -310,8 +310,9 @@
       <fileset dir="build/jsweetCandy/resources" />
     </jar>
     
-    <move file="build/jsBundle/js/j4ts-awtgeom-0.0.0-SNAPSHOT/bundle.js" tofile="lib/generated/geom.js"/>
-    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-0.0.0-SNAPSHOT/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
+    <move file="build/jsBundle/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
+    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
+    <move file="build/jsBundle/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
     <!-- Clean build -->
     <delete dir="build" />
   </target>
