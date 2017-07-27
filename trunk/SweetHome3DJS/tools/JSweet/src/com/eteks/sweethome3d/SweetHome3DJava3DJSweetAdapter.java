@@ -29,9 +29,8 @@ import org.jsweet.transpiler.model.NewClassElement;
 import org.jsweet.transpiler.model.VariableAccessElement;
 
 /**
- * This adapter tunes the JavaScript generation for some SweetHome3D
- * specificities.
- * 
+ * This adapter tunes the JavaScript generation for some Java 3D specificities.
+ * It's used temporarily to help faster transpiling Java 3D API calls to glMatrix and scene3d.js ones.
  * @author Emmanuel Puybaret
  * @author Renaud Pawlak
  */
