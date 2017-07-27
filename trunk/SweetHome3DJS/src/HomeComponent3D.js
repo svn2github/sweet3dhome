@@ -1085,11 +1085,11 @@ HomeComponent3D.prototype.getInputMap = function() {
  */
 HomeComponent3D.prototype.createSceneTree = function(listenToHomeUpdates, waitForLoading) {
   var root = new Group3D();
-  // Build scene tree
-  root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
+  // Build scene tree with background node first to ensure home structure will be loaded first if it exists
   root.addChild(this.createBackgroundNode(listenToHomeUpdates, waitForLoading));
   var groundNode = this.createGroundNode(-0.5E5, -0.5E5, 1E5, 1E5, listenToHomeUpdates, waitForLoading);
   root.addChild(groundNode);
+  root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
   
   this.sceneLights = this.createLights(listenToHomeUpdates);
   for (var i = 0; i < this.sceneLights.length; i++) {

@@ -73,7 +73,8 @@ HomePieceOfFurniture3D.prototype.createPieceOfFurnitureNode = function(piece, wa
       modelUpdated : function(modelRoot) {
         var modelRotation = piece.getModelRotation();
         // Add piece model scene to a normalized transform group
-        var modelTransformGroup = ModelManager.getInstance().getNormalizedTransformGroup(modelRoot, modelRotation, 1);
+        var modelTransformGroup = ModelManager.getInstance().getNormalizedTransformGroup(
+            modelRoot, modelRotation, 1, piece.isModelCenteredAtOrigin());
         piece3D.updatePieceOfFurnitureModelNode(modelRoot, modelTransformGroup, waitModelAndTextureLoadingEnd);            
       },        
       modelError : function(ex) {
@@ -102,10 +103,11 @@ HomePieceOfFurniture3D.prototype.update = function() {
  * @private
  */
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureTransform = function() {
-  var pieceTransform = ModelManager.getInstance().
-      getPieceOFFurnitureNormalizedModelTransformation(this.getUserData());
+  var transformGroup = this.getChild(0); 
+  var pieceTransform = ModelManager.getInstance().getPieceOfFurnitureNormalizedModelTransformation(
+      this.getUserData(), transformGroup.getChild(0));
   // Change model transformation      
-  this.getChild(0).setTransform(pieceTransform);
+  transformGroup.setTransform(pieceTransform);
 }
 
 /**
@@ -186,9 +188,14 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(mode
   transformGroup.removeAllChildren();
   // Add model branch to live scene
   transformGroup.addChild(modelBranch);
+  var piece = this.getUserData();
+  if (piece.isHorizontallyRotated()) {
+    // Update piece transformation to ensure its center is correctly placed
+    this.updatePieceOfFurnitureTransform();
+  }
 
   // Flip normals if back faces of model are shown
-  if (this.getUserData().isBackFaceShown()) {
+  if (piece.isBackFaceShown()) {
     this.setBackFaceNormalFlip(this.getModelNode(), true);
   }
   // Update piece color, visibility and model mirror in dispatch thread as
@@ -196,7 +203,8 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(mode
   this.updatePieceOfFurnitureModelMirrored();
   this.updatePieceOfFurnitureColorAndTexture(waitTextureLoadingEnd);      
   this.updatePieceOfFurnitureVisibility();
-  if (this.getUserData().isDoorOrWindow()) {
+  
+  if (piece.isDoorOrWindow()) {
     this.setTransparentShapeNotPickable(this);
   }
 }

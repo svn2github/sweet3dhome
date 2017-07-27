@@ -140,25 +140,25 @@ ModelManager.prototype.isOrthogonalRotation = function(transformation) {
 /**
  * @private
  */
-ModelManager.prototype.computeBounds = function(node, bounds, parentTransformations, transformShapeGeometry) {
+ModelManager.prototype.computeBounds = function(node, bounds, parentTransformation, transformShapeGeometry) {
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
-      parentTransformations = mat4.clone(parentTransformations);
-      mat4.mul(parentTransformations, parentTransformations, node.transform);
+      parentTransformation = mat4.clone(parentTransformation);
+      mat4.mul(parentTransformation, parentTransformation, node.transform);
     }
     // Compute the bounds of all the node children
     for (var i = 0; i < node.children.length; i++) {
-      this.computeBounds(node.children [i], bounds, parentTransformations, transformShapeGeometry);
+      this.computeBounds(node.children [i], bounds, parentTransformation, transformShapeGeometry);
     }
   } else if (node instanceof Link3D) {
-    this.computeBounds(node.getSharedGroup(), bounds, parentTransformations, transformShapeGeometry);
+    this.computeBounds(node.getSharedGroup(), bounds, parentTransformation, transformShapeGeometry);
   } else if (node instanceof Shape3D) {
     var shapeBounds;
     if (transformShapeGeometry) {
-      shapeBounds = this.computeTransformedGeometryBounds(node, parentTransformations);
+      shapeBounds = this.computeTransformedGeometryBounds(node, parentTransformation);
     } else {
       shapeBounds = node.getBounds();
-      shapeBounds.transform(parentTransformations);
+      shapeBounds.transform(parentTransformation);
     }
     bounds.combine(shapeBounds);
   }
@@ -200,9 +200,12 @@ ModelManager.prototype.updateBounds = function(vertex, transformation, lower, up
  * @param {Array}  modelRotation the rotation applied to the model before normalization 
  *                 or <code>null</code> if no transformation should be applied to node.
  * @param {number} width    the width of the box
+ * @param {boolean} [modelCenteredAtOrigin] if <code>true</code> or missing, center will be moved 
+ *                 to match the origin after the model rotation is applied
  */
-ModelManager.prototype.getNormalizedTransformGroup = function(node, modelRotation, width) {
-  return new TransformGroup3D(this.getNormalizedTransform(node, modelRotation, width));
+ModelManager.prototype.getNormalizedTransformGroup = function(node, modelRotation, width, modelCenteredAtOrigin) {
+  return new TransformGroup3D(this.getNormalizedTransform(
+      node, modelRotation, width, modelCenteredAtOrigin !== false));
 }
 
 /**
@@ -212,8 +215,10 @@ ModelManager.prototype.getNormalizedTransformGroup = function(node, modelRotatio
  * @param {?Array} modelRotation the rotation applied to the model before normalization 
  *                 or <code>null</code> if no transformation should be applied to node.
  * @param {number} width    the width of the box
+ * @param {boolean} [modelCenteredAtOrigin] if <code>true</code> center will be moved to match the origin 
+ *                 after the model rotation is applied
  */
-ModelManager.prototype.getNormalizedTransform = function(node, modelRotation, width) {
+ModelManager.prototype.getNormalizedTransform = function(node, modelRotation, width, modelCenteredAtOrigin) {
   // Get model bounding box size 
   var modelBounds = this.getBounds(node);
   var lower = vec3.create();
@@ -230,11 +235,20 @@ ModelManager.prototype.getNormalizedTransform = function(node, modelRotation, wi
   var modelTransform;
   if (modelRotation !== undefined && modelRotation !== null) {
     // Get model bounding box size with model rotation
-    var modelTransform = this.getRotationTransformation(modelRotation);
-    mat4.mul(modelTransform, modelTransform, translation);
-    var rotatedModelBounds = this.getBounds(node, modelTransform);
+    var rotationTransform = this.getRotationTransformation(modelRotation);
+    mat4.mul(rotationTransform, rotationTransform, translation);
+    var rotatedModelBounds = this.getBounds(node, rotationTransform);
     rotatedModelBounds.getLower(lower);
     rotatedModelBounds.getUpper(upper);
+    modelTransform = mat4.create();
+    if (modelCenteredAtOrigin) {
+      // Move model back to its new center
+      mat4.translate(modelTransform, modelTransform,
+          vec3.fromValues(-(lower[0] + (upper[0] - lower[0]) / 2), 
+              -(lower[1] + (upper[1] - lower[1]) / 2), 
+              -(lower[2] + (upper[2] - lower[2]) / 2)));
+    }
+    mat4.mul(modelTransform, modelTransform, rotationTransform);
   } else {
     modelTransform = translation;
   }
@@ -270,9 +284,12 @@ ModelManager.prototype.getRotationTransformation = function(modelRotation) {
 /**
  * Returns a transformation able to place in the scene the normalized model 
  * of the given <code>piece</code>.
- * @param {HomePieceOfFurniture} piece   a piece of furniture
+ * @param {HomePieceOfFurniture} piece  a piece of furniture
+ * @param {Node3D} [normalizedModelNode]  the node matching the normalized model of the piece. 
+ *              This parameter is required only if the piece is rotated horizontally
+ * @ignore
  */
-ModelManager.prototype.getPieceOFFurnitureNormalizedModelTransformation = function(piece) {
+ModelManager.prototype.getPieceOfFurnitureNormalizedModelTransformation = function(piece, normalizedModelNode) {
   // Set piece size
   var scale = mat4.create();
   var pieceWidth = piece.getWidth();
@@ -281,18 +298,50 @@ ModelManager.prototype.getPieceOFFurnitureNormalizedModelTransformation = functi
     pieceWidth *= -1;
   }
   mat4.scale(scale, scale, vec3.fromValues(pieceWidth, piece.getHeight(), piece.getDepth()));
+  
+  var horizontalRotationAndScale = mat4.create();
+  // Change its angle around horizontal axis
+  if (piece.getPitch() !== 0) {
+    mat4.fromXRotation(horizontalRotationAndScale, -piece.getPitch());
+  } else {
+    mat4.fromZRotation(horizontalRotationAndScale, -piece.getRoll());
+  }
+  mat4.mul(horizontalRotationAndScale, horizontalRotationAndScale, scale);
+  
+  var centerLocation;
+  if (piece.isHorizontallyRotated() && normalizedModelNode !== undefined && normalizedModelNode !== null) {
+    // Compute center location when the piece is rotated around an horizontal axis
+    var rotatedModelBounds = this.getBounds(normalizedModelNode, horizontalRotationAndScale);
+    var lower = vec3.create();
+    rotatedModelBounds.getLower(lower);
+    var upper = vec3.create();
+    rotatedModelBounds.getUpper(upper);
+    centerLocation = vec3.fromValues(
+        -lower[0] / Math.max(this.getMinimumSize(), upper[0] - lower[0]),
+        -lower[1] / Math.max(this.getMinimumSize(), upper[1] - lower[1]),
+        -lower[2] / Math.max(this.getMinimumSize(), upper[2] - lower[2]));
+  } else {
+    centerLocation = vec3.fromValues(0.5, 0.5, 0.5);
+  }
+  
   // Change its angle around y axis
-  var orientation = mat4.create();
-  mat4.fromYRotation(orientation, -piece.getAngle());
-  mat4.mul(orientation, orientation, scale);
+  var verticalOrientation = mat4.create();
+  mat4.fromYRotation(verticalOrientation, -piece.getAngle());
+  mat4.mul(verticalOrientation, verticalOrientation, horizontalRotationAndScale);
+  
   // Translate it to its location
   var pieceTransform = mat4.create();
-  var z = piece.getElevation() + piece.getHeight() / 2.;
+  var levelElevation;
   if (piece.getLevel() !== null) {
-    z += piece.getLevel().getElevation();
+    levelElevation = piece.getLevel().getElevation();
+  } else {
+    levelElevation = 0;
   }
-  mat4.translate(pieceTransform, pieceTransform, vec3.fromValues(piece.getX(), z, piece.getY()));      
-  mat4.mul(pieceTransform, pieceTransform, orientation);
+  mat4.translate(pieceTransform, pieceTransform, vec3.fromValues(
+      piece.getX() + (centerLocation[0] - 0.5) * piece.getWidthInPlan(), 
+      piece.getElevation() + centerLocation[1] * piece.getHeightInPlan() + levelElevation,
+      piece.getY() + (centerLocation[2] - 0.5) * piece.getDepthInPlan()));      
+  mat4.mul(pieceTransform, pieceTransform, verticalOrientation);
   return pieceTransform;
 }
 

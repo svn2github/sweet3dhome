@@ -151,13 +151,14 @@ Wall3D.prototype.updateWallSideGeometry = function(wallSide, waitDoorOrWindowMod
 Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometries, topGeometries, wallSide, 
                                                  baseboard, texture, waitDoorOrWindowModelsLoadingEnd) {
   var wall = this.getUserData();
+  var wallShape = this.getShape(wall.getPoints());
   var wallSidePoints = this.getWallSidePoints(wallSide);
-  var wallShape = this.getShape(wallSidePoints);
+  var wallSideShape = this.getShape(wallSidePoints);
   var wallSideOrBaseboardPoints = baseboard == null 
       ? wallSidePoints 
       : this.getWallBaseboardPoints(wallSide);
-  var wallOrBaseboardShape = this.getShape(wallSideOrBaseboardPoints);
-  var wallOrBaseboardArea = new java.awt.geom.Area(wallOrBaseboardShape);
+  var wallSideOrBaseboardShape = this.getShape(wallSideOrBaseboardPoints);
+  var wallSideOrBaseboardShape = new java.awt.geom.Area(wallSideOrBaseboardShape);
   var textureReferencePoint = wallSide === Wall3D.WALL_LEFT_SIDE 
       ? wallSideOrBaseboardPoints[0].slice(0) 
       : wallSideOrBaseboardPoints[wallSideOrBaseboardPoints.length - 1].slice(0);
@@ -201,22 +202,37 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
       var intersectionArea = new java.awt.geom.Area(wallShape);
       intersectionArea.intersect(pieceArea);
       if (!intersectionArea.isEmpty()) {
-        if (baseboard !== null) {
-          var pieceWallAngle = Math.abs(wallYawAngle - piece.getAngle()) % Math.PI;
-          if (pieceWallAngle < 1.0E-5 || (Math.PI - pieceWallAngle) < 1.0E-5) {
-            var deeperPiece = piece.clone();
-            deeperPiece.setDepth(deeperPiece.getDepth() + 2 * baseboard.getThickness());
-            pieceArea = new java.awt.geom.Area(this.getShape(deeperPiece.getPoints()));
+        var deeperPiece = null;
+        if (piece.isParallelToWall(wall)) {
+          if (baseboard !== null) {
+            // Increase piece depth to ensure baseboard will be cut even if the window is as thick as the wall
+            deeperPiece = piece.clone();
+            deeperPiece.setDepthInPlan(deeperPiece.getDepth() + 2 * baseboard.getThickness());
           }
-          intersectionArea = new java.awt.geom.Area(wallOrBaseboardShape);
-          intersectionArea.intersect(pieceArea);
-          if (intersectionArea.isEmpty()) {
-            continue;
+          if (piece instanceof HomeDoorOrWindow) {
+            if (piece.isWallCutOutOnBothSides()) {
+              if (deeperPiece === null) {
+                deeperPiece = piece.clone();
+              }
+              // Increase piece depth to ensure the wall will be cut on both sides 
+              deeperPiece.setDepthInPlan(deeperPiece.getDepth() + 4 * wall.getThickness());
+            }
           }
         }
-        windowIntersections.push(new Wall3D.DoorOrWindowArea(intersectionArea, [piece]));
-        intersectingDoorOrWindows.push(piece);
-        wallOrBaseboardArea.subtract(pieceArea);
+        // Recompute intersection on wall side shape only
+        if (deeperPiece !== null) {
+          pieceArea = new java.awt.geom.Area(this.getShape(deeperPiece.getPoints()));
+          intersectionArea = new java.awt.geom.Area(wallSideOrBaseboardShape);
+          intersectionArea.intersect(pieceArea);
+        } else {
+          intersectionArea = new java.awt.geom.Area(wallSideShape);
+          intersectionArea.intersect(pieceArea);
+        }
+        if (!intersectionArea.isEmpty()) {
+          windowIntersections.push(new Wall3D.DoorOrWindowArea(intersectionArea, [piece]));
+          intersectingDoorOrWindows.push(piece);
+          wallSideOrBaseboardShape.subtract(pieceArea);
+        }
       }
     }
   }
@@ -247,7 +263,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
   }
   var points = [];
   var previousPoint = null;
-  for (var it = wallOrBaseboardArea.getPathIterator(null); !it.isDone(); it.next()) {
+  for (var it = wallSideOrBaseboardShape.getPathIterator(null); !it.isDone(); it.next()) {
     var wallPoint = [0, 0];
     if (it.currentSegment(wallPoint) === java.awt.geom.PathIterator.SEG_CLOSE) {
       if (points.length > 2) {
@@ -902,7 +918,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
         wallSecondPoint[0], wallSecondPoint[1], xPieceSide, yPieceSide);
     var depthTranslation = frontOrBackSide * (0.5 - position * frontSideToWallDistance / doorOrWindowDepth);
     
-    var frontAreaTransform = ModelManager.getInstance().getPieceOFFurnitureNormalizedModelTransformation(doorOrWindow);
+    var frontAreaTransform = ModelManager.getInstance().getPieceOfFurnitureNormalizedModelTransformation(doorOrWindow);
     var frontAreaTranslation = mat4.create();
     mat4.fromTranslation(frontAreaTranslation, vec3.fromValues(0, 0, depthTranslation));
     mat4.mul(frontAreaTransform, frontAreaTransform, frontAreaTranslation);

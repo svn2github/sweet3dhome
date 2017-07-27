@@ -84,11 +84,23 @@ Object3DBranch.prototype.updateAppearanceMaterial = function(appearance, diffuse
  * @param {boolean} [scaled]
  */
 Object3DBranch.prototype.updateTextureTransform = function(appearance, texture, scaled) {
+  var textureWidth = texture.getWidth();
+  var textureHeight = texture.getHeight();
+  if (textureWidth === -1 || textureHeight === -1) {
+    // Set a default value of 1m for textures with width and height equal to -1
+    // (this may happen for textures retrieved from 3D models)
+    textureWidth = 100.;
+    textureHeight = 100.;
+  }
+  var textureScale = 1 / texture.getScale();
   var rotation = mat3.create();
   mat3.rotate(rotation, rotation, texture.getAngle());
   var transform = mat3.create();
-  if (scaled && (texture.getWidth() !== -1 || texture.getHeight() !== -1)) {
-    mat3.scale(transform, transform, vec3.fromValues(1.0 / texture.getWidth(), 1.0 / texture.getHeight(), 1));
+  // Change scale if required
+  if (scaled) {
+    mat3.scale(transform, transform, vec2.fromValues(textureScale / textureWidth, textureScale / textureHeight));
+  } else {
+    mat3.multiplyScalar(transform, transform, textureScale);
   }
   mat3.mul(transform, transform, rotation);
   appearance.setTextureTransform(transform);

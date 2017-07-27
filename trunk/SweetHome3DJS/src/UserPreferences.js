@@ -61,12 +61,14 @@ function UserPreferences() {
   this.unit = null;
   this.furnitureCatalogViewedInTree = true;
   this.aerialViewCenteredOnSelectionEnabled = false;
+  this.observerCameraSelectedAtChange = true;
   this.navigationPanelVisible = true;
   this.magnetismEnabled = true;
   this.rulersVisible    = true;
   this.gridVisible      = true;
   this.defaultFontName  = null;
   this.furnitureViewedFromTop = true;
+  this.furnitureModelIconSize = 128;
   this.roomFloorColoredOrTextured = true;
   this.wallPattern = null;
   this.newWallPattern = null;
@@ -80,6 +82,7 @@ function UserPreferences() {
   this.autoCompletionStrings = {};
   this.recentColors = [];
   this.recentTextures = [];
+  this.homeExamples = [];
 }
 
 UserPreferences.DEFAULT_SUPPORTED_LANGUAGES = ["en"]; 
@@ -445,6 +448,26 @@ UserPreferences.prototype.isAerialViewCenteredOnSelectionEnabled = function() {
 }
 
 /**
+ * Sets whether the observer camera should be selected at each change.
+ * @since 5.5
+ */
+UserPreferences.prototype.setObserverCameraSelectedAtChange = function(observerCameraSelectedAtChange) {
+  if (observerCameraSelectedAtChange !== this.observerCameraSelectedAtChange) {
+    this.observerCameraSelectedAtChange = observerCameraSelectedAtChange;
+    this.propertyChangeSupport.firePropertyChange("OBSERVER_CAMERA_SELECTED_AT_CHANGE", 
+        !observerCameraSelectedAtChange, observerCameraSelectedAtChange);
+  }
+}
+
+/**
+ * Returns whether the observer camera should be selected at each change.
+ * @since 5.5
+ */
+UserPreferences.prototype.isObserverCameraSelectedAtChange = function() {
+  return this.observerCameraSelectedAtChange;
+}
+
+/**
  * Returns <code>true</code> if magnetism is enabled.
  * @return <code>true</code> by default.
  * @ignore
@@ -557,6 +580,28 @@ UserPreferences.prototype.setFurnitureViewedFromTop = function(furnitureViewedFr
     this.furnitureViewedFromTop = furnitureViewedFromTop;
     this.propertyChangeSupport.firePropertyChange("FURNITURE_VIEWED_FROM_TOP", 
         !furnitureViewedFromTop, furnitureViewedFromTop);
+  }
+}
+
+/**
+ * Returns the size used to generate icons of furniture viewed from top.
+ * @since 5.5
+ * @ignore
+ */
+UserPreferences.prototype.getFurnitureModelIconSize = function() {
+  return this.furnitureModelIconSize;
+}
+
+/**
+ * Sets the name of the font that should be used by default.
+ * @since 5.5
+ * @ignore
+ */
+UserPreferences.prototype.setFurnitureModelIconSize = function(furnitureModelIconSize) {
+  if (furnitureModelIconSize !== this.furnitureModelIconSize) {
+    var oldSize = this.furnitureModelIconSize;
+    this.furnitureModelIconSize = furnitureModelIconSize;
+    this.propertyChangeSupport.firePropertyChange("FURNITURE_MODEL_ICON_SIZE", oldSize, furnitureModelIconSize);
   }
 }
 
@@ -940,6 +985,31 @@ UserPreferences.prototype.setRecentTextures = function(recentTextures) {
     this.propertyChangeSupport.firePropertyChange("RECENT_TEXTURES", 
         oldRecentTextures, this.getRecentTextures());
   }
+}
+
+/**
+ * Sets the home examples available for the user.
+ * @param {HomeDescriptor[]} homeExamples an array of examples
+ * @since 5.5
+ * @ignore
+ */
+UserPreferences.prototype.setHomeExamples = function(homeExamples) {
+  if (homeExamples != this.homeExamples) {
+    var oldExamples = this.homeExamples;
+    this.homeExamples = homeExamples.slice(0);
+    this.propertyChangeSupport.firePropertyChange("HOME_EXAMPLES", 
+        oldExamples, this.getHomeExamples());
+  }
+}
+
+/**
+ * Returns the home examples available for the user.
+ * @return {HomeDescriptor[]} an array of examples.
+ * @since 5.5
+ * @ignore
+ */
+UserPreferences.prototype.getHomeExamples = function() {
+  return this.homeExamples;
 }
 
 /**
