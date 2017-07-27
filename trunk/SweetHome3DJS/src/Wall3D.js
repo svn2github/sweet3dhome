@@ -158,7 +158,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
       ? wallSidePoints 
       : this.getWallBaseboardPoints(wallSide);
   var wallSideOrBaseboardShape = this.getShape(wallSideOrBaseboardPoints);
-  var wallSideOrBaseboardShape = new java.awt.geom.Area(wallSideOrBaseboardShape);
+  var wallSideOrBaseboardArea = new java.awt.geom.Area(wallSideOrBaseboardShape);
   var textureReferencePoint = wallSide === Wall3D.WALL_LEFT_SIDE 
       ? wallSideOrBaseboardPoints[0].slice(0) 
       : wallSideOrBaseboardPoints[wallSideOrBaseboardPoints.length - 1].slice(0);
@@ -209,7 +209,8 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
             deeperPiece = piece.clone();
             deeperPiece.setDepthInPlan(deeperPiece.getDepth() + 2 * baseboard.getThickness());
           }
-          if (piece instanceof HomeDoorOrWindow) {
+          if (typeof HomeDoorOrWindow !== "undefined"
+              && piece instanceof HomeDoorOrWindow) {
             if (piece.isWallCutOutOnBothSides()) {
               if (deeperPiece === null) {
                 deeperPiece = piece.clone();
@@ -231,7 +232,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
         if (!intersectionArea.isEmpty()) {
           windowIntersections.push(new Wall3D.DoorOrWindowArea(intersectionArea, [piece]));
           intersectingDoorOrWindows.push(piece);
-          wallSideOrBaseboardShape.subtract(pieceArea);
+          wallSideOrBaseboardArea.subtract(pieceArea);
         }
       }
     }
@@ -263,7 +264,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
   }
   var points = [];
   var previousPoint = null;
-  for (var it = wallSideOrBaseboardShape.getPathIterator(null); !it.isDone(); it.next()) {
+  for (var it = wallSideOrBaseboardArea.getPathIterator(null); !it.isDone(); it.next()) {
     var wallPoint = [0, 0];
     if (it.currentSegment(wallPoint) === java.awt.geom.PathIterator.SEG_CLOSE) {
       if (points.length > 2) {
