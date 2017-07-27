@@ -87,6 +87,8 @@
   var onerror = function(err) {
       if (err == "No WebGL") {
         alert("Sorry, your browser doesn't support WebGL.");
+      } else if (typeof err === "string" && err.indexOf("No Home.xml entry") == 0) {
+        alert("Ensure your home file was saved with Sweet Home 3D 5.3 or a newer version.");
       } else {
         console.log(err.stack);
         alert("Error: " + (err.message  ? err.constructor.name + " " +  err.message  : err));
