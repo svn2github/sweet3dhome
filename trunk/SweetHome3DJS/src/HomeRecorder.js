@@ -86,7 +86,7 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   
   observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 0);
   
-  var handler = new HomeXMLHandler();
+  var handler = this.getHomeXMLHandler();
   // The handler needs the zip URL for creating the right content URL (see HomeXMLHandler#parseContent)
   handler.homeUrl = zipUrl;
   var saxParser = new SAXParser(handler, handler, handler, handler, handler);
@@ -101,4 +101,14 @@ HomeRecorder.prototype.parseHomeXMLEntry = function(homeXmlEntry, zip, zipUrl, o
   
   observer.progression(HomeRecorder.PARSING_HOME, homeXmlEntry.name, 1);
 }
+
+/**
+ * Returns a SAX XML handler able to interpret the information contained in the 
+ * <code>Home.xml</code> entry.
+ * @protected 
+ */
+HomeRecorder.prototype.getHomeXMLHandler = function() {
+  return new HomeXMLHandler();
+}
+
 
