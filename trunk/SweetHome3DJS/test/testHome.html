@@ -30,6 +30,8 @@
 <script type="text/javascript" src="src/URLContent.js"></script>
 <script type="text/javascript" src="src/scene3d.js"></script>
 <script type="text/javascript" src="lib/generated/geom.js"></script>
+<!-- swingundo.js isn't required if SweetHome3D.js includes only viewer classes  -->
+<script type="text/javascript" src="lib/generated/swingundo.js"></script>
 <script type="text/javascript" src="lib/generated/batik-svgpathparser.js"></script>
 <script type="text/javascript" src="lib/generated/SweetHome3D.js"></script>
 <script type="text/javascript" src="src/HTMLCanvas3D.js"></script>
@@ -106,8 +108,8 @@ function testGeom() {
   piece.setAngle(-Math.PI / 3);
   piece.setX(100);
   piece.setY(300);
-  piece.setWidth(50);
-  piece.setDepth(20);
+  piece.setWidthInPlan(50);
+  piece.setDepthInPlan(20);
   piecePoints = piece.getPoints();
   assertEquals("Wrong point", 100 + 50 / 2 / 2 + 20 / 2 * Math.sqrt(3) / 2, piecePoints [2][0]);
   assertEquals("Wrong point", 300 - 50 / 2 * Math.sqrt(3) / 2 + 20 / 2 / 2, piecePoints [2][1]);
