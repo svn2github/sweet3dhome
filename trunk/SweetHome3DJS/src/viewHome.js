@@ -59,7 +59,8 @@ function viewHome(canvasId, homeUrl, onerror, onprogression, params) {
  *          viewerControlsAdditionalHTML: string,
  *          readingHomeText: string, 
  *          readingModelText: string,
- *          noWebGLSupportError: string}} [params] the texts and other information displayed in the user interface. 
+ *          noWebGLSupportError: string,
+ *          missingHomeXmlEntryError: string}} [params] the texts and other information displayed in the user interface. 
  *                      If not provided, there will be no controls, no animation and canvas size ratio will be 4/3 
  *                      with no navigation panel. 
  */
@@ -208,6 +209,12 @@ function viewHomeInOverlay(homeUrl, params) {
           errorMessage = params.noWebGLSupportError;
         }
         alert(errorMessage);
+      } else if (typeof err === "string" && err.indexOf("No Home.xml entry") == 0) {
+        var errorMessage = "Ensure your home file was saved with Sweet Home 3D 5.3 or a newer version.";
+        if (params.missingHomeXmlEntryError) {
+          errorMessage = params.missingHomeXmlEntryError;
+        }
+        alert(errorMessage);        
       } else {
         console.log(err.stack);
         alert("Error: " + (err.message  ? err.constructor.name + " " +  err.message  : err));
