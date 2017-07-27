@@ -12,7 +12,7 @@
   <!-- The current version of Sweet Home 3D JS -->
   <property name="version" value="2.0"/>
 
-  <target name="concat" depends="jsBundle"
+  <target name="concat" depends="SweetHome3Djs"
           description="Concat Javacript files in dist/build directory">
     <mkdir dir="dist/build" />
     <concat destfile="dist/build/viewmodel.min.js" encoding="UTF-8">
@@ -20,7 +20,7 @@
         <file name="scene3d.js" />
         <file name="HTMLCanvas3D.js" />
         <file name="URLContent.js" />
-      	<file name="ModelLoader.js" />
+        <file name="ModelLoader.js" />
         <file name="OBJLoader.js" />
         <file name="ModelManager.js" />
         <file name="ModelPreviewComponent.js" />
@@ -82,17 +82,22 @@
       <arg value="dist/build/geom.min.js" />
     </java>
     <java jar="${yuicompressor.jar}" fork="true">
+      <arg value="lib/generated/swingundo.js" />
+      <arg value="-o" />
+      <arg value="dist/build/swingundo.min.js" />
+    </java>
+    <java jar="${yuicompressor.jar}" fork="true">
       <arg value="lib/generated/batik-svgpathparser.js" />
       <arg value="-o" />
       <arg value="dist/build/batik-svgpathparser.min.js" />
-    </java>  	
+    </java>
     <java jar="${yuicompressor.jar}" fork="true">
       <arg value="src/Triangulator.js" />
       <arg value="-o" />
       <arg value="dist/build/triangulator.min.js" />
     </java>
 
-    <!-- Add headers to minified files -->
+    <!-- Add viewModel.js GNU GPL header to viewmodel.min.js -->
     <concat destfile="dist/viewmodel.min.js" encoding="UTF-8">
       <header file="src/viewModel.js" />
       <filterchain>
@@ -103,6 +108,7 @@
       </filterchain>
       <file name="dist/build/viewmodel.min.js" />
     </concat>
+    <!-- Add viewHome.js GNU GPL header to viewhome.min.js -->
     <concat destfile="dist/viewhome.min.js" encoding="UTF-8">
       <header file="src/viewHome.js" />
       <filterchain>
@@ -113,6 +119,7 @@
       </filterchain>
       <file name="dist/build/viewhome.min.js" />
     </concat>
+    <!-- Add core.js GNU GPL header to core.min.js -->
     <concat destfile="dist/core.min.js" encoding="UTF-8">
       <header file="src/core.js" />
       <filterchain>
@@ -123,7 +130,17 @@
       </filterchain>
       <file name="dist/build/core.min.js" />
     </concat>
+    <!-- Add core.js GNU GPL header to geom.min.js -->
     <concat destfile="dist/geom.min.js" encoding="UTF-8">
+      <file file="src/core.js" />
+      <filterchain>
+        <headfilter lines="24" />
+        <tokenfilter>
+          <replacestring from="core.js" to="geom.min.js  version ${version}" />
+        </tokenfilter>
+      </filterchain>
+    </concat>
+    <concat destfile="dist/geom.min.js" encoding="UTF-8" append="true">
       <file name="lib/generated/geom.js" />
       <filterchain>
         <headfilter lines="1" skip="5" />
@@ -132,7 +149,38 @@
     <concat destfile="dist/geom.min.js" encoding="UTF-8" append="true">
       <file name="dist/build/geom.min.js" />
     </concat>
+    <!-- Add core.js GNU GPL header to swingundo.min.js -->
+    <concat destfile="dist/swingundo.min.js" encoding="UTF-8">
+      <file file="src/core.js" />
+      <filterchain>
+        <headfilter lines="24" />
+        <tokenfilter>
+          <replacestring from="core.js" to="swingundo.min.js  version ${version}" />
+        </tokenfilter>
+      </filterchain>
+      <file name="dist/build/core.min.js" /> 
+    </concat>
+    <concat destfile="dist/swingundo.min.js" encoding="UTF-8" append="true">
+      <file name="lib/generated/swingundo.js" />
+      <filterchain>
+        <headfilter lines="1" skip="5" />
+      </filterchain>
+    </concat>
+    <concat destfile="dist/swingundo.min.js" encoding="UTF-8" append="true">
+      <file name="dist/build/swingundo.min.js" />
+    </concat>
+    <!-- Add THIRDPARTY-LICENSE-BATIK.TXT to dist/batik-svgpathparser.min.js -->
     <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8">
+      <header filtering="no" trimleading="yes">/*
+      </header>
+      <file name="THIRDPARTY-LICENSE-BATIK.TXT" />
+      <filterchain>
+        <headfilter lines="3" skip="14" />
+      </filterchain>
+    </concat>
+    <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8" append="true">
+      <header filtering="no" trimleading="yes">*/
+      </header>
       <file name="lib/generated/batik-svgpathparser.js" />
       <filterchain>
         <headfilter lines="1" skip="5" />
@@ -141,6 +189,7 @@
     <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8" append="true">
       <file name="dist/build/batik-svgpathparser.min.js" />
     </concat>
+ 
     <concat destfile="dist/triangulator.min.js" encoding="UTF-8">
       <header file="src/Triangulator.js" />
       <filterchain>
@@ -154,7 +203,7 @@
     <copy file="lib/big.min.js" todir="dist" />
     <copy file="lib/gl-matrix-min.js" todir="dist" />
     <copy file="lib/jszip.min.js" todir="dist" />
-  	<copy file="lib/jsXmlSaxParser.min.js" todir="dist" />
+    <copy file="lib/jsXmlSaxParser.min.js" todir="dist" />
     <copy file="src/close.png" todir="dist" />
     <copy file="src/navigationPanel.png" todir="dist" />
 
@@ -207,7 +256,7 @@
 
   <!-- Builds dist/SweetHome3DJS-version-jsdoc.zip archive that contains 
      the generated JSDoc of Javascript source files found in SweetHome3D-version-src -->
-  <target name="jsdoc" depends="jsBundle"
+  <target name="jsdoc" depends="SweetHome3Djs"
           description="Builds dist/SweetHome3DJS-version-jsdoc.zip archive">
     <!-- Download and build JSDoc Toolkit Ant task -->
     <available file="tools/jsdoc-toolkit-ant-task" type="dir" property="jsdoc-toolkit-ant-task.present" />
@@ -216,7 +265,8 @@
     <mkdir dir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc" />
     <taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" 
            classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-2.0.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
-    <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
+    <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" 
+                  template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
       <fileset dir="src" includes="*.js" excludes="scene3d.js, HTMLCanvas3D.js, Triangulator.js" />
       <fileset dir="lib/generated" includes="SweetHome3D.js" />
     </jsdoctoolkit>
@@ -237,23 +287,17 @@
   </target>
 
   <!-- JSweet Java to JS generation -->
-  <target name="SweetHome3DJSweetExtension"
-          description="Builds build/SweetHome3DJSweetExtension.jar">
+  <target name="jsBundle" 
+          description="Transpiles Sweet Home 3D classes to build/jsBundle">
+    <!-- Builds build/SweetHome3DJSweetExtension.jar which adapts JSweet transpiler to Sweet Home 3D JS needs  -->
     <mkdir dir="build/SweetHome3DJSweetExtension"/>
     <javac srcdir="tools/JSweet/src" 
-      destdir="build/SweetHome3DJSweetExtension" 
-      classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc1-jar-with-dependencies.jar" 
-      source="1.8" 
-      encoding="ISO-8859-1"
-      includes="com/eteks/**" />
+        destdir="build/SweetHome3DJSweetExtension" 
+        classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc1-jar-with-dependencies.jar" 
+        source="1.8" 
+        encoding="ISO-8859-1"
+        includes="com/eteks/sweethome3d/**" />
 
-    <jar destfile="build/SweetHome3DJSweetExtension.jar">
-      <fileset dir="build/SweetHome3DJSweetExtension" />
-    </jar>
-  </target>
-
-  <target name="jsBundle" depends="SweetHome3DJSweetExtension"
-          description="Builds dist/generated/SweetHome3D.js">
     <mkdir dir="build/jsBundle/ts" />
     <mkdir dir="build/jsBundle/js" />
     <java classname="org.jsweet.JSweetCommandLineLauncher" fork="true" failonerror="true">
@@ -282,22 +326,37 @@
       <arg value="-i" />
       <arg value="../SweetHome3D/src:tools/JSweet/src" />
       <arg value="--includes" />
-      <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/io:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/j3d" />
+      <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/io" />
       <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
+      <!-- Transpilation target may contain almost all com.eteks.sweethome3d.viewcontroller classes or only the subset needed to run 
+           Sweet Home 3D viewer (in which case swingundo.js isn't required) -->
+      <sysproperty key="transpilationTarget" value="SweetHome3DViewer"/>
       <classpath>
         <fileset dir="tools/JSweet/lib" excludes="generated/" />
-        <pathelement location="build/SweetHome3DJSweetExtension.jar"/>
+        <pathelement location="build/SweetHome3DJSweetExtension"/>
         <pathelement location="../SweetHome3D/libtest/jnlp.jar"/>
         <pathelement location="../SweetHome3D/libtest/AppleJavaExtensions.jar"/>
       </classpath>
     </java>
-    
+  </target>
+
+  <target name="SweetHome3Djs" depends="jsBundle"
+          description="Builds dist/generated/SweetHome3D.js and retrieves other generated JavaScript libraries">
     <mkdir dir="lib/generated" />
     <move file="build/jsBundle/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
-    
-    <!-- Create JSweet Candy for sub-projects --> 
+    <move file="build/jsBundle/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
+    <move file="build/jsBundle/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
+    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
+
+    <!-- Clean build -->
+    <delete dir="build" />
+  </target>
+
+  <target name="SweetHome3DCandy" depends="jsBundle"
+          description="Builds tools/JSweet/lib/generated/SweetHome3DJS.jar JSweet Candy for sub projects">
     <mkdir dir="build/jsweetCandy/classes" />
-    <javac srcdir="tools/JSweet/src" destdir="build/jsweetCandy/classes" classpath="tools/JSweet/lib/jsweet-core-5-20170726.jar" source="1.8" encoding="ISO-8859-1" includes="def/**" />
+    <javac srcdir="tools/JSweet/src" destdir="build/jsweetCandy/classes" classpath="tools/JSweet/lib/jsweet-core-5-20170726.jar" 
+           source="1.8" encoding="ISO-8859-1" includes="def/**" />
 
     <mkdir dir="build/jsweetCandy/resources/META-INF/resources/typings" />
     <move file="build/jsBundle/js/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/viewhome.d.ts"  />
@@ -310,9 +369,6 @@
       <fileset dir="build/jsweetCandy/resources" />
     </jar>
     
-    <move file="build/jsBundle/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
-    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
-    <move file="build/jsBundle/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
     <!-- Clean build -->
     <delete dir="build" />
   </target>

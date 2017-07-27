@@ -1,4 +1,4 @@
-The following additional provisions apply to src/core.js and lib/generated/geom.js 
+The following additional provisions apply to src/core.js, lib/generated/geom.js and lib/generated/swingundo.js 
 
 core.js contains various classes translated from OpenJDK 8
 geom.js contains classes translated from java.awt.geom package ones in OpenJDK 8
