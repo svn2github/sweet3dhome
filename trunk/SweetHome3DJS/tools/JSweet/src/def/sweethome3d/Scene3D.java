@@ -17,9 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-package def.scene3d;
+package def.sweethome3d;
 
 import def.js.Error;
+
+// Bridges to JavaScript classes implemented in lib/gl-matrix.js and src/scene3d.js  
 
 /**
  * Data of a vector storing 2 values.
