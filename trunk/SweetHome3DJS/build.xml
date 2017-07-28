@@ -289,15 +289,16 @@
   <!-- JSweet Java to JS generation -->
   <target name="jsBundle" 
           description="Transpiles Sweet Home 3D classes to build/jsBundle">
-    <!-- Builds build/SweetHome3DJSweetExtension.jar which adapts JSweet transpiler to Sweet Home 3D JS needs  -->
+    <!-- Compile classes which adapts JSweet transpiler to Sweet Home 3D JS needs  -->
     <mkdir dir="build/SweetHome3DJSweetExtension"/>
     <javac srcdir="tools/JSweet/src" 
         destdir="build/SweetHome3DJSweetExtension" 
         classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc1-jar-with-dependencies.jar" 
         source="1.8" 
         encoding="ISO-8859-1"
-        includes="com/eteks/sweethome3d/**" />
-
+        includes="com/eteks/sweethome3d/jsweet/*" />
+  	
+    <!-- Transpile Sweet Home 3D classes -->
     <mkdir dir="build/jsBundle/ts" />
     <mkdir dir="build/jsBundle/js" />
     <java classname="org.jsweet.JSweetCommandLineLauncher" fork="true" failonerror="true">
@@ -306,7 +307,7 @@
       <arg value="--workingDir" />
       <arg value="build/jsweet.tmp" />
       <arg value="--factoryClassName" />
-      <arg value="com.eteks.sweethome3d.SweetHome3DJSweetFactory" />
+      <arg value="com.eteks.sweethome3d.jsweet.SweetHome3DJSweetFactory" />
       <arg value="--header"/>
       <arg value="tools/JSweet/header.txt" />
       <!-- ts output dir -->
@@ -326,7 +327,7 @@
       <arg value="-i" />
       <arg value="../SweetHome3D/src:tools/JSweet/src" />
       <arg value="--includes" />
-      <arg value="com/eteks/sweethome3d/model:def:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/io" />
+      <arg value="def:com/eteks/sweethome3d/model:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/io" />
       <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
       <!-- Transpilation target may contain almost all com.eteks.sweethome3d.viewcontroller classes or only the subset needed to run 
            Sweet Home 3D viewer (in which case swingundo.js isn't required) -->
@@ -348,7 +349,7 @@
     <move file="build/jsBundle/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
     <move file="build/jsBundle/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
 
-    <!-- Clean build -->
+    <!-- Clean build directory -->
     <delete dir="build" />
   </target>
 
@@ -369,7 +370,7 @@
       <fileset dir="build/jsweetCandy/resources" />
     </jar>
     
-    <!-- Clean build -->
+    <!-- Clean build directory -->
     <delete dir="build" />
   </target>
 </project>
