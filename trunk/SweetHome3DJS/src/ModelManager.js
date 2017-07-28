@@ -346,6 +346,13 @@ ModelManager.prototype.getPieceOfFurnitureNormalizedModelTransformation = functi
 }
 
 /**
+ * For backward compatibility.
+ * @deprecated
+ * @ignore
+ */
+ModelManager.prototype.getPieceOFFurnitureNormalizedModelTransformation = ModelManager.prototype.getPieceOfFurnitureNormalizedModelTransformation;
+
+/**
  * Reads a 3D node from content with supported loaders
  * and notifies the loaded model to the given modelObserver once available
  * with its modelUpdated and modelError methods. 
