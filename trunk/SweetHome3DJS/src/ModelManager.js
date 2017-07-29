@@ -227,10 +227,10 @@ ModelManager.prototype.getNormalizedTransform = function(node, modelRotation, wi
   modelBounds.getUpper(upper);
   // Translate model to its center
   var translation = mat4.create();
-  mat4.translate(translation, translation,
-      vec3.fromValues(-lower[0] - (upper[0] - lower[0]) / 2, 
-          -lower[1] - (upper[1] - lower[1]) / 2, 
-          -lower[2] - (upper[2] - lower[2]) / 2));
+  mat4.translate(translation, translation, vec3.fromValues(
+      -lower[0] - (upper[0] - lower[0]) / 2, 
+      -lower[1] - (upper[1] - lower[1]) / 2, 
+      -lower[2] - (upper[2] - lower[2]) / 2));
   
   var modelTransform;
   if (modelRotation !== undefined && modelRotation !== null) {
@@ -243,10 +243,10 @@ ModelManager.prototype.getNormalizedTransform = function(node, modelRotation, wi
     modelTransform = mat4.create();
     if (modelCenteredAtOrigin) {
       // Move model back to its new center
-      mat4.translate(modelTransform, modelTransform,
-          vec3.fromValues(-(lower[0] + (upper[0] - lower[0]) / 2), 
-              -(lower[1] + (upper[1] - lower[1]) / 2), 
-              -(lower[2] + (upper[2] - lower[2]) / 2)));
+      mat4.translate(modelTransform, modelTransform, vec3.fromValues(
+          -lower[0] - (upper[0] - lower[0]) / 2, 
+          -lower[1] - (upper[1] - lower[1]) / 2, 
+          -lower[2] - (upper[2] - lower[2]) / 2));
     }
     mat4.mul(modelTransform, modelTransform, rotationTransform);
   } else {
@@ -300,38 +300,40 @@ ModelManager.prototype.getPieceOfFurnitureNormalizedModelTransformation = functi
   }
   mat4.scale(scale, scale, vec3.fromValues(pieceWidth, piece.getHeight(), piece.getDepth()));
   
-  var horizontalRotationAndScale = mat4.create();
-  // Change its angle around horizontal axis
-  if (piece.getPitch() !== 0) {
-    mat4.fromXRotation(horizontalRotationAndScale, -piece.getPitch());
-  } else {
-    mat4.fromZRotation(horizontalRotationAndScale, -piece.getRoll());
-  }
-  mat4.mul(horizontalRotationAndScale, horizontalRotationAndScale, scale);
-  
-  // Change its angle around y axis
-  var verticalOrientation = mat4.create();
-  mat4.fromYRotation(verticalOrientation, -piece.getAngle());
-  
-  var centerLocation;
+  var modelTransform;
+  var height;
   if (piece.isHorizontallyRotated() && normalizedModelNode !== undefined && normalizedModelNode !== null) {
-    // Compute center location when the piece is rotated around an horizontal axis
+    var horizontalRotationAndScale = mat4.create();
+    // Change its angle around horizontal axis
+    if (piece.getPitch() !== 0) {
+      mat4.fromXRotation(horizontalRotationAndScale, -piece.getPitch());
+    } else {
+      mat4.fromZRotation(horizontalRotationAndScale, -piece.getRoll());
+    }
+    mat4.mul(horizontalRotationAndScale, horizontalRotationAndScale, scale);
+    
+    // Compute center location when the piece is rotated around horizontal axis
     var rotatedModelBounds = this.getBounds(normalizedModelNode, horizontalRotationAndScale);
     var lower = vec3.create();
     rotatedModelBounds.getLower(lower);
     var upper = vec3.create();
     rotatedModelBounds.getUpper(upper);
-    centerLocation = vec3.fromValues(
-        -0.5 -lower[0] / Math.max(this.getMinimumSize(), upper[0] - lower[0]),
-        -0.5 -lower[1] / Math.max(this.getMinimumSize(), upper[1] - lower[1]),
-        -0.5 -lower[2] / Math.max(this.getMinimumSize(), upper[2] - lower[2]));
-    
-    vec3.transformMat4(centerLocation, centerLocation, verticalOrientation);
+    modelTransform = mat4.create();
+    mat4.translate(modelTransform, modelTransform, vec3.fromValues(
+        -lower[0] - (upper[0] - lower[0]) / 2, 
+        -lower[1] - (upper[1] - lower[1]) / 2, 
+        -lower[2] - (upper[2] - lower[2]) / 2));
+    mat4.mul(modelTransform, modelTransform, horizontalRotationAndScale);
+    height = Math.max(this.getMinimumSize(), upper[1] - lower[1]);
   } else {
-    centerLocation = vec3.create();
+    modelTransform = scale;
+    height = piece.getHeight();
   }
   
-  mat4.mul(verticalOrientation, verticalOrientation, horizontalRotationAndScale);
+  // Change its angle around y axis
+  var verticalRotation = mat4.create();
+  mat4.fromYRotation(verticalRotation, -piece.getAngle());
+  mat4.mul(verticalRotation, verticalRotation, modelTransform);
   
   // Translate it to its location
   var pieceTransform = mat4.create();
@@ -342,10 +344,10 @@ ModelManager.prototype.getPieceOfFurnitureNormalizedModelTransformation = functi
     levelElevation = 0;
   }
   mat4.translate(pieceTransform, pieceTransform, vec3.fromValues(
-      piece.getX() + centerLocation[0] * piece.getWidthInPlan(), 
-      piece.getElevation() + (centerLocation[1] + 0.5) * piece.getHeightInPlan() + levelElevation,
-      piece.getY() + centerLocation[2] * piece.getDepthInPlan()));      
-  mat4.mul(pieceTransform, pieceTransform, verticalOrientation);
+      piece.getX(), 
+      piece.getElevation() + height / 2 + levelElevation,
+      piece.getY()));      
+  mat4.mul(pieceTransform, pieceTransform, verticalRotation);
   return pieceTransform;
 }
 
