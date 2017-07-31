@@ -972,7 +972,7 @@ IndexedGeometryArray3D.prototype.hasTextureCoordinates = function() {
  * Disposes the vertices and texture coordinates used by this geometry.
  */
 IndexedGeometryArray3D.prototype.disposeCoordinates = function() {
-  delete this.vertices;
+  // Keep this.vertices to possibly compute bounds with transformation 
   delete this.vertexIndices;
   delete this.textureCoordinates;
   delete this.textureCoordinateIndices;

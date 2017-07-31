@@ -174,8 +174,8 @@ ModelManager.prototype.computeTransformedGeometryBounds = function(shape, transf
     // geometry instanceof IndexedGeometryArray3D
     var geometry = shape.geometries [i];
     var vertex = vec3.create();
-    for (var index = 0; index < geometry.vertexIndices.length; index++) {
-      vec3.copy(vertex, geometry.vertices [geometry.vertexIndices [index]]);
+    for (var index = 0; index < geometry.vertices.length; index++) {
+      vec3.copy(vertex, geometry.vertices [index]);
       this.updateBounds(vertex, transformation, lower, upper);
     }
   }
