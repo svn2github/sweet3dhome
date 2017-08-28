@@ -1211,6 +1211,7 @@ HomeComponent3D.prototype.createSceneTree = function(listenToHomeUpdates, waitFo
   var root = new Group3D();
   // Build scene tree with background node first to ensure home structure will be loaded first if it exists
   root.addChild(this.createBackgroundNode(listenToHomeUpdates, waitForLoading));
+  // Limit ground area to 1 km x 1 km to avoid bad effects with a larger area 
   var groundNode = this.createGroundNode(-0.5E5, -0.5E5, 1E5, 1E5, listenToHomeUpdates, waitForLoading);
   root.addChild(groundNode);
   root.addChild(this.createHomeTree(listenToHomeUpdates, waitForLoading)); 
