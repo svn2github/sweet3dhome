@@ -416,7 +416,6 @@ HomeComponent3D.prototype.updateView = function(camera) {
         frontClipDistance = distanceToGroundAtFieldOfViewBottomAngle / frontBackDistanceRatio;
       }
     }
-    console.log(frontClipDistance + " " + fieldOfViewBottomAngle)
   }
   // Update front and back clip distance 
   this.canvas3D.setFrontClipDistance(frontClipDistance);
