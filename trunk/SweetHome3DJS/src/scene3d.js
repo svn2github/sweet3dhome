@@ -1109,6 +1109,19 @@ BoundingBox3D.prototype.combine = function(bounds) {
 }
 
 /** 
+ * Returns <code>true</code> if the point given in parameter intersects this bounding box.
+ * @param {vec3} point
+ */
+BoundingBox3D.prototype.intersect = function(point) {
+  return point[0] >= this.lower[0] 
+      && point[0] <= this.upper[0] 
+      && point[1] >= this.lower[1] 
+      && point[1] <= this.upper[1] 
+      && point[2] >= this.lower[2] 
+      && point[2] <= this.upper[2];  
+}
+
+/** 
  * Transforms this bounding box by the given matrix.
  * @param {mat4} transform
  */
