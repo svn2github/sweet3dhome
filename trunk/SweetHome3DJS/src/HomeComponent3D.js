@@ -93,7 +93,7 @@ HomeComponent3D.prototype.createComponent3D = function(canvasId, preferences, co
   }
 
   // Update field of view from current camera
-  this.updateView(this.home.getCamera(), this.home.getTopCamera() === this.home.getCamera());
+  this.updateView(this.home.getCamera());
   // Update point of view from current camera
   this.updateViewPlatformTransform(this.home.getCamera(), false);
   // Add camera listeners to update later point of view from camera
@@ -365,14 +365,14 @@ HomeComponent3D.prototype.addCameraListeners = function() {
       setTimeout(
           function() {
             if (component3D.canvas3D) {
-              component3D.updateView(home.getCamera(), home.getTopCamera() === home.getCamera());
+              component3D.updateView(home.getCamera());
               component3D.updateViewPlatformTransform(home.getCamera(), true);
             }
           }, 0);
     };
   home.getCamera().addPropertyChangeListener(this.cameraChangeListener);
   this.homeCameraListener = function(ev) {
-      component3D.updateView(home.getCamera(), home.getTopCamera() === home.getCamera());
+      component3D.updateView(home.getCamera());
       component3D.updateViewPlatformTransform(home.getCamera(), false);
       // Add camera change listener to new active camera
       ev.getOldValue().removePropertyChangeListener(component3D.cameraChangeListener);
@@ -385,64 +385,42 @@ HomeComponent3D.prototype.addCameraListeners = function() {
  * Updates <code>view</code> from <code>camera</code> field of view.
  * @private 
  */
-HomeComponent3D.prototype.updateView = function(camera, topCamera) {
+HomeComponent3D.prototype.updateView = function(camera) {
   var fieldOfView = camera.getFieldOfView();
   if (fieldOfView === 0) {
     fieldOfView = Math.PI * 63 / 180;
   }
   this.canvas3D.setFieldOfView(fieldOfView);
-  var frontClipDistance;
-  var backClipDistance;
-  if (topCamera) {
-    var approximateHomeBounds = this.getApproximateHomeBounds();
-    if (approximateHomeBounds === null) {
-      frontClipDistance = 5;
-    } else {
-      var lower = vec3.create();
-      approximateHomeBounds.getLower(lower);
-      var upper = vec3.create();
-      approximateHomeBounds.getUpper(upper);
-      // Use a variable front clip distance for top camera depending on the distance to home objects center
-      frontClipDistance = 1 + Math.sqrt(Math.pow((lower [0] + upper [0]) / 2 - camera.getX(), 2) 
-          + Math.pow((lower [1] + upper [1]) / 2 - camera.getY(), 2) 
-          + Math.pow((lower [2] + upper [2]) / 2 - camera.getZ(), 2)) / 100;
-    }
-    // It's recommended to keep ratio between back and front clip distances under 3000
-    backClipDistance = frontClipDistance * 3000;
-  } else {
-    // Use a variable front clip distance for observer camera depending on the elevation 
-    // Under 125 cm keep a front clip distance equal to 2.5 cm 
-    frontClipDistance = 2.5;
-    backClipDistance = frontClipDistance * 5000;
-    var minElevation = 125;
-    if (camera.getZ() > minElevation) {
-      var intermediateGrowFactor = 1 / 250;
-      var approximateHomeBounds = this.getApproximateHomeBounds();
-      var highestPoint = 0; 
-      if (approximateHomeBounds !== null) {
-        var upper = vec3.create();
-        approximateHomeBounds.getUpper(upper);
-        highestPoint = Math.min(upper [2], 10000);
-      }
-      if (camera.getZ() < highestPoint + minElevation) {
-        // Between 200 cm and the highest point, make front clip distance grow slowly and increase front/back ratio  
-        frontClipDistance += (camera.getZ() - minElevation) * intermediateGrowFactor;
-        backClipDistance  += (frontClipDistance - 2.5) * 25000;
-      } else {
-        // Above, make front clip distance grow faster
-        frontClipDistance += 
-            highestPoint * intermediateGrowFactor 
-          + (camera.getZ() - highestPoint - minElevation) / 50;
-        backClipDistance  += 
-            + (highestPoint * intermediateGrowFactor) * 25000
-            + (frontClipDistance - highestPoint * intermediateGrowFactor - 2.5) * 5000;
-      }
+  var frontClipDistance = 2.5;
+  // It's recommended to keep ratio between back and front clip distances under 3000
+  var frontBackDistanceRatio = 3000;
+  var approximateHomeBounds = this.getApproximateHomeBounds();
+  // If camera is out of home bounds, adjust the front clip distance to the distance to home bounds 
+  if (approximateHomeBounds != null 
+      && !approximateHomeBounds.intersect(vec3.fromValues(camera.getX(), camera.getY(), camera.getZ()))) {
+    var distanceToClosestBoxSide = this.getDistanceToBox(camera.getX(), camera.getY(), camera.getZ(), approximateHomeBounds);
+    if (!isNaN(distanceToClosestBoxSide)) {
+      frontClipDistance = Math.max(frontClipDistance, 0.1 * distanceToClosestBoxSide);
     }
   }
-  
+  var canvasBounds = this.canvas3D.getCanvas().getBoundingClientRect();
+  if (camera.getZ() > 0 && canvasBounds.width !== 0 && canvasBounds.height !== 0) {
+    var halfVerticalFieldOfView = Math.atan(Math.tan(fieldOfView / 2) * canvasBounds.height / canvasBounds.width);
+    var fieldOfViewBottomAngle = camera.getPitch() + halfVerticalFieldOfView;
+    // If the horizon is above the frustrum bottom, take into account the distance to the ground 
+    if (fieldOfViewBottomAngle > 0) {
+      var distanceToGroundAtFieldOfViewBottomAngle = (camera.getZ() / Math.sin(fieldOfViewBottomAngle));
+      frontClipDistance = Math.min(frontClipDistance, 0.35 * distanceToGroundAtFieldOfViewBottomAngle);
+      if (frontClipDistance * frontBackDistanceRatio < distanceToGroundAtFieldOfViewBottomAngle) {
+        // Ensure the ground is always visible at the back clip distance
+        frontClipDistance = distanceToGroundAtFieldOfViewBottomAngle / frontBackDistanceRatio;
+      }
+    }
+    console.log(frontClipDistance + " " + fieldOfViewBottomAngle)
+  }
   // Update front and back clip distance 
   this.canvas3D.setFrontClipDistance(frontClipDistance);
-  this.canvas3D.setBackClipDistance(backClipDistance);
+  this.canvas3D.setBackClipDistance(frontClipDistance * frontBackDistanceRatio);
 }
 
 /**
@@ -454,22 +432,27 @@ HomeComponent3D.prototype.getApproximateHomeBounds = function() {
     var approximateHomeBounds = null;
     var furniture = this.home.getFurniture();
     for (var i = 0; i < furniture.length; i++) {
-      var piece = furniture [i];
-      if (piece.isVisible()
-          && (piece.getLevel() === null
+      var piece = furniture[i];
+      if (piece.isVisible() 
+          && (piece.getLevel() === null 
               || piece.getLevel().isViewable())) {
-        var pieceLocation = vec3.fromValues(piece.getX(), piece.getY(), piece.getGroundElevation());
+        var halfMaxDimension = Math.max(piece.getWidthInPlan(), piece.getDepthInPlan()) / 2;
+        var elevation = piece.getGroundElevation();
+        var pieceLocation = vec3.fromValues(
+            piece.getX() - halfMaxDimension, piece.getY() - halfMaxDimension, elevation);
         if (approximateHomeBounds === null) {
           approximateHomeBounds = new BoundingBox3D(pieceLocation, pieceLocation);
         } else {
           approximateHomeBounds.combine(pieceLocation);
         }
+        approximateHomeBounds.combine(vec3.fromValues(
+            piece.getX() + halfMaxDimension, piece.getY() + halfMaxDimension, elevation + piece.getHeightInPlan()));
       }
     }
     var walls = this.home.getWalls();
     for (var i = 0; i < walls.length; i++) {
-      var wall = walls [i];
-      if (wall.getLevel() === null
+      var wall = walls[i];
+      if (wall.getLevel() === null 
           || wall.getLevel().isViewable()) {
         var startPoint = vec3.fromValues(wall.getXStart(), wall.getYStart(), 
             wall.getLevel() !== null ? wall.getLevel().getElevation() : 0);
@@ -479,15 +462,14 @@ HomeComponent3D.prototype.getApproximateHomeBounds = function() {
           approximateHomeBounds.combine(startPoint);
         }
         approximateHomeBounds.combine(vec3.fromValues(wall.getXEnd(), wall.getYEnd(), 
-            startPoint [2] + (wall.getHeight() !== null ? wall.getHeight() : this.home.getWallHeight())));
+            startPoint.z + (wall.getHeight() !== null ? wall.getHeight() : this.home.getWallHeight())));
       }
     }
     var rooms = this.home.getRooms();
     for (var i = 0; i < rooms.length; i++) {
-      var room = rooms [i];
-      if (room.getLevel() === null
-          || room.getLevel().isViewable()) {
-         var center = vec3.fromValues(room.getXCenter(), room.getYCenter(), 
+      var room = rooms[i];
+      if (room.getLevel() === null || room.getLevel().isViewable()) {
+        var center = vec3.fromValues(room.getXCenter(), room.getYCenter(), 
             room.getLevel() !== null ? room.getLevel().getElevation() : 0);
         if (approximateHomeBounds === null) {
           approximateHomeBounds = new BoundingBox3D(center, center);
@@ -498,12 +480,12 @@ HomeComponent3D.prototype.getApproximateHomeBounds = function() {
     }
     var labels = this.home.getLabels();
     for (var i = 0; i < labels.length; i++) {
-      var label = labels [i];
-      if ((label.getLevel() === null
-            || label.getLevel().isViewable())
+      var label = labels[i];
+      if ((label.getLevel() === null 
+            || label.getLevel().isViewable()) 
           && label.getPitch() !== null) {
         var center = vec3.fromValues(label.getX(), label.getY(), label.getGroundElevation());
-        if (approximateHomeBounds === null) {
+        if (approximateHomeBounds == null) {
           approximateHomeBounds = new BoundingBox3D(center, center);
         } else {
           approximateHomeBounds.combine(center);
@@ -513,6 +495,148 @@ HomeComponent3D.prototype.getApproximateHomeBounds = function() {
     this.approximateHomeBoundsCache = approximateHomeBounds;
   }
   return this.approximateHomeBoundsCache;
+}
+
+/**
+ * Returns the distance between the point at the given coordinates (x,y,z) 
+ * and the closest side of <code>box</code>.
+ * @private
+ */
+HomeComponent3D.prototype.getDistanceToBox = function (x, y, z, box) {
+  var point = vec3.fromValues(x, y, z);
+  var lower = vec3.create();
+  box.getLower(lower);
+  var upper = vec3.create();
+  box.getUpper(upper);
+  var boxVertices = [
+      vec3.fromValues(lower[0], lower[1], lower[2]), 
+      vec3.fromValues(upper[0], lower[1], lower[2]), 
+      vec3.fromValues(lower[0], upper[1], lower[2]), 
+      vec3.fromValues(upper[0], upper[1], lower[2]), 
+      vec3.fromValues(lower[0], lower[1], upper[2]), 
+      vec3.fromValues(upper[0], lower[1], upper[2]), 
+      vec3.fromValues(lower[0], upper[1], upper[2]), 
+      vec3.fromValues(upper[0], upper[1], upper[2])];
+  var distancesToVertex = new Array(boxVertices.length);
+  for (var i = 0; i < distancesToVertex.length; i++) {
+    distancesToVertex[i] = vec3.squaredDistance(point, boxVertices[i]);
+  }
+  var distancesToSide = [
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 0, 1, 3, 2, 2), 
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 0, 1, 5, 4, 1), 
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 0, 2, 6, 4, 0), 
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 4, 5, 7, 6, 2), 
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 2, 3, 7, 6, 1), 
+      this.getDistanceToSide(point, boxVertices, distancesToVertex, 1, 3, 7, 5, 0)];
+  var distance = distancesToSide[0];
+  for (var i = 1; i < distancesToSide.length; i++) {
+    distance = Math.min(distance, distancesToSide[i]);
+  }
+  return distance;
+}
+
+/**
+ * Returns the distance between the given <code>point</code> and the plane defined by four vertices.
+ * @private
+ */
+HomeComponent3D.prototype.getDistanceToSide = function (point, boxVertices, distancesSquaredToVertex, 
+                                                        index1, index2, index3, index4, axis) {
+  switch (axis) {
+    case 0:
+      if (point[1] <= boxVertices[index1][1]) {
+        if (point[2] <= boxVertices[index1][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index1]);
+        } else if (point[2] >= boxVertices[index4][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index4]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index4]);
+        }
+      } else if (point[1] >= boxVertices[index2][1]) {
+        if (point[2] <= boxVertices[index2][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index2]);
+        } else if (point[2] >= boxVertices[index3][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index3]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index2], boxVertices[index3]);
+        }
+      } else if (point[2] <= boxVertices[index1][2]) {
+        return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index2]);
+      } else if (point[2] >= boxVertices[index4][2]) {
+        return this.getDistanceToLine(point, boxVertices[index3], boxVertices[index4]);
+      }
+      break;
+    case 1 : // Normal along y axis
+      if (point[0] <= boxVertices[index1][0]) {
+        if (point[2] <= boxVertices[index1][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index1]);
+        } else if (point[2] >= boxVertices[index4][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index4]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index4]);
+        }
+      } else if (point[0] >= boxVertices[index2][0]) {
+        if (point[2] <= boxVertices[index2][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index2]);
+        } else if (point[2] >= boxVertices[index3][2]) {
+          return Math.sqrt(distancesSquaredToVertex[index3]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index2], boxVertices[index3]);
+        }
+      } else if (point[2] <= boxVertices[index1][2]) {
+        return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index2]);
+      } else if (point[2] >= boxVertices[index4][2]) {
+        return this.getDistanceToLine(point, boxVertices[index3], boxVertices[index4]);
+      }
+      break;
+    case 2 : // Normal along z axis
+      if (point[0] <= boxVertices[index1][0]) {
+        if (point[1] <= boxVertices[index1][1]) {
+          return Math.sqrt(distancesSquaredToVertex[index1]);
+        } else if (point[1] >= boxVertices[index4][1]) {
+          return Math.sqrt(distancesSquaredToVertex[index4]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index4]);
+        }
+      } else if (point[0] >= boxVertices[index2][0]) {
+        if (point[1] <= boxVertices[index2][1]) {
+          return Math.sqrt(distancesSquaredToVertex[index2]);
+        } else if (point[1] >= boxVertices[index3][1]) {
+          return Math.sqrt(distancesSquaredToVertex[index3]);
+        } else {
+          return this.getDistanceToLine(point, boxVertices[index2], boxVertices[index3]);
+        }
+      } else if (point[1] <= boxVertices[index1][1]) {
+        return this.getDistanceToLine(point, boxVertices[index1], boxVertices[index2]);
+      } else if (point[1] >= boxVertices[index4][1]) {
+        return this.getDistanceToLine(point, boxVertices[index3], boxVertices[index4]);
+      }
+      break;
+  }
+
+  // Return distance to plane 
+  // from https://fr.wikipedia.org/wiki/Distance_d%27un_point_à_un_plan 
+  var vector1 = vec3.fromValues(boxVertices[index2][0] - boxVertices[index1][0], 
+      boxVertices[index2][1] - boxVertices[index1][1], 
+      boxVertices[index2][2] - boxVertices[index1][2]);
+  var vector2 = vec3.fromValues(boxVertices[index3][0] - boxVertices[index1][0], 
+      boxVertices[index3][1] - boxVertices[index1][1], 
+      boxVertices[index3][2] - boxVertices[index1][2]);
+  var normal = vec3.create();
+  vec3.cross(normal, vector1, vector2);
+  return Math.abs(vec3.dot(normal, vec3.fromValues(boxVertices[index1][0] - point[0], boxVertices[index1][1] - point[1], boxVertices[index1][2] - point[2]))) / vec3.length(normal);
+}
+
+/**
+ * Returns the distance between the given <code>point</code> and the line defined by two points.
+ * @private
+ */
+HomeComponent3D.prototype.getDistanceToLine = function (point, point1, point2) {
+  // From https://fr.wikipedia.org/wiki/Distance_d%27un_point_à_une_droite#Dans_l.27espace
+  var lineDirection = vec3.fromValues(point2[0] - point1[0], point2[1] - point1[1], point2[2] - point1[2]);
+  var vector = vec3.fromValues(point[0] - point1[0], point[1] - point1[1], point[2] - point1[2]);
+  var crossProduct = vec3.create();
+  vec3.cross(crossProduct, lineDirection, vector);
+  return vec3.length(crossProduct) / vec3.length(lineDirection);
 }
 
 /**
@@ -1574,6 +1698,8 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
       if ("X" == propertyName
           || "Y" == propertyName
           || "ANGLE" == propertyName
+          || "ROLL" == propertyName
+          || "PITCH" == propertyName
           || "WIDTH" == propertyName
           || "DEPTH" == propertyName) {
         updatePieceOfFurnitureGeometry(updatedPiece);
@@ -1644,6 +1770,8 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
         component3D.updateObjects(component3D.home.getWalls());
       } else if (component3D.containsStaircases(piece)) {
         component3D.updateObjects(component3D.home.getRooms());
+      } else {
+        approximateHomeBoundsCache = null;
       }
       component3D.groundChangeListener(null);
     };
