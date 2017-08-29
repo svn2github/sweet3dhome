@@ -84,7 +84,11 @@
                    + "<tr><td></td><td><button data-simulated-key=\"DOWN\">&darr;</button></td><td></td></tr></table>",
                aerialViewButtonText: "Aerial view",          /* Text displayed for aerial view radio button, no radio buttons if missing */ 
                virtualVisitButtonText: "Virtual visit",      /* Text displayed for virtual visit radio button, no radio buttons if missing */
-            /* selectableLevels: ["Level 0", "Level 1"], */  /* Uncomment to choose the list of displayed levels, no select component if empty array */
+               level: "Roof",                                /* Selected level, default level if missing */
+               selectableLevels: ["Basement", "Ground floor", "1st floor", "Roof"],  /* List of displayed levels, no select component if empty array */
+               camera: "Exterior view",                      /* Selected camera, default camera if missing */
+               selectableCameras: ["Exterior view", "Main room", "Kitchen"],  /* List of displayed cameras, no camera if missing */
+               activateCameraSwitchKey: true,                /* Switch between top view / virtual visit with space bar if not false or missing */
                viewerControlsAdditionalHTML:                 /* Additional HTML text appended to controls displayed below the canvas 3D, by default empty */
                     "<button onclick=\"document.getElementById(viewerCanvasId).homePreviewComponent.startRotationAnimation(Math.random() * 5);\">Retart animation</button>",
                readingHomeText: "Reading",                   /* Comment displayed while reading home */

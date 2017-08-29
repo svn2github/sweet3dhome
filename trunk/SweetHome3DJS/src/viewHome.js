@@ -32,7 +32,11 @@
  *          aerialViewButtonId: string, 
  *          virtualVisitButtonId: string, 
  *          levelsAndCamerasListId: string,
- *          selectableLevels: string[]}} [params] the ids of the buttons and other information displayed in the user interface. 
+ *          level: string,
+ *          selectableLevels: string[],
+ *          camera: string,
+ *          selectableCameras: string[],
+ *          activateCameraSwitchKey: boolean}} [params] the ids of the buttons and other information displayed in the user interface. 
  *                      If not provided, controls won't be managed if any, no animation and navigation arrows won't be displayed. 
  * @return {HomePreviewComponent} the returned object gives access to the loaded {@link Home} instance, 
  *                the {@link HomeComponent3D} instance that displays it, the {@link HomeController3D} instance that manages 
@@ -55,7 +59,11 @@ function viewHome(canvasId, homeUrl, onerror, onprogression, params) {
  *          navigationPanel: string,
  *          aerialViewButtonText: string, 
  *          virtualVisitButtonText: string, 
- *          selectableLevels: string[], 
+ *          level: string,
+ *          selectableLevels: string[],
+ *          camera: string,
+ *          selectableCameras: string[],
+ *          activateCameraSwitchKey: boolean, 
  *          viewerControlsAdditionalHTML: string,
  *          readingHomeText: string, 
  *          readingModelText: string,
@@ -258,8 +266,12 @@ function viewHomeInOverlay(homeUrl, params) {
            navigationPanel : params.navigationPanel,
            aerialViewButtonId : "aerialView", 
            virtualVisitButtonId : "virtualVisit", 
-           levelsAndCamerasListId : "levelsAndCameras", 
-           selectableLevels : params.selectableLevels});
+           levelsAndCamerasListId : "levelsAndCameras",
+           level : params.level,
+           selectableLevels : params.selectableLevels,
+           camera: params.camera,
+           selectableCameras : params.selectableCameras,
+           activateCameraSwitchKey : params.activateCameraSwitchKey});
     } else {
       canvas.homePreviewComponent = new homePreviewComponentContructor(
           "viewerCanvas", homeUrl, onerror, onprogression, 
@@ -304,7 +316,11 @@ function hideHomeOverlay() {
  *          aerialViewButtonId: string, 
  *          virtualVisitButtonId: string, 
  *          levelsAndCamerasListId: string,
- *          selectableLevels: string[]}} [params] the ids of the buttons and other information displayed in the user interface. 
+ *          level: string,
+ *          selectableLevels: string[],
+ *          camera: string,
+ *          selectableCameras: string[],
+ *          activateCameraSwitchKey: boolean}} [params] the ids of the buttons and other information displayed in the user interface. 
  *                      If not provided, controls won't be managed if any, no animation and navigation arrows won't be displayed. 
  * @constructor
  * @author Emmanuel Puybaret
@@ -351,8 +367,12 @@ function HomePreviewComponent(canvasId, homeUrl, onerror, onprogression, params)
                               navigationPanelVisible : params.navigationPanel && params.navigationPanel != "none",
                               aerialViewButtonId : params.aerialViewButtonId, 
                               virtualVisitButtonId : params.virtualVisitButtonId, 
-                              levelsAndCamerasListId : params.levelsAndCamerasListId, 
-                              selectableLevels : params.selectableLevels}
+                              levelsAndCamerasListId : params.levelsAndCamerasListId,
+                              level : params.level,
+                              selectableLevels : params.selectableLevels,
+                              camera : params.camera,
+                              selectableCameras : params.selectableCameras,
+                              activateCameraSwitchKey : params.activateCameraSwitchKey}
                            : undefined);
               }
             } catch (ex) {
@@ -400,7 +420,11 @@ HomePreviewComponent.prototype.createComponent3D = function(canvasId) {
  *          aerialViewButtonId: string, 
  *          virtualVisitButtonId: string, 
  *          levelsAndCamerasListId: string,
- *          selectableLevels: string[]}} [params] the ids of the buttons and other information displayed in the user interface. 
+ *          level: string,
+ *          selectableLevels: string[],
+ *          camera: string,
+ *          selectableCameras: string[],
+ *          activateCameraSwitchKey: boolean}} [params] the ids of the buttons and other information displayed in the user interface. 
  *                      If not provided, controls won't be managed if any, no animation and navigation panel won't be displayed. 
  * @protected
  * @ignore
@@ -447,12 +471,16 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
       cameraTypeButtonsUpdater();
     };
   var canvas = document.getElementById(canvasId);
-  canvas.addEventListener("keydown", 
-      function(ev) {
+  if (params === undefined 
+      || params.activateCameraSwitchKey === undefined
+      || params.activateCameraSwitchKey) {
+    canvas.addEventListener("keydown", 
+          function(ev) {
         if (ev.keyCode === 32) { // Space bar
           toggleCamera();
         }
       });
+  }
   if (params && params.aerialViewButtonId && params.virtualVisitButtonId) {
     var aerialViewButton = document.getElementById(params.aerialViewButtonId);
     aerialViewButton.addEventListener("change", 
@@ -493,6 +521,33 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
         });
   } 
 
+  if (params && params.level) {
+    var levels = home.getLevels();
+    if (levels.length > 0) {
+      for (var i = 0; i < levels.length; i++) {
+        var level = levels [i];
+        if (level.isViewable()
+            && level.getName() == params.level) {
+          home.setSelectedLevel(level);
+          break;
+        }
+      }
+    }
+  }
+  
+  if (params && params.camera) {
+    var cameras = home.getStoredCameras();
+    if (cameras.length > 0) {
+      for (var i = 0; i < cameras.length; i++) {
+        var camera = cameras [i];
+        if (camera.getName() == params.camera) {
+          this.getController().goToCamera(camera);
+          break;
+        }
+      }
+    }
+  }
+  
   if (params && params.levelsAndCamerasListId) {
     var levelsAndCamerasList = document.getElementById(params.levelsAndCamerasListId);
     levelsAndCamerasList.disabled = home.structure !== undefined && home.getCamera() === home.getTopCamera();
@@ -501,8 +556,7 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
       for (var i = 0; i < levels.length; i++) {
         var level = levels [i];
         if (level.isViewable()
-            && (params === undefined 
-                || !params.selectableLevels 
+            && (!params.selectableLevels 
                 || params.selectableLevels.indexOf(level.getName()) >= 0)) {
           var option = document.createElement("option");
           option.text  = level.getName();
@@ -513,11 +567,41 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
           }
         }
       }
+      
+      if (params.selectableCameras !== undefined) {
+        var cameras = home.getStoredCameras();
+        if (cameras.length > 0) {
+          var addSeparator = levelsAndCamerasList.options.length > 0;
+          for (var i = 0; i < cameras.length; i++) {
+            var camera = cameras [i];
+            if (params.selectableCameras.indexOf(camera.getName()) >= 0) {
+              if (addSeparator) {
+                levelsAndCamerasList.add(document.createElement("option"));
+                addSeparator = false;
+              }
+              var option = document.createElement("option");
+              option.text  = camera.getName();
+              option.camera = camera;
+              levelsAndCamerasList.add(option);
+              if (camera === home.getCamera()) {
+                levelsAndCamerasList.selectedIndex = i;
+              }
+            }
+          }
+        }
+      }
+        
       if (levelsAndCamerasList.options.length > 1) {
+        var controller = this.getController();
         levelsAndCamerasList.addEventListener("change", 
             function() {
               previewComponent.startRotationAnimationAfterLoading = false;
-              home.setSelectedLevel(levelsAndCamerasList.options [levelsAndCamerasList.selectedIndex].level);
+              var selectedOption = levelsAndCamerasList.options [levelsAndCamerasList.selectedIndex];
+              if (selectedOption.level !== undefined) {
+                home.setSelectedLevel(selectedOption.level);
+              } else if (selectedOption.camera !== undefined) {
+                controller.goToCamera(selectedOption.camera);
+              }  
             });
         levelsAndCamerasList.style.visibility = "visible";
       }
@@ -525,8 +609,8 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
   }
   
   if (roundsPerMinute) {
-    home.setCamera(home.getTopCamera());
     var controller = this.getController();
+    controller.goToCamera(home.getTopCamera());
     controller.rotateCameraPitch(Math.PI / 6 - home.getCamera().getPitch());
     controller.moveCamera(10000);
     controller.moveCamera(-50);

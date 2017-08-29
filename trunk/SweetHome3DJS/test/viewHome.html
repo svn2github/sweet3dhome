@@ -107,8 +107,10 @@
         progress.value = 100 + percentage * 100;
         if (percentage === 1) {
           document.getElementById("viewerProgressDiv").style.visibility = "hidden";
-          // Start animation once all models are loaded
-          homeComponent.startRotationAnimation(2);
+          if (homeComponent.getHome() === homeComponent.getHome().getTopCamera()) {
+            // Start animation once all models are loaded
+	        homeComponent.startRotationAnimation(2);
+          }
           document.getElementById("info").innerHTML = "Home <i>" + homeComponent.getHome().getName() + "</i> with " + homeComponent.getHome().getFurniture().length + " pieces"; 
           document.getElementById("changeColorButton").style.visibility = "visible";
         }
@@ -133,8 +135,12 @@
                                                  // attribute set "UP", "DOWN", "LEFT", "RIGHT"... to replace the default navigation panel, "none" if missing 
           aerialViewButtonId: "aerialView",      // Id of the aerial view radio button, radio buttons hidden if missing  
           virtualVisitButtonId: "virtualVisit",  // Id of the aerial view radio button, radio buttons hidden if missing  
-          levelsAndCamerasListId: "levelsAndCameras"   // Id of the levels select component, hidden if missing or no levels
-      /*, selectableLevels: ["Level 0", "Level 1"] */  // List of displayed levels, all viewable levels if missing
+          levelsAndCamerasListId: "levelsAndCameras",  // Id of the levels select component, hidden if missing or no levels
+          level: "Roof",                         // Selected level, default level if missing
+          selectableLevels: ["Basement", "Ground floor", "1st floor", "Roof"],  // List of displayed levels, all viewable levels if missing
+          camera: "Exterior view",               // Selected camera, default camera if missing
+          selectableCameras: ["Exterior view", "Main room", "Kitchen"],  // List of displayed cameras, no camera if missing
+          activateCameraSwitchKey: false         // Switch between top view / virtual visit with space bar if not false or missing  
          });  
 </script>
 
