@@ -4,15 +4,17 @@
      Sweet Home 3D JS, Copyright (c) 2016 Emmanuel PUYBARET / eTeks <info@eteks.com>. 
      
      Ant build file. Available targets :
-     - build         : Builds minified Javacript files in dist directory
-     - sourceArchive : Builds SweetHome3DJS-version-src.zip file
-     - jsdoc         : Builds SweetHome3DJS-version-jsdoc.zip file 
+     - build              : Builds SweetHome3DJSViewer-version.zip file in install directory
+     - sourceArchive      : Builds SweetHome3DJS-version-src.zip file in install directory
+     - jsdoc              : Builds SweetHome3DJS-version-jsdoc.zip file in install directory
+     - dist               : Builds minified Javacript files in dist directory
+     - generatedLibraries : Generates JavaScript libraries required for the project
 -->
 <project basedir="." default="build" name="SweetHome3DJS">
   <!-- The current version of Sweet Home 3D JS -->
-  <property name="version" value="2.0"/>
+  <property name="version" value="5.5"/>
 
-  <target name="concat" depends="SweetHome3Djs"
+  <target name="concat" depends="generatedLibraries"
           description="Concat Javacript files in dist/build directory">
     <mkdir dir="dist/build" />
     <concat destfile="dist/build/viewmodel.min.js" encoding="UTF-8">
@@ -48,7 +50,7 @@
     </concat>
   </target>
 
-  <target name="build" depends="concat" 
+  <target name="dist" depends="concat" 
           description="Builds minified Javacript files in dist directory">
     <!-- Download and build YUI Compressor -->
     <available file="tools/yuicompressor" type="dir" property="yuicompressor.present" />
@@ -213,6 +215,36 @@
     <echo message="Javascript files in dist ready for ftp" />
   </target>
 
+  <!-- Builds install/SweetHome3DJSViewer-version.zip archive that contains
+       the files required for SweetHome3DJSViewer  -->
+  <target name="build" depends="dist" 
+          description="Builds minified Javacript files in dist directory">
+  	<mkdir dir="install/viewer/SweetHome3DJSViewer-${version}/lib" />
+  	<copy todir="install/viewer/SweetHome3DJSViewer-${version}/lib">
+      <fileset dir="dist"/>
+    </copy>
+  	<copy file="test/resources/SweetHome3DExample6.sh3d" 
+  		  tofile="install/viewer/SweetHome3DJSViewer-${version}/default.sh3d"/> 
+    <zip destfile="install/SweetHome3DJSViewer-${version}.zip">
+      <zipfileset dir="install/viewer/SweetHome3DJSViewer-${version}"/>
+      <zipfileset dir="install/viewer" includes="README.TXT, *.html"/>
+      <zipfileset dir=".">
+        <include name="COPYING.TXT"/>
+        <include name="LICENSE.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-JAVA3D-UTILS.TXT"/>
+        <include name="THIRDPARTY-LICENSE-BATIK.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-BIG-JS.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-GLMATRIX.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-JSXMLSAXPARSER.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-JSZIP.TXT"/>
+      	<include name="THIRDPARTY-LICENSE-OPEN-JDK.TXT"/>
+      </zipfileset>
+    </zip>
+    <delete dir="install/viewer/SweetHome3DJSViewer-${version}" />
+
+    <echo message="install/SweetHome3DJSViewer-${version}.zip ready"/>
+  </target>
+	
   <!-- Downloads and builds YUI Compressor in tools/yuicompressor-master -->
   <target name="install-yuicompressor" unless="yuicompressor.present">
     <get src="https://github.com/yui/yuicompressor/archive/master.zip" dest="tools/yuicompressor.zip" />
@@ -226,14 +258,15 @@
        SweetHome3D source files in directory named SweetHome3D-version-src -->
   <target name="sourceArchive"
           description="Builds SweetHome3DJS-version-src.zip archive">
-    <mkdir dir="tools/source/SweetHome3DJS-${version}-src" />
-    <copy todir="tools/source/SweetHome3DJS-${version}-src">
+    <mkdir dir="install/source/SweetHome3DJS-${version}-src" />
+    <copy todir="install/source/SweetHome3DJS-${version}-src">
       <fileset dir=".">
         <include name="build.xml" />
         <include name="*.TXT" />
         <include name="src/**" />
         <include name="lib/**" />
         <include name="test/**" />
+        <include name="install/viewer/*"/>
         <include name="tools/JSDocTemplate/**" />
         <include name="tools/JSweet/**" />
         <!-- Eclipse project files -->
@@ -242,39 +275,42 @@
         <include name=".project" />
         <!-- Exclude generated libs --> 
         <exclude name="lib/generated/**" />
+        <exclude name="tools/JSweet/classes/**" />
+        <exclude name="tools/JSweet/lib/generated/**" />
       </fileset>
     </copy>
 
-    <zip destfile="SweetHome3DJS-${version}-src.zip" basedir="tools/source"
+    <zip destfile="install/SweetHome3DJS-${version}-src.zip" basedir="install/source"
          includes="SweetHome3DJS-${version}-src/**" />
 
     <!-- Clean source directory -->
-    <delete dir="tools/source" />
+    <delete dir="install/source" />
 
-    <echo message="SweetHome3DJS-${version}-src.zip ready for ftp" />
+    <echo message="install/SweetHome3DJS-${version}-src.zip ready for ftp" />
   </target>
 
   <!-- Builds dist/SweetHome3DJS-version-jsdoc.zip archive that contains 
      the generated JSDoc of Javascript source files found in SweetHome3D-version-src -->
-  <target name="jsdoc" depends="SweetHome3Djs"
+  <target name="jsdoc" depends="generatedLibraries"
           description="Builds dist/SweetHome3DJS-version-jsdoc.zip archive">
     <!-- Download and build JSDoc Toolkit Ant task -->
     <available file="tools/jsdoc-toolkit-ant-task" type="dir" property="jsdoc-toolkit-ant-task.present" />
     <antcall target="install-jsdoc-toolkit-ant-task" />
     <!-- Generate JSDoc -->
-    <mkdir dir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc" />
+    <mkdir dir="install/jsdoc/SweetHome3DJS-${version}-jsdoc" />
     <taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" 
-           classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-2.0.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
+           classpath="tools/jsdoc-toolkit-ant-task/build/jar/jsdoc-toolkit-ant-task-1.1.2.jar;tools/jsdoc-toolkit-ant-task/lib/rhino/js-1.7r2.jar"/>
     <jsdoctoolkit jsdochome="tools/jsdoc-toolkit-ant-task/lib/jsdoc-toolkit/jsdoc_toolkit-2.4.0/" 
-                  template="../../../../../JSDocTemplate" outputdir="tools/jsdoc/SweetHome3DJS-${version}-jsdoc">
+                  template="../../../../../JSDocTemplate" outputdir="install/jsdoc/SweetHome3DJS-${version}-jsdoc">
       <fileset dir="src" includes="*.js" excludes="scene3d.js, HTMLCanvas3D.js, Triangulator.js" />
       <fileset dir="lib/generated" includes="SweetHome3D.js" />
     </jsdoctoolkit>
-    <zip destfile="SweetHome3DJS-${version}-jsdoc.zip" basedir="tools/jsdoc" includes="SweetHome3DJS-${version}-jsdoc/**" />
+    <zip destfile="install/SweetHome3DJS-${version}-jsdoc.zip" basedir="install/jsdoc" includes="SweetHome3DJS-${version}-jsdoc/**" />
+  	
     <!-- Clean jsdoc directory -->
-    <delete dir="tools/jsdoc" />
+    <delete dir="install/jsdoc" />
 
-    <echo message="SweetHome3DJS-${version}-jsdoc.zip ready for ftp" />
+    <echo message="install/SweetHome3DJS-${version}-jsdoc.zip ready for ftp" />
   </target>
 
   <!-- Downloads and builds JSDoc Toolkit Ant task in tools/jsdoc-toolkit-ant-task -->
@@ -283,39 +319,39 @@
     <unzip src="tools/jsdoc-toolkit-ant-task.zip" dest="tools" />
     <delete file="tools/jsdoc-toolkit-ant-task.zip" />
     <move file="tools/jsdoc-toolkit-ant-task-master" tofile="tools/jsdoc-toolkit-ant-task" />
-    <ant dir="tools/jsdoc-toolkit-ant-task" target="package" />
+    <ant dir="tools/jsdoc-toolkit-ant-task" target="package" inheritAll="false" />
   </target>
 
-  <!-- JSweet Java to JS generation -->
-  <target name="jsBundle" 
-          description="Transpiles Sweet Home 3D classes to build/jsBundle">
+  <!-- Java to JavaScript and TypeScript transpilation with JSweet -->
+  <target name="transpiledLibraries" 
+          description="Transpiles Sweet Home 3D classes to tools/JSweet/build">
     <!-- Compile classes which adapts JSweet transpiler to Sweet Home 3D JS needs  -->
-    <mkdir dir="build/SweetHome3DJSweetExtension"/>
+    <mkdir dir="tools/JSweet/build/SweetHome3DJSweetExtension"/>
     <javac srcdir="tools/JSweet/src" 
-        destdir="build/SweetHome3DJSweetExtension" 
+        destdir="tools/JSweet/build/SweetHome3DJSweetExtension" 
         classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc2-jar-with-dependencies.jar" 
         source="1.8" 
         encoding="ISO-8859-1"
         includes="com/eteks/sweethome3d/jsweet/*" />
   	
     <!-- Transpile Sweet Home 3D classes -->
-    <mkdir dir="build/jsBundle/ts" />
-    <mkdir dir="build/jsBundle/js" />
+    <mkdir dir="tools/JSweet/build/ts" />
+    <mkdir dir="tools/JSweet/build/js" />
     <java classname="org.jsweet.JSweetCommandLineLauncher" fork="true" failonerror="true">
       <arg value="-v" />
       <arg value="-b" />
       <arg value="--workingDir" />
-      <arg value="build/jsweet.tmp" />
+      <arg value="tools/JSweet/build/jsweet.tmp" />
       <arg value="--factoryClassName" />
       <arg value="com.eteks.sweethome3d.jsweet.SweetHome3DJSweetFactory" />
       <arg value="--header"/>
       <arg value="tools/JSweet/header.txt" />
       <!-- ts output dir -->
       <arg value="--tsout" />
-      <arg value="build/jsBundle/ts" />
+      <arg value="tools/JSweet/build/ts" />
       <!-- js output dir -->
       <arg value="-o" />
-      <arg value="build/jsBundle/js" />
+      <arg value="tools/JSweet/build/js" />
       <arg value="--declaration" />
       <!-- input dir -->
       <arg value="--jdkHome" />
@@ -323,7 +359,7 @@
       <arg value="--encoding" />
       <arg value="ISO-8859-1" />
       <arg value="--candiesJsOut"/>
-      <arg value="build/jsBundle/js" />
+      <arg value="tools/JSweet/build/js" />
       <arg value="-i" />
       <arg value="../SweetHome3D/src:tools/JSweet/src" />
       <arg value="--includes" />
@@ -331,46 +367,46 @@
       <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
       <!-- Transpilation target may contain almost all com.eteks.sweethome3d.viewcontroller classes or only the subset needed to run 
            Sweet Home 3D viewer (in which case swingundo.js isn't required) -->
-      <sysproperty key="transpilationTarget" value="SweetHome3DViewer"/>
+      <sysproperty key="transpilationTarget" value="SweetHome3DJSViewer"/>
       <classpath>
         <fileset dir="tools/JSweet/lib" excludes="generated/" />
-        <pathelement location="build/SweetHome3DJSweetExtension"/>
+        <pathelement location="tools/JSweet/build/SweetHome3DJSweetExtension"/>
         <pathelement location="../SweetHome3D/libtest/jnlp.jar"/>
         <pathelement location="../SweetHome3D/libtest/AppleJavaExtensions.jar"/>
       </classpath>
     </java>
   </target>
 
-  <target name="SweetHome3Djs" depends="jsBundle"
+  <target name="generatedLibraries" depends="transpiledLibraries"
           description="Builds dist/generated/SweetHome3D.js and retrieves other generated JavaScript libraries">
     <mkdir dir="lib/generated" />
-    <move file="build/jsBundle/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
-    <move file="build/jsBundle/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
-    <move file="build/jsBundle/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
-    <move file="build/jsBundle/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
+    <move file="tools/JSweet/build/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
+    <move file="tools/JSweet/build/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
+    <move file="tools/JSweet/build/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
+    <move file="tools/JSweet/build/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
 
     <!-- Clean build directory -->
-    <delete dir="build" />
+    <delete dir="tools/JSweet/build" />
   </target>
 
-  <target name="SweetHome3DCandy" depends="jsBundle"
+  <target name="jsweetCandy" depends="transpiledLibraries"
           description="Builds tools/JSweet/lib/generated/SweetHome3DJS.jar JSweet Candy for sub projects">
-    <mkdir dir="build/jsweetCandy/classes" />
-    <javac srcdir="tools/JSweet/src" destdir="build/jsweetCandy/classes" classpath="tools/JSweet/lib/jsweet-core-5-20170726.jar" 
+    <mkdir dir="tools/JSweet/build/candy/classes" />
+    <javac srcdir="tools/JSweet/src" destdir="tools/JSweet/build/candy/classes" classpath="tools/JSweet/lib/jsweet-core-5-20170726.jar" 
            source="1.8" encoding="ISO-8859-1" includes="def/**" />
 
-    <mkdir dir="build/jsweetCandy/resources/META-INF/resources/typings" />
-    <move file="build/jsBundle/js/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/viewhome.d.ts"  />
-    <move file="build/jsBundle/ts/bundle.d.ts" tofile="build/jsweetCandy/resources/META-INF/resources/typings/defs.d.ts" />
-    <copy file="tools/JSweet/candy-metadata.json" tofile="build/jsweetCandy/resources/META-INF/candy-metadata.json" />
+    <mkdir dir="tools/JSweet/build/candy/resources/META-INF/resources/typings" />
+    <move file="tools/JSweet/build/js/bundle.d.ts" tofile="tools/JSweet/build/candy/resources/META-INF/resources/typings/viewhome.d.ts"  />
+    <move file="tools/JSweet/build/ts/bundle.d.ts" tofile="tools/JSweet/build/candy/resources/META-INF/resources/typings/defs.d.ts" />
+    <copy file="tools/JSweet/candy-metadata.json" tofile="tools/JSweet/build/candy/resources/META-INF/candy-metadata.json" />
 
     <mkdir dir="tools/JSweet/lib/generated" />
     <jar destfile="tools/JSweet/lib/generated/SweetHome3DJS.jar">
-      <fileset dir="build/jsweetCandy/classes" />
-      <fileset dir="build/jsweetCandy/resources" />
+      <fileset dir="tools/JSweet/build/candy/classes" />
+      <fileset dir="tools/JSweet/build/candy/resources" />
     </jar>
     
     <!-- Clean build directory -->
-    <delete dir="build" />
+    <delete dir="tools/JSweet/build" />
   </target>
 </project>
