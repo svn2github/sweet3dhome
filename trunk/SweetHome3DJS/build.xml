@@ -329,7 +329,7 @@
     <mkdir dir="tools/JSweet/build/SweetHome3DJSweetExtension"/>
     <javac srcdir="tools/JSweet/src" 
         destdir="tools/JSweet/build/SweetHome3DJSweetExtension" 
-        classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-rc2-jar-with-dependencies.jar" 
+        classpath="tools/JSweet/lib/jsweet-transpiler-2.0.0-jar-with-dependencies.jar" 
         source="1.8" 
         encoding="ISO-8859-1"
         includes="com/eteks/sweethome3d/jsweet/*" />
