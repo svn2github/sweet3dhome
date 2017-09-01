@@ -4,6 +4,7 @@
 #
 # Outdoor staircase created by DaniFeri
 # http://sourceforge.net/p/sweethome3d/d-models/365/
+# Removed useless parts with wire_... material by Emmanuel Puybaret / eTeks 
 #
 # This file is distributed under Free Art License, see http://artlibre.org/licence/lal/en for more informations
 #
@@ -19,26 +20,6 @@ newmtl Columns
 	Kd 0.0784 0.0353 0.0235
 	Ks 0.0707 0.0611 0.0579
 	Ke 0.0000 0.0000 0.0000
-
-newmtl wire_087225143
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.3412 0.8824 0.5608
-	Kd 0.3412 0.8824 0.5608
-	Ks 0.3500 0.3500 0.3500
-
-newmtl wire_028149177
-	Ns 32
-	d 1
-	Tr 0
-	Tf 1 1 1
-	illum 2
-	Ka 0.1098 0.5843 0.6941
-	Kd 0.1098 0.5843 0.6941
-	Ks 0.3500 0.3500 0.3500
 
 newmtl Railing
 	Ns 0.0000
