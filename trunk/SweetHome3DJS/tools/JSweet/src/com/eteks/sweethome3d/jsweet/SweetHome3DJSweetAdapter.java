@@ -411,9 +411,20 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     }
     String[] lines = comment.split("\n");
     StringBuffer newComment = new StringBuffer();
+    boolean firstParam = true;
     for (String line : lines) {
+      if (element.getKind() == ElementKind.CLASS 
+          && ((QualifiedNameable)element).getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture") 
+          && line.contains("@param")
+          && firstParam) {
+        // Add extra information to CatalogPieceOfFurniture constructor
+        newComment.append("<br>Caution: The constructor of <code>CatalogPieceOfFurniture</code> was modified in version 5.5 with incompatible changes with previous versions"
+            + " and might require some changes in your program.\n");
+        firstParam = false;
+      }
       if (!line.contains("@since")) {
-        newComment.append(line);
+        // Ignore unmodifiable comment
+        newComment.append(line.replace("an unmodifiable", "a"));
         newComment.append("\n");
       }
     }
