@@ -563,7 +563,7 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
           option.level = level;
           levelsAndCamerasList.add(option);
           if (level === home.getSelectedLevel()) {
-            levelsAndCamerasList.selectedIndex = i;
+            levelsAndCamerasList.selectedIndex = levelsAndCamerasList.options.length - 1;
           }
         }
       }
@@ -583,9 +583,6 @@ HomePreviewComponent.prototype.prepareComponent = function(canvasId, onprogressi
               option.text  = camera.getName();
               option.camera = camera;
               levelsAndCamerasList.add(option);
-              if (camera === home.getCamera()) {
-                levelsAndCamerasList.selectedIndex = i;
-              }
             }
           }
         }
