@@ -1,7 +1,7 @@
 SWEET HOME 3D JS v 5.5
 ----------------------
 
-This archive contains source code of Sweet Home 3D JS, an HTML5 3D viewer 
+This archive contains source code of Sweet Home 3D JS, a HTML5 3D viewer 
 for Sweet Home 3D files saved with version 5.3 or a more recent version.
 
 You may also download this source code with the following CVS command:
