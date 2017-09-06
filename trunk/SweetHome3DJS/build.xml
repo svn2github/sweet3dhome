@@ -84,11 +84,6 @@
       <arg value="dist/build/geom.min.js" />
     </java>
     <java jar="${yuicompressor.jar}" fork="true">
-      <arg value="lib/generated/swingundo.js" />
-      <arg value="-o" />
-      <arg value="dist/build/swingundo.min.js" />
-    </java>
-    <java jar="${yuicompressor.jar}" fork="true">
       <arg value="lib/generated/batik-svgpathparser.js" />
       <arg value="-o" />
       <arg value="dist/build/batik-svgpathparser.min.js" />
@@ -150,26 +145,6 @@
     </concat>
     <concat destfile="dist/geom.min.js" encoding="UTF-8" append="true">
       <file name="dist/build/geom.min.js" />
-    </concat>
-    <!-- Add core.js GNU GPL header to swingundo.min.js -->
-    <concat destfile="dist/swingundo.min.js" encoding="UTF-8">
-      <file file="src/core.js" />
-      <filterchain>
-        <headfilter lines="24" />
-        <tokenfilter>
-          <replacestring from="core.js" to="swingundo.min.js  version ${version}" />
-        </tokenfilter>
-      </filterchain>
-      <file name="dist/build/core.min.js" /> 
-    </concat>
-    <concat destfile="dist/swingundo.min.js" encoding="UTF-8" append="true">
-      <file name="lib/generated/swingundo.js" />
-      <filterchain>
-        <headfilter lines="1" skip="5" />
-      </filterchain>
-    </concat>
-    <concat destfile="dist/swingundo.min.js" encoding="UTF-8" append="true">
-      <file name="dist/build/swingundo.min.js" />
     </concat>
     <!-- Add THIRDPARTY-LICENSE-BATIK.TXT to dist/batik-svgpathparser.min.js -->
     <concat destfile="dist/batik-svgpathparser.min.js" encoding="UTF-8">
@@ -366,7 +341,7 @@
       <arg value="def:com/eteks/sweethome3d/model:com/eteks/sweethome3d/tools:com/eteks/sweethome3d/viewcontroller:com/eteks/sweethome3d/io" />
       <sysproperty key="java.ext.dirs" value="../SweetHome3D/lib"/>
       <!-- Transpilation target may contain almost all com.eteks.sweethome3d.viewcontroller classes or only the subset needed to run 
-           Sweet Home 3D viewer (in which case swingundo.js isn't required) -->
+           Sweet Home 3D JS Viewer (in which case swingundo.js extracted from tools/JSweet/build/js/j4ts-swingundo-1.8.132-20170726/bundle.js isn't required) -->
       <sysproperty key="transpilationTarget" value="SweetHome3DJSViewer"/>
       <classpath>
         <fileset dir="tools/JSweet/lib" excludes="generated/" />
@@ -382,7 +357,6 @@
     <mkdir dir="lib/generated" />
     <move file="tools/JSweet/build/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
     <move file="tools/JSweet/build/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
-    <move file="tools/JSweet/build/js/j4ts-swingundo-1.8.132-20170726/bundle.js" tofile="lib/generated/swingundo.js"/>
     <move file="tools/JSweet/build/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
 
     <!-- Clean build directory -->
