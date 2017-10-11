@@ -1,5 +1,5 @@
 /*
- * SweetHome3DJSweetAdapter.java 
+ * SweetHome3DJSweetAdapter.java
  *
  * Sweet Home 3D, Copyright (c) 2017 Emmanuel PUYBARET / eTeks <info@eteks.com>
  *
@@ -59,20 +59,20 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
   public SweetHome3DJSweetAdapter(PrinterAdapter parent) {
     super(parent);
     // Types that are supported in core.js
-    sh3dTypeMapping.put(IllegalArgumentException.class.getName(), "IllegalArgumentException");
-    sh3dTypeMapping.put(IllegalStateException.class.getName(), "IllegalStateException");
-    sh3dTypeMapping.put(InternalError.class.getName(), "InternalError");
-    sh3dTypeMapping.put(NoSuchElementException.class.getName(), "NoSuchElementException");
-    sh3dTypeMapping.put(NullPointerException.class.getName(), "NullPointerException");
-    sh3dTypeMapping.put(UnsupportedOperationException.class.getName(), "UnsupportedOperationException");
-    sh3dTypeMapping.put(PropertyChangeEvent.class.getName(), "PropertyChangeEvent");
-    sh3dTypeMapping.put(EventObject.class.getName(), "EventObject");
-    sh3dTypeMapping.put(PropertyChangeListener.class.getName(), "PropertyChangeListener");
-    sh3dTypeMapping.put(PropertyChangeSupport.class.getName(), "PropertyChangeSupport");
+    this.sh3dTypeMapping.put(IllegalArgumentException.class.getName(), "IllegalArgumentException");
+    this.sh3dTypeMapping.put(IllegalStateException.class.getName(), "IllegalStateException");
+    this.sh3dTypeMapping.put(InternalError.class.getName(), "InternalError");
+    this.sh3dTypeMapping.put(NoSuchElementException.class.getName(), "NoSuchElementException");
+    this.sh3dTypeMapping.put(NullPointerException.class.getName(), "NullPointerException");
+    this.sh3dTypeMapping.put(UnsupportedOperationException.class.getName(), "UnsupportedOperationException");
+    this.sh3dTypeMapping.put(PropertyChangeEvent.class.getName(), "PropertyChangeEvent");
+    this.sh3dTypeMapping.put(EventObject.class.getName(), "EventObject");
+    this.sh3dTypeMapping.put(PropertyChangeListener.class.getName(), "PropertyChangeListener");
+    this.sh3dTypeMapping.put(PropertyChangeSupport.class.getName(), "PropertyChangeSupport");
     // We assume we have the big.js lib and we map BigDecimal to Big
-    sh3dTypeMapping.put(BigDecimal.class.getName(), "Big");
+    this.sh3dTypeMapping.put(BigDecimal.class.getName(), "Big");
     // Activate the local type map
-    addTypeMappings(sh3dTypeMapping);
+    addTypeMappings(this.sh3dTypeMapping);
     // We don't have a specific implementation for ResourceURLContent in JS...
     // Use the default one
     addTypeMapping("com.eteks.sweethome3d.tools.ResourceURLContent", "URLContent");
@@ -105,7 +105,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.io.HomeXMLHandler.setContentContext(**)",
         "com.eteks.sweethome3d.io.HomeXMLHandler.isSameContent(**)");
     if ("SweetHome3DJSViewer".equals(System.getProperty("transpilationTarget"))) {
-      // Only HomeController3D and its dependencies are needed for Sweet Home 3D viewer 
+      // Only HomeController3D and its dependencies are needed for Sweet Home 3D viewer
       addAnnotation("jsweet.lang.Erased",
           "com.eteks.sweethome3d.viewcontroller.*",
           "!com.eteks.sweethome3d.viewcontroller.HomeController3D",
@@ -145,8 +145,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
             return Action.ADD;
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
-            // Only keep the private constructor of CatalogPieceOfFurniture and its 2 public constructors used 
-            // to create pieces available in version 5.3 and 5.5 
+            // Only keep the private constructor of CatalogPieceOfFurniture and its 2 public constructors used
+            // to create pieces available in version 5.3 and 5.5
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
               if (c.getParameters().size() != 16 && c.getParameters().size() != 26 && c.getParameters().size() != 28) {
@@ -156,8 +156,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
             // Keep less constructors in CatalogLight and CatalogDoorOrWindow
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogLight")) {
-            // Only keep the public constructor of CatalogLight available in version 5.5 
-            // (CatalogLight class didn't exist in SweetHome3DJS 1.2) 
+            // Only keep the public constructor of CatalogLight available in version 5.5
+            // (CatalogLight class didn't exist in SweetHome3DJS 1.2)
             ExecutableElement c = (ExecutableElement) element;
             if (c.getParameters().size() != 29) {
               return Action.ADD;
@@ -165,7 +165,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogDoorOrWindow")) {
             // Only keep the public constructor of CatalogDoorOrWindow used to create unmodifiable pieces
-            // (CatalogDoorOrWindow class didn't exist in SweetHome3DJS 1.2) 
+            // (CatalogDoorOrWindow class didn't exist in SweetHome3DJS 1.2)
             ExecutableElement c = (ExecutableElement) element;
             if (c.getParameters().size() != 18 && c.getParameters().size() != 32) {
               return Action.ADD;
@@ -182,7 +182,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         "com.eteks.sweethome3d.viewcontroller", "com.eteks.sweethome3d.j3d");
 
     // Replace some Java implementations with some JavaScript-specific implementations
-    
+
     // Ignore polyline thickness because BasicStroke#createStrokedShape isn't available
     addAnnotation(
         "@Replace('if (this.shapeCache == null) { this.shapeCache = this.getPolylinePath(); } return this.shapeCache; ')",
@@ -199,7 +199,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     addAnnotation(
         "@Replace('this.preferences = preferences; this.viewFactory = viewFactory; this.propertyChangeSupport = new PropertyChangeSupport(this); this.updateProperties();')",
         "com.eteks.sweethome3d.viewcontroller.UserPreferencesController.UserPreferencesController(*,*,*)");
-    
+
     // Force some interface to be mapped as functional types when possible
     addAnnotation(FunctionalInterface.class, "com.eteks.sweethome3d.model.CollectionListener",
         "com.eteks.sweethome3d.model.LocationAndSizeChangeListener");
@@ -209,8 +209,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
   public boolean substituteNewClass(NewClassElement newClass) {
     String className = newClass.getTypeAsElement().toString();
     // Handle generically all types that are locally mapped
-    if (sh3dTypeMapping.containsKey(className)) {
-      print("new ").print(sh3dTypeMapping.get(className)).print("(").printArgList(newClass.getArguments()).print(")");
+    if (this.sh3dTypeMapping.containsKey(className)) {
+      print("new ").print(this.sh3dTypeMapping.get(className)).print("(").printArgList(newClass.getArguments()).print(")");
       return true;
     }
     switch (className) {
@@ -279,6 +279,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
               printMacroName(invocation.getMethodName());
               print(invocation.getTargetExpression()).print(".plus(").printArgList(invocation.getArguments()).print(")");
               return true;
+            case "subtract":
+              printMacroName(invocation.getMethodName());
+              print(invocation.getTargetExpression()).print(".minus(").printArgList(invocation.getArguments()).print(")");
+              return true;
             case "scale":
               printMacroName(invocation.getMethodName());
               // Always have a scale of 2 (we only have currencies, so 2 is a standard)
@@ -333,8 +337,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
         return true;
       }
     }
-    
-    // Provide a partial default simple JavaScript implementation for String.format 
+
+    // Provide a partial default simple JavaScript implementation for String.format
     if (invocation.getMethodName().equals("format")
         && String.class.getName().equals(invocation.getTargetExpression().getTypeAsElement().toString())) {
       print(
@@ -413,8 +417,8 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     StringBuffer newComment = new StringBuffer();
     boolean firstParam = true;
     for (String line : lines) {
-      if (element.getKind() == ElementKind.CLASS 
-          && ((QualifiedNameable)element).getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture") 
+      if (element.getKind() == ElementKind.CLASS
+          && ((QualifiedNameable)element).getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")
           && line.contains("@param")
           && firstParam) {
         // Add extra information to CatalogPieceOfFurniture constructor
