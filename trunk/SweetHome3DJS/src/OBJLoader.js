@@ -1158,8 +1158,8 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
                         material : "default", 
                         smooth : false}; 
   
-  try {
-    if (onmodelloaded === null) {
+  if (onmodelloaded === null) {
+    try {
       onprogression(ModelLoader.PARSING_MODEL, objEntryName, 0);
       for (var startOfLine = 0; startOfLine <= objContent.length; ) {
         startOfLine = this.parseObjectLine(objContent, startOfLine, vertices, textureCoordinates, normals, groups,
@@ -1167,10 +1167,15 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
       } 
       onprogression(ModelLoader.PARSING_MODEL, objEntryName, 1);
       return this.createScene(vertices, textureCoordinates, normals, groups, modelContext.appearances, null, onprogression);
-    } else {
-      var startOfLine = 0;
-      var loader = this;
-      var objEntryParser = function() {
+    } catch (ex) {
+      onprogression(ModelLoader.PARSING_MODEL, objEntryName, 1);
+      return this.createScene([], [], [], {}, modelContext.appearances, null, onprogression);
+    }
+  } else {
+    var startOfLine = 0;
+    var loader = this;
+    var objEntryParser = function() {
+        try {
           onprogression(ModelLoader.PARSING_MODEL, objEntryName, startOfLine / objContent.length);
           var minimumIndexBeforeTimeout = startOfLine + 200000; 
           var start = Date.now();
@@ -1195,11 +1200,12 @@ OBJLoader.prototype.parseEntryScene = function(objContent, objEntryName, zip, mo
                     }, 
                     onprogression);
               }, 0);
-        };
-      objEntryParser();
-    }
-  } catch (ex) {
-    this.createScene([], [], [], {}, modelContext.appearances, onmodelloaded, onprogression);
+        } catch (ex) {
+          onprogression(ModelLoader.PARSING_MODEL, objEntryName, 1);
+          loader.createScene([], [], [], {}, modelContext.appearances, onmodelloaded, onprogression);
+        }
+      };
+    objEntryParser();
   }
 }
 
