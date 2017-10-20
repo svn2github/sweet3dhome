@@ -1,5 +1,5 @@
-SWEET HOME 3D JS VIEWER v 5.5
------------------------------
+SWEET HOME 3D JS VIEWER v 5.5.2
+-------------------------------
 
 This archive contains files required to install Sweet Home 3D JS Viewer, a 
 HTML5 component able to display the 3D view of a Sweet Home 3D file from its URL.
