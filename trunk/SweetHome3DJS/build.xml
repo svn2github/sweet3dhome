@@ -193,7 +193,7 @@
   <!-- Builds install/SweetHome3DJSViewer-version.zip archive that contains
        the files required for SweetHome3DJSViewer  -->
   <target name="build" depends="dist" 
-          description="Builds minified Javacript files in dist directory">
+          description="Builds SweetHome3DJSViewer-version.zip in install directory">
   	<mkdir dir="install/viewer/SweetHome3DJSViewer-${version}/lib" />
   	<copy todir="install/viewer/SweetHome3DJSViewer-${version}/lib">
       <fileset dir="dist"/>
