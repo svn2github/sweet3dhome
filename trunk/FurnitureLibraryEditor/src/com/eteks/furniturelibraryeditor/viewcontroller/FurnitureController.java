@@ -25,6 +25,8 @@ import java.beans.PropertyChangeSupport;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -1325,6 +1327,16 @@ public class FurnitureController implements Controller {
         BigDecimal piecePrice = piece.getPrice();
         BigDecimal pieceValueAddedTaxPercentage = piece.getValueAddedTaxPercentage();
         String pieceCurrency = piece.getCurrency();
+        Collection<String> propertyNames = piece.getPropertyNames();
+        Map<String, String> pieceProperties;
+        if (propertyNames.isEmpty()) {
+          pieceProperties = Collections.emptyMap();
+        } else {
+          pieceProperties = new HashMap<String, String>(propertyNames.size());
+          for (String propertyName : propertyNames) {
+            pieceProperties.put(propertyName, piece.getProperty(propertyName));
+          }
+        }
         // Retrieve localized data
         Map<String, Object> localizedNames = new HashMap<String, Object>();
         retrieveLocalizedData(piece, localizedNames, FurnitureLibrary.FURNITURE_NAME_PROPERTY);
@@ -1466,7 +1478,7 @@ public class FurnitureController implements Controller {
               opening.isWallCutOutOnBothSides(), opening.isWidthDepthDeformable(), opening.getSashes(),
               pieceModelRotation, pieceBackFaceShown, pieceModelSize,
               pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
+              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency, pieceProperties);
         } else if (piece instanceof CatalogLight) {
           CatalogLight light = (CatalogLight)piece;
           updatedPiece = new CatalogLight(pieceId, pieceName, pieceDescription, 
@@ -1476,7 +1488,7 @@ public class FurnitureController implements Controller {
               light.getLightSources(), pieceStaircaseCutOutShape, 
               pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
               pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, piece.isHorizontallyRotatable(),  
-              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
+              piecePrice, pieceValueAddedTaxPercentage, pieceCurrency, pieceProperties);
         } else {
           if (doorOrWindow != null && doorOrWindow) {
             updatedPiece = new CatalogDoorOrWindow(pieceId, pieceName, pieceDescription, 
@@ -1486,7 +1498,7 @@ public class FurnitureController implements Controller {
                 pieceDoorOrWindowCutOutShape, 1, 0, true, true, new Sash [0], 
                 pieceModelRotation, pieceBackFaceShown, pieceModelSize,
                 pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, 
-                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
+                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency, pieceProperties);
           } else {
             updatedPiece = new CatalogPieceOfFurniture(pieceId, pieceName, pieceDescription, 
                 pieceInformation, pieceTags, pieceCreationDate, pieceGrade, 
@@ -1494,7 +1506,7 @@ public class FurnitureController implements Controller {
                 pieceElevation, pieceDropOnTopElevation, pieceMovable, 
                 pieceStaircaseCutOutShape, pieceModelRotation, pieceBackFaceShown, pieceModelSize, 
                 pieceCreator, pieceResizable, pieceDeformable, pieceTexturable, piece.isHorizontallyRotatable(), 
-                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency);
+                piecePrice, pieceValueAddedTaxPercentage, pieceCurrency, pieceProperties);
           }
         }
         new FurnitureCatalog().add(pieceCategory, updatedPiece);

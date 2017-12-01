@@ -40,6 +40,8 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -589,6 +592,11 @@ public class FurnitureLibraryFileRecorder implements FurnitureLibraryRecorder {
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.PRICE, i, piece.getPrice());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.VALUE_ADDED_TAX_PERCENTAGE, i, piece.getValueAddedTaxPercentage());
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CURRENCY, i, piece.getCurrency());
+      List<String> propertyNames = new ArrayList<String>(piece.getPropertyNames());
+      Collections.sort(propertyNames);
+      for (String propertyName : propertyNames) {
+        writeProperty(writer, propertyName + "#" + i, piece.getProperty(propertyName));
+      }
       writeProperty(writer, DefaultFurnitureCatalog.PropertyKey.CREATOR, i, piece.getCreator());
       i++;
     }
