@@ -145,29 +145,29 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
             return Action.ADD;
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
-            // Only keep the private constructor of CatalogPieceOfFurniture and its 2 public constructors used
-            // to create pieces available in version 5.3 and 5.5
+            // Only keep the private constructor of CatalogPieceOfFurniture and its 4 public constructors used
+            // to create pieces available from version 5.3 
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
-              if (c.getParameters().size() != 16 && c.getParameters().size() != 26 && c.getParameters().size() != 28) {
+              if (c.getParameters().size() != 16 && c.getParameters().size() != 26 && c.getParameters().size() != 28 && c.getParameters().size() != 29) {
                 return Action.ADD;
               }
             }
             // Keep less constructors in CatalogLight and CatalogDoorOrWindow
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogLight")) {
-            // Only keep the public constructor of CatalogLight available in version 5.5
+            // Only keep the public constructors of CatalogLight available from version 5.5
             // (CatalogLight class didn't exist in SweetHome3DJS 1.2)
             ExecutableElement c = (ExecutableElement) element;
-            if (c.getParameters().size() != 29) {
+            if (c.getParameters().size() != 29 && c.getParameters().size() != 30) {
               return Action.ADD;
             }
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogDoorOrWindow")) {
-            // Only keep the public constructor of CatalogDoorOrWindow used to create unmodifiable pieces
+            // Only keep the public constructors of CatalogDoorOrWindow used to create unmodifiable pieces
             // (CatalogDoorOrWindow class didn't exist in SweetHome3DJS 1.2)
             ExecutableElement c = (ExecutableElement) element;
-            if (c.getParameters().size() != 18 && c.getParameters().size() != 32) {
+            if (c.getParameters().size() != 18 && c.getParameters().size() != 32 && c.getParameters().size() != 33) {
               return Action.ADD;
             }
           }
