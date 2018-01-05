@@ -1648,10 +1648,11 @@ public class FurniturePanel extends JPanel implements DialogView {
         addRotationListener(controller);
         addBackFaceShownListener(controller);
         setBackground(UIManager.getColor("window"));
-        setModel(controller.getModel(), preferences);
         if (controller.getModel() != null) {
-          setModelRotationAndSize(controller.getModelRotation(), 
-              controller.getWidth(), controller.getDepth(), controller.getHeight());
+          setModel(controller.getModel(), controller.getModelRotation(), 
+              controller.getWidth(), controller.getDepth(), controller.getHeight(), preferences);
+        } else {
+          setModel(controller.getModel(), null, -1, -1, -1, preferences);
         }
         
         addMouseListener(new MouseAdapter() {
@@ -1776,7 +1777,7 @@ public class FurniturePanel extends JPanel implements DialogView {
       controller.addPropertyChangeListener(FurnitureController.Property.MODEL,
           new PropertyChangeListener () {
             public void propertyChange(PropertyChangeEvent ev) {
-              setModel(controller.getModel(), preferences);
+              setModel(controller.getModel(), null, -1, -1, -1, preferences);
             }
           });
     }
@@ -1784,13 +1785,15 @@ public class FurniturePanel extends JPanel implements DialogView {
     /**
      * Sets the 3D model viewed by this model  
      */
-    public void setModel(final Content model, final UserPreferences preferences) {
+    public void setModel(final Content model, final float [][] modelRotation,
+                         final float width, final float depth, final float height,
+                         final UserPreferences preferences) {
       if (model == null) {
         setModel(null);            
       } else {
         ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {          
             public void modelUpdated(BranchGroup modelRoot) {
-              setModel(model);            
+              setModel(model, false, modelRotation, width, depth, height); 
             }
             
             public void modelError(Exception ex) {
