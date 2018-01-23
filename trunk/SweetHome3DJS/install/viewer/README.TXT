@@ -76,8 +76,8 @@ navigationPanel: "true" should be replaced by navigationPanel: "default"
 navigationPanel: "false" should be replaced by navigationPanel: "none"
                
                      
-Mentioning the following copyrights on the web page where you use 
+Mentioning the following copyright on the web page where you use 
 Sweet Home 3D JS Viewer will be greatly appreciated:
 
-Sweet Home 3D JS Viewer, Copyright (c) 2005-2017 Emmanuel PUYBARET / eTeks. 
+Sweet Home 3D JS Viewer, Copyright (c) 2005-2018 Emmanuel PUYBARET / eTeks. 
 Distributed under GNU General Public License    
