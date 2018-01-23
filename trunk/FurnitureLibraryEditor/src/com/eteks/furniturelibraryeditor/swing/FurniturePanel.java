@@ -1652,7 +1652,7 @@ public class FurniturePanel extends JPanel implements DialogView {
           setModel(controller.getModel(), controller.getModelRotation(), 
               controller.getWidth(), controller.getDepth(), controller.getHeight(), preferences);
         } else {
-          setModel(controller.getModel(), null, -1, -1, -1, preferences);
+          setModel(null);
         }
         
         addMouseListener(new MouseAdapter() {
@@ -1777,7 +1777,8 @@ public class FurniturePanel extends JPanel implements DialogView {
       controller.addPropertyChangeListener(FurnitureController.Property.MODEL,
           new PropertyChangeListener () {
             public void propertyChange(PropertyChangeEvent ev) {
-              setModel(controller.getModel(), null, -1, -1, -1, preferences);
+              setModel(controller.getModel(), controller.getModelRotation(), 
+                  controller.getWidth(), controller.getDepth(), controller.getHeight(), preferences);
             }
           });
     }
@@ -1786,14 +1787,17 @@ public class FurniturePanel extends JPanel implements DialogView {
      * Sets the 3D model viewed by this model  
      */
     public void setModel(final Content model, final float [][] modelRotation,
-                         final float width, final float depth, final float height,
+                         final Float width, final Float depth, final Float height,
                          final UserPreferences preferences) {
       if (model == null) {
         setModel(null);            
       } else {
         ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {          
             public void modelUpdated(BranchGroup modelRoot) {
-              setModel(model, false, modelRotation, width, depth, height); 
+              setModel(model);    
+              if (width != null && depth != null && height != null) {
+                setModelRotationAndSize(modelRotation, width, depth, height);
+              }
             }
             
             public void modelError(Exception ex) {
