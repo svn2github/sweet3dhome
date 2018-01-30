@@ -91,29 +91,16 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
    */
   public CatalogPieceOfFurniture readPieceOfFurniture(final Content model) throws InterruptedException {
     try {
-      final AtomicReference<BranchGroup> modelNode = new AtomicReference<BranchGroup>();
       String modelName = "model";
-      final CountDownLatch latch = new CountDownLatch(1);
-      EventQueue.invokeAndWait(new Runnable() {
-          public void run() {
-            // Load content using cache to make it accessible by preview components
-            ModelManager.getInstance().loadModel(model, new ModelManager.ModelObserver() {
-                public void modelUpdated(BranchGroup modelRoot) {
-                  latch.countDown();
-                  modelNode.set(modelRoot);
-                }
-                
-                public void modelError(Exception ex) {
-                  latch.countDown();
-                }
-              });
-          }
-        });
-      
-      latch.await();
+      final AtomicReference<BranchGroup> modelNode = new AtomicReference<BranchGroup>();
+      try {
+        // Load model without ModelManager cache in case its content changed 
+        modelNode.set(ModelManager.getInstance().loadModel(model));
+      } catch (IOException ex) {
+        // modelNode not set
+      }
       
       URLContent pieceModel = null;
-      Content previewModel = null;
       if (modelNode.get() != null) {
         // Copy model to a temporary OBJ content with materials and textures
         if (model instanceof URLContent) {
@@ -123,12 +110,19 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
           }
         } 
 
-        previewModel = model;
         pieceModel = copyToTemporaryOBJContent(modelNode.get(), model);
         int dotIndex = modelName.lastIndexOf('.');
         if (dotIndex != -1) {
           modelName = modelName.substring(0, dotIndex);
         } 
+        // Load copied content in current thread using cache to make it accessible by preview components without waiting in EDT
+        ModelManager.getInstance().loadModel(model, true, new ModelManager.ModelObserver() {
+            public void modelUpdated(BranchGroup modelRoot) {
+            }
+            
+            public void modelError(Exception ex) {
+            }
+          });
       } else {
         ZipInputStream zipIn = null;
         try {
@@ -154,26 +148,17 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
                 URL entryUrl = new URL("jar:" + urlContent.getURL() + "!/" 
                     + URLEncoder.encode(entryName, "UTF-8").replace("+", "%20").replace("%2F", "/"));
                 final Content entryContent = new TemporaryURLContent(entryUrl);
-                final CountDownLatch entryLatch = new CountDownLatch(1);
-                EventQueue.invokeAndWait(new Runnable() {
-                    public void run() {
-                      // Load content using cache to make it accessible by preview components
-                      ModelManager.getInstance().loadModel(entryContent, new ModelManager.ModelObserver() {
-                          public void modelUpdated(BranchGroup modelRoot) {
-                            modelNode.set(modelRoot);
-                            entryLatch.countDown();
-                          }
-                          
-                          public void modelError(Exception ex) {
-                            entryLatch.countDown();
-                          }
-                        });
+                // Load content using cache to make it accessible by preview components without waiting in EDT
+                ModelManager.getInstance().loadModel(entryContent, true, new ModelManager.ModelObserver() {
+                    public void modelUpdated(BranchGroup modelRoot) {
+                      modelNode.set(modelRoot);
+                    }
+                    
+                    public void modelError(Exception ex) {
                     }
                   });
                 
-                entryLatch.await();
                 if (modelNode.get() != null) {
-                  previewModel =
                   pieceModel = new TemporaryURLContent(entryUrl);
                   if (!entryFileName.toLowerCase().endsWith(".obj")
                       && (this.preferences.isModelContentAlwaysConvertedToOBJFormat()
@@ -209,10 +194,10 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       
       Vector3f size = ModelManager.getInstance().getSize(modelNode.get());
       // Generate icon image        
-      final Content finalPreviewModel = previewModel;
+      final Content previewModel = pieceModel;
       EventQueue.invokeAndWait(new Runnable() {
           public void run() {
-            iconPreviewComponent.setModel(finalPreviewModel);
+            iconPreviewComponent.setModel(previewModel);
           }
         });
       Thread.sleep(this.firstRendering ? 1000 : 100);
