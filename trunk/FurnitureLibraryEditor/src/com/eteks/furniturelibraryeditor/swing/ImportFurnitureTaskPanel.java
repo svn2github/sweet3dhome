@@ -222,24 +222,9 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       } else {
         key = null;
       }
-      // Compute a more human readable name with spaces instead of hyphens and without camel case and trailing digit 
-      String pieceName = "" + Character.toUpperCase(modelName.charAt(0));
-      for (int i = 1; i < modelName.length(); i++) {
-        char c = modelName.charAt(i);
-        if (c == '-' || c == '_') {
-          pieceName += ' ';
-        } else if (!Character.isDigit(c) || i < modelName.length() - 1) {
-          // Remove camel case
-          if ((Character.isUpperCase(c) || Character.isDigit(c)) 
-              && Character.isLowerCase(modelName.charAt(i - 1))) {
-            pieceName += ' ';
-            c = Character.toLowerCase(c);
-          }
-          pieceName += c;
-        }
-      }
+      
       CatalogPieceOfFurniture piece = new CatalogPieceOfFurniture(key, 
-          pieceName, null, null, new String [0], null, null, iconContent.get(), null, pieceModel, 
+          getPieceOfFurnitureName(modelName), null, null, new String [0], null, null, iconContent.get(), null, pieceModel, 
           size.x, size.z, size.y, 0f, 1f, true, null, null, false, pieceModel.getSize(), 
           this.preferences.getDefaultCreator(), true, true, true, true, null, null, null);
       FurnitureCategory defaultCategory = new FurnitureCategory(
@@ -256,6 +241,30 @@ public class ImportFurnitureTaskPanel extends ThreadedTaskPanel implements Impor
       ex.printStackTrace();
       return null;
     }
+  }
+
+  /**
+   * Returns a human readable name matching the given model name with spaces instead of hyphens 
+   * and without camel case and trailing digit.
+   */
+  protected String getPieceOfFurnitureName(String modelName) {
+    // Compute a more human readable name with spaces instead of hyphens and without camel case and trailing digit 
+    String pieceName = "" + Character.toUpperCase(modelName.charAt(0));
+    for (int i = 1; i < modelName.length(); i++) {
+      char c = modelName.charAt(i);
+      if (c == '-' || c == '_') {
+        pieceName += ' ';
+      } else if (!Character.isDigit(c) || i < modelName.length() - 1) {
+        // Remove camel case
+        if ((Character.isUpperCase(c) || Character.isDigit(c)) 
+            && Character.isLowerCase(modelName.charAt(i - 1))) {
+          pieceName += ' ';
+          c = Character.toLowerCase(c);
+        }
+        pieceName += c;
+      }
+    }
+    return pieceName;
   }
   
   /**
