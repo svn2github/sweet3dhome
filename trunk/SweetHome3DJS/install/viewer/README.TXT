@@ -4,8 +4,10 @@ SWEET HOME 3D JS VIEWER v 5.7
 This archive contains files required to install Sweet Home 3D JS Viewer, a 
 HTML5 component able to display the 3D view of a Sweet Home 3D file from its URL.
 The viewed SH3D file MUST have been saved with version Sweet Home 3D 5.3 
-or more recent version. This component can run under any web browser compatible 
+or a more recent version. This component can run under any web browser compatible 
 with WebGL (see http://caniuse.com/webgl for a list of compatible browsers).
+For local tests (including the HTML files found in this archive), be sure 
+to disable local file restrictions in your browser if needed.
 
 Mouse and keyboard navigation are explained at 
 http://sweethome3d.cvs.sf.net/viewvc/sweethome3d/SweetHome3D/src/com/eteks/sweethome3d/viewcontroller/resources/help/en/editing3DView.html
