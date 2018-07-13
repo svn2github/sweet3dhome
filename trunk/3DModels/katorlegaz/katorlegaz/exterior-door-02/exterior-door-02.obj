@@ -1,5 +1,9 @@
 # Blender3D v245 OBJ File: exterior-door-02.blend
 # www.blender3d.org
+#
+# Created by Andrew Kator & Jennifer Legaz
+# Added rotation support by Emmanuel Puybaret / eTeks
+#
 mtllib exterior-door-02.mtl
 o Exterior_door_2
 v -2.716919 -0.342371 -0.048508
@@ -958,7 +962,7 @@ v -2.974371 -7.058662 0.304517
 v -2.974399 7.058662 0.304517
 v -2.974399 -0.865628 0.304517
 v -2.974371 6.030183 0.304517
-g Exterior_door_2_Exterior_door_2_PAINT_gloss_white
+g sweethome3d_opening_on_hinge_1_Exterior_door_2_PAINT_gloss_white
 usemtl PAINT_gloss_white
 s off
 f 211 212 245 240
@@ -1127,7 +1131,7 @@ f 936 953 952 937
 f 933 956 954 935
 f 933 934 955 956
 f 940 949 948 941
-g Exterior_door_2_Exterior_door_2_METAL_brass_polish
+g sweethome3d_opening_on_hinge_1_Exterior_door_2_METAL_brass_polish
 usemtl METAL_brass_polish
 s 1
 f 171 161 172
@@ -1146,7 +1150,7 @@ f 163 164 172
 f 177 163 172
 f 162 177 172
 f 161 162 172
-g Exterior_door_2_Exterior_door_2_METAL_aluminum
+g sweethome3d_opening_on_hinge_1_Exterior_door_2_METAL_aluminum
 usemtl METAL_aluminum
 f 1 2 50 49
 f 2 3 51 50
@@ -3174,7 +3178,7 @@ f 1390 1389 1398 1391
 f 1392 1395 1396 1397
 f 1393 1391 1398 1394
 f 1395 1393 1394 1396
-g Door_frame_Door_frame_METAL_brass_polis.001
+g sweethome3d_hinge_1_Door_frame_METAL_brass_polis.001
 usemtl METAL_brass_polis.001
 f 1497 1489 1490
 f 1497 1490 1491

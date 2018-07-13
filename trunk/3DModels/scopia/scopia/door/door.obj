@@ -1,7 +1,11 @@
 # Blender v2.76 (sub 0) OBJ File: 'double_door.blend'
 # www.blender.org
+#
+# Created by Scopia
+# Added rotation support by Emmanuel Puybaret / eTeks
+#
 mtllib door.mtl
-o gonds_Cylinder.004
+o sweethome3d_hinge_1
 v 0.946925 182.097229 1.355418
 v 0.946925 188.031448 1.355420
 v 1.025299 188.031448 1.472715
@@ -302,7 +306,7 @@ f 135//22 134//22 151//22 153//22
 f 134//22 133//22 152//22 151//22
 f 133//21 145//21 146//21 152//21
 f 140//21 138//21 154//21 141//21
-o door.000_Cube.006
+o sweethome3d_opening_on_hinge_1_door
 v -65.212540 17.839443 0.817233
 v -13.562618 17.839443 0.817225
 v -15.459927 19.696545 1.338206
@@ -578,7 +582,7 @@ f 262//35 265//35 266//35 263//35
 f 220//79 264//79 266//79 265//79
 f 221//80 220//80 265//80 262//80
 f 264//81 261//81 263//81 266//81
-o handle_Cylinder
+o sweethome3d_opening_on_hinge_1_handle
 v -73.854149 99.750778 2.610313
 v -70.250748 101.636215 2.486018
 v -70.250748 101.636215 2.335569
