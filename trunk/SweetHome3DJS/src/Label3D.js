@@ -35,6 +35,8 @@ function Label3D(label, home, waitModelAndTextureLoadingEnd) {
   Object3DBranch.call(this);
   this.setUserData(label);
   
+  this.setCapability(Group3D.ALLOW_CHILDREN_EXTEND);
+  
   this.update();
 }
 Label3D.prototype = Object.create(Object3DBranch.prototype);
