@@ -1,5 +1,5 @@
 /*
- * SweetHome3DJava3DJSweetAdapter.java 
+ * SweetHome3DJava3DJSweetAdapter.java
  *
  * Sweet Home 3D, Copyright (c) 2017 Emmanuel PUYBARET / eTeks <info@eteks.com>
  *
@@ -36,7 +36,7 @@ import org.jsweet.transpiler.model.VariableAccessElement;
  */
 public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
   private Map<String, String> java3dTypeMapping = new HashMap<>();
-  
+
   public SweetHome3DJava3DJSweetAdapter(PrinterAdapter parent) {
     super(parent);
 
@@ -63,7 +63,7 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
     this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.Box", "Box3D");
     this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.GeometryInfo", "GeometryInfo3D");
     this.java3dTypeMapping.put("com.sun.j3d.utils.geometry.NormalGenerator", "GeometryInfo3D");
-    
+
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.Wall3D", "Wall3D");
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.Ground3D", "Ground3D");
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.Room3D", "Room3D");
@@ -71,7 +71,7 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.TextureManager", "TextureManager");
     this.java3dTypeMapping.put("com.eteks.sweethome3d.j3d.ModelManager", "ModelManager");
     addTypeMappings(this.java3dTypeMapping);
-    
+
     addAnnotation(FunctionalInterface.class, "com.eteks.sweethome3d.j3d.TextureManager.TextureObserver");
   }
 
@@ -171,16 +171,17 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
       if ("getHomeTextureClone".equals(invocation.getMethodName())) {
         print(invocation.getArguments().get(0));
         return true;
-      };      
+      };
     }
     return super.substituteMethodInvocation(invocation);
   }
-  
+
   @Override
   public boolean substituteVariableAccess(VariableAccessElement variableAccess) {
     if (variableAccess.getTargetExpression() != null) {
       switch (variableAccess.getTargetExpression().getTypeAsElement().toString()) {
         case "javax.vecmath.Point3f":
+        case "javax.vecmath.Point3d":
         case "javax.vecmath.TexCoord2f":
         case "javax.vecmath.Vector3f":
         case "javax.vecmath.Vector3d":
@@ -213,6 +214,7 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
         print("vec4.fromValues(").printArgList(newClass.getArguments()).print(")");
         return true;
       case "javax.vecmath.Point3f":
+      case "javax.vecmath.Point3d":
       case "javax.vecmath.Vector3f":
       case "javax.vecmath.Vector3d":
         print("vec3.fromValues(").printArgList(newClass.getArguments()).print(")");
@@ -221,7 +223,12 @@ public class SweetHome3DJava3DJSweetAdapter extends PrinterAdapter {
         print("vec2.fromValues(").printArgList(newClass.getArguments()).print(")");
         return true;
       case "javax.media.j3d.Transform3D":
-        print("mat4.create()");
+        if (newClass.getArguments().size() > 0
+            && "javax.media.j3d.Transform3D".equals(newClass.getArguments().get(0).getTypeAsElement().toString())) {
+          print("mat4.clone(").printArgList(newClass.getArguments()).print(")");
+        } else {
+          print("mat4.create(").printArgList(newClass.getArguments()).print(")");
+        }
         return true;
     }
     // Remove package in front of other Java 3D classes
