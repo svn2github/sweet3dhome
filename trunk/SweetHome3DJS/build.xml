@@ -45,6 +45,7 @@
         <file name="Room3D.js" />
         <file name="Ground3D.js" />
         <file name="Label3D.js" />
+        <file name="Polyline3D.js" />
         <file name="TextureManager.js" />
         <file name="viewHome.js" />
       </filelist>
