@@ -136,7 +136,8 @@ Polyline3D.prototype.update = function() {
       this.addChild(group);
     } else {
       var shape = this.getChild(0).getChild(0).getChild(0);
-      shape.setGeometry(geometryArray);
+      shape.removeGeometry(0);
+      shape.addGeometry(geometryArray);
     }
     
     var transformGroup = this.getChild(0).getChild(0);
