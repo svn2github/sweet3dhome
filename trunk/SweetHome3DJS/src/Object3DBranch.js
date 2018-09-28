@@ -19,6 +19,7 @@
  */
 
 // Requires scene3d.js
+//          ShapeTools.js
 //          geom.js
 
 /**
@@ -44,13 +45,7 @@ Object3DBranch.DEFAULT_AMBIENT_COLOR = 0x333333;
  * @ignore
  */
 Object3DBranch.prototype.getShape = function(points) {
-  var path = new java.awt.geom.GeneralPath();
-  path.moveTo(Math.fround(points[0][0]), Math.fround(points[0][1]));
-  for (var i = 1; i < points.length; i++) {
-    path.lineTo(Math.fround(points[i][0]), Math.fround(points[i][1]));
-  }
-  path.closePath();
-  return path;
+  return ShapeTools.getShape(points, true, null);
 }
 
 /**
@@ -92,16 +87,22 @@ Object3DBranch.prototype.updateTextureTransform = function(appearance, texture, 
     textureWidth = 100.;
     textureHeight = 100.;
   }
+  var textureXOffset = texture.getXOffset();
+  var textureYOffset = texture.getYOffset();
   var textureScale = 1 / texture.getScale();
   var rotation = mat3.create();
   mat3.rotate(rotation, rotation, texture.getAngle());
+  var translation = mat3.create();
   var transform = mat3.create();
   // Change scale if required
   if (scaled) {
+    mat3.fromTranslation(translation, vec2.fromValues(-textureXOffset / textureScale * textureWidth, -textureYOffset / textureScale * textureHeight));
     mat3.scale(transform, transform, vec2.fromValues(textureScale / textureWidth, textureScale / textureHeight));
   } else {
+    mat3.fromTranslation(translation, vec2.fromValues(-textureXOffset / textureScale, -textureYOffset / textureScale));
     mat3.multiplyScalar(transform, transform, textureScale);
   }
+  mat3.mul(rotation, rotation, translation);
   mat3.mul(transform, transform, rotation);
   appearance.setTextureTransform(transform);
 }

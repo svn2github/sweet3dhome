@@ -65,6 +65,8 @@ function HomeComponent3D(canvasId, home, preferences, object3dFactory, controlle
   this.furnitureChangeListener = null;
   this.roomListener = null;
   this.roomChangeListener = null;
+  this.polylineChangeListener = null;
+  this.polylineListener = null;
   this.labelListener = null;
   this.labelChangeListener = null;
   this.approximateHomeBoundsCache = null;
@@ -239,26 +241,6 @@ HomeComponent3D.prototype.setNavigationPanelVisible = function(visible) {
 }
 
 /**
- * Returns the closest home item displayed at client coordinates (x, y). 
- * @param {number} x
- * @param {number} y
- * @returns {Object}
- * @since 1.1
- */
-HomeComponent3D.prototype.getClosestItemAt = function(x, y) {
-  var node = this.canvas3D.getClosestShapeAt(x, y);
-  while (node !== null
-         && !(node instanceof Object3DBranch)) {
-    node = node.getParent();
-  }
-  if (node != null) {
-    return node.getUserData();
-  } else {
-    return null;
-  }
-}
-
-/**
  * Remove all listeners bound to home that updates 3D scene objects.
  * @private 
  */
@@ -271,6 +253,8 @@ HomeComponent3D.prototype.removeHomeListeners = function() {
   homeEnvironment.removePropertyChangeListener("GROUND_TEXTURE", this.backgroundChangeListener);
   homeEnvironment.removePropertyChangeListener("GROUND_COLOR", this.groundChangeListener);
   homeEnvironment.removePropertyChangeListener("GROUND_TEXTURE", this.groundChangeListener);
+  homeEnvironment.removePropertyChangeListener("BACKGROUND_IMAGE_VISIBLE_ON_GROUND_3D", this.groundChangeListener);
+  this.home.removePropertyChangeListener("BACKGROUND_IMAGE", this.groundChangeListener);
   homeEnvironment.removePropertyChangeListener("LIGHT_COLOR", this.lightColorListener);
   homeEnvironment.removePropertyChangeListener("WALLS_ALPHA", this.wallsAlphaListener);
   this.home.getCamera().removePropertyChangeListener(this.cameraChangeListener);
@@ -302,6 +286,11 @@ HomeComponent3D.prototype.removeHomeListeners = function() {
   var rooms = this.home.getRooms();
   for (var i = 0; i < rooms.length; i++) {
     rooms[i].removePropertyChangeListener(this.roomChangeListener);
+  }
+  this.home.removePolylinesListener(this.polylineListener);
+  var polylines = this.home.getPolylines();
+  for (var i = 0; i < polylines.length; i++) {
+    polylines[i].removePropertyChangeListener(this.polylineChangeListener);
   }
   this.home.removeLabelsListener(this.labelListener);
   var labels = this.home.getLabels();
@@ -392,28 +381,31 @@ HomeComponent3D.prototype.updateView = function(camera) {
   }
   this.canvas3D.setFieldOfView(fieldOfView);
   var frontClipDistance = 2.5;
-  // It's recommended to keep ratio between back and front clip distances under 3000
-  var frontBackDistanceRatio = 3000;
-  var approximateHomeBounds = this.getApproximateHomeBounds();
-  // If camera is out of home bounds, adjust the front clip distance to the distance to home bounds 
-  if (approximateHomeBounds != null 
-      && !approximateHomeBounds.intersect(vec3.fromValues(camera.getX(), camera.getY(), camera.getZ()))) {
-    var distanceToClosestBoxSide = this.getDistanceToBox(camera.getX(), camera.getY(), camera.getZ(), approximateHomeBounds);
-    if (!isNaN(distanceToClosestBoxSide)) {
-      frontClipDistance = Math.max(frontClipDistance, 0.1 * distanceToClosestBoxSide);
+  var frontBackDistanceRatio = 500000;
+  if (this.canvas3D.getDepthBits() <= 16) {
+    // It's recommended to keep ratio between back and front clip distances under 3000
+    var frontBackDistanceRatio = 3000;
+    var approximateHomeBounds = this.getApproximateHomeBounds();
+    // If camera is out of home bounds, adjust the front clip distance to the distance to home bounds 
+    if (approximateHomeBounds != null 
+        && !approximateHomeBounds.intersect(vec3.fromValues(camera.getX(), camera.getY(), camera.getZ()))) {
+      var distanceToClosestBoxSide = this.getDistanceToBox(camera.getX(), camera.getY(), camera.getZ(), approximateHomeBounds);
+      if (!isNaN(distanceToClosestBoxSide)) {
+        frontClipDistance = Math.max(frontClipDistance, 0.1 * distanceToClosestBoxSide);
+      }
     }
-  }
-  var canvasBounds = this.canvas3D.getCanvas().getBoundingClientRect();
-  if (camera.getZ() > 0 && canvasBounds.width !== 0 && canvasBounds.height !== 0) {
-    var halfVerticalFieldOfView = Math.atan(Math.tan(fieldOfView / 2) * canvasBounds.height / canvasBounds.width);
-    var fieldOfViewBottomAngle = camera.getPitch() + halfVerticalFieldOfView;
-    // If the horizon is above the frustrum bottom, take into account the distance to the ground 
-    if (fieldOfViewBottomAngle > 0) {
-      var distanceToGroundAtFieldOfViewBottomAngle = (camera.getZ() / Math.sin(fieldOfViewBottomAngle));
-      frontClipDistance = Math.min(frontClipDistance, 0.35 * distanceToGroundAtFieldOfViewBottomAngle);
-      if (frontClipDistance * frontBackDistanceRatio < distanceToGroundAtFieldOfViewBottomAngle) {
-        // Ensure the ground is always visible at the back clip distance
-        frontClipDistance = distanceToGroundAtFieldOfViewBottomAngle / frontBackDistanceRatio;
+    var canvasBounds = this.canvas3D.getCanvas().getBoundingClientRect();
+    if (camera.getZ() > 0 && canvasBounds.width !== 0 && canvasBounds.height !== 0) {
+      var halfVerticalFieldOfView = Math.atan(Math.tan(fieldOfView / 2) * canvasBounds.height / canvasBounds.width);
+      var fieldOfViewBottomAngle = camera.getPitch() + halfVerticalFieldOfView;
+      // If the horizon is above the frustrum bottom, take into account the distance to the ground 
+      if (fieldOfViewBottomAngle > 0) {
+        var distanceToGroundAtFieldOfViewBottomAngle = (camera.getZ() / Math.sin(fieldOfViewBottomAngle));
+        frontClipDistance = Math.min(frontClipDistance, 0.35 * distanceToGroundAtFieldOfViewBottomAngle);
+        if (frontClipDistance * frontBackDistanceRatio < distanceToGroundAtFieldOfViewBottomAngle) {
+          // Ensure the ground is always visible at the back clip distance
+          frontClipDistance = distanceToGroundAtFieldOfViewBottomAngle / frontBackDistanceRatio;
+        }
       }
     }
   }
@@ -1203,6 +1195,26 @@ HomeComponent3D.prototype.getInputMap = function() {
 }
 
 /**
+ * Returns the closest home item displayed at client coordinates (x, y). 
+ * @param {number} x
+ * @param {number} y
+ * @returns {Object}
+ * @since 1.1
+ */
+HomeComponent3D.prototype.getClosestItemAt = function(x, y) {
+  var node = this.canvas3D.getClosestShapeAt(x, y);
+  while (node !== null
+         && !(node instanceof Object3DBranch)) {
+    node = node.getParent();
+  }
+  if (node != null) {
+    return node.getUserData();
+  } else {
+    return null;
+  }
+}
+
+/**
  * Returns a new scene tree root.
  * @private 
  */
@@ -1301,7 +1313,7 @@ HomeComponent3D.prototype.createHalfSphereGeometry = function(top) {
     var nextAlpha = (i  + 1) * 2 * Math.PI / divisionCount;
     var cosNextAlpha = Math.cos(nextAlpha);
     var sinNextAlpha = Math.sin(nextAlpha);
-    for (var j = 0; j < divisionCount / 4; j++, k += 4) {
+    for (var j = 0, max = divisionCount / 4; j < max; j++, k += 4) {
       var beta = 2 * j * Math.PI / divisionCount;
       var cosBeta = Math.cos(beta); 
       var sinBeta = Math.sin(beta);
@@ -1324,10 +1336,10 @@ HomeComponent3D.prototype.createHalfSphereGeometry = function(top) {
         coordIndices.push(k);
         coordIndices.push(k + 2);
         coordIndices.push(k + 3);
-        textureCoords.push(vec2.fromValues(i / divisionCount, sinBeta)); 
-        textureCoords.push(vec2.fromValues((i + 1) / divisionCount, sinBeta)); 
-        textureCoords.push(vec2.fromValues((i + 1) / divisionCount, sinNextBeta)); 
-        textureCoords.push(vec2.fromValues(i / divisionCount, sinNextBeta));
+        textureCoords.push(vec2.fromValues(i / divisionCount, j / max)); 
+        textureCoords.push(vec2.fromValues((i + 1) / divisionCount, j / max)); 
+        textureCoords.push(vec2.fromValues((i + 1) / divisionCount, (j + 1) / max)); 
+        textureCoords.push(vec2.fromValues(i / divisionCount, (j + 1) / max));
       } else {
         coordIndices.push(k);
         coordIndices.push(k + 2);
@@ -1359,10 +1371,13 @@ HomeComponent3D.prototype.updateBackgroundColorAndTexture = function(skyBackgrou
                                                            (skyColor & 0xFF) / 255.));
   var skyTexture = home.getEnvironment().getSkyTexture();
   if (skyTexture !== null) {
+    var transform = mat3.create();
+    mat3.fromTranslation(transform, vec2.fromValues(-skyTexture.getXOffset(), 0));
     TextureManager.getInstance().loadTexture(skyTexture.getImage(), 0, waitForLoading,
         {
           textureUpdated : function(textureImage) {
             skyBackgroundAppearance.setTextureImage(textureImage);
+            skyBackgroundAppearance.setTextureTransform(transform);
           },
           textureError : function(error) {
             return this.textureUpdated(TextureManager.getInstance().getErrorImage());
@@ -1451,7 +1466,9 @@ HomeComponent3D.prototype.createGroundNode = function(groundOriginX, groundOrigi
         };
       var homeEnvironment = this.home.getEnvironment();
       homeEnvironment.addPropertyChangeListener("GROUND_COLOR", this.groundChangeListener);
+      homeEnvironment.addPropertyChangeListener("BACKGROUND_IMAGE_VISIBLE_ON_GROUND_3D", this.groundChangeListener);
       homeEnvironment.addPropertyChangeListener("GROUND_TEXTURE", this.groundChangeListener);
+      this.home.addPropertyChangeListener("BACKGROUND_IMAGE", this.groundChangeListener);
     }    
     return transformGroup;
   }
@@ -1510,10 +1527,14 @@ HomeComponent3D.prototype.updateLightColor = function(light) {
 HomeComponent3D.prototype.createHomeTree = function(listenToHomeUpdates, waitForLoading) {
   var homeRoot = new BranchGroup3D();
   homeRoot.setCapability(Group3D.ALLOW_CHILDREN_EXTEND);
-  // Add walls, pieces, rooms and labels already available
+  // Add walls, pieces, rooms, polylines and labels already available
   var labels = this.home.getLabels();
   for (var i = 0; i < labels.length; i++) {
     this.addObject(homeRoot, labels [i], listenToHomeUpdates, waitForLoading);
+  }
+  var polylines = this.home.getPolylines();
+  for (var i = 0; i < polylines.length; i++) {
+    this.addObject(homeRoot, polylines [i], listenToHomeUpdates, waitForLoading);
   }
   var rooms = this.home.getRooms();
   for (var i = 0; i < rooms.length; i++) {
@@ -1544,6 +1565,7 @@ HomeComponent3D.prototype.createHomeTree = function(listenToHomeUpdates, waitFor
     this.addWallListener(homeRoot);
     this.addFurnitureListener(homeRoot);
     this.addRoomListener(homeRoot);
+    this.addPolylineListener(homeRoot);
     this.addLabelListener(homeRoot);
     this.addEnvironmentListeners();
   }
@@ -1560,10 +1582,24 @@ HomeComponent3D.prototype.addLevelListener = function(group) {
   var component3D = this;
   this.levelChangeListener = function(ev) {
       var propertyName = ev.getPropertyName();
-      if ("ELEVATION" == propertyName
-          || "VISIBLE" == propertyName
+      if ("VISIBLE" == propertyName
           || "VIEWABLE" == propertyName) {
+        var objects = component3D.homeObjects;
+        var updatedItems = [];
+        for (var i = 0; i < objects.length; i++) {
+          var item = objects [i];
+          if (item instanceof Room // 3D rooms depend on rooms at other levels
+              || item.isAtLevel !== undefined // item instanceof Elevetable
+              || item.isAtLevel(ev.getSource())) {
+            updatedItems.push(item);
+          }
+        }
+        component3D.updateObjects(updatedItems);          
+        component3D.groundChangeListener(null);
+      } else if ("ELEVATION" == propertyName) {
         component3D.updateObjects(component3D.homeObjects.slice(0));          
+        component3D.groundChangeListener(null);
+      } else if ("BACKGROUND_IMAGE" == propertyName()) {
         component3D.groundChangeListener(null);
       } else if ("FLOOR_THICKNESS" == propertyName) {
         component3D.updateObjects(component3D.home.getWalls());          
@@ -1646,7 +1682,11 @@ HomeComponent3D.prototype.addWallListener = function(group) {
       if ("PATTERN" != propertyName) {
         var updatedWall = ev.getSource();
         component3D.updateWall(updatedWall);          
-        component3D.updateObjects(component3D.home.getRooms());
+        var levels = component3D.home.getLevels();
+        if (updatedWall.getLevel() === null
+            || updatedWall.isAtLevel(levels [levels.length - 1])) {
+          component3D.updateObjects(component3D.home.getRooms());
+        }
         if (updatedWall.getLevel() != null && updatedWall.getLevel().getElevation() < 0) {
           component3D.groundChangeListener(null);
         }
@@ -1681,9 +1721,29 @@ HomeComponent3D.prototype.addWallListener = function(group) {
  */
 HomeComponent3D.prototype.addFurnitureListener = function(group) {
   var component3D = this;
-  var updatePieceOfFurnitureGeometry = function(piece) {
+  var updatePieceOfFurnitureGeometry = function(piece, propertyName, oldValue) {
       component3D.updateObjects([piece]);
       if (component3D.containsDoorsAndWindows(piece)) {
+        if (oldValue !== null) {
+          var oldPiece = piece.clone();
+          if ("X" == propertyName) {
+            oldPiece.setX(oldValue);
+          } else if ("Y" == propertyName) {
+            oldPiece.setY(oldValue);
+          } else if ("ANGLE" == propertyName) {
+            oldPiece.setAngle(oldValue);
+          } else if ("WIDTH" == propertyName) {
+            oldPiece.setWidth(oldValue);
+          } else if ("DEPTH" == propertyName) {
+            oldPiece.setDepth(oldValue);
+          }
+          // For doors and windows, propertyName can't be equal to ROLL or PITCH
+
+          component3D.updateIntersectingWalls([oldPiece, piece]);
+        } else {
+          component3D.updateIntersectingWalls([piece]);
+        }
+        
         component3D.updateObjects(component3D.home.getWalls());
       } else if (component3D.containsStaircases(piece)) {
         component3D.updateObjects(component3D.home.getRooms());
@@ -1702,13 +1762,14 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
           || "PITCH" == propertyName
           || "WIDTH" == propertyName
           || "DEPTH" == propertyName) {
-        updatePieceOfFurnitureGeometry(updatedPiece);
+        updatePieceOfFurnitureGeometry(updatedPiece, propertyName, ev.getOldValue());
       } else if ("HEIGHT" == propertyName
           || "ELEVATION" == propertyName
           || "MODEL_MIRRORED" == propertyName
+          || "MODEL_TRANSFORMATIONS" == propertyName
           || "VISIBLE" == propertyName
           || "LEVEL" == propertyName) {
-        updatePieceOfFurnitureGeometry(updatedPiece);
+        updatePieceOfFurnitureGeometry(updatedPiece, null, null);
       } else if ("COLOR" == propertyName
           || "TEXTURE" == propertyName
           || "MODEL_MATERIALS" == propertyName
@@ -1767,7 +1828,7 @@ HomeComponent3D.prototype.addFurnitureListener = function(group) {
       }
       // If piece is or contains a door or a window, update walls that intersect with piece
       if (component3D.containsDoorsAndWindows(piece)) {
-        component3D.updateObjects(component3D.home.getWalls());
+        component3D.updateIntersectingWalls([piece]);
       } else if (component3D.containsStaircases(piece)) {
         component3D.updateObjects(component3D.home.getRooms());
       } else {
@@ -1842,7 +1903,7 @@ HomeComponent3D.prototype.addRoomListener = function(group) {
   }
   this.roomListener = function(ev) {
       var room = ev.getItem();
-      switch ((ev.getType())) {
+      switch (ev.getType()) {
         case CollectionEvent.Type.ADD :
           component3D.addObject(group, room, ev.getIndex(), true, false);
           room.addPropertyChangeListener(component3D.roomChangeListener);
@@ -1875,6 +1936,38 @@ HomeComponent3D.prototype.getShape = function(points) {
 }
 
 /**
+ * Adds a polyline listener to home polylines that updates the children of the given
+ * <code>group</code>, each time a polyline is added, updated or deleted.
+ * @param {Group} group
+ * @private
+ */
+HomeComponent3D.prototype.addPolylineListener = function(group) {
+  var component3D = this;
+  this.polylineChangeListener = function(ev) {
+      var polyline = ev.getSource();
+      component3D.updateObjects([polyline]);
+    };
+  var polylines = this.home.getPolylines();
+  for (var i = 0; i < polylines.length; i++) {
+    polylines[i].addPropertyChangeListener(this.polylineChangeListener);
+  }
+  this.polylineListener = function(ev) {
+      var polyline = ev.getItem();
+      switch (ev.getType()) {
+        case CollectionEvent.Type.ADD :
+          component3D.addObject(group, polyline, true, false);
+          polyline.addPropertyChangeListener(component3D.polylineChangeListener);
+          break;
+        case CollectionEvent.Type.DELETE :
+          component3D.deleteObject(polyline);
+          polyline.removePropertyChangeListener(component3D.polylineChangeListener);
+          break;
+      }
+    };
+  this.home.addPolylinesListener(this.polylineListener);
+}
+
+/**
  * Adds a label listener to home labels that updates the children of the given
  * <code>group</code>, each time a label is added, updated or deleted.
  * @param {Group3D} group
@@ -1892,7 +1985,7 @@ HomeComponent3D.prototype.addLabelListener = function(group) {
   }
   this.labelListener = function(ev) {
       var label = ev.getItem();
-      switch ((ev.getType())) {
+      switch (ev.getType()) {
         case CollectionEvent.Type.ADD :
           component3D.addObject(group, label, true, false);
           label.addPropertyChangeListener(component3D.labelChangeListener);
@@ -1964,7 +2057,7 @@ HomeComponent3D.prototype.deleteObject = function(homeObject) {
 }
 
 /**
- * Updates <code>objects</code> later. 
+ * Updates 3D <code>objects</code> later. 
  * @param {Array} objects
  * @private
  */
@@ -1972,7 +2065,7 @@ HomeComponent3D.prototype.updateObjects = function(objects) {
   if (this.homeObjectsToUpdate) {
     for (var i = 0; i < objects.length; i++) {
       var object = objects [i];
-      if (this.homeObjectsToUpdate.indexOf(object) <= -1) {
+      if (this.homeObjectsToUpdate.indexOf(object) <= -1) {        
         this.homeObjectsToUpdate.push(object);
       }
     }
@@ -1992,6 +2085,50 @@ HomeComponent3D.prototype.updateObjects = function(objects) {
         }, 0, this);
   }
   this.approximateHomeBoundsCache = null;
+}
+
+/**
+ * Updates walls that may intersect from the given doors or window.
+ * @param {Array} doorOrWindows
+ * @private
+ */
+HomeComponent3D.prototype.updateIntersectingWalls = function(doorOrWindows) {
+  var walls = this.home.getWalls();
+  var wallCount = 0;
+  if (this.homeObjectsToUpdate !== null) {
+    for (var i = 0; i < this.homeObjectsToUpdate.length; i++) {
+      if (this.homeObjectsToUpdate [i] instanceof Wall) {
+        wallCount++;
+      }
+    }
+  }
+
+  if (wallCount !== walls.length) {
+    var updatedWalls = [];
+    var doorOrWindowBounds = null;
+    for (var i = 0; i < doorOrWindows.length; i++) {
+      var doorOrWindow = doorOrWindows [i];
+      var points = doorOrWindow.getPoints();
+      if (doorOrWindowBounds === null) {
+        doorOrWindowBounds = new java.awt.geom.Rectangle2D.Float(points [0][0], points [0][1], 0, 0);
+      } else {
+        doorOrWindowBounds.add(points [0][0], points [0][1]);
+      }
+      for (var j = 1; j < points.length; j++) {
+        doorOrWindowBounds.add(points [j][0], points [j][1]);
+      }
+    }
+    // Search walls that intersect approximative bounds
+    for (var i = 0; i < walls.length; i++) {
+      var wall = walls [i];
+      if (wall.intersectsRectangle(doorOrWindowBounds.getX(), doorOrWindowBounds.getY(),
+          doorOrWindowBounds.getX() + doorOrWindowBounds.getWidth(),
+          doorOrWindowBounds.getY() + doorOrWindowBounds.getHeight())) {
+        updatedWalls.add(wall);
+      }
+    }
+    this.updateObjects(updatedWalls);
+  }
 }
 
 /**
@@ -2032,6 +2169,8 @@ Object3DBranchFactory.prototype.createObject3D = function(home, item, waitForLoa
     return new Wall3D(item, home, waitForLoading);
   } else if (item instanceof Room) {
     return new Room3D(item, home, false, waitForLoading);
+  } else if (item instanceof Polyline) {
+    return new Polyline3D(item, home);
    } else if (item instanceof Label) {
      return new Label3D(item, home, waitForLoading);
   } else {

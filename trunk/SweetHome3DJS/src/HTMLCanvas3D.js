@@ -247,6 +247,13 @@ HTMLCanvas3D.prototype.getCanvas = function() {
 }
 
 /**
+ * Returns the depth bits count in WebGL.
+ */
+HTMLCanvas3D.prototype.getDepthBits = function() {
+  return this.gl.getParameter(this.gl.DEPTH_BITS);
+}
+
+/**
  * Sets the field of view of this canvas.
  * @param {number} fieldOfView
  */
@@ -1280,7 +1287,7 @@ HTMLCanvas3D.prototype.getClosestShapeAt = function(x, y) {
         if (defaultColor !== undefined) {
           geometry.diffuseColor = defaultColor;
         }
-      }
+      } 
     }
     
     this.gl.readPixels(0, 0, this.pickingFrameBuffer.width, this.pickingFrameBuffer.height, this.gl.RGBA, this.gl.UNSIGNED_BYTE,

@@ -71,6 +71,8 @@ HomePieceOfFurniture3D.prototype.createPieceOfFurnitureNode = function(piece, wa
   var piece3D = this;
   ModelManager.getInstance().loadModel(model, waitModelAndTextureLoadingEnd, {
       modelUpdated : function(modelRoot) {
+        piece3D.updateModelTransformations(modelRoot);
+
         var modelRotation = piece.getModelRotation();
         // Add piece model scene to a normalized transform group
         var modelTransformGroup = ModelManager.getInstance().getNormalizedTransformGroup(
@@ -91,9 +93,12 @@ HomePieceOfFurniture3D.prototype.createPieceOfFurnitureNode = function(piece, wa
  * Updates this branch from the home piece it manages.
  */
 HomePieceOfFurniture3D.prototype.update = function() {
-  this.updatePieceOfFurnitureTransform();
-  this.updatePieceOfFurnitureModelMirrored();
-  this.updatePieceOfFurnitureColorAndTexture(false);      
+  if (this.isVisible()) {
+    this.updatePieceOfFurnitureModelTransformations();
+    this.updatePieceOfFurnitureTransform();
+    this.updatePieceOfFurnitureModelMirrored();
+    this.updatePieceOfFurnitureColorAndTexture(false);      
+  }
   this.updatePieceOfFurnitureVisibility();      
 }
 
@@ -154,9 +159,7 @@ HomePieceOfFurniture3D.prototype.getModelNode = function() {
 HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureVisibility = function() {
   var piece = this.getUserData();
   // Update visibility of filled model shapes
-  var visible = piece.isVisible() 
-      && (piece.getLevel() === null
-          || piece.getLevel().isViewableAndVisible()); 
+  var visible = this.isVisible();
   var materials = piece.getColor() === null && piece.getTexture() === null
       ? piece.getModelMaterials()
       : null;
@@ -174,21 +177,145 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelMirrored = function(
 }
 
 /**
+ * Sets the transformations applied to piece model parts.
+ * @private 
+ */
+HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelTransformations = function() {
+  var piece = this.getUserData();
+  var modelNode = this.getModelNode();
+  if (modelNode.getChild(0).getUserData() !== HomePieceOfFurniture3D.DEFAULT_BOX
+      && this.updateModelTransformations(this)) {
+    // Update normalized transform group
+    var modelTransform = ModelManager.getInstance().
+        getNormalizedTransform(modelNode.getChild(0), piece.getModelRotation(), 1, piece.isModelCenteredAtOrigin());
+    modelNode.setTransform(modelTransform);
+  }
+}
+
+/**
+ * Sets the transformations applied to <code>node</code> children
+ * and returns <code>true</code> if a transformation was changed.
+ * @param {Node3D} node
+ * @private 
+ */
+HomePieceOfFurniture3D.prototype.updateModelTransformations = function(node) {
+  var modifiedTransformations = false;
+  var transformations = this.getUserData().getModelTransformations();
+  var updatedTransformations = null;
+  if (transformations !== null) {
+    for (var i = 0; i < transformations.length; i++) {
+      var transformation = transformations [i];
+      var transformName = transformation.getName() + ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX;
+      if (updatedTransformations === null) {
+        updatedTransformations = [];
+      }
+      updatedTransformations.push(transformName);
+      modifiedTransformations |= this.updateTransformation(node, transformName, transformation.getMatrix());
+    }
+  }
+  modifiedTransformations |= this.setNotUpdatedTranformationsToIdentity(node, updatedTransformations);
+  return modifiedTransformations;
+}
+
+/**
+ * Sets the transformation matrix of the children which user data is equal to <code>transformGroupName</code>.
+ * @param {Node3D} node
+ * @param {String} transformGroupName
+ * @param {Array}  matrix
+ * @private 
+ */
+HomePieceOfFurniture3D.prototype.updateTransformation = function(node, transformGroupName, matrix) {
+  var modifiedTransformations = false;
+  if (node instanceof Group3D) {
+    if (node instanceof TransformGroup3D
+        && transformGroupName == node.getName()) {
+      var transformMatrix = mat4.create();
+      node.getTransform(transformMatrix);
+      if (matrix [0][0] !== transformMatrix [0]
+          || matrix [0][1] !== transformMatrix [4]
+          || matrix [0][2] !== transformMatrix [8]
+          || matrix [0][3] !== transformMatrix [12]
+          || matrix [1][0] !== transformMatrix [1]
+          || matrix [1][1] !== transformMatrix [5]
+          || matrix [1][2] !== transformMatrix [9]
+          || matrix [1][3] !== transformMatrix [13]
+          || matrix [2][0] !== transformMatrix [2]
+          || matrix [2][1] !== transformMatrix [6]
+          || matrix [2][2] !== transformMatrix [10]
+          || matrix [2][3] !== transformMatrix [14]) {
+        mat4.set(transformMatrix, 
+            matrix[0][0], matrix[1][0], matrix[2][0], 0,
+            matrix[0][1], matrix[1][1], matrix[2][1], 0,
+            matrix[0][2], matrix[1][2], matrix[2][2], 0,
+            matrix[0][3], matrix[1][3], matrix[2][3], 1);
+        node.setTransform(transformMatrix);
+        modifiedTransformations = true;
+      }
+    } else {
+      var children = node.getChildren(); 
+      for (var i = 0; i < children.length; i++) {
+        modifiedTransformations |= this.updateTransformation(children [i], transformGroupName, matrix);
+      }
+    }
+  }
+  // No Link parsing
+
+  return modifiedTransformations;
+}
+
+/**
+ * Sets the transformation matrix of the children which user data is not in <code>updatedTransformations</code> to identity.
+ * @param {Node3D} node
+ * @param {string[]} updatedTransformations
+ * @private 
+ */
+HomePieceOfFurniture3D.prototype.setNotUpdatedTranformationsToIdentity = function(node, updatedTransformations) {
+  var modifiedTransformations = false;
+  if (node instanceof Group3D) {
+    if (node instanceof TransformGroup3D
+        && node.getName() !== null
+        && node.getName().indexOf(ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX) === node.getName().length - ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX.length
+        && (updatedTransformations === null
+            || updatedTransformations.indexOf(node.getName()) < 0)) {
+      var group = node;
+      var transform = mat4.create();
+      group.getTransform(transform);
+      if (!TransformGroup3D.isIdentity(transform)) {
+        mat4.identity(transform);
+        group.setTransform(transform);
+        modifiedTransformations = true;
+      }
+    }
+    var children = node.getChildren(); 
+    for (var i = 0; i < children.length; i++) {
+      modifiedTransformations |= this.setNotUpdatedTranformationsToIdentity(children [i], updatedTransformations);
+    }
+  }
+
+  return modifiedTransformations;
+}
+
+/**
  * Updates transform group children with <code>modelMode</code>.
  * @private
  */
-HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(modelNode, normalization, waitTextureLoadingEnd) {    
+HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(modelNode, normalization, waitTextureLoadingEnd) {
+  normalization.setCapability(TransformGroup3D.ALLOW_TRANSFORM_WRITE);
   normalization.addChild(modelNode);
   // Add model node to branch group
   var modelBranch = new BranchGroup3D();
   modelBranch.addChild(normalization);
+
+  var piece = this.getUserData();
+  if (piece.isDoorOrWindow()) {
+    this.setTransparentShapeNotPickable(modelNode);
+  }
 
   var transformGroup = this.getChild(0);
   // Remove previous nodes    
   transformGroup.removeAllChildren();
   // Add model branch to live scene
   transformGroup.addChild(modelBranch);
-  var piece = this.getUserData();
   if (piece.isHorizontallyRotated()) {
     // Update piece transformation to ensure its center is correctly placed
     this.updatePieceOfFurnitureTransform();
@@ -203,10 +330,6 @@ HomePieceOfFurniture3D.prototype.updatePieceOfFurnitureModelNode = function(mode
   this.updatePieceOfFurnitureModelMirrored();
   this.updatePieceOfFurnitureColorAndTexture(waitTextureLoadingEnd);      
   this.updatePieceOfFurnitureVisibility();
-  
-  if (piece.isDoorOrWindow()) {
-    this.setTransparentShapeNotPickable(this);
-  }
 }
 
 /**
@@ -529,6 +652,17 @@ HomePieceOfFurniture3D.prototype.setVisible = function(node, visible, materials)
     appearance.setVisible(visible);
   } 
 } 
+
+/**
+ * Returns <code>true</code> if this 3D piece is visible.
+ * @private
+ */
+HomePieceOfFurniture3D.prototype.isVisible = function() {
+  var piece = this.getUserData();
+  return piece.isVisible()
+      && (piece.getLevel() === null
+          || piece.getLevel().isViewableAndVisible());
+}
 
 /**
  * Returns <code>true</code> if this piece of furniture belongs to <code>selectedItems</code>.

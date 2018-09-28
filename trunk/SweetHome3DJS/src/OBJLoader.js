@@ -1089,7 +1089,7 @@ OBJLoader.prototype.createGroupShapes = function(vertices, textureCoordinates, n
       
       var shape = new Shape3D(geometryArray, appearance);   
       sceneRoot.addChild(shape);
-      shape.setName(group.name + (i === 0 ? "" : i));   
+      shape.setName(group.name + (i === 0 ? "" : "_" + i));
       i = max;
     }
   }
@@ -1264,11 +1264,13 @@ OBJLoader.prototype.parseObjectLine = function(objContent, startOfLine, vertices
   } else if (start === "f") {
     var face = this.parseFace(strings, currentObjects.smooth, currentObjects.material);
     if (face.vertexIndices.length > 2) {
-      if (face.normalIndices.length === 0) {
+      if (face.normalIndices.length === 0
+          || currentObjects.group.name.indexOf("sweethome3d_") === 0) {
         currentObjects.group.addGeometry(face);
       } else {
-        // Add faces with normals to the group with the same material 
-        // since there won't be any smooth normal to compute
+        // Except for group names starting with sweethome3d_ which faces group mustn't be changed,
+        // add faces with normals to the group with the same material 
+        // since there won't be any smooth normal to computes
         if (!(face.material in materialGroupsWithNormals)) {
           materialGroupsWithNormals [face.material] = currentObjects.group;
         }

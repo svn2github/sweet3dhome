@@ -592,7 +592,7 @@ function TransformGroup3D(transform) {
 TransformGroup3D.prototype = Object.create(Group3D.prototype);
 TransformGroup3D.prototype.constructor = TransformGroup3D;
 
-TransformGroup3D.ALLOW_TRANSFORM_WRITE = 3;
+TransformGroup3D.ALLOW_TRANSFORM_WRITE = 4;
 
 TransformGroup3D.prototype.getTransform = function(transform) {
   mat4.copy(transform, this.transform);
@@ -628,6 +628,19 @@ TransformGroup3D.areTransformationsEqual = function(transform1, transform2) {
   } else {
     return transform1 === transform2;
   }
+}
+
+/**
+ * Return <code>true</code> if the given <code>transform</code> is identity.
+ * @param {mat4} transform
+ * @package
+ * @ignore
+ */
+TransformGroup3D.isIdentity = function(transform) {
+  if (TransformGroup3D.IDENTITY === undefined) {
+    TransformGroup3D.IDENTITY = mat4.create();
+  }
+  return mat4.exactEquals(transform, TransformGroup3D.IDENTITY);
 }
 
 TransformGroup3D.prototype.clone = function() {
@@ -972,8 +985,7 @@ IndexedGeometryArray3D.prototype.hasTextureCoordinates = function() {
  * Disposes the vertices and texture coordinates used by this geometry.
  */
 IndexedGeometryArray3D.prototype.disposeCoordinates = function() {
-  // Keep this.vertices to possibly compute bounds with transformation 
-  delete this.vertexIndices;
+  // Keep this.vertices and this.vertexIndices to possibly compute bounds with transformation 
   delete this.textureCoordinates;
   delete this.textureCoordinateIndices;
 }

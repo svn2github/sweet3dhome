@@ -386,7 +386,7 @@ Max3DSLoader.prototype.createShapes = function(mesh, meshesGroups, appearances, 
         }
         shape = new Shape3D(geometryArray, appearance);   
         parentGroup.addChild(shape);
-        shape.setName(mesh.name + (i === 0 ? "" : i));
+        shape.setName(mesh.name + (i === 0 ? "" : "_" + i));
       } else {
         shape.addGeometry(geometryArray);
       }

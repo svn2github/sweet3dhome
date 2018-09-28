@@ -49,19 +49,107 @@ function Ground3D(home, originX, originY, width, depth, waitTextureLoadingEnd) {
   groundShape.setAppearance(groundAppearance);
 
   this.addChild(groundShape);
+  
+  var backgroundImageAppearance = new Appearance3D();
+  this.updateAppearanceMaterial(backgroundImageAppearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_COLOR, 0);
+  backgroundImageAppearance.setCullFace(Appearance3D.CULL_NONE);
+
+  var transformGroup = new TransformGroup3D();
+  // Allow the change of the transformation that sets background image size and position
+  transformGroup.setCapability(TransformGroup3D.ALLOW_TRANSFORM_WRITE);
+  var backgroundImageShape = new Shape3D( 
+      new IndexedTriangleArray3D(
+         [vec3.fromValues(-0.5, 0, -0.5),
+          vec3.fromValues(-0.5, 0, 0.5),
+          vec3.fromValues(0.5, 0, 0.5),
+          vec3.fromValues(0.5, 0, -0.5)],
+         [0, 1, 2, 0, 2, 3],
+         [vec2.fromValues(0., 0.),
+          vec2.fromValues(1., 0.),
+          vec2.fromValues(1., 1.),
+          vec2.fromValues(0., 1.)],
+         [3, 0, 1, 3, 1, 2],
+         [vec3.fromValues(0., 1., 0.)],
+         [0, 0, 0, 0, 0, 0]), backgroundImageAppearance);
+  transformGroup.addChild(backgroundImageShape);
+  this.addChild(transformGroup);
+
   this.update(waitTextureLoadingEnd);
 }
 Ground3D.prototype = Object.create(Object3DBranch.prototype);
 Ground3D.prototype.constructor = Ground3D;
 
 /**
- * Updates ground coloring and texture attributes from home ground color and texture.
+ * Updates the geometry and attributes of ground and sublevels.
  * @param {boolean} [waitTextureLoadingEnd]
  */
 Ground3D.prototype.update = function(waitTextureLoadingEnd) {
   if (waitTextureLoadingEnd === undefined) {
     waitTextureLoadingEnd = false;
   }
+  var home = this.getUserData();
+
+  // Update background image viewed on ground
+  var backgroundImageGroup = this.getChild(1);
+  var backgroundImageShape = backgroundImageGroup.getChild(0);
+  var backgroundImageAppearance = backgroundImageShape.getAppearance();
+  var backgroundImage = null;
+  if (home.getEnvironment().isBackgroundImageVisibleOnGround3D()) {
+    var levels = home.getLevels();
+    if (levels.length > 0) {
+      for (var i = levels.length - 1; i >= 0; i--) {
+        var level = levels [i];
+        if (level.getElevation() == 0
+            && level.isViewableAndVisible()
+            && level.getBackgroundImage() !== null
+            && level.getBackgroundImage().isVisible()) {
+          backgroundImage = level.getBackgroundImage();
+          break;
+        }
+      }
+    } else if (home.getBackgroundImage() !== null
+              && home.getBackgroundImage().isVisible()) {
+      backgroundImage = home.getBackgroundImage();
+    }
+  }
+  if (backgroundImage !== null) {
+    var ground3d = this;
+    TextureManager.getInstance().loadTexture(backgroundImage.getImage(), waitTextureLoadingEnd, {
+        textureUpdated : function(texture) {
+          // Update image location and size
+          var backgroundImageScale = backgroundImage.getScale();
+          var imageWidth = backgroundImageScale * texture.width;
+          var imageHeight = backgroundImageScale * texture.height;
+          var backgroundImageTransform = mat4.create();
+          mat4.scale(backgroundImageTransform, backgroundImageTransform, vec3.fromValues(imageWidth, 1, imageHeight));
+          var backgroundImageTranslation = mat4.create();
+          mat4.fromTranslation(backgroundImageTranslation, vec3.fromValues(imageWidth / 2 - backgroundImage.getXOrigin(), 0., 
+              imageHeight / 2 - backgroundImage.getYOrigin()));
+          mat4.mul(backgroundImageTransform, backgroundImageTranslation, backgroundImageTransform);
+          backgroundImageAppearance.setTextureImage(texture);
+          backgroundImageGroup.setTransform(backgroundImageTransform);
+          ground3d.updateGround(waitTextureLoadingEnd,
+              new java.awt.geom.Rectangle2D.Float(-backgroundImage.getXOrigin(), -backgroundImage.getYOrigin(), imageWidth, imageHeight));
+        },
+        textureError : function(error) {
+          return this.textureUpdated(TextureManager.getInstance().getErrorImage());
+        },
+        progression : function(part, info, percentage) {
+        }
+      });
+    backgroundImageAppearance.setVisible(true);
+  } else {
+    backgroundImageAppearance.setVisible(false);
+    this.updateGround(waitTextureLoadingEnd, null);
+  }
+}
+
+/**
+ * @param {boolean} waitTextureLoadingEnd
+ * @param {java.awt.geom.Rectangle2D} backgroundImageRectangle
+ * @private 
+ */
+Ground3D.prototype.updateGround = function(waitTextureLoadingEnd, backgroundImageRectangle) {
   var home = this.getUserData();
   var groundShape = this.getChild(0);
   var currentGeometriesCount = groundShape.getGeometries().length;
@@ -114,22 +202,9 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
       }
     }
   }
-  var furniture = home.getFurniture();
-  for (var i = 0; i < furniture.length; i++) {
-    var piece = furniture[i];
-    var pieceLevel = piece.getLevel();
-    if (piece.getGroundElevation() < 0 
-        && pieceLevel !== null 
-        && pieceLevel.isViewable() 
-        && pieceLevel.getElevation() < 0) {
-      var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, pieceLevel);
-      if (piece.getStaircaseCutOutShape() === null) {
-        levelAreas.undergroundArea.add(new java.awt.geom.Area(this.getShape(piece.getPoints())));
-      } else {
-        levelAreas.undergroundArea.add(ModelManager.getInstance().getAreaOnFloor(piece));
-      }
-    }
-  }
+  
+  this.updateUndergroundAreasDugByFurniture(undergroundLevelAreas, home.getFurniture());
+
   var walls = home.getWalls();
   for (var i = 0; i < walls.length; i++) {
     var wall = walls[i];
@@ -192,7 +267,7 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
   for (var i = 0; i < undergroundAreas.length; i++) {
     var levelAreas = undergroundAreas[i];
     var roomArea = levelAreas.roomArea;
-    if (roomArea != null) {
+    if (roomArea !== null) {
       levelAreas.undergroundArea.subtract(roomArea);
     }
   }
@@ -220,6 +295,9 @@ Ground3D.prototype.update = function(waitTextureLoadingEnd) {
     this.addAreaGeometry(groundShape, groundTexture, outsideGroundArea, 0);
   }
   groundArea.subtract(areaRemovedFromGround);
+  if (backgroundImageRectangle !== null) {
+    groundArea.subtract(new java.awt.geom.Area(backgroundImageRectangle));
+  }
   undergroundAreas.splice(0, 0, new Ground3D.LevelAreas(new Level("Ground", 0, 0, 0), groundArea));
   var previousLevelElevation = 0;
   for (var i = 0; i < undergroundAreas.length; i++) {
@@ -297,6 +375,37 @@ Ground3D.prototype.getUndergroundAreas = function(undergroundAreas, level) {
   return levelAreas;
 };
 
+
+/**
+ * Updates underground level areas dug by the visible furniture placed at underground levels.
+ * @param {Object} undergroundLevelAreas
+ * @param {Level} level
+ * @return {Array} furniture
+ * @private
+ */
+Ground3D.prototype.updateUndergroundAreasDugByFurniture = function(undergroundLevelAreas, furniture) {
+  for (var i = 0; i < furniture.length; i++) {
+    var piece = furniture[i];
+    var pieceLevel = piece.getLevel();
+    if (piece.getGroundElevation() < 0 
+        && piece.isVisible()
+        && pieceLevel !== null 
+        && pieceLevel.isViewable() 
+        && pieceLevel.getElevation() < 0) {
+      if (piece instanceof HomeFurnitureGroup) {
+        this.updateUndergroundAreasDugByFurniture(undergroundLevelAreas, piece.getFurniture());
+      } else {
+        var levelAreas = this.getUndergroundAreas(undergroundLevelAreas, pieceLevel);
+        if (piece.getStaircaseCutOutShape() === null) {
+          levelAreas.undergroundArea.add(new java.awt.geom.Area(this.getShape(piece.getPoints())));
+        } else {
+          levelAreas.undergroundArea.add(ModelManager.getInstance().getAreaOnFloor(piece));
+        }
+      }
+    }
+  }
+}
+
 /**
  * Adds to ground shape the geometry matching the given area.
  * @param {Shape3D} groundShape
@@ -307,7 +416,7 @@ Ground3D.prototype.getUndergroundAreas = function(undergroundAreas, level) {
  */
 Ground3D.prototype.addAreaGeometry = function(groundShape, groundTexture, area, elevation) {
   var areaPoints = this.getAreaPoints(area, 1, false);
-  if (areaPoints.length != 0) {
+  if (areaPoints.length !== 0) {
     var vertexCount = 0;
     var stripCounts = new Array(areaPoints.length);
     for (var i = 0; i < stripCounts.length; i++) {

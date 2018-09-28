@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- build.xml
 
-     Sweet Home 3D JS, Copyright (c) 2016-2017 Emmanuel PUYBARET / eTeks <info@eteks.com>. 
+     Sweet Home 3D JS, Copyright (c) 2016-2018 Emmanuel PUYBARET / eTeks <info@eteks.com>. 
      
      Ant build file. Available targets :
      - build              : Builds SweetHome3DJSViewer-version.zip file in install directory
@@ -12,7 +12,7 @@
 -->
 <project basedir="." default="build" name="SweetHome3DJS">
   <!-- The current version of Sweet Home 3D JS -->
-  <property name="version" value="5.7"/>
+  <property name="version" value="6.0"/>
 
   <target name="concat" depends="generatedLibraries"
           description="Concat Javacript files in dist/build directory">
@@ -32,6 +32,7 @@
     <concat destfile="dist/build/viewhome.min.js" encoding="UTF-8">
       <fileset dir="lib/generated" includes="SweetHome3D.js" />
       <filelist dir="src">
+        <file name="ShapeTools.js" />
         <file name="DAELoader.js" />
         <file name="Max3DSLoader.js" />
         <file name="LengthUnit.js" />
@@ -177,6 +178,7 @@
       </filterchain>
       <file name="dist/build/triangulator.min.js" />
     </concat>
+    <copy file="lib/stroke.min.js" todir="dist" />
     <copy file="lib/big.min.js" todir="dist" />
     <copy file="lib/gl-matrix-min.js" todir="dist" />
     <copy file="lib/jszip.min.js" todir="dist" />
@@ -357,6 +359,8 @@
     <mkdir dir="lib/generated" />
     <move file="tools/JSweet/build/js/bundle.js" tofile="lib/generated/SweetHome3D.js"/>
     <move file="tools/JSweet/build/js/j4ts-awtgeom-1.8.132-20170726/bundle.js" tofile="lib/generated/geom.js"/>
+  	<!-- Quick fix for missing returns in geom.js -->
+  	<replace file="lib/generated/geom.js" token="  _super.prototype.getPathIterator" value="  return _super.prototype.getPathIterator"/>
     <move file="tools/JSweet/build/js/j4ts-batik-svgpathparser-1.10.0-20170726/bundle.js" tofile="lib/generated/batik-svgpathparser.js"/>
 
     <!-- Clean build directory -->

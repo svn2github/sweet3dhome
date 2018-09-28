@@ -401,24 +401,28 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
     var epsilon = Math.PI / 720;
     var missingModels = [];
     for (var i = 0; i < intersectingDoorOrWindows.length; i++) {
-      var doorOrWindow = intersectingDoorOrWindows[i];
+      var piece = intersectingDoorOrWindows[i];
       if (typeof HomeDoorOrWindow !== "undefined"
-          && doorOrWindow instanceof HomeDoorOrWindow 
-          && "M0,0 v1 h1 v-1 z" != doorOrWindow.getCutOutShape()) {
-        var angleDifference = Math.abs(wallYawAngle - doorOrWindow.getAngle()) % (2 * Math.PI);
+          && piece instanceof HomeDoorOrWindow 
+          && (PieceOfFurniture.DEFAULT_CUT_OUT_SHAPE != piece.getCutOutShape()
+              || piece.getWallWidth() !== 1
+              || piece.getWallLeft() !== 0
+              || piece.getWallHeight() !== 1
+              || piece.getWallTop() !== 0)) {
+        var angleDifference = Math.abs(wallYawAngle - piece.getAngle()) % (2 * Math.PI);
         if (angleDifference < epsilon 
             || angleDifference > 2 * Math.PI - epsilon 
             || Math.abs(angleDifference - Math.PI) < epsilon) {
           var frontOrBackSide = Math.abs(angleDifference - Math.PI) < epsilon ? 1 : -1;
-          var rotatedModelFrontArea = Wall3D.getRotatedModelFrontArea(doorOrWindow);
+          var rotatedModelFrontArea = Wall3D.getRotatedModelFrontArea(piece);
           if (rotatedModelFrontArea !== null 
               && (missingModels.length === 0 || !waitDoorOrWindowModelsLoadingEnd)) {
-            this.createGeometriesSurroundingDoorOrWindow(doorOrWindow, rotatedModelFrontArea, frontOrBackSide, 
+            this.createGeometriesSurroundingDoorOrWindow(piece, rotatedModelFrontArea, frontOrBackSide, 
                 wall, sideGeometries, topGeometries, 
                 wallSideOrBaseboardPoints, wallElevation, cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta, 
                 texture, textureReferencePoint, wallSide);
           } else {
-            missingModels.push(doorOrWindow);
+            missingModels.push(piece);
           }
         }
       }
@@ -460,7 +464,7 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
               }
             },        
             modelError : function(ex) {
-              if (getRotatedModelFrontArea(this.doorOrWindow) === null) {
+              if (Wall3D.getRotatedModelFrontArea(this.doorOrWindow) === null) {
                 Wall3D.rotatedModelsFrontAreas.push({
                     model : this.doorOrWindow.getModel(),
                     modelRotation : this.doorOrWindow.getModelRotation(),
@@ -881,7 +885,7 @@ Wall3D.prototype.createTopPartGeometry = function(points, cosWallYawAngle, sinWa
 
 /**
 * Creates the geometry surrounding the given non rectangular door or window.
-* @param {HomePieceOfFurniture} doorOrWindow
+* @param {HomeDoorOrWindow} doorOrWindow
 * @param {Area} doorOrWindowFrontArea
 * @param {number} frontOrBackSide
 * @param {Wall} wall
@@ -901,6 +905,21 @@ Wall3D.prototype.createTopPartGeometry = function(points, cosWallYawAngle, sinWa
 Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow, doorOrWindowFrontArea, frontOrBackSide, wall, wallGeometries, wallTopGeometries, 
                                                                     wallSidePoints, wallElevation, cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta, 
                                                                     texture, textureReferencePoint, wallSide) {
+  if (doorOrWindow.getModelTransformations() !== null) {
+    doorOrWindowFrontArea = new java.awt.geom.Area(doorOrWindowFrontArea);
+    doorOrWindowFrontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(0.5, 0.5));
+    doorOrWindowFrontArea.transform(java.awt.geom.AffineTransform.getScaleInstance(
+        doorOrWindow.getWidth() * doorOrWindow.getWallWidth(),
+        doorOrWindow.getHeight() * doorOrWindow.getWallHeight()));
+    doorOrWindowFrontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(
+        doorOrWindow.getWallLeft() * doorOrWindow.getWidth(),
+        (1 - doorOrWindow.getWallHeight() - doorOrWindow.getWallTop()) * doorOrWindow.getHeight()));
+    doorOrWindowFrontArea.transform(java.awt.geom.AffineTransform.getScaleInstance(
+        1 / doorOrWindow.getWidth(),
+        1 / doorOrWindow.getHeight()));
+    doorOrWindowFrontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(-0.5, -0.5));
+  }
+
   var fullFaceArea = new java.awt.geom.Area(Wall3D.FULL_FACE_CUT_OUT_AREA);
   fullFaceArea.subtract(doorOrWindowFrontArea);
   if (!fullFaceArea.isEmpty()) {
@@ -919,7 +938,7 @@ Wall3D.prototype.createGeometriesSurroundingDoorOrWindow = function(doorOrWindow
         wallSecondPoint[0], wallSecondPoint[1], xPieceSide, yPieceSide);
     var depthTranslation = frontOrBackSide * (0.5 - position * frontSideToWallDistance / doorOrWindowDepth);
     
-    var frontAreaTransform = ModelManager.getInstance().getPieceOfFurnitureNormalizedModelTransformation(doorOrWindow);
+    var frontAreaTransform = ModelManager.getInstance().getPieceOfFurnitureNormalizedModelTransformation(doorOrWindow, null);
     var frontAreaTranslation = mat4.create();
     mat4.fromTranslation(frontAreaTranslation, vec3.fromValues(0, 0, depthTranslation));
     mat4.mul(frontAreaTransform, frontAreaTransform, frontAreaTranslation);

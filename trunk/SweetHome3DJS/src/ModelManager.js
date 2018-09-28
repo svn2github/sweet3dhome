@@ -24,6 +24,7 @@
 //          OBJLoader.js
 //          HomeObject.js
 //          HomePieceOfFurniture.js
+//          ShapeTools.js
 
 /**
  * Singleton managing 3D models cache.
@@ -33,7 +34,6 @@
 function ModelManager() {
   this.loadedModelNodes = {};
   this.loadingModelObservers = {};
-  this.parsedShapes = {};
 }
 
 /**
@@ -48,6 +48,63 @@ ModelManager.MIRROR_SHAPE_PREFIX = "sweethome3d_window_mirror";
  * <code>Shape3D</code> name prefix for lights. 
  */
 ModelManager.LIGHT_SHAPE_PREFIX = "sweethome3d_light";
+/**
+ * <code>Node</code> user data prefix for mannequin parts.
+ */
+ModelManager.MANNEQUIN_ABDOMEN_PREFIX        = "sweethome3d_mannequin_abdomen";
+ModelManager.MANNEQUIN_CHEST_PREFIX          = "sweethome3d_mannequin_chest";
+ModelManager.MANNEQUIN_PELVIS_PREFIX         = "sweethome3d_mannequin_pelvis";
+ModelManager.MANNEQUIN_NECK_PREFIX           = "sweethome3d_mannequin_neck";
+ModelManager.MANNEQUIN_HEAD_PREFIX           = "sweethome3d_mannequin_head";
+ModelManager.MANNEQUIN_LEFT_SHOULDER_PREFIX  = "sweethome3d_mannequin_left_shoulder";
+ModelManager.MANNEQUIN_LEFT_ARM_PREFIX       = "sweethome3d_mannequin_left_arm";
+ModelManager.MANNEQUIN_LEFT_ELBOW_PREFIX     = "sweethome3d_mannequin_left_elbow";
+ModelManager.MANNEQUIN_LEFT_FOREARM_PREFIX   = "sweethome3d_mannequin_left_forearm";
+ModelManager.MANNEQUIN_LEFT_WRIST_PREFIX     = "sweethome3d_mannequin_left_wrist";
+ModelManager.MANNEQUIN_LEFT_HAND_PREFIX      = "sweethome3d_mannequin_left_hand";
+ModelManager.MANNEQUIN_LEFT_HIP_PREFIX       = "sweethome3d_mannequin_left_hip";
+ModelManager.MANNEQUIN_LEFT_THIGH_PREFIX     = "sweethome3d_mannequin_left_thigh";
+ModelManager.MANNEQUIN_LEFT_KNEE_PREFIX      = "sweethome3d_mannequin_left_knee";
+ModelManager.MANNEQUIN_LEFT_LEG_PREFIX       = "sweethome3d_mannequin_left_leg";
+ModelManager.MANNEQUIN_LEFT_ANKLE_PREFIX     = "sweethome3d_mannequin_left_ankle";
+ModelManager.MANNEQUIN_LEFT_FOOT_PREFIX      = "sweethome3d_mannequin_left_foot";
+ModelManager.MANNEQUIN_RIGHT_SHOULDER_PREFIX = "sweethome3d_mannequin_right_shoulder";
+ModelManager.MANNEQUIN_RIGHT_ARM_PREFIX      = "sweethome3d_mannequin_right_arm";
+ModelManager.MANNEQUIN_RIGHT_ELBOW_PREFIX    = "sweethome3d_mannequin_right_elbow";
+ModelManager.MANNEQUIN_RIGHT_FOREARM_PREFIX  = "sweethome3d_mannequin_right_forearm";
+ModelManager.MANNEQUIN_RIGHT_WRIST_PREFIX    = "sweethome3d_mannequin_right_wrist";
+ModelManager.MANNEQUIN_RIGHT_HAND_PREFIX     = "sweethome3d_mannequin_right_hand";
+ModelManager.MANNEQUIN_RIGHT_HIP_PREFIX      = "sweethome3d_mannequin_right_hip";
+ModelManager.MANNEQUIN_RIGHT_THIGH_PREFIX    = "sweethome3d_mannequin_right_thigh";
+ModelManager.MANNEQUIN_RIGHT_KNEE_PREFIX     = "sweethome3d_mannequin_right_knee";
+ModelManager.MANNEQUIN_RIGHT_LEG_PREFIX      = "sweethome3d_mannequin_right_leg";
+ModelManager.MANNEQUIN_RIGHT_ANKLE_PREFIX    = "sweethome3d_mannequin_right_ankle";
+ModelManager.MANNEQUIN_RIGHT_FOOT_PREFIX     = "sweethome3d_mannequin_right_foot";
+
+ModelManager.MANNEQUIN_ABDOMEN_CHEST_PREFIX  = "sweethome3d_mannequin_abdomen_chest";
+ModelManager.MANNEQUIN_ABDOMEN_PELVIS_PREFIX = "sweethome3d_mannequin_abdomen_pelvis";
+/**
+ * <code>Node</code> user data prefix for ball / rotating  joints.
+ */
+ModelManager.BALL_PREFIX                 = "sweethome3d_ball_";
+ModelManager.ARM_ON_BALL_PREFIX          = "sweethome3d_arm_on_ball_";
+/**
+ * <code>Node</code> user data prefix for hinge / rotating opening joints.
+ */
+ModelManager.HINGE_PREFIX                = "sweethome3d_hinge_";
+ModelManager.OPENING_ON_HINGE_PREFIX     = "sweethome3d_opening_on_hinge_";
+ModelManager.WINDOW_PANE_ON_HINGE_PREFIX = "sweethome3d_window_pane_on_hinge_";
+/**
+ * <code>Node</code> user data prefix for rail / sliding opening joints.
+ */
+ModelManager.UNIQUE_RAIL_PREFIX          = "sweethome3d_unique_rail";
+ModelManager.RAIL_PREFIX                 = "sweethome3d_rail_";
+ModelManager.OPENING_ON_RAIL_PREFIX      = "sweethome3d_opening_on_rail_";
+ModelManager.WINDOW_PANE_ON_RAIL_PREFIX  = "sweethome3d_window_pane_on_rail_";
+/**
+ * Deformable group suffix.
+ */
+ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX = "_transformation";
 
 // Singleton
 ModelManager.instance = null;
@@ -103,6 +160,21 @@ ModelManager.prototype.getSize = function(node, transformation) {
 }
 
 /**
+ * Returns the center of the bounds of <code>node</code> 3D shapes.
+ * @param node  the root of a model
+ */
+ModelManager.prototype.getCenter = function(node) {
+  var bounds = this.getBounds(node);
+  var lower = vec3.create();
+  bounds.getLower(lower);
+  var upper = vec3.create();
+  bounds.getUpper(upper);
+  return vec3.fromValues((lower.getX() + upper.getX()) / 2,
+      (lower.getY() + upper.getY()) / 2,
+      (lower.getZ() + upper.getZ()) / 2);
+}
+
+/**
  * Returns the bounds of the 3D shapes of node with an additional optional transformation.
  * @param {Node3D} node  the root of a model 
  * @param {Array}  [transformation] the optional transformation applied to the model  
@@ -114,7 +186,7 @@ ModelManager.prototype.getBounds = function(node, transformation) {
   var objectBounds = new BoundingBox3D(
       vec3.fromValues(Infinity, Infinity, Infinity), 
       vec3.fromValues(-Infinity, -Infinity, -Infinity));
-  this.computeBounds(node, objectBounds, transformation, !this.isOrthogonalRotation(transformation));
+  this.computeBounds(node, objectBounds, transformation, !this.isOrthogonalRotation(transformation), this.isDeformed(node));
   return objectBounds;
 }
 
@@ -140,7 +212,7 @@ ModelManager.prototype.isOrthogonalRotation = function(transformation) {
 /**
  * @private
  */
-ModelManager.prototype.computeBounds = function(node, bounds, parentTransformation, transformShapeGeometry) {
+ModelManager.prototype.computeBounds = function(node, bounds, parentTransformation, transformShapeGeometry, deformedGeometry) {
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
       parentTransformation = mat4.clone(parentTransformation);
@@ -148,13 +220,15 @@ ModelManager.prototype.computeBounds = function(node, bounds, parentTransformati
     }
     // Compute the bounds of all the node children
     for (var i = 0; i < node.children.length; i++) {
-      this.computeBounds(node.children [i], bounds, parentTransformation, transformShapeGeometry);
+      this.computeBounds(node.children [i], bounds, parentTransformation, transformShapeGeometry, deformedGeometry);
     }
   } else if (node instanceof Link3D) {
-    this.computeBounds(node.getSharedGroup(), bounds, parentTransformation, transformShapeGeometry);
+    this.computeBounds(node.getSharedGroup(), bounds, parentTransformation, transformShapeGeometry, deformedGeometry);
   } else if (node instanceof Shape3D) {
     var shapeBounds;
-    if (transformShapeGeometry) {
+    if (transformShapeGeometry
+        || deformedGeometry
+           && !this.isOrthogonalRotation(parentTransformation)) {
       shapeBounds = this.computeTransformedGeometryBounds(node, parentTransformation);
     } else {
       shapeBounds = node.getBounds();
@@ -174,8 +248,8 @@ ModelManager.prototype.computeTransformedGeometryBounds = function(shape, transf
     // geometry instanceof IndexedGeometryArray3D
     var geometry = shape.geometries [i];
     var vertex = vec3.create();
-    for (var index = 0; index < geometry.vertices.length; index++) {
-      vec3.copy(vertex, geometry.vertices [index]);
+    for (var index = 0; index < geometry.vertexIndices.length; index++) {
+      vec3.copy(vertex, geometry.vertices [geometry.vertexIndices [index]]);
       this.updateBounds(vertex, transformation, lower, upper);
     }
   }
@@ -411,6 +485,7 @@ ModelManager.prototype.loadModel = function(content, synchronous, modelObserver)
               if (observers) {
                 delete modelManager.loadingModelObservers [contentUrl];
                 modelManager.updateWindowPanesTransparency(model);
+                modelManager.updateDeformableModelHierarchy(model);
                 modelManager.loadedModelNodes [contentUrl] = model;
                 for (var i = 0; i < observers.length; i++) {
                   observers [i].modelUpdated(modelManager.cloneNode(model));
@@ -544,7 +619,10 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
     this.updateWindowPanesTransparency(node.getSharedGroup());
   } else if (node instanceof Shape3D) {
     var name = node.getName();
-    if (name && name.indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0) {
+    if (name 
+        && (name.indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0
+            || name.indexOf(ModelManager.WINDOW_PANE_ON_HINGE_PREFIX) === 0
+            || name.indexOf(ModelManager.WINDOW_PANE_ON_RAIL_PREFIX) === 0)) {
       var appearance = node.getAppearance();
       if (appearance === null) {
         appearance = new Appearance3D();
@@ -558,6 +636,265 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
 }
 
 /**
+ * Updates the hierarchy of nodes with intermediate pickable nodes to help deforming models.
+ * @param {Group3D} group
+ * @private 
+*/
+ModelManager.prototype.updateDeformableModelHierarchy = function(group) {
+  // Try to reorganize node hierarchy of mannequin model
+  if (this.containsNode(group, ModelManager.MANNEQUIN_ABDOMEN_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_CHEST_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_PELVIS_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_NECK_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_HEAD_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_SHOULDER_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_ARM_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_ELBOW_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_FOREARM_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_WRIST_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_HAND_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_HIP_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_THIGH_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_KNEE_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_LEG_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_ANKLE_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_LEFT_FOOT_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_SHOULDER_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_ARM_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_ELBOW_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_FOREARM_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_WRIST_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_HAND_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_HIP_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_THIGH_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_KNEE_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_LEG_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_ANKLE_PREFIX)
+      && this.containsNode(group, ModelManager.MANNEQUIN_RIGHT_FOOT_PREFIX)) {
+    // Head
+    var head = this.extractNodes(group, ModelManager.MANNEQUIN_HEAD_PREFIX, null);
+    var headGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_NECK_PREFIX, [head]);
+
+    // Left arm
+    var leftHand = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_HAND_PREFIX, null);
+    var leftHandGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_WRIST_PREFIX, [leftHand]);
+    var leftForearm = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_FOREARM_PREFIX, null);
+    var leftWrist = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_WRIST_PREFIX, null);
+    var leftForearmGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_ELBOW_PREFIX, [leftForearm, leftWrist, leftHandGroup]);
+    var leftArm = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_ARM_PREFIX, null);
+    var leftElbow = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_ELBOW_PREFIX, null);
+    var leftArmGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_SHOULDER_PREFIX, [leftArm, leftElbow, leftForearmGroup]);
+
+    // Right arm
+    var rightHand = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_HAND_PREFIX, null);
+    var rightHandGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_WRIST_PREFIX, [rightHand]);
+    var rightForearm = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_FOREARM_PREFIX, null);
+    var rightWrist = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_WRIST_PREFIX, null);
+    var rightForearmGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_ELBOW_PREFIX, [rightForearm, rightWrist, rightHandGroup]);
+    var rightArm = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_ARM_PREFIX, null);
+    var rightElbow = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_ELBOW_PREFIX, null);
+    var rightArmGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_SHOULDER_PREFIX, [rightArm, rightElbow, rightForearmGroup]);
+
+    // Chest
+    var chest = this.extractNodes(group, ModelManager.MANNEQUIN_CHEST_PREFIX, null);
+    var leftShoulder = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_SHOULDER_PREFIX, null);
+    var rightShoulder = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_SHOULDER_PREFIX, null);
+    var neck = this.extractNodes(group, ModelManager.MANNEQUIN_NECK_PREFIX, null);
+    var chestGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_ABDOMEN_CHEST_PREFIX, [chest, leftShoulder, leftArmGroup, rightShoulder, rightArmGroup, neck, headGroup]);
+
+    // Left leg
+    var leftFoot = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_FOOT_PREFIX, null);
+    var leftFootGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_ANKLE_PREFIX, [leftFoot]);
+    var leftLeg = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_LEG_PREFIX, null);
+    var leftAnkle = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_ANKLE_PREFIX, null);
+    var leftLegGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_KNEE_PREFIX, [leftLeg, leftAnkle, leftFootGroup]);
+    var leftThigh = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_THIGH_PREFIX, null);
+    var leftKnee = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_KNEE_PREFIX, null);
+    var leftThighGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_LEFT_HIP_PREFIX, [leftThigh, leftKnee, leftLegGroup]);
+
+    // Right leg
+    var rightFoot = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_FOOT_PREFIX, null);
+    var rightFootGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_ANKLE_PREFIX, [rightFoot]);
+    var rightLeg = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_LEG_PREFIX, null);
+    var rightAnkle = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_ANKLE_PREFIX, null);
+    var rightLegGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_KNEE_PREFIX, [rightLeg, rightAnkle, rightFootGroup]);
+    var rightThigh = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_THIGH_PREFIX, null);
+    var rightKnee = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_KNEE_PREFIX, null);
+    var rightThighGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_RIGHT_HIP_PREFIX, [rightThigh, rightKnee, rightLegGroup]);
+
+    // Pelvis
+    var pelvis = this.extractNodes(group, ModelManager.MANNEQUIN_PELVIS_PREFIX, null);
+    var leftHip = this.extractNodes(group, ModelManager.MANNEQUIN_LEFT_HIP_PREFIX, null);
+    var rightHip = this.extractNodes(group, ModelManager.MANNEQUIN_RIGHT_HIP_PREFIX, null);
+    var pelvisGroup = this.createPickableTransformGroup(ModelManager.MANNEQUIN_ABDOMEN_PELVIS_PREFIX, [pelvis, leftHip, leftThighGroup, rightHip, rightThighGroup]);
+
+    var abdomen = this.extractNodes(group, ModelManager.MANNEQUIN_ABDOMEN_PREFIX, null);
+    group.addChild(abdomen);
+    group.addChild(chestGroup);
+    group.addChild(pelvisGroup);
+  } else {
+    // Reorganize rotating openings
+    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.HINGE_PREFIX, ModelManager.OPENING_ON_HINGE_PREFIX, ModelManager.WINDOW_PANE_ON_HINGE_PREFIX);
+    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.BALL_PREFIX, ModelManager.ARM_ON_BALL_PREFIX, null);
+    // Reorganize sliding openings
+    this.updateSimpleDeformableModelHierarchy(group, ModelManager.UNIQUE_RAIL_PREFIX, ModelManager.RAIL_PREFIX, ModelManager.OPENING_ON_RAIL_PREFIX, ModelManager.WINDOW_PANE_ON_RAIL_PREFIX);
+  }
+}
+
+/**
+ * @param {Group3D} group
+ * @param {string} uniqueReferenceNodePrefix
+ * @param {string} referenceNodePrefix
+ * @param {string} openingPrefix
+ * @param {string} openingPanePrefix) {
+ * @private 
+ */
+ModelManager.prototype.updateSimpleDeformableModelHierarchy = function(group, uniqueReferenceNodePrefix, referenceNodePrefix,
+                                                                       openingPrefix, openingPanePrefix) {
+  if (this.containsNode(group, openingPrefix + 1)
+      || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + 1))) {
+    if (this.containsNode(group, referenceNodePrefix + 1)) {
+      // Reorganize openings with multiple reference nodes
+      var i = 1;
+      do {
+        var referenceNode = this.extractNodes(group, referenceNodePrefix + i, null);
+        var opening = this.extractNodes(group, openingPrefix + i, null);
+        var openingPane = openingPanePrefix !== null ? this.extractNodes(group, openingPanePrefix + i, null) : null;
+        var openingGroup = this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane]);
+        group.addChild(referenceNode);
+        group.addChild(openingGroup);
+        i++;
+      } while (this.containsNode(group, referenceNodePrefix + i)
+          && (this.containsNode(group, openingPrefix + i)
+              || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + i))));
+    } else if (uniqueReferenceNodePrefix !== null
+               && this.containsNode(group, uniqueReferenceNodePrefix)) {
+      // Reorganize openings with a unique reference node
+      var referenceNode = this.extractNodes(group, uniqueReferenceNodePrefix, null);
+      group.addChild(referenceNode);
+      var i = 1;
+      do {
+        var opening = this.extractNodes(group, openingPrefix + i, null);
+        var openingPane = this.extractNodes(group, openingPanePrefix + i, null);
+        group.addChild(this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane]));
+        i++;
+      } while (this.containsNode(group, openingPrefix + i)
+               || this.containsNode(group, openingPanePrefix + i));
+    }
+  }
+}
+
+/**
+ * Returns <code>true</code> if the given <code>node</code> or a node in its hierarchy
+ * contains a node which name, stored in user data, starts with <code>prefix</code>.
+ * @param {Node3D} node   a node
+ * @param {string} prefix a string
+ */
+ModelManager.prototype.containsNode = function(node, prefix) {
+  var name = node.getName();
+  if (name !== null
+      && name.indexOf(prefix) === 0) {
+    return true;
+  }
+  if (node instanceof Group3D) {
+    for (var i = node.getChildren().length - 1; i >= 0; i--) {
+      if (this.containsNode(node.getChild(i), prefix)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Searches among the given <code>node</code> and its children the nodes which name, stored in user data, starts with <code>name</code>,
+ * then returns a group containing the found nodes.
+ * @param {Node3D} node
+ * @param {string} name
+ * @param {Group3D} destinationGroup
+ * @private
+ */
+ModelManager.prototype.extractNodes = function(node, name, destinationGroup) {
+  if (node.getName() !== null
+      && node.getName().indexOf(name) === 0) {
+    node.getParent().removeChild(node);
+    if (destinationGroup === null) {
+      destinationGroup = new Group3D();
+    }
+    destinationGroup.addChild(node);
+  }
+  if (node instanceof Group3D) {
+    // Enumerate children
+    for (var i = node.getChildren().length - 1; i >= 0; i--) {
+      destinationGroup = this.extractNodes(node.getChild(i), name, destinationGroup);
+    }
+  }
+  return destinationGroup;
+}
+
+/**
+ * Returns a pickable group with its <code>children</code> and the given reference node as user data.
+ * @param {string} deformableGroupPrefix
+ * @param {Array}  children
+ * @private
+ */
+ModelManager.prototype.createPickableTransformGroup = function(deformableGroupPrefix, children) {
+  var transformGroup = new TransformGroup3D();
+  transformGroup.setCapability(TransformGroup3D.ALLOW_TRANSFORM_WRITE);
+  transformGroup.setName(deformableGroupPrefix + ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX);
+  // Store the node around which objects should turn
+  for (var i = 0; i < children.length; i++) {
+    if (children [i] !== null) {
+      transformGroup.addChild(children [i]);
+    }
+  }
+  return transformGroup;
+}
+
+/**
+ * Return <code>true</code> if the given <code>node</code> or its children contains at least a deformable group.
+ * @param {Node3D} node  the root of a model
+ */
+ModelManager.prototype.containsDeformableNode = function(node) {
+  if (node instanceof TransformGroup3D
+      && node.getName() !== null
+      && node.getName().indexOf(DEFORMABLE_TRANSFORM_GROUP_SUFFIX) === (node.getName().length - DEFORMABLE_TRANSFORM_GROUP_SUFFIX.length)) {
+    return true;
+  } else if (node instanceof Group3D) {
+    var children = node.getChildren();
+    for (var i = 0; i < children.length; i++) {
+      if (this.containsDeformableNode(children [i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Return <code>true</code> if the given <code>node</code> or its children contains is a deformed transformed group.
+ * @param {Node3D} node  a node
+ * @private
+ */
+ModelManager.prototype.isDeformed = function(node) {
+  if (node instanceof TransformGroup3D
+      && node.getName() !== null
+      && node.getName().indexOf(ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX) === (node.getName().length - ModelManager.DEFORMABLE_TRANSFORM_GROUP_SUFFIX.length)) {
+    var transform = mat4.create();
+    node.getTransform(transform);
+    return !TransformGroup3D.isIdentity(transform);
+  } else if (node instanceof Group3D) {
+    var children = node.getChildren();
+    for (var i = 0; i < children.length; i++) {
+      if (this.isDeformed(children [i])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
  * Returns the shape matching the given cut out shape if not <code>null</code> 
  * or the 2D area of the 3D shapes children of the <code>node</code> 
  * projected on its front side. The returned area is normalized in a 1 unit square
@@ -565,7 +902,7 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
  */
 ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
   var frontArea; 
-  if (cutOutShape != null) {
+  if (cutOutShape !== null) {
     frontArea = new java.awt.geom.Area(this.getShape(cutOutShape));
     frontArea.transform(java.awt.geom.AffineTransform.getScaleInstance(1, -1));
     frontArea.transform(java.awt.geom.AffineTransform.getTranslateInstance(-0.5, 0.5));
@@ -575,11 +912,11 @@ ModelManager.prototype.getFrontArea = function(cutOutShape, node) {
       var frontAreaWithHoles = new java.awt.geom.Area();
       this.computeBottomOrFrontArea(node, frontAreaWithHoles, mat4.create(), false, false);
       frontArea = new java.awt.geom.Area();
-      var currentPathPoints = ([]);
+      var currentPathPoints = [];
       var previousRoomPoint = null;
       for (var it = frontAreaWithHoles.getPathIterator(null, 1); !it.isDone(); it.next()) {
         var areaPoint = [0, 0];
-        switch ((it.currentSegment(areaPoint))) {
+        switch (it.currentSegment(areaPoint)) {
           case java.awt.geom.PathIterator.SEG_MOVETO :
           case java.awt.geom.PathIterator.SEG_LINETO :
             if (previousRoomPoint === null 
@@ -642,14 +979,18 @@ ModelManager.prototype.getAreaOnFloor = function(node) {
     } else {
       var vertices = [];
       this.computeVerticesOnFloor(node, vertices, mat4.create());
-      var surroundingPolygon = this.getSurroundingPolygon(vertices.slice(0));
-      var generalPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, surroundingPolygon.length);
-      generalPath.moveTo(surroundingPolygon[0][0], surroundingPolygon[0][1]);
-      for (var i = 0; i < surroundingPolygon.length; i++) {
-        generalPath.lineTo(surroundingPolygon[i][0], surroundingPolygon[i][1]);
+      if (vertices.length > 0) {
+        var surroundingPolygon = this.getSurroundingPolygon(vertices.slice(0));
+        var generalPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, surroundingPolygon.length);
+        generalPath.moveTo(surroundingPolygon[0][0], surroundingPolygon[0][1]);
+        for (var i = 0; i < surroundingPolygon.length; i++) {
+          generalPath.lineTo(surroundingPolygon[i][0], surroundingPolygon[i][1]);
+        }
+        generalPath.closePath();
+        modelAreaOnFloor = new java.awt.geom.Area(generalPath);
+      } else {
+        modelAreaOnFloor = new java.awt.geom.Area();
       }
-      generalPath.closePath();
-      modelAreaOnFloor = new java.awt.geom.Area(generalPath);
     }
     return modelAreaOnFloor;
   } else {
@@ -713,7 +1054,7 @@ ModelManager.prototype.getVertexCount = function(node) {
 ModelManager.prototype.computeBottomOrFrontArea = function(node, nodeArea, parentTransformations, ignoreTransparentShapes, bottom) {
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
-      parentTransformations = mat4.create();
+      parentTransformations = mat4.clone(parentTransformations);
       var transform = mat4.create();
       node.getTransform(transform);
       mat4.mul(parentTransformations, parentTransformations, transform);
@@ -726,7 +1067,10 @@ ModelManager.prototype.computeBottomOrFrontArea = function(node, nodeArea, paren
     this.computeBottomOrFrontArea(node.getSharedGroup(), nodeArea, parentTransformations, ignoreTransparentShapes, bottom);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
-    if (appearance.isVisible() && (!ignoreTransparentShapes || appearance.getTransparency() < 1)) {
+    if (appearance.isVisible() 
+        && (!ignoreTransparentShapes
+            || appearance.getTransparency() === undefined
+            || appearance.getTransparency() < 1)) {
       var geometries = node.getGeometries(); 
       for (var i = 0, n = geometries.length; i < n; i++) {
         var geometry = geometries[i];
@@ -746,25 +1090,28 @@ ModelManager.prototype.computeBottomOrFrontArea = function(node, nodeArea, paren
  * @private
  */
 ModelManager.prototype.computeBottomOrFrontGeometryArea = function(geometryArray, nodeArea, parentTransformations, bottom) {
-  var vertexCount = geometryArray.vertices.length;
-  var vertices = new Array(vertexCount * 2);
-  var vertex = vec3.create();
-  for (var index = 0, i = 0; index < vertices.length; i++) {
-    vec3.copy(vertex, geometryArray.vertices[i]);
-    vec3.transformMat4(vertex, vertex, parentTransformations);
-    vertices[index++] = vertex[0];
-    if (bottom) {
-      vertices[index++] = vertex[2];
-    } else {
-      vertices[index++] = vertex[1];
+  if (geometryArray instanceof IndexedTriangleArray3D) {
+    var vertexCount = geometryArray.vertices.length;
+    var vertices = new Array(vertexCount * 2);
+    var vertex = vec3.create();
+    for (var index = 0, i = 0; index < vertices.length; i++) {
+      vec3.copy(vertex, geometryArray.vertices [i]);
+      vec3.transformMat4(vertex, vertex, parentTransformations);
+      vertices[index++] = vertex[0];
+      if (bottom) {
+        vertices[index++] = vertex[2];
+      } else {
+        vertices[index++] = vertex[1];
+      }
     }
+    
+    geometryPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, 1000);
+    for (var i = 0, triangleIndex = 0, n = geometryArray.vertexIndices.length; i < n; i += 3) {
+      this.addTriangleToPath(geometryArray, geometryArray.vertexIndices [i], geometryArray.vertexIndices [i + 1], geometryArray.vertexIndices [i + 2], vertices, 
+          geometryPath, triangleIndex++, nodeArea);
+    }
+    nodeArea.add(new java.awt.geom.Area(geometryPath));
   }
-
-  geometryPath = new java.awt.geom.GeneralPath(java.awt.geom.Path2D.WIND_NON_ZERO, 1000);
-  for (var i = 0, triangleIndex = 0, n = geometryArray.vertexIndices.length; i < n; i += 3) {
-    this.addTriangleToPath(geometryArray, geometryArray.vertexIndices [i], geometryArray.vertexIndices [i + 1], geometryArray.vertexIndices [i + 2], vertices, geometryPath, triangleIndex, nodeArea);
-  }
-  nodeArea.add(new java.awt.geom.Area(geometryPath));
 }
 
 /**
@@ -810,7 +1157,7 @@ ModelManager.prototype.addTriangleToPath = function(geometryArray, vertexIndex1,
 ModelManager.prototype.computeVerticesOnFloor = function (node, vertices, parentTransformations) {
   if (node instanceof Group3D) {
     if (node instanceof TransformGroup3D) {
-      parentTransformations = mat4.create();
+      parentTransformations = mat4.clone(parentTransformations);
       var transform = mat4.create();
       node.getTransform(transform);
       mat4.mul(parentTransformations, parentTransformations, transform);
@@ -823,15 +1170,16 @@ ModelManager.prototype.computeVerticesOnFloor = function (node, vertices, parent
     this.computeVerticesOnFloor(node.getSharedGroup(), vertices, parentTransformations);
   } else if (node instanceof Shape3D) {
     var appearance = node.getAppearance();
-    if (appearance.isVisible() && (!ignoreTransparentShapes || appearance.getTransparency() < 1)) {
+    if (appearance.isVisible() 
+        && (appearance.getTransparency() === undefined
+            || appearance.getTransparency() < 1)) {
       var geometries = node.getGeometries(); 
       for (var i = 0, n = geometries.length; i < n; i++) {
         var geometryArray = geometries[i];
         var vertexCount = geometryArray.vertices.length;
-        var vertices = new Array(vertexCount * 2);
         var vertex = vec3.create();
         for (var index = 0, j = 0; index < vertexCount; j++, index++) {
-          vec3.copy(vertex, geometryArray.vertices[j]);
+          vec3.copy(vertex, geometryArray.vertices [j]);
           vec3.transformMat4(vertex, vertex, parentTransformations);
           vertices.push([vertex[0], vertex[2]]);
         }
@@ -848,7 +1196,7 @@ ModelManager.prototype.computeVerticesOnFloor = function (node, vertices, parent
  * @return {Array}
  * @private
  */
-ModelManager.prototype.getSurroundingPolygon = function (vertices) {
+ModelManager.prototype.getSurroundingPolygon = function(vertices) {
   vertices.sort(function (vertex1, vertex2) {
       var testedValue;
       if (vertex1[0] === vertex2[0]) {
@@ -885,7 +1233,7 @@ ModelManager.prototype.getSurroundingPolygon = function (vertices) {
     }
     polygon[++top] = vertices[minMin];
     var surroundingPolygon = new Array(top + 1);
-    System.arraycopy(polygon, 0, surroundingPolygon, 0, surroundingPolygon_1.length);
+    System.arraycopy(polygon, 0, surroundingPolygon, 0, surroundingPolygon.length);
     return surroundingPolygon;
   }
   
@@ -901,15 +1249,16 @@ ModelManager.prototype.getSurroundingPolygon = function (vertices) {
   
   polygon[++top] = vertices[minMin];
   i = minMax;
-  while ((++i <= maxMin)) {
+  while (++i <= maxMin) {
     if (this.isLeft(vertices[minMin], vertices[maxMin], vertices[i]) >= 0 && i < maxMin) {
       continue;
     }
-    while ((top > 0)) {
-      if (this.isLeft(polygon[top - 1], polygon[top], vertices[i]) > 0)
+    while (top > 0) {
+      if (this.isLeft(polygon[top - 1], polygon[top], vertices[i]) > 0) {
         break;
-      else
+      } else {
         top--;
+      }
     }
     polygon[++top] = vertices[i];
   }
@@ -919,15 +1268,14 @@ ModelManager.prototype.getSurroundingPolygon = function (vertices) {
   }
   bottom = top;
   i = maxMin;
-  while ((--i >= minMax)) {
+  while (--i >= minMax) {
     if (this.isLeft(vertices[maxMax], vertices[minMax], vertices[i]) >= 0 && i > minMax) {
       continue;
     }
-    while ((top > bottom)) {
+    while (top > bottom) {
       if (this.isLeft(polygon[top - 1], polygon[top], vertices[i]) > 0) {
         break;
-      }
-      else {
+      } else {
         top--;
       }
     }
@@ -942,7 +1290,8 @@ ModelManager.prototype.getSurroundingPolygon = function (vertices) {
 }
 
 ModelManager.prototype.isLeft = function(vertex0, vertex1, vertex2) {
-  return (vertex1[0] - vertex0[0]) * (vertex2[1] - vertex0[1]) - (vertex2[0] - vertex0[0]) * (vertex1[1] - vertex0[1]);
+  return (vertex1[0] - vertex0[0]) * (vertex2[1] - vertex0[1]) 
+       - (vertex2[0] - vertex0[0]) * (vertex1[1] - vertex0[1]);
 }
 
 /**
@@ -955,7 +1304,7 @@ ModelManager.prototype.getMirroredArea = function (area) {
   var mirrorPath = new java.awt.geom.GeneralPath();
   var point = [0, 0, 0, 0, 0, 0];
   for (var it = area.getPathIterator(null); !it.isDone(); it.next()) {
-    switch ((it.currentSegment(point))) {
+    switch (it.currentSegment(point)) {
     case java.awt.geom.PathIterator.SEG_MOVETO :
       mirrorPath.moveTo(1 - point[0], point[1]);
       break;
@@ -982,19 +1331,5 @@ ModelManager.prototype.getMirroredArea = function (area) {
  * @return {Shape}
  */
 ModelManager.prototype.getShape = function(svgPathShape) {
-  var shape2D = this.parsedShapes [svgPathShape];
-  if (!shape2D) {
-    shape2D = new java.awt.geom.Rectangle2D.Float(0, 0, 1, 1);
-    try {
-      var pathProducer = new org.apache.batik.parser.AWTPathProducer();
-      var pathParser = new org.apache.batik.parser.PathParser();
-      pathParser.setPathHandler(pathProducer);
-      pathParser.parse(svgPathShape);
-      shape2D = pathProducer.getShape();
-    } catch (ex) {
-      // Keep default value if Batik is not available or if the path is incorrect
-    }
-    this.parsedShapes[svgPathShape] = shape2D;
-  }
-  return shape2D;
+  return ShapeTools.getShape(svgPathShape);
 }

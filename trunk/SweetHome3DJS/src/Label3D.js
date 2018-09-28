@@ -72,14 +72,25 @@ Label3D.prototype.update = function() {
         fontName = "sans-serif";
       }
       
-      var font = fontStyle + "100px " + fontName;
+      var fontHeight = 50; // Size to get a similar outline as in Java  
+      var fontScale = fontHeight / style.getFontSize();
+      var ascent = fontHeight * 0.8;
+      var font = fontStyle + " " + fontHeight + "px " + fontName;
       Label3D.dummyContext.font = font;
-      var fontMetrics = Label3D.dummyContext.measureText(text);
-      var textWidth = fontMetrics.width / 100. * style.getFontSize();
-      if (style.isItalic()) {
-        textWidth += style.getFontSize() * 0.15;
+      
+      var lines = text.split("\n");
+      var lineWidths = new Array(lines.length);
+      var textWidth = -Infinity;
+      var baseLineShift = ascent + fontHeight * (lines.length - 1);
+      for (var i = 0; i < lines.length; i++) {
+        lineWidths [i] = Label3D.dummyContext.measureText(lines [i]).width;
+        if (style.isItalic()) {
+          lineWidths [i] += fontHeight * 0.15;
+        }
+        textWidth = Math.max(lineWidths [i], textWidth);
       }
-      var textHeight = style.getFontSize();
+      
+      var textHeight = fontHeight * lines.length;
       var textRatio = Math.sqrt(textWidth / textHeight);
       var textRatio = Math.sqrt(textWidth / textHeight);
       var width;
@@ -100,9 +111,9 @@ Label3D.prototype.update = function() {
         textureImage.height = Appearance3D.getNextHighestPowerOfTwo(height) / 2;
         textureImage.transparent = true;
         var context = textureImage.getContext("2d");
-        context.scale(scale / 100. * style.getFontSize() / width * textureImage.width, 
-            scale / 100. * style.getFontSize() / height * textureImage.height);
-        context.translate(0, 100 * 0.8);
+        
+        context.scale(scale / width * textureImage.width, scale / height * textureImage.height);
+        context.translate(0, baseLineShift);
         context.font = font;
         if (color !== null) {
           context.fillStyle = "rgb(" 
@@ -110,12 +121,43 @@ Label3D.prototype.update = function() {
              + ((color >>> 8) & 0xFF) + ","
              + (color & 0xFF) + ")";
         }
-        context.fillText(text, 0, 0);      
+        if (outlineColor !== null) {
+          context.strokeStyle = "rgb(" 
+              + ((outlineColor >>> 16) & 0xFF) + ","
+              + ((outlineColor >>> 8) & 0xFF) + ","
+              + (outlineColor & 0xFF) + ")"
+        }
+        for (var i = lines.length - 1; i >= 0; i--) {
+          var line = lines [i];
+          var translationX;
+          if (style.getAlignment() === TextStyle.Alignment.LEFT) {
+            translationX = 0;
+          } else if (style.getAlignment() === TextStyle.Alignment.RIGHT) {
+            translationX = textWidth - lineWidths [i];
+          } else { // CENTER
+            translationX = (textWidth - lineWidths [i]) / 2;
+          }
+          context.translate(translationX, 0);
+          context.fillText(line, 0, 0);      
+          if (outlineColor !== null) {
+            // Fill then stroke to be able to view outline drawn in each character
+            context.strokeText(line, 0, 0);
+          }
+          context.translate(-translationX, -fontHeight);
+        }
         
         var scaleTransform = mat4.create();
-        mat4.scale(scaleTransform, scaleTransform, vec3.fromValues(textWidth, 1, textHeight));
+        mat4.scale(scaleTransform, scaleTransform, vec3.fromValues(textWidth / fontScale, 1, textHeight / fontScale));
         this.baseLineTransform = mat4.create();
-        mat4.fromTranslation(this.baseLineTransform, vec3.fromValues(0, 0, textHeight / 2 - 0.8 * style.getFontSize()));
+        var translationX;
+        if (style.getAlignment() == TextStyle.Alignment.LEFT) {
+          translationX = textWidth / 2;
+        } else if (style.getAlignment() == TextStyle.Alignment.RIGHT) {
+          translationX = -textWidth / 2;
+        } else { // CENTER
+          translationX = 0;
+        }
+        mat4.fromTranslation(this.baseLineTransform, vec3.fromValues(translationX / fontScale, 0, (textHeight / 2 - baseLineShift) / fontScale));
         mat4.mul(this.baseLineTransform, this.baseLineTransform, scaleTransform);
         this.texture = textureImage;
         this.text = text;
@@ -135,9 +177,6 @@ Label3D.prototype.update = function() {
         var appearance = new Appearance3D();
         this.updateAppearanceMaterial(appearance, Object3DBranch.DEFAULT_COLOR, Object3DBranch.DEFAULT_AMBIENT_COLOR, 0);
         appearance.setCullFace(Appearance3D.CULL_NONE);
-        appearance.setTextureCoordinatesGeneration(
-            {planeS : vec4.fromValues(1, 0, 0, 0.5), 
-             planeT : vec4.fromValues(0, 1, -1, 0.5)});
         var shape = new Shape3D( 
             new IndexedTriangleArray3D(
                [vec3.fromValues(-0.5, 0, -0.5),
@@ -164,7 +203,7 @@ Label3D.prototype.update = function() {
       mat4.fromYRotation(rotationY, -label.getAngle());
       mat4.mul(rotationY, rotationY, pitchRotation);
       var transform = mat4.create();
-      mat4.fromTranslation(transform, vec3.fromValues(label.getX(), label.getGroundElevation(), label.getY()));
+      mat4.fromTranslation(transform, vec3.fromValues(label.getX(), label.getGroundElevation() + (pitch == 0 && label.getElevation() < 0.1 ? 0.1 : 0), label.getY()));
       mat4.mul(transform, transform, rotationY);
       transformGroup.setTransform(transform);
       transformGroup.getChild(0).getAppearance().setTextureImage(this.texture);
