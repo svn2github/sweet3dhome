@@ -273,6 +273,10 @@ function testHome(geomAvailable) {
   label.setElevation(10);
   home.addLabel(label);
   assertEquals("Wrong number of labels", 1, home.getLabels().length);
+  var polyline = new Polyline([[0, 910], [200, 910], [200, 950]]);
+  polyline.setVisibleIn3D(true);
+  home.addPolyline(polyline);
+  assertEquals("Wrong number of polylines", 1, home.getPolylines().length);
   
   new HomeRecorder().readHome("test/resources/SweetHome3DExample3.zip", 
       {
@@ -288,9 +292,11 @@ function testHome(geomAvailable) {
 	      home.addWall(wall2);
 	      home.addRoom(room);
 	      home.addLabel(label);
+	      home.addPolyline(polyline);
 	      var thicknessDelta = 0.5;
 	      var lengthDelta = -5;
 	      var elevationDelta = -5;
+	      var thicknessDelta = 0.1;
 	      setInterval(function() {
 	          // Make piece blink
 	          piece.setVisible(!piece.isVisible());
@@ -313,6 +319,10 @@ function testHome(geomAvailable) {
 	  	      label.setElevation(label.getElevation() + elevationDelta);
 	  	      if (label.getElevation() >= 200 || label.getElevation() < 10) {
 	  	        elevationDelta = -elevationDelta;
+	  	      }
+	  	      polyline.setThickness(polyline.getThickness() + thicknessDelta);
+	  	      if (polyline.getThickness() >= 20 || polyline.getThickness() < 1) {
+	  	        thicknessDelta = -thicknessDelta;
 	  	      }
 	        }, 100);
 	      
