@@ -34,11 +34,11 @@ var ShapeTools = {
  * @param {number} thickness
  * @param {Polyline.CapStyle} capStyle
  * @param {Polyline.JoinStyle} joinStyle
- * @param {Polyline.DashStyle} dashStyle
+ * @param {number []} dashPattern
  * @param {number} dashOffset
  * @return {Object}
  */
-ShapeTools.getStroke = function (thickness, capStyle, joinStyle, dashStyle, dashOffset) {
+ShapeTools.getStroke = function (thickness, capStyle, joinStyle, dashPattern, dashOffset) {
   var strokeCapStyle;
   switch (capStyle) {
     case Polyline.CapStyle.ROUND:
@@ -66,33 +66,16 @@ ShapeTools.getStroke = function (thickness, capStyle, joinStyle, dashStyle, dash
       break;
   }
   
-  var strokeDashes;
-  switch (dashStyle) {
-    case Polyline.DashStyle.DOT:
-      strokeDashes = [thickness, thickness];
-      break;
-    case Polyline.DashStyle.DASH:
-      strokeDashes = [thickness * 4, thickness * 2];
-      break;
-    case Polyline.DashStyle.DASH_DOT:
-      strokeDashes = [thickness * 8, thickness * 2, thickness * 2, thickness * 2];
-      break;
-    case Polyline.DashStyle.DASH_DOT_DOT:
-      strokeDashes = [thickness * 8, thickness * 2, thickness * 2, thickness * 2, thickness * 2, thickness * 2];
-      break;
-    default:
-      strokeDashes = null;
-      break;
-  }
-  
   var dashPhase = 0;
-  if (strokeDashes !== null) {
-    for (var i = 0; i < strokeDashes.length; i++) {
-      dashPhase += strokeDashes[i];
+  if (dashPattern != null) {
+    dashPattern = dashPattern.slice(0);
+    for (var i = 0; i < dashPattern.length; i++) {
+      dashPattern [i] *= thickness;
+      dashPhase += dashPattern [i];
     }
     dashPhase *= dashOffset;
   }
-  return new java.awt.BasicStroke(thickness, strokeCapStyle, strokeJoinStyle, 10, strokeDashes, dashPhase);
+  return new java.awt.BasicStroke(thickness, strokeCapStyle, strokeJoinStyle, 10, dashPattern, dashPhase);
 }
 
 /**
