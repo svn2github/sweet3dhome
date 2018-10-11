@@ -30,6 +30,9 @@
     <!-- Compile Furniture Library Editor -->
     <javac srcdir="src" destdir="build/classes"
            encoding="ISO-8859-1" target="1.5">
+      <extdirs>
+        <pathelement location="../SweetHome3D/lib"/>
+      </extdirs>
       <classpath>
         <pathelement location="build/classes"/>
         <pathelement location="../SweetHome3D/lib/batik-svgpathparser-1.7.jar"/>
@@ -144,7 +147,7 @@
         <include name="*.jar"/>
         <include name="macosx/*.jar"/>
         <include name="java3d-1.6/*.jar"/>
-      	<exclude name="java3d-1.6/jogl-all.jar"/>
+        <exclude name="java3d-1.6/jogl-all.jar"/>
         <exclude name="freehep-vectorgraphics-svg-*.jar"/>
         <exclude name="iText-*.jar"/>
         <exclude name="sunflow-*.jar"/>
