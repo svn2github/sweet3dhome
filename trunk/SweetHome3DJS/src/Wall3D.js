@@ -229,7 +229,9 @@ Wall3D.prototype.createWallGeometries = function(bottomGeometries, sideGeometrie
           intersectionArea = new java.awt.geom.Area(wallSideShape);
           intersectionArea.intersect(pieceArea);
         }
-        if (!intersectionArea.isEmpty()) {
+        if (!intersectionArea.isEmpty()
+            && (!wall.isTrapezoidal()
+                || pieceElevation < this.getMaxElevationAtWallIntersection(intersectionArea, cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta))) {
           windowIntersections.push(new Wall3D.DoorOrWindowArea(intersectionArea, [piece]));
           intersectingDoorOrWindows.push(piece);
           wallSideOrBaseboardArea.subtract(pieceArea);
@@ -783,6 +785,28 @@ Wall3D.prototype.createVerticalPartGeometry = function(wall, points, minElevatio
   }
   geometryInfo.setGeneratedNormals(true);
   return geometryInfo.getIndexedGeometryArray();
+}
+
+/**
+ * Returns the maximum wall elevation of each point of the given intersection.
+ * @param {Area} pieceWallIntersection
+ * @param {number} cosWallYawAngle
+ * @param {number} sinWallYawAngle
+ * @param {number} topLineAlpha
+ * @param {number} topLineBeta
+ * @return {number}
+ * @private
+ */
+Wall3D.prototype.getMaxElevationAtWallIntersection = function(pieceWallIntersection, cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta) {
+  var maxElevation = -Infinity;
+  for (var it = pieceWallIntersection.getPathIterator(null); !it.isDone(); it.next()) {
+    var wallPoint = [0, 0];
+    if (it.currentSegment(wallPoint) !== java.awt.geom.PathIterator.SEG_CLOSE) {
+      maxElevation = Math.max(maxElevation, this.getWallPointElevation(wallPoint [0], wallPoint [1],
+            cosWallYawAngle, sinWallYawAngle, topLineAlpha, topLineBeta));
+    }
+  }
+  return maxElevation;
 }
 
 /**
