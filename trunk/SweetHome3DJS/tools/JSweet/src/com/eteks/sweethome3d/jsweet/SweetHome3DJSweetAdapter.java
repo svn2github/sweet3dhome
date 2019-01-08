@@ -146,7 +146,7 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
           } else if (element.getKind() == ElementKind.CONSTRUCTOR && ((QualifiedNameable) element.getEnclosingElement())
               .getQualifiedName().toString().equals("com.eteks.sweethome3d.model.CatalogPieceOfFurniture")) {
             // Only keep the private constructor of CatalogPieceOfFurniture and its 4 public constructors used
-            // to create pieces available from version 5.3 
+            // to create pieces available from version 5.3
             ExecutableElement c = (ExecutableElement) element;
             if (!element.getModifiers().contains(Modifier.PRIVATE)) {
               if (c.getParameters().size() != 16 && c.getParameters().size() != 26 && c.getParameters().size() != 28 && c.getParameters().size() != 29) {
@@ -190,10 +190,10 @@ public class SweetHome3DJSweetAdapter extends PrinterAdapter {
     // Manage content without contentContext
     addAnnotation(
         "@Replace('if (contentFile == null) { return null; } else if (contentFile.indexOf('://') >= 0) { return new URLContent(contentFile); } else { return new HomeURLContent('jar:' + this['homeUrl'] + '!/' + contentFile); }')",
-        "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String,java.lang.String)");
+        "com.eteks.sweethome3d.io.HomeXMLHandler.parseContent(java.lang.String,java.lang.String,boolean)");
     // Store home structure if set in the XML file
     addAnnotation(
-        "@Replace('{{ body }}{{ baseIndent }}if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure'], null); }')",
+        "@Replace('{{ body }}{{ baseIndent }}if(attributes['structure']) { home['structure'] = this.parseContent(attributes['structure'], null, false); }')",
         "com.eteks.sweethome3d.io.HomeXMLHandler.setHomeAttributes(..)");
     // WARNING: this constructor delegates to an erased constructor, so we need to replace its implementation
     addAnnotation(
