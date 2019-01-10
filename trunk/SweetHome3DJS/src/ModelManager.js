@@ -93,14 +93,16 @@ ModelManager.ARM_ON_BALL_PREFIX          = "sweethome3d_arm_on_ball_";
  */
 ModelManager.HINGE_PREFIX                = "sweethome3d_hinge_";
 ModelManager.OPENING_ON_HINGE_PREFIX     = "sweethome3d_opening_on_hinge_";
-ModelManager.WINDOW_PANE_ON_HINGE_PREFIX = "sweethome3d_window_pane_on_hinge_";
+ModelManager.WINDOW_PANE_ON_HINGE_PREFIX = ModelManager.WINDOW_PANE_SHAPE_PREFIX + "_on_hinge_";
+ModelManager.MIRROR_ON_HINGE_PREFIX      = ModelManager.MIRROR_SHAPE_PREFIX + "_on_hinge_";
 /**
  * <code>Node</code> user data prefix for rail / sliding opening joints.
  */
 ModelManager.UNIQUE_RAIL_PREFIX          = "sweethome3d_unique_rail";
 ModelManager.RAIL_PREFIX                 = "sweethome3d_rail_";
 ModelManager.OPENING_ON_RAIL_PREFIX      = "sweethome3d_opening_on_rail_";
-ModelManager.WINDOW_PANE_ON_RAIL_PREFIX  = "sweethome3d_window_pane_on_rail_";
+ModelManager.WINDOW_PANE_ON_RAIL_PREFIX  = ModelManager.WINDOW_PANE_SHAPE_PREFIX + "_on_rail_";
+ModelManager.MIRROR_ON_RAIL_PREFIX       = ModelManager.MIRROR_SHAPE_PREFIX + "_on_rail_";
 /**
  * Deformable group suffix.
  */
@@ -620,9 +622,7 @@ ModelManager.prototype.updateWindowPanesTransparency = function(node) {
   } else if (node instanceof Shape3D) {
     var name = node.getName();
     if (name 
-        && (name.indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0
-            || name.indexOf(ModelManager.WINDOW_PANE_ON_HINGE_PREFIX) === 0
-            || name.indexOf(ModelManager.WINDOW_PANE_ON_RAIL_PREFIX) === 0)) {
+        && name.indexOf(ModelManager.WINDOW_PANE_SHAPE_PREFIX) === 0) {
       var appearance = node.getAppearance();
       if (appearance === null) {
         appearance = new Appearance3D();
@@ -734,10 +734,10 @@ ModelManager.prototype.updateDeformableModelHierarchy = function(group) {
     group.addChild(pelvisGroup);
   } else {
     // Reorganize rotating openings
-    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.HINGE_PREFIX, ModelManager.OPENING_ON_HINGE_PREFIX, ModelManager.WINDOW_PANE_ON_HINGE_PREFIX);
-    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.BALL_PREFIX, ModelManager.ARM_ON_BALL_PREFIX, null);
+    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.HINGE_PREFIX, ModelManager.OPENING_ON_HINGE_PREFIX, ModelManager.WINDOW_PANE_ON_HINGE_PREFIX, ModelManager.MIRROR_ON_HINGE_PREFIX);
+    this.updateSimpleDeformableModelHierarchy(group, null, ModelManager.BALL_PREFIX, ModelManager.ARM_ON_BALL_PREFIX, null, null);
     // Reorganize sliding openings
-    this.updateSimpleDeformableModelHierarchy(group, ModelManager.UNIQUE_RAIL_PREFIX, ModelManager.RAIL_PREFIX, ModelManager.OPENING_ON_RAIL_PREFIX, ModelManager.WINDOW_PANE_ON_RAIL_PREFIX);
+    this.updateSimpleDeformableModelHierarchy(group, ModelManager.UNIQUE_RAIL_PREFIX, ModelManager.RAIL_PREFIX, ModelManager.OPENING_ON_RAIL_PREFIX, ModelManager.MIRROR_ON_RAIL_PREFIX);
   }
 }
 
@@ -746,13 +746,15 @@ ModelManager.prototype.updateDeformableModelHierarchy = function(group) {
  * @param {string} uniqueReferenceNodePrefix
  * @param {string} referenceNodePrefix
  * @param {string} openingPrefix
- * @param {string} openingPanePrefix) {
+ * @param {string} openingPanePrefix
+ * @param {string} openingMirrorPrefix
  * @private 
  */
 ModelManager.prototype.updateSimpleDeformableModelHierarchy = function(group, uniqueReferenceNodePrefix, referenceNodePrefix,
-                                                                       openingPrefix, openingPanePrefix) {
+                                                                       openingPrefix, openingPanePrefix, openingMirrorPrefix) {
   if (this.containsNode(group, openingPrefix + 1)
-      || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + 1))) {
+      || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + 1))
+      || (openingMirrorPrefix !== null && this.containsNode(group, openingMirrorPrefix + 1))) {
     if (this.containsNode(group, referenceNodePrefix + 1)) {
       // Reorganize openings with multiple reference nodes
       var i = 1;
@@ -760,13 +762,15 @@ ModelManager.prototype.updateSimpleDeformableModelHierarchy = function(group, un
         var referenceNode = this.extractNodes(group, referenceNodePrefix + i, null);
         var opening = this.extractNodes(group, openingPrefix + i, null);
         var openingPane = openingPanePrefix !== null ? this.extractNodes(group, openingPanePrefix + i, null) : null;
-        var openingGroup = this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane]);
+        var openingMirror = openingMirrorPrefix !== null ? this.extractNodes(group, openingMirrorPrefix + i, null) : null;
+        var openingGroup = this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane, openingMirror]);
         group.addChild(referenceNode);
         group.addChild(openingGroup);
         i++;
       } while (this.containsNode(group, referenceNodePrefix + i)
           && (this.containsNode(group, openingPrefix + i)
-              || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + i))));
+              || (openingPanePrefix !== null && this.containsNode(group, openingPanePrefix + i))
+              || (openingMirrorPrefix !== null && this.containsNode(group, openingMirrorPrefix + i))));
     } else if (uniqueReferenceNodePrefix !== null
                && this.containsNode(group, uniqueReferenceNodePrefix)) {
       // Reorganize openings with a unique reference node
@@ -776,10 +780,12 @@ ModelManager.prototype.updateSimpleDeformableModelHierarchy = function(group, un
       do {
         var opening = this.extractNodes(group, openingPrefix + i, null);
         var openingPane = this.extractNodes(group, openingPanePrefix + i, null);
-        group.addChild(this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane]));
+        var openingMirror = this.extractNodes(group, openingMirrorPrefix + i, null);
+        group.addChild(this.createPickableTransformGroup(referenceNodePrefix + i, [opening, openingPane, openingMirror]));
         i++;
       } while (this.containsNode(group, openingPrefix + i)
-               || this.containsNode(group, openingPanePrefix + i));
+               || this.containsNode(group, openingPanePrefix + i)
+               || this.containsNode(group, openingMirrorPrefix + i));
     }
   }
 }
