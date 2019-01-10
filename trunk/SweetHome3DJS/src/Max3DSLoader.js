@@ -908,7 +908,7 @@ Max3DSLoader.prototype.parsePercentage = function(input) {
       case Max3DSLoader.PERCENTAGE_INT :
         percentage = input.readLittleEndianShort() / 100.;
         break;
-      case PERCENTAGE_FLOAT :
+      case Max3DSLoader.PERCENTAGE_FLOAT :
         percentage = input.readLittleEndianFloat();
         break;
       default :
