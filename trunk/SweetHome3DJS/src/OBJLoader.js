@@ -1486,6 +1486,14 @@ OBJLoader.parseMaterial = function(mtlContent, appearances, objEntryName, zip) {
           imageEntryName = objEntryName.substring(0, lastSlash + 1) + imageEntryName;
         }
         var imageEntry = zip.file(imageEntryName);
+        if (imageEntry === null
+            && strings.length > 2) {
+          imageEntryName = line.substring(7, line.length).trim();
+          if (lastSlash >= 0) {
+            imageEntryName = objEntryName.substring(0, lastSlash + 1) + imageEntryName;
+          }
+          imageEntry = zip.file(imageEntryName);
+        }
         if (imageEntry !== null) {
           currentAppearance.imageEntryName = imageEntryName;
         }
