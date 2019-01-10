@@ -249,6 +249,7 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
         }
       }
       
+      var lastEnclosingAreaPointJoiningHoles = null;
       while (holesInArea.length !== 0) {
         var minDistance = Number.MAX_VALUE;
         var closestHolePointsIndex = 0;
@@ -258,9 +259,11 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
           var holePoints = holesInArea[j];
           for (var k = 0; k < holePoints.length && minDistance > 0; k++) {
             for (var l = 0; l < enclosingAreaPartPoints.length && minDistance > 0; l++) {
+              var enclosingAreaPartPoint = enclosingAreaPartPoints[l];
               var distance = java.awt.geom.Point2D.distanceSq(holePoints[k][0], holePoints[k][1], 
-                  enclosingAreaPartPoints[l][0], enclosingAreaPartPoints[l][1]);
-              if (distance < minDistance) {
+                  enclosingAreaPartPoint[0], enclosingAreaPartPoint[1]);
+              if (distance < minDistance
+                  && lastEnclosingAreaPointJoiningHoles !== enclosingAreaPartPoint) {
                 minDistance = distance;
                 closestHolePointsIndex = j;
                 closestPointIndex = k;
@@ -271,7 +274,8 @@ Object3DBranch.prototype.getAreaPoints = function (area, areaPoints, areaHoles, 
         }
         var closestHolePoints = holesInArea[closestHolePointsIndex];
         if (minDistance !== 0) {
-          enclosingAreaPartPoints.splice(areaClosestPointIndex, 0, enclosingAreaPartPoints[areaClosestPointIndex]);
+          lastEnclosingAreaPointJoiningHoles = enclosingAreaPartPoints[areaClosestPointIndex];
+          enclosingAreaPartPoints.splice(areaClosestPointIndex, 0, lastEnclosingAreaPointJoiningHoles);
           enclosingAreaPartPoints.splice(++areaClosestPointIndex, 0, closestHolePoints[closestPointIndex]);
         }
         var lastPartPoints = closestHolePoints.slice(closestPointIndex, closestHolePoints.length);
