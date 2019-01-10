@@ -56,6 +56,7 @@ Max3DSLoader.COLOR_24 = 0x0011;
 Max3DSLoader.LINEAR_COLOR_24 = 0x0012;
 Max3DSLoader.LINEAR_COLOR_FLOAT = 0x0013;
 Max3DSLoader.PERCENTAGE_INT = 0x0030;
+Max3DSLoader.PERCENTAGE_FLOAT = 0x0031;
 
 Max3DSLoader.EDITOR_DATA = 0x3D3D;
 Max3DSLoader.MESH_VERSION = 0x3D3E;
@@ -906,6 +907,9 @@ Max3DSLoader.prototype.parsePercentage = function(input) {
     switch (input.readChunkHeader().id) {
       case Max3DSLoader.PERCENTAGE_INT :
         percentage = input.readLittleEndianShort() / 100.;
+        break;
+      case PERCENTAGE_FLOAT :
+        percentage = input.readLittleEndianFloat();
         break;
       default :
         input.readUntilChunkEnd();
