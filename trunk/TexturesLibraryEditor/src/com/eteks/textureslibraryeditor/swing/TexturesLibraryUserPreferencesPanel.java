@@ -67,7 +67,7 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
   /**
    * Creates and initializes components and their models.
    */
-  private void createComponents(UserPreferences preferences, 
+  private void createComponents(UserPreferences preferences,
                                 final TexturesLibraryUserPreferencesController controller) {
     abstract class DocumentChangeListener implements DocumentListener {
       public void insertUpdate(DocumentEvent ev) {
@@ -78,7 +78,7 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
         changedUpdate(ev);
       }
     };
-    
+
     if (controller.isPropertyEditable(TexturesLibraryUserPreferencesController.Property.DEFAULT_CREATOR)) {
       // Create default author label and its text field bound to DEFAULT_CREATOR controller property
       this.defaultCreatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, TexturesLibraryUserPreferencesPanel.class, "defaultCreatorLabel.text"));
@@ -95,7 +95,7 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.defaultCreatorTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesLibraryUserPreferencesController.Property.DEFAULT_CREATOR, creatorChangeListener);
-            String defaultCreator = defaultCreatorTextField.getText(); 
+            String defaultCreator = defaultCreatorTextField.getText();
             if (defaultCreator == null || defaultCreator.trim().length() == 0) {
               controller.setDefaultCreator(null);
             } else {
@@ -105,19 +105,19 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
           }
         });
     }
-    
+
     if (controller.isPropertyEditable(TexturesLibraryUserPreferencesController.Property.OFFLINE_TEXTURES_LIBRARY)) {
       // Create offline label and check box bound to controller OFFLINE_TEXTURES_LIBRARY property
       this.offlineTexturesLibraryLabel = new JLabel(preferences.getLocalizedString(
           TexturesLibraryUserPreferencesPanel.class, "offlineTexturesLibraryLabel.text"));
-      this.offlineTexturesLibraryCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+      this.offlineTexturesLibraryCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences,
           TexturesLibraryUserPreferencesPanel.class, "offlineTexturesLibraryCheckBox.text"), controller.isTexturesLibraryOffline());
       this.offlineTexturesLibraryCheckBox.addItemListener(new ItemListener() {
           public void itemStateChanged(ItemEvent ev) {
             controller.setTexturesLibraryOffline(offlineTexturesLibraryCheckBox.isSelected());
           }
         });
-      controller.addPropertyChangeListener(TexturesLibraryUserPreferencesController.Property.OFFLINE_TEXTURES_LIBRARY, 
+      controller.addPropertyChangeListener(TexturesLibraryUserPreferencesController.Property.OFFLINE_TEXTURES_LIBRARY,
           new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent ev) {
               boolean texturesLibraryOffline = controller.isTexturesLibraryOffline();
@@ -149,7 +149,7 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.texturesResourcesLocalDirectoryTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesLibraryUserPreferencesController.Property.TEXTURES_RESOURCES_LOCAL_DIRECTORY, localDirectoryChangeListener);
-            String texturesResourcesLocalDirectory = texturesResourcesLocalDirectoryTextField.getText(); 
+            String texturesResourcesLocalDirectory = texturesResourcesLocalDirectoryTextField.getText();
             if (texturesResourcesLocalDirectory == null || texturesResourcesLocalDirectory.trim().length() == 0) {
               controller.setTexturesResourcesLocalDirectory(null);
             } else {
@@ -177,7 +177,7 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.texturesResourcesRemoteUrlBaseTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesLibraryUserPreferencesController.Property.TEXTURES_RESOURCES_REMOTE_URL_BASE, urlBaseChangeListener);
-            String texturesResourcesRemoteUrlBase = texturesResourcesRemoteUrlBaseTextField.getText(); 
+            String texturesResourcesRemoteUrlBase = texturesResourcesRemoteUrlBaseTextField.getText();
             if (texturesResourcesRemoteUrlBase == null || texturesResourcesRemoteUrlBase.trim().length() == 0) {
               controller.setTexturesResourcesRemoteURLBase(null);
             } else {
@@ -187,8 +187,8 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
           }
         });
     }
-  }        
-  
+  }
+
   /**
    * Sets components mnemonics and label / component associations.
    */
@@ -215,46 +215,47 @@ public class TexturesLibraryUserPreferencesPanel extends UserPreferencesPanel {
       }
     }
   }
-  
+
   /**
-   * Layouts panel components in panel with their labels. 
+   * Layouts panel components in panel with their labels.
    */
   private void layoutComponents() {
-    int labelAlignment = OperatingSystem.isMacOSX() 
+    int labelAlignment = OperatingSystem.isMacOSX()
         ? GridBagConstraints.LINE_END
         : GridBagConstraints.LINE_START;
-    Insets labelInsets = new Insets(0, 0, 5, 5);
-    Insets componentInsets = new Insets(0, 0, 5, 0);
+    int gap = Math.round(5 * SwingTools.getResolutionScale());
+    Insets labelInsets = new Insets(0, 0, gap, gap);
+    Insets componentInsets = new Insets(0, 0, gap, 0);
     if (this.defaultCreatorLabel != null) {
       add(this.defaultCreatorLabel, new GridBagConstraints(
-          0, 100, 1, 1, 0, 0, labelAlignment, 
+          0, 100, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.defaultCreatorTextField, new GridBagConstraints(
-          1, 100, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 100, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.offlineTexturesLibraryLabel != null) {
       add(this.offlineTexturesLibraryLabel, new GridBagConstraints(
-          0, 101, 1, 1, 0, 0, labelAlignment, 
+          0, 101, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.offlineTexturesLibraryCheckBox, new GridBagConstraints(
-          1, 101, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 101, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.texturesResourcesLocalDirectoryLabel != null) {
       add(this.texturesResourcesLocalDirectoryLabel, new GridBagConstraints(
-          0, 102, 1, 1, 0, 0, labelAlignment, 
+          0, 102, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.texturesResourcesLocalDirectoryTextField, new GridBagConstraints(
-          1, 102, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 102, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.texturesResourcesRemoteUrlBaseLabel != null) {
       add(this.texturesResourcesRemoteUrlBaseLabel, new GridBagConstraints(
-          0, 103, 1, 1, 0, 0, labelAlignment, 
-          GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+          0, 103, 1, 1, 0, 0, labelAlignment,
+          GridBagConstraints.NONE, new Insets(0, 0, 0, gap), 0, 0));
       add(this.texturesResourcesRemoteUrlBaseTextField, new GridBagConstraints(
-          1, 103, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 103, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     }
   }

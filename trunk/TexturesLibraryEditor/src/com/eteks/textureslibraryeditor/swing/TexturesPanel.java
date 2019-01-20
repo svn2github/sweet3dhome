@@ -1,5 +1,5 @@
 /*
- * TexturesPanel.java 
+ * TexturesPanel.java
  *
  * Textures Library Editor, Copyright (c) 2012 Emmanuel PUYBARET / eTeks <info@eteks.com>
  *
@@ -87,7 +87,7 @@ public class TexturesPanel extends JPanel implements DialogView {
   private String                   dialogTitle;
 
   /**
-   * Creates a panel that displays catalog textures data according to the units 
+   * Creates a panel that displays catalog textures data according to the units
    * set in <code>preferences</code>.
    * @param preferences user preferences
    * @param controller the controller of this panel
@@ -104,11 +104,11 @@ public class TexturesPanel extends JPanel implements DialogView {
   /**
    * Creates and initializes components and spinners model.
    */
-  private void createComponents(final UserPreferences preferences, 
+  private void createComponents(final UserPreferences preferences,
                                 final TexturesController controller) {
-    // Get unit name matching current unit 
+    // Get unit name matching current unit
     String unitName = preferences.getLengthUnit().getName();
-    
+
     if (this.controller.isPropertyEditable(TexturesController.Property.ID)) {
       // Create id label and its text field bound to ID controller property
       this.idLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, TexturesPanel.class, "idLabel.text"));
@@ -125,7 +125,7 @@ public class TexturesPanel extends JPanel implements DialogView {
       this.idTextField.getDocument().addDocumentListener(new DocumentListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesController.Property.ID, idChangeListener);
-            String id = idTextField.getText(); 
+            String id = idTextField.getText();
             if (id == null || id.trim().length() == 0) {
               controller.setId(null);
             } else {
@@ -133,17 +133,17 @@ public class TexturesPanel extends JPanel implements DialogView {
             }
             controller.addPropertyChangeListener(TexturesController.Property.ID, idChangeListener);
           }
-    
+
           public void insertUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
-    
+
           public void removeUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
         });
     }
-        
+
     if (this.controller.isPropertyEditable(TexturesController.Property.NAME)) {
       // Create name label and its text field bound to NAME controller property
       this.nameLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, TexturesPanel.class, "nameLabel.text"));
@@ -160,7 +160,7 @@ public class TexturesPanel extends JPanel implements DialogView {
       this.nameTextField.getDocument().addDocumentListener(new DocumentListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesController.Property.NAME, nameChangeListener);
-            String name = nameTextField.getText(); 
+            String name = nameTextField.getText();
             if (name == null || name.trim().length() == 0) {
               controller.setName(null);
             } else {
@@ -168,20 +168,20 @@ public class TexturesPanel extends JPanel implements DialogView {
             }
             controller.addPropertyChangeListener(TexturesController.Property.NAME, nameChangeListener);
           }
-    
+
           public void insertUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
-    
+
           public void removeUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
         });
     }
-    
+
     if (this.controller.isPropertyEditable(TexturesController.Property.CATEGORY)) {
-      this.categoryLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, 
-          TexturesPanel.class, "categoryLabel.text")); 
+      this.categoryLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences,
+          TexturesPanel.class, "categoryLabel.text"));
       final List<TexturesCategory> categories = controller.getAvailableCategories();
       List<TexturesCategory> categoriesList = new ArrayList<TexturesCategory>(categories);
       final boolean nullableComboBox = controller.getCategory() == null;
@@ -189,7 +189,7 @@ public class TexturesPanel extends JPanel implements DialogView {
         categoriesList.add(0, null);
       }
       this.categoryComboBox = new JComboBox(categoriesList.toArray());
-      this.categoryComboBox.setEditable(true); 
+      this.categoryComboBox.setEditable(true);
       final ComboBoxEditor defaultEditor = this.categoryComboBox.getEditor();
       // Change editor to edit category name
       this.categoryComboBox.setEditor(new ComboBoxEditor() {
@@ -213,35 +213,35 @@ public class TexturesPanel extends JPanel implements DialogView {
               if (categoryIndex >= 0) {
                 return categories.get(categoryIndex);
               }
-              // If no existing category was found, return a new one          
+              // If no existing category was found, return a new one
               return category;
             }
           }
-        
+
           public void setItem(Object value) {
             if (value != null) {
               defaultEditor.setItem(((TexturesCategory)value).getName());
             }
           }
-  
+
           public void addActionListener(ActionListener l) {
             defaultEditor.addActionListener(l);
           }
-  
+
           public Component getEditorComponent() {
             return defaultEditor.getEditorComponent();
           }
-  
+
           public void removeActionListener(ActionListener l) {
             defaultEditor.removeActionListener(l);
           }
-  
+
           public void selectAll() {
             defaultEditor.selectAll();
           }
         });
       this.categoryComboBox.setRenderer(new DefaultListCellRenderer() {
-          public Component getListCellRendererComponent(JList list, Object value, int index, 
+          public Component getListCellRendererComponent(JList list, Object value, int index,
                                                         boolean isSelected, boolean cellHasFocus) {
             if (value == null) {
               value = " ";
@@ -271,14 +271,14 @@ public class TexturesPanel extends JPanel implements DialogView {
       }
       this.categoryComboBox.setMaximumRowCount(15);
     }
-    
+
     final float minimumLength = preferences.getLengthUnit().getMinimumLength();
     final float maximumLength = preferences.getLengthUnit().getMaximumLength();
     if (this.controller.isPropertyEditable(TexturesController.Property.WIDTH)) {
       // Create width label and its spinner bound to WIDTH controller property
-      this.widthLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, 
+      this.widthLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences,
           TexturesPanel.class, "widthLabel.text", unitName));
-      final NullableSpinner.NullableSpinnerLengthModel widthSpinnerModel = 
+      final NullableSpinner.NullableSpinnerLengthModel widthSpinnerModel =
           new NullableSpinner.NullableSpinnerLengthModel(preferences, minimumLength, maximumLength);
       this.widthSpinner = new NullableSpinner(widthSpinnerModel);
       final PropertyChangeListener widthChangeListener = new PropertyChangeListener() {
@@ -301,12 +301,12 @@ public class TexturesPanel extends JPanel implements DialogView {
           }
         });
     }
-    
+
     if (this.controller.isPropertyEditable(TexturesController.Property.HEIGHT)) {
       // Create height label and its spinner bound to HEIGHT controller property
-      this.heightLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, 
+      this.heightLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences,
           TexturesPanel.class, "heightLabel.text", unitName));
-      final NullableSpinner.NullableSpinnerLengthModel heightSpinnerModel = 
+      final NullableSpinner.NullableSpinnerLengthModel heightSpinnerModel =
           new NullableSpinner.NullableSpinnerLengthModel(preferences, minimumLength, maximumLength);
       this.heightSpinner = new NullableSpinner(heightSpinnerModel);
       final PropertyChangeListener heightChangeListener = new PropertyChangeListener() {
@@ -329,7 +329,7 @@ public class TexturesPanel extends JPanel implements DialogView {
           }
         });
     }
-    
+
     if (this.controller.isPropertyEditable(TexturesController.Property.CREATOR)) {
       // Create creator label and its text field bound to CREATOR controller property
       this.creatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, TexturesPanel.class, "creatorLabel.text"));
@@ -346,7 +346,7 @@ public class TexturesPanel extends JPanel implements DialogView {
       this.creatorTextField.getDocument().addDocumentListener(new DocumentListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(TexturesController.Property.CREATOR, creatorChangeListener);
-            String creator = creatorTextField.getText(); 
+            String creator = creatorTextField.getText();
             if (creator == null || creator.trim().length() == 0) {
               controller.setCreator(null);
             } else {
@@ -354,17 +354,17 @@ public class TexturesPanel extends JPanel implements DialogView {
             }
             controller.addPropertyChangeListener(TexturesController.Property.CREATOR, creatorChangeListener);
           }
-    
+
           public void insertUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
-    
+
           public void removeUpdate(DocumentEvent ev) {
             changedUpdate(ev);
           }
         });
     }
-  
+
     if (this.controller.isPropertyEditable(TexturesController.Property.IMAGE)) {
       this.imageComponent = new ScaledImageComponent();
       Insets insets = this.imageComponent.getInsets();
@@ -383,18 +383,18 @@ public class TexturesPanel extends JPanel implements DialogView {
   }
 
   /**
-   * Sets the image viewed by this texture.  
+   * Sets the image viewed by this texture.
    */
   public void setImage(Content image, final UserPreferences preferences) {
     if (image == null) {
-      this.imageComponent.setImage(null);            
+      this.imageComponent.setImage(null);
     } else {
       InputStream in = null;
       try {
         in = controller.getImage().openStream();
         this.imageComponent.setImage(ImageIO.read(in));
       } catch (IOException e) {
-        JOptionPane.showMessageDialog(SwingUtilities.getRootPane(TexturesPanel.this), 
+        JOptionPane.showMessageDialog(SwingUtilities.getRootPane(TexturesPanel.this),
             preferences.getLocalizedString(TexturesPanel.class, "textureError"),
             preferences.getLocalizedString(TexturesPanel.class, "errorTitle"),
             JOptionPane.ERROR_MESSAGE);
@@ -447,93 +447,94 @@ public class TexturesPanel extends JPanel implements DialogView {
       }
     }
   }
-  
+
   /**
-   * Layouts panel components in panel with their labels. 
+   * Layouts panel components in panel with their labels.
    */
   private void layoutComponents() {
-    int labelAlignment = OperatingSystem.isMacOSX() 
+    int labelAlignment = OperatingSystem.isMacOSX()
         ? GridBagConstraints.LINE_END
         : GridBagConstraints.LINE_START;
-    Insets labelInsets = new Insets(0, 0, 5, 5);
-    Insets componentInsets = new Insets(0, 0, 5, 0);
+    int gap = Math.round(5 * SwingTools.getResolutionScale());
+    Insets labelInsets = new Insets(0, 0, gap, gap);
+    Insets componentInsets = new Insets(0, 0, gap, 0);
     if (this.controller.isPropertyEditable(TexturesController.Property.IMAGE)) {
       JPanel iconPanel = new JPanel(new GridBagLayout());
-      // Add dummy labels with a vertical weight of 1 at top and bottom of iconPanel 
+      // Add dummy labels with a vertical weight of 1 at top and bottom of iconPanel
       // to keep imageComponent and rotationButtonsPanel in the middle
       // when grid bag fill constraint is BOTH for iconPanel.
       // If this constraint is set to HORIZONTAL only, iconPanel location may be lower
-      // and may not be the first panel treated by the focus traversal algorithm 
+      // and may not be the first panel treated by the focus traversal algorithm
       iconPanel.add(new JLabel(), new GridBagConstraints(
-          0, 0, 1, 1, 0, 1, GridBagConstraints.CENTER, 
+          0, 0, 1, 1, 0, 1, GridBagConstraints.CENTER,
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
       iconPanel.add(this.imageComponent, new GridBagConstraints(
-          0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER, 
-          GridBagConstraints.NONE, new Insets(0, 0, 5, 0), 0, 0));
+          0, 1, 1, 1, 0, 0, GridBagConstraints.CENTER,
+          GridBagConstraints.NONE, new Insets(0, 0, gap, 0), 0, 0));
       iconPanel.add(new JLabel(), new GridBagConstraints(
-          0, 3, 1, 1, 0, 1, GridBagConstraints.CENTER, 
+          0, 3, 1, 1, 0, 1, GridBagConstraints.CENTER,
           GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 
       add(iconPanel, new GridBagConstraints(
-          0, 0, 1, 15, 0, 0, GridBagConstraints.CENTER, 
-          GridBagConstraints.BOTH, new Insets(0, 0, 0, 15), 0, 0));
+          0, 0, 1, 15, 0, 0, GridBagConstraints.CENTER,
+          GridBagConstraints.BOTH, new Insets(0, 0, 0, 3 * gap), 0, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.ID)) {
       add(this.idLabel, new GridBagConstraints(
-          1, 0, 1, 1, 0, 0, labelAlignment, 
+          1, 0, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.idTextField, new GridBagConstraints(
-          2, 0, 3, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 0, 3, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.NAME)) {
       add(this.nameLabel, new GridBagConstraints(
-          1, 1, 1, 1, 0, 0, labelAlignment, 
+          1, 1, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.nameTextField, new GridBagConstraints(
-          2, 1, 3, 1, 0, 0, GridBagConstraints.LINE_START, 
+          2, 1, 3, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.CREATOR)) {
       add(this.creatorLabel, new GridBagConstraints(
-          1, 3, 1, 1, 0, 0, labelAlignment, 
+          1, 3, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.creatorTextField, new GridBagConstraints(
-          2, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), 0, 0));
+          2, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, gap, 10), 0, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.CATEGORY)) {
       add(this.categoryLabel, new GridBagConstraints(
-          3, 3, 1, 1, 0, 0, labelAlignment, 
+          3, 3, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.categoryComboBox, new GridBagConstraints(
-          4, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
+          4, 3, 1, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.WIDTH)) {
       add(this.widthLabel, new GridBagConstraints(
-          1, 5, 1, 1, 0, 0, labelAlignment, 
+          1, 5, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.widthSpinner, new GridBagConstraints(
-          2, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), -10, 0));
+          2, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, gap, 2 * gap), -10, 0));
     }
     if (this.controller.isPropertyEditable(TexturesController.Property.HEIGHT)) {
       add(this.heightLabel, new GridBagConstraints(
-          3, 5, 1, 1, 0, 0, labelAlignment, 
+          3, 5, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.heightSpinner, new GridBagConstraints(
-          4, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START, 
-          GridBagConstraints.HORIZONTAL, new Insets(0, 0, 5, 10), -10, 0));
+          4, 5, 1, 1, 0, 0, GridBagConstraints.LINE_START,
+          GridBagConstraints.HORIZONTAL, new Insets(0, 0, gap, 2 * gap), -10, 0));
     }
   }
 
   /**
-   * Displays this panel in a modal dialog box. 
+   * Displays this panel in a modal dialog box.
    */
   public void displayView(View parentView) {
     final Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-    if (SwingTools.showConfirmDialog((JComponent)parentView, 
+    if (SwingTools.showConfirmDialog((JComponent)parentView,
             this, this.dialogTitle, this.nameTextField) == JOptionPane.OK_OPTION) {
       this.controller.modifyTextures();
     }

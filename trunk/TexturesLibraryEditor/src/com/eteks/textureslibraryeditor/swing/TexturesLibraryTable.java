@@ -65,6 +65,7 @@ import com.eteks.sweethome3d.model.SelectionEvent;
 import com.eteks.sweethome3d.model.SelectionListener;
 import com.eteks.sweethome3d.model.UserPreferences;
 import com.eteks.sweethome3d.swing.IconManager;
+import com.eteks.sweethome3d.swing.SwingTools;
 import com.eteks.sweethome3d.tools.OperatingSystem;
 import com.eteks.sweethome3d.tools.URLContent;
 import com.eteks.sweethome3d.viewcontroller.View;
@@ -86,6 +87,11 @@ public class TexturesLibraryTable extends JTable implements View {
                               TexturesLanguageController texturesLanguageController) {
     super(new TexturesLibraryTableModel(texturesLibrary, texturesLanguageController),
         new TexturesLibraryTableColumnModel(texturesLibrary, preferences, texturesLanguageController));
+    float resolutionScale = SwingTools.getResolutionScale();
+    if (resolutionScale != 1) {
+      // Adapt row height to specified resolution scale
+      setRowHeight(Math.round(getRowHeight() * resolutionScale));
+    }
     addTableHeaderListener();
     setAutoResizeMode(AUTO_RESIZE_OFF);
     updateTableColumnsWidth();
@@ -97,10 +103,10 @@ public class TexturesLibraryTable extends JTable implements View {
     }
     addUserPreferencesListener(preferences);
   }
-  
+
   /**
    * Adds a listener to <code>preferences</code> to repaint this table
-   * and its header when unit changes.  
+   * and its header when unit changes.
    */
   private void addUserPreferencesListener(UserPreferences preferences) {
     preferences.addPropertyChangeListener(
@@ -109,7 +115,7 @@ public class TexturesLibraryTable extends JTable implements View {
 
   /**
    * Preferences property listener bound to this table with a weak reference to avoid
-   * strong link between user preferences and this table.  
+   * strong link between user preferences and this table.
    */
   private static class UserPreferencesChangeListener implements PropertyChangeListener {
     private WeakReference<TexturesLibraryTable>  texturesLibraryTable;
@@ -117,7 +123,7 @@ public class TexturesLibraryTable extends JTable implements View {
     public UserPreferencesChangeListener(TexturesLibraryTable texturesTable) {
       this.texturesLibraryTable = new WeakReference<TexturesLibraryTable>(texturesTable);
     }
-    
+
     public void propertyChange(PropertyChangeEvent ev) {
       // If textures table was garbage collected, remove this listener from preferences
       TexturesLibraryTable texturesLibraryTable = this.texturesLibraryTable.get();
@@ -134,10 +140,10 @@ public class TexturesLibraryTable extends JTable implements View {
   /**
    * Adds selection listeners to this table.
    */
-  private void addSelectionListeners(final TexturesLibraryController controller) {   
+  private void addSelectionListeners(final TexturesLibraryController controller) {
     final SelectionListener controllerSelectionListener = new SelectionListener() {
         public void selectionChanged(SelectionEvent ev) {
-          setSelectedTextures(controller.getSelectedTextures());        
+          setSelectedTextures(controller.getSelectedTextures());
         }
       };
     this.tableSelectionListener = new ListSelectionListener () {
@@ -181,7 +187,7 @@ public class TexturesLibraryTable extends JTable implements View {
    * Adds a mouse listener on table header that will sort textures.
    */
   private void addTableHeaderListener() {
-    // Sort on click in column header 
+    // Sort on click in column header
     getTableHeader().addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent ev) {
@@ -193,7 +199,7 @@ public class TexturesLibraryTable extends JTable implements View {
           int columnIndex = getTableHeader().columnAtPoint(ev.getPoint());
           Object columnIdentifier = getColumnModel().getColumn(columnIndex).getIdentifier();
           if (columnIdentifier instanceof String) {
-            String propertyKey = (String)columnIdentifier; 
+            String propertyKey = (String)columnIdentifier;
             if (columnIdentifier.equals(tableModel.getSortProperty())) {
               if (tableModel.isDescendingOrder()) {
                 tableModel.setSortProperty(null);
@@ -212,7 +218,7 @@ public class TexturesLibraryTable extends JTable implements View {
   }
 
   /**
-   * Selects textures in table. 
+   * Selects textures in table.
    */
   private void setSelectedTextures(List<CatalogTexture> selectedTextures) {
     getSelectionModel().removeListSelectionListener(this.tableSelectionListener);
@@ -224,7 +230,7 @@ public class TexturesLibraryTable extends JTable implements View {
       if (texture instanceof CatalogTexture) {
         // Search index of texture in sorted table model
         int index = tableModel.getTextureIndex((CatalogTexture)texture);
-        // If the texture was found (during the addition of a texture to library, the model may not be updated yet) 
+        // If the texture was found (during the addition of a texture to library, the model may not be updated yet)
         if (index != -1) {
           addRowSelectionInterval(index, index);
           minIndex = Math.min(minIndex, index);
@@ -237,16 +243,16 @@ public class TexturesLibraryTable extends JTable implements View {
     }
     getSelectionModel().addListSelectionListener(this.tableSelectionListener);
   }
-  
+
   /**
    * Ensures the rectangle which displays rows from <code>minIndex</code> to <code>maxIndex</code> is visible.
    */
-  private void makeRowsVisible(int minRow, int maxRow) {    
-    // Compute the rectangle that includes a row 
+  private void makeRowsVisible(int minRow, int maxRow) {
+    // Compute the rectangle that includes a row
     Rectangle includingRectangle = getCellRect(minRow, 0, true);
     if (minRow != maxRow) {
       includingRectangle = includingRectangle.
-          union(getCellRect(maxRow, 0, true));      
+          union(getCellRect(maxRow, 0, true));
     }
     if (getAutoResizeMode() == AUTO_RESIZE_OFF) {
       int lastColumn = getColumnCount() - 1;
@@ -254,7 +260,7 @@ public class TexturesLibraryTable extends JTable implements View {
           union(getCellRect(minRow, lastColumn, true));
       if (minRow != maxRow) {
         includingRectangle = includingRectangle.
-            union(getCellRect(maxRow, lastColumn, true));      
+            union(getCellRect(maxRow, lastColumn, true));
       }
     }
     scrollRectToVisible(includingRectangle);
@@ -263,11 +269,11 @@ public class TexturesLibraryTable extends JTable implements View {
   /**
    * Adds a listener on textures language change to resort textures.
    */
-  private void addTexturesLanguageListener(TexturesLibrary texturesLibrary, 
+  private void addTexturesLanguageListener(TexturesLibrary texturesLibrary,
                                            TexturesLanguageController controller) {
     PropertyChangeListener listener = new PropertyChangeListener() {
         private boolean sorting = false;
-        
+
         public void propertyChange(PropertyChangeEvent ev) {
           if (!sorting) {
             // Postpone update in case of multiple localized data is set
@@ -305,7 +311,7 @@ public class TexturesLibraryTable extends JTable implements View {
       preferredWidth = Math.max(preferredWidth, column.getHeaderRenderer().getTableCellRendererComponent(
           this, column.getHeaderValue(), false, false, -1, columnIndex).getPreferredSize().width);
       for (int rowIndex = 0, m = tableModel.getRowCount(); rowIndex < m; rowIndex++) {
-        preferredWidth = Math.max(preferredWidth, 
+        preferredWidth = Math.max(preferredWidth,
             column.getCellRenderer().getTableCellRendererComponent(
                 this, tableModel.getValueAt(rowIndex, modelColumnIndex), false, false, -1, columnIndex).
                     getPreferredSize().width);
@@ -321,7 +327,7 @@ public class TexturesLibraryTable extends JTable implements View {
   @Override
   public String getToolTipText(MouseEvent ev) {
     int column = columnAtPoint(ev.getPoint());
-    if (column != -1 
+    if (column != -1
         && TexturesLibrary.TEXTURES_IMAGE_PROPERTY.equals(getColumnModel().getColumn(column).getIdentifier())) {
       int row = rowAtPoint(ev.getPoint());
       if (row != -1) {
@@ -341,9 +347,9 @@ public class TexturesLibraryTable extends JTable implements View {
             } else {
               height = Math.round(128f * image.getHeight() / image.getWidth());
               width = Math.round((float)height * image.getWidth() / image.getHeight());
-            }              
-            return "<html><table><tr><td width='128' height='128' align='center' valign='middle'>" 
-                + "<img width='" + width + "' height='" + height + "' src='" 
+            }
+            return "<html><table><tr><td width='128' height='128' align='center' valign='middle'>"
+                + "<img width='" + width + "' height='" + height + "' src='"
                 + ((URLContent)texture.getImage()).getURL() + "'></td></tr></table>";
           } catch (IOException ex) {
             return null;
@@ -358,18 +364,18 @@ public class TexturesLibraryTable extends JTable implements View {
   public Dimension getPreferredScrollableViewportSize() {
     return new Dimension(getPreferredSize().width, 400);
   }
-  
-  
+
+
   /**
    * Model used by textures table.
    */
   private static class TexturesLibraryTableModel extends AbstractTableModel {
     private final TexturesLibrary              texturesLibrary;
-    private final TexturesLanguageController   controller; 
+    private final TexturesLanguageController   controller;
     private List<CatalogTexture>               sortedTextures;
     private String                             sortProperty;
     private boolean                            descendingOrder;
-    
+
     public TexturesLibraryTableModel(TexturesLibrary texturesLibrary,
                                       TexturesLanguageController controller) {
       this.texturesLibrary = texturesLibrary;
@@ -407,44 +413,44 @@ public class TexturesLibraryTable extends JTable implements View {
          * If <code>texture</code> isn't added to textures table, the returned value is
          * equals to the insertion index where texture should be added.
          */
-        private int getTextureInsertionIndex(CatalogTexture texture, 
-                                                      TexturesLibrary texturesLibrary, 
+        private int getTextureInsertionIndex(CatalogTexture texture,
+                                                      TexturesLibrary texturesLibrary,
                                                       int textureIndex) {
           if (sortProperty == null) {
             return textureIndex;
-          } 
-          // Default case when texture is included and textures is  sorted 
+          }
+          // Default case when texture is included and textures is  sorted
           int sortedIndex = Collections.binarySearch(sortedTextures, texture, getTexturesComparator(sortProperty));
           if (sortedIndex >= 0) {
             return sortedIndex;
           } else {
             return -(sortedIndex + 1);
-          }              
+          }
         }
 
         /**
          * Returns the index of an existing <code>texture</code> in textures table, with a default index
          * of <code>textureIndex</code> if textures isn't sorted.
          */
-        private int getTextureDeletionIndex(CatalogTexture texture, 
-                                                     TexturesLibrary texturesLibrary, 
+        private int getTextureDeletionIndex(CatalogTexture texture,
+                                                     TexturesLibrary texturesLibrary,
                                                      int textureIndex) {
           if (sortProperty == null) {
             return textureIndex;
-          } 
-          return getTextureIndex(texture);              
+          }
+          return getTextureIndex(texture);
         }
       });
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-      // Column name is set by TableColumn instances themselves 
+      // Column name is set by TableColumn instances themselves
       return null;
     }
 
     public int getColumnCount() {
-      // Column count is set by TableColumnModel itself 
+      // Column count is set by TableColumnModel itself
       return 0;
     }
 
@@ -458,7 +464,7 @@ public class TexturesLibraryTable extends JTable implements View {
     }
 
     /**
-     * Returns the index of <code>texture</code> in textures table, or -1. 
+     * Returns the index of <code>texture</code> in textures table, or -1.
      */
     public int getTextureIndex(CatalogTexture searchedTexture) {
       for (int i = 0, n = this.sortedTextures.size(); i < n; i++) {
@@ -474,7 +480,7 @@ public class TexturesLibraryTable extends JTable implements View {
      * Sorts textures.
      */
     public void sortTextures() {
-      int previousRowCount = this.sortedTextures != null 
+      int previousRowCount = this.sortedTextures != null
           ? this.sortedTextures.size()
           : 0;
       List<CatalogTexture> libraryTextures = this.texturesLibrary.getTextures();
@@ -482,9 +488,9 @@ public class TexturesLibraryTable extends JTable implements View {
       // Sort it if necessary
       if (this.sortProperty != null) {
         Comparator<CatalogTexture> texturesComparator = getTexturesComparator(this.sortProperty);
-        Collections.sort(this.sortedTextures, texturesComparator);         
+        Collections.sort(this.sortedTextures, texturesComparator);
       }
-      
+
       if (previousRowCount != this.sortedTextures.size()) {
         fireTableDataChanged();
       } else {
@@ -501,7 +507,7 @@ public class TexturesLibraryTable extends JTable implements View {
               if (texture1.getId() == null) {
                 return -1;
               } else if (texture2.getId() == null) {
-                return 1; 
+                return 1;
               } else {
                 return collator.compare(texture1.getId(), texture2.getId());
               }
@@ -536,7 +542,7 @@ public class TexturesLibraryTable extends JTable implements View {
       } else if (TexturesLibrary.TEXTURES_WIDTH_PROPERTY.equals(propertyKey)) {
         texturesComparator = new Comparator<CatalogTexture>() {
             public int compare(CatalogTexture texture1, CatalogTexture texture2) {
-              return texture1.getWidth() < texture2.getWidth()  
+              return texture1.getWidth() < texture2.getWidth()
                   ? -1
                   : (texture1.getWidth() == texture2.getWidth()
                       ? 0 : 1);
@@ -545,7 +551,7 @@ public class TexturesLibraryTable extends JTable implements View {
       } else if (TexturesLibrary.TEXTURES_HEIGHT_PROPERTY.equals(propertyKey)) {
         texturesComparator = new Comparator<CatalogTexture>() {
             public int compare(CatalogTexture texture1, CatalogTexture texture2) {
-              return texture1.getHeight() < texture2.getHeight()  
+              return texture1.getHeight() < texture2.getHeight()
                   ? -1
                   : (texture1.getHeight() == texture2.getHeight()
                       ? 0 : 1);
@@ -582,24 +588,24 @@ public class TexturesLibraryTable extends JTable implements View {
       this.sortProperty = sortProperty;
       sortTextures();
     }
-    
+
     public boolean isDescendingOrder() {
       return this.descendingOrder;
     }
-    
+
     public void setDescendingOrder(boolean descendingOrder) {
       this.descendingOrder = descendingOrder;
       sortTextures();
     }
   }
 
-  
+
   /**
    * Column table model used by textures library table.
    */
   private static class TexturesLibraryTableColumnModel extends DefaultTableColumnModel {
-    public TexturesLibraryTableColumnModel(TexturesLibrary texturesLibrary, 
-                                            TexturesLibraryUserPreferences preferences, 
+    public TexturesLibraryTableColumnModel(TexturesLibrary texturesLibrary,
+                                            TexturesLibraryUserPreferences preferences,
                                             TexturesLanguageController controller) {
       createColumns(texturesLibrary, preferences, controller);
       addLanguageListener(preferences);
@@ -608,8 +614,8 @@ public class TexturesLibraryTable extends JTable implements View {
     /**
      * Creates the list of available columns from textures sortable properties.
      */
-    private void createColumns(TexturesLibrary texturesLibrary, 
-                               TexturesLibraryUserPreferences preferences, 
+    private void createColumns(TexturesLibrary texturesLibrary,
+                               TexturesLibraryUserPreferences preferences,
                                TexturesLanguageController controller) {
         // Create the list of custom columns
       TableCellRenderer headerRenderer = getHeaderRenderer();
@@ -629,13 +635,13 @@ public class TexturesLibraryTable extends JTable implements View {
      * column names when preferred language changes.
      */
     private void addLanguageListener(UserPreferences preferences) {
-      preferences.addPropertyChangeListener(UserPreferences.Property.LANGUAGE, 
+      preferences.addPropertyChangeListener(UserPreferences.Property.LANGUAGE,
           new LanguageChangeListener(this));
     }
 
     /**
      * Preferences property listener bound to this component with a weak reference to avoid
-     * strong link between preferences and this component.  
+     * strong link between preferences and this component.
      */
     private static class LanguageChangeListener implements PropertyChangeListener {
       private WeakReference<TexturesLibraryTableColumnModel> texturesTableColumnModel;
@@ -643,14 +649,14 @@ public class TexturesLibraryTable extends JTable implements View {
       public LanguageChangeListener(TexturesLibraryTableColumnModel texturesTable) {
         this.texturesTableColumnModel = new WeakReference<TexturesLibraryTableColumnModel>(texturesTable);
       }
-      
+
       public void propertyChange(PropertyChangeEvent ev) {
         // If textures table column model was garbage collected, remove this listener from preferences
         TexturesLibraryTableColumnModel texturesTableColumnModel = this.texturesTableColumnModel.get();
         UserPreferences preferences = (UserPreferences)ev.getSource();
         if (texturesTableColumnModel == null) {
           preferences.removePropertyChangeListener(UserPreferences.Property.LANGUAGE, this);
-        } else {          
+        } else {
           // Change column name and renderer from current locale
           for (int i = 0; i < texturesTableColumnModel.getColumnCount(); i++) {
             TableColumn tableColumn = texturesTableColumnModel.getColumn(i);
@@ -667,11 +673,11 @@ public class TexturesLibraryTable extends JTable implements View {
         }
       }
     }
-    
+
     /**
      * Returns localized column names.
      */
-    private String getColumnName(String propertyKey, 
+    private String getColumnName(String propertyKey,
                                  UserPreferences preferences) {
       if (TexturesLibrary.TEXTURES_ID_PROPERTY.equals(propertyKey)) {
         return preferences.getLocalizedString(TexturesLibraryTable.class, "idColumn");
@@ -691,7 +697,7 @@ public class TexturesLibraryTable extends JTable implements View {
         throw new IllegalArgumentException("Unknown key " + propertyKey);
       }
     }
-    
+
     /**
      * Returns the preferred width of a column.
      */
@@ -713,21 +719,21 @@ public class TexturesLibraryTable extends JTable implements View {
         throw new IllegalArgumentException("Unknown key " + propertyKey);
       }
     }
-    
+
     /**
      * Returns column renderers.
      */
-    private TableCellRenderer getColumnRenderer(String propertyKey, 
-                                                TexturesLibrary texturesLibrary, 
-                                                UserPreferences preferences, 
+    private TableCellRenderer getColumnRenderer(String propertyKey,
+                                                TexturesLibrary texturesLibrary,
+                                                UserPreferences preferences,
                                                 TexturesLanguageController controller) {
       if (TexturesLibrary.TEXTURES_ID_PROPERTY.equals(propertyKey)
           || TexturesLibrary.TEXTURES_NAME_PROPERTY.equals(propertyKey)
           || TexturesLibrary.TEXTURES_CATEGORY_PROPERTY.equals(propertyKey)
           || TexturesLibrary.TEXTURES_CREATOR_PROPERTY.equals(propertyKey)) {
-        return getStringRenderer(propertyKey, texturesLibrary, controller); 
+        return getStringRenderer(propertyKey, texturesLibrary, controller);
       } else if (TexturesLibrary.TEXTURES_IMAGE_PROPERTY.equals(propertyKey)) {
-        return getImageRenderer(propertyKey); 
+        return getImageRenderer(propertyKey);
       } else if (TexturesLibrary.TEXTURES_WIDTH_PROPERTY.equals(propertyKey)
           || TexturesLibrary.TEXTURES_HEIGHT_PROPERTY.equals(propertyKey)) {
         return getSizeRenderer(propertyKey, preferences);
@@ -737,10 +743,10 @@ public class TexturesLibraryTable extends JTable implements View {
     }
 
     /**
-     * Returns a renderer that displays a string property of a texture of textures. 
+     * Returns a renderer that displays a string property of a texture of textures.
      */
-    private TableCellRenderer getStringRenderer(final String propertyKey, 
-                                                final TexturesLibrary texturesLibrary, 
+    private TableCellRenderer getStringRenderer(final String propertyKey,
+                                                final TexturesLibrary texturesLibrary,
                                                 final TexturesLanguageController controller) {
       if (TexturesLibrary.TEXTURES_ID_PROPERTY.equals(propertyKey)) {
         return new DefaultTableCellRenderer() {
@@ -748,7 +754,7 @@ public class TexturesLibraryTable extends JTable implements View {
             public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
               return super.getTableCellRendererComponent(
-                  table, ((CatalogTexture)value).getId(), isSelected, hasFocus, row, column); 
+                  table, ((CatalogTexture)value).getId(), isSelected, hasFocus, row, column);
             }
           };
       } else if (TexturesLibrary.TEXTURES_NAME_PROPERTY.equals(propertyKey)) {
@@ -772,7 +778,7 @@ public class TexturesLibraryTable extends JTable implements View {
               String textureCategory = (String)texturesLibrary.getTextureLocalizedData(
                     texture, controller.getTexturesLangauge(), propertyKey, texture.getCategory().getName());
               return super.getTableCellRendererComponent(
-                  table, textureCategory, isSelected, hasFocus, row, column); 
+                  table, textureCategory, isSelected, hasFocus, row, column);
             }
           };
       } else if (TexturesLibrary.TEXTURES_CREATOR_PROPERTY.equals(propertyKey)) {
@@ -781,27 +787,27 @@ public class TexturesLibraryTable extends JTable implements View {
             public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
               return super.getTableCellRendererComponent(
-                  table, ((CatalogTexture)value).getCreator(), isSelected, hasFocus, row, column); 
+                  table, ((CatalogTexture)value).getCreator(), isSelected, hasFocus, row, column);
             }
           };
       } else {
-          throw new IllegalArgumentException(propertyKey + " column not a string column"); 
+          throw new IllegalArgumentException(propertyKey + " column not a string column");
       }
     }
 
     /**
-     * Returns a renderer that displays the icons of a texture of textures. 
+     * Returns a renderer that displays the icons of a texture of textures.
      */
     private TableCellRenderer getImageRenderer(final String propertyKey) {
-      return new DefaultTableCellRenderer() { 
+      return new DefaultTableCellRenderer() {
         @Override
-        public Component getTableCellRendererComponent(JTable table, 
-             Object value, boolean isSelected, boolean hasFocus, 
+        public Component getTableCellRendererComponent(JTable table,
+             Object value, boolean isSelected, boolean hasFocus,
              int row, int column) {
-          CatalogTexture texture = (CatalogTexture)value; 
+          CatalogTexture texture = (CatalogTexture)value;
           JLabel label = (JLabel)super.getTableCellRendererComponent(
-            table, "", isSelected, hasFocus, row, column); 
-          Content iconContent = texture.getImage(); 
+            table, "", isSelected, hasFocus, row, column);
+          Content iconContent = texture.getImage();
           if (iconContent != null) {
             label.setIcon(IconManager.getInstance().getIcon(
                 iconContent, table.getRowHeight(), table));
@@ -815,15 +821,15 @@ public class TexturesLibraryTable extends JTable implements View {
     }
 
     /**
-     * Returns a renderer that converts the displayed <code>property</code> of a texture of textures 
-     * to inch in case preferences unit us equal to INCH. 
+     * Returns a renderer that converts the displayed <code>property</code> of a texture of textures
+     * to inch in case preferences unit us equal to INCH.
      */
     private TableCellRenderer getSizeRenderer(String propertyKey,
                                               final UserPreferences preferences) {
       // Renderer super class used to display sizes
       class SizeRenderer extends DefaultTableCellRenderer {
-        public Component getTableCellRendererComponent(JTable table, 
-             Object value, boolean isSelected, boolean hasFocus, 
+        public Component getTableCellRendererComponent(JTable table,
+             Object value, boolean isSelected, boolean hasFocus,
              int row, int column) {
           value = preferences.getLengthUnit().getFormat().format((Float)value);
           setHorizontalAlignment(JLabel.RIGHT);
@@ -831,22 +837,22 @@ public class TexturesLibraryTable extends JTable implements View {
               table, value, isSelected, hasFocus, row, column);
         }
       };
-      
+
       if (TexturesLibrary.TEXTURES_WIDTH_PROPERTY.equals(propertyKey)) {
         return new SizeRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, 
+            public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-              return super.getTableCellRendererComponent(table, 
+              return super.getTableCellRendererComponent(table,
                   ((CatalogTexture)value).getWidth(), isSelected, hasFocus, row, column);
             }
           };
       } else if (TexturesLibrary.TEXTURES_HEIGHT_PROPERTY.equals(propertyKey)) {
         return new SizeRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, 
+            public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-              return super.getTableCellRendererComponent(table, 
+              return super.getTableCellRendererComponent(table,
                   ((CatalogTexture)value).getHeight(), isSelected, hasFocus, row, column);
             }
           };
@@ -856,17 +862,17 @@ public class TexturesLibraryTable extends JTable implements View {
     }
 
     /**
-     * Returns column header renderer that displays an ascending or a descending icon 
+     * Returns column header renderer that displays an ascending or a descending icon
      * when column is sorted, beside column name.
      */
     private TableCellRenderer getHeaderRenderer() {
       // Return a table renderer that displays the icon matching current sort
       return new TableCellRenderer() {
-          private TableCellRenderer headerRenderer;        
+          private TableCellRenderer headerRenderer;
           private ImageIcon ascendingSortIcon = new ImageIcon(getClass().getResource("resources/ascending.png"));
           private ImageIcon descendingSortIcon = new ImageIcon(getClass().getResource("resources/descending.png"));
-          
-          public Component getTableCellRendererComponent(JTable table, 
+
+          public Component getTableCellRendererComponent(JTable table,
                Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             if (this.headerRenderer == null) {
               this.headerRenderer = table.getTableHeader().getDefaultRenderer();
@@ -892,13 +898,13 @@ public class TexturesLibraryTable extends JTable implements View {
     }
   }
 
-  
+
   /**
    * Table transfer handler.
    */
   private class TableTransferHandler extends TransferHandler {
     private final TexturesLibraryController texturesController;
-    
+
     /**
      * Creates a handler able to receive textures files.
      */
@@ -912,7 +918,7 @@ public class TexturesLibraryTable extends JTable implements View {
     }
 
     /**
-     * Returns <code>true</code> if flavors contains 
+     * Returns <code>true</code> if flavors contains
      * <code>DataFlavor.javaFileListFlavor</code> flavor.
      */
     @Override
@@ -930,12 +936,12 @@ public class TexturesLibraryTable extends JTable implements View {
       if (canImport(destination, transferable.getTransferDataFlavors())) {
         try {
           List<File> files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-          final List<String> importableTextures = new ArrayList<String>();        
+          final List<String> importableTextures = new ArrayList<String>();
           for (File file : files) {
             if (!file.isDirectory()) {
               String absolutePath = file.getAbsolutePath();
               importableTextures.add(absolutePath);
-            }        
+            }
           }
           EventQueue.invokeLater(new Runnable() {
               public void run() {
