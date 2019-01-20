@@ -67,7 +67,7 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
   /**
    * Creates and initializes components and their models.
    */
-  private void createComponents(UserPreferences preferences, 
+  private void createComponents(UserPreferences preferences,
                                 final FurnitureLibraryUserPreferencesController controller) {
     abstract class DocumentChangeListener implements DocumentListener {
       public void insertUpdate(DocumentEvent ev) {
@@ -78,7 +78,7 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
         changedUpdate(ev);
       }
     };
-    
+
     if (controller.isPropertyEditable(FurnitureLibraryUserPreferencesController.Property.DEFAULT_CREATOR)) {
       // Create default author label and its text field bound to DEFAULT_CREATOR controller property
       this.defaultCreatorLabel = new JLabel(SwingTools.getLocalizedLabelText(preferences, FurnitureLibraryUserPreferencesPanel.class, "defaultCreatorLabel.text"));
@@ -95,7 +95,7 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.defaultCreatorTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(FurnitureLibraryUserPreferencesController.Property.DEFAULT_CREATOR, creatorChangeListener);
-            String defaultCreator = defaultCreatorTextField.getText(); 
+            String defaultCreator = defaultCreatorTextField.getText();
             if (defaultCreator == null || defaultCreator.trim().length() == 0) {
               controller.setDefaultCreator(null);
             } else {
@@ -105,19 +105,19 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
           }
         });
     }
-    
+
     if (controller.isPropertyEditable(FurnitureLibraryUserPreferencesController.Property.OFFLINE_FURNITURE_LIBRARY)) {
       // Create offline label and check box bound to controller OFFLINE_FURNITURE_LIBRARY property
       this.offlineFurnitureLibraryLabel = new JLabel(preferences.getLocalizedString(
           FurnitureLibraryUserPreferencesPanel.class, "offlineFurnitureLibraryLabel.text"));
-      this.offlineFurnitureLibraryCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences, 
+      this.offlineFurnitureLibraryCheckBox = new JCheckBox(SwingTools.getLocalizedLabelText(preferences,
           FurnitureLibraryUserPreferencesPanel.class, "offlineFurnitureLibraryCheckBox.text"), controller.isFurnitureLibraryOffline());
       this.offlineFurnitureLibraryCheckBox.addItemListener(new ItemListener() {
           public void itemStateChanged(ItemEvent ev) {
             controller.setFurnitureLibraryOffline(offlineFurnitureLibraryCheckBox.isSelected());
           }
         });
-      controller.addPropertyChangeListener(FurnitureLibraryUserPreferencesController.Property.OFFLINE_FURNITURE_LIBRARY, 
+      controller.addPropertyChangeListener(FurnitureLibraryUserPreferencesController.Property.OFFLINE_FURNITURE_LIBRARY,
           new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent ev) {
               boolean furnitureLibraryOffline = controller.isFurnitureLibraryOffline();
@@ -149,7 +149,7 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.furnitureResourcesLocalDirectoryTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(FurnitureLibraryUserPreferencesController.Property.FURNITURE_RESOURCES_LOCAL_DIRECTORY, localDirectoryChangeListener);
-            String furnitureResourcesLocalDirectory = furnitureResourcesLocalDirectoryTextField.getText(); 
+            String furnitureResourcesLocalDirectory = furnitureResourcesLocalDirectoryTextField.getText();
             if (furnitureResourcesLocalDirectory == null || furnitureResourcesLocalDirectory.trim().length() == 0) {
               controller.setFurnitureResourcesLocalDirectory(null);
             } else {
@@ -177,7 +177,7 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
       this.furnitureResourcesRemoteUrlBaseTextField.getDocument().addDocumentListener(new DocumentChangeListener() {
           public void changedUpdate(DocumentEvent ev) {
             controller.removePropertyChangeListener(FurnitureLibraryUserPreferencesController.Property.FURNITURE_RESOURCES_REMOTE_URL_BASE, urlBaseChangeListener);
-            String furnitureResourcesRemoteUrlBase = furnitureResourcesRemoteUrlBaseTextField.getText(); 
+            String furnitureResourcesRemoteUrlBase = furnitureResourcesRemoteUrlBaseTextField.getText();
             if (furnitureResourcesRemoteUrlBase == null || furnitureResourcesRemoteUrlBase.trim().length() == 0) {
               controller.setFurnitureResourcesRemoteURLBase(null);
             } else {
@@ -187,8 +187,8 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
           }
         });
     }
-  }        
-  
+  }
+
   /**
    * Sets components mnemonics and label / component associations.
    */
@@ -215,46 +215,47 @@ public class FurnitureLibraryUserPreferencesPanel extends UserPreferencesPanel {
       }
     }
   }
-  
+
   /**
-   * Layouts panel components in panel with their labels. 
+   * Layouts panel components in panel with their labels.
    */
   private void layoutComponents() {
-    int labelAlignment = OperatingSystem.isMacOSX() 
+    int labelAlignment = OperatingSystem.isMacOSX()
         ? GridBagConstraints.LINE_END
         : GridBagConstraints.LINE_START;
-    Insets labelInsets = new Insets(0, 0, 5, 5);
-    Insets componentInsets = new Insets(0, 0, 5, 0);
+    int gap = Math.round(5 * SwingTools.getResolutionScale());
+    Insets labelInsets = new Insets(0, 0, gap, gap);
+    Insets componentInsets = new Insets(0, 0, gap, 0);
     if (this.defaultCreatorLabel != null) {
       add(this.defaultCreatorLabel, new GridBagConstraints(
-          0, 100, 1, 1, 0, 0, labelAlignment, 
+          0, 100, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.defaultCreatorTextField, new GridBagConstraints(
-          1, 100, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 100, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.offlineFurnitureLibraryLabel != null) {
       add(this.offlineFurnitureLibraryLabel, new GridBagConstraints(
-          0, 101, 1, 1, 0, 0, labelAlignment, 
+          0, 101, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.offlineFurnitureLibraryCheckBox, new GridBagConstraints(
-          1, 101, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 101, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.NONE, componentInsets, 0, 0));
     }
     if (this.furnitureResourcesLocalDirectoryLabel != null) {
       add(this.furnitureResourcesLocalDirectoryLabel, new GridBagConstraints(
-          0, 102, 1, 1, 0, 0, labelAlignment, 
+          0, 102, 1, 1, 0, 0, labelAlignment,
           GridBagConstraints.NONE, labelInsets, 0, 0));
       add(this.furnitureResourcesLocalDirectoryTextField, new GridBagConstraints(
-          1, 102, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 102, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, componentInsets, 0, 0));
     }
     if (this.furnitureResourcesRemoteUrlBaseLabel != null) {
       add(this.furnitureResourcesRemoteUrlBaseLabel, new GridBagConstraints(
-          0, 103, 1, 1, 0, 0, labelAlignment, 
-          GridBagConstraints.NONE, new Insets(0, 0, 0, 5), 0, 0));
+          0, 103, 1, 1, 0, 0, labelAlignment,
+          GridBagConstraints.NONE, new Insets(0, 0, 0, gap), 0, 0));
       add(this.furnitureResourcesRemoteUrlBaseTextField, new GridBagConstraints(
-          1, 103, 2, 1, 0, 0, GridBagConstraints.LINE_START, 
+          1, 103, 2, 1, 0, 0, GridBagConstraints.LINE_START,
           GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
     }
   }
